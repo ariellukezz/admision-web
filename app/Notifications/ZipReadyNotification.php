@@ -20,7 +20,7 @@ class ZipReadyNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return [];
     }
 
     public function toMail($notifiable)

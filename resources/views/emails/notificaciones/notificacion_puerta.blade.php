@@ -15,12 +15,18 @@
 
     <!-- Cabecera institucional -->
     <div style="background: #1a365d; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between;">
-      <img src="https://inscripciones.admision.unap.edu.pe/build/assets/logotiny-e0fccd92.png" alt="Logo UNA" style="height: 60px;">
-      <div style="text-align: center; color: white;">
-        <h1 style="margin: 0; font-size: 18px; font-weight: 500;">UNIVERSIDAD NACIONAL DEL ALTIPLANO</h1>
-        <p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">RUC: 20145496170 | Av. Floral Nº 1153 - Puno</p>
-      </div>
-      <img src="https://inscripciones.admision.unap.edu.pe/imagenes/logoDAD.jpg" alt="Logo DADI" style="height: 60px;">
+        <div style="flex: 0 0 auto;">
+            <img src="https://inscripciones.admision.unap.edu.pe/build/assets/logotiny-e0fccd92.png" alt="Logo UNA" style="height: 60px;">
+        </div>
+        
+        <div style="flex: 1; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 18px; font-weight: 500;">UNIVERSIDAD NACIONAL DEL ALTIPLANO</h1>
+            <p style="margin: 5px 0 0; font-size: 12px; opacity: 0.9;">RUC: 20145496170 | Av. Floral Nº 1153 - Puno</p>
+        </div>
+        
+        <div style="flex: 0 0 auto;">
+            <img src="https://inscripciones.admision.unap.edu.pe/imagenes/dad2.png" alt="Logo DADI" style="height: 60px;">
+        </div>
     </div>
 
     <!-- Contenido principal -->
@@ -28,18 +34,18 @@
 
       <!-- Título -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">
-        <h2 style="color: #1a365d; font-size: 24px; margin: 0 0 5px; font-weight: 600;">CONFIRMACIÓN DE INSCRIPCIÓN</h2>
+        <h2 style="color: #1a365d; font-size: 24px; margin: 0 0 5px; font-weight: 600;">NOTIFICACIÓN DE PUERTA DE ENTRADA</h2>
         <p style="color: #4a5568; font-size: 16px; margin: 0; font-weight: 500;">EXAMEN DE ADMISIÓN CEPREUNA 2025-II</p>
       </div>
 
       <!-- Saludo personalizado -->
-      <p style="font-size: 16px; margin-bottom: 25px;">Estimada postulante,</p>
+      <p style="font-size: 16px; margin-bottom: 25px;">Estimado(a) postulante,</p>
 
       <!-- Datos del postulante -->
       <div style="background: #f8fafc; border-left: 4px solid #2b6cb0; padding: 15px; margin-bottom: 25px; border-radius: 0 4px 4px 0;">
-        <p style="font-size: 18px; font-weight: 600; color: #1a365d; margin: 0 0 10px;">MARI LUZ MAMANI MOLLEAPAZA</p>
-        <p style="margin: 5px 0;"><strong style="color: #4a5568;">Programa:</strong> Ciencias de la Comunicación Social</p>
-        <p style="margin: 5px 0;"><strong style="color: #4a5568;">Puerta asignada:</strong> PUERTA DE INGENIERÍAS (Jr. Jorge Basadre – Puno)</p>
+        <p style="font-size: 16px; font-weight: 600; color: #1a365d; margin: 0 0 10px;">{{ $nombre }} </p>
+        <p style="margin: 5px 0;"><strong style="color: #4a5568;">Programa:</strong> {{ $programa }}</p>
+        <p style="margin: 5px 0; margin-top:10px; font-size:16pt; "><strong style="color: #ff7700;"><span style="color: #1a365d;">PUERTA DE INGRESO:</span> {{ $puerta }}</strong ></p>
       </div>
 
       <!-- Información importante -->
@@ -57,7 +63,7 @@
           </div>
         </div>
         
-        <p style="margin: 0 0 15px;"><strong>📍 Ubicación:</strong> Campus Universitario - Puno (ingreso por puerta asignada)</p>
+        <p style="margin: 0 0 15px;"><strong>📍 Ubicación:</strong> Campus Universitario - Puno (INGRESO POR LA {{ $puerta }})</p>
       </div>
 
       <!-- Requisitos -->
@@ -81,11 +87,11 @@
           </div>
           <div style="display: flex; align-items: flex-start;">
             <span style="color: #c53030; margin-right: 8px;">✖</span>
-            <span>Material de escritura</span>
+            <span>Lápiz, borrador o tajador</span>
           </div>
           <div style="display: flex; align-items: flex-start;">
             <span style="color: #c53030; margin-right: 8px;">✖</span>
-            <span>Accesorios personales</span>
+            <span>Aretes, collares o pulseras</span>
           </div>
           <div style="display: flex; align-items: flex-start;">
             <span style="color: #c53030; margin-right: 8px;">✖</span>
@@ -110,8 +116,9 @@
       <div style="background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 6px; padding: 15px;">
         <h3 style="color: #276749; font-size: 16px; margin: 0 0 10px;">📌 RECOMENDACIONES</h3>
         <ul style="margin: 0; padding-left: 20px;">
-          <li style="margin-bottom: 5px;">Presentarse con <strong>45 minutos de anticipación</strong></li>
-          <li style="margin-bottom: 5px;">Portar indumentaria sencilla (polo/blusa sin estampados)</li>
+          {{-- <li style="margin-bottom: 5px;">Presentarse con <strong>45 minutos de anticipación</strong></li> --}}
+          <li style="margin-bottom: 5px;">Portar indumentaria sencilla sin capucha</li>
+          <li style="margin-bottom: 5px;">Mantener visible el cuellos, orejas y el cabello recogido o corto</li>
           <li>Revisar con anticipación la ubicación de su puerta de ingreso</li>
         </ul>
       </div>

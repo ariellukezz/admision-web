@@ -304,7 +304,6 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/reporte-usuarios', [ReporteController::class, 'reporteUsuarios'])->middleware('auth');
     Route::post('/get-ratio', [RatioController::class, 'getRatio']);
     Route::get('/ratio', fn () => Inertia::render('Admin/Resumenes/ratio'))->name('admin-ratio');
-    
 
     Route::get('/descargar-documentos', fn () => Inertia::render('Procesos/temp'));
     Route::post('/admin/descargar-documentos/prepare', [DescargarArchivosController::class, 'prepareDownload'])
@@ -316,6 +315,8 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/admin/descargar-documentos/download/{filename}', [DescargarArchivosController::class, 'downloadPreparedZip'])
         ->name('download.prepared');
 
+    Route::get('/pdf-solicitud/{dni}', [PreinscripcionController::class, 'pdfsolicitudAdmin']);
+    Route::get('/pdf-biometrio/{dni}', [IngresoController::class, 'pdfbiometrico2']);
 });
 
 #Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
@@ -763,7 +764,7 @@ Route::get('/phpinfo', function () { phpinfo();});
 
 Route::get('/notifiacion-correo', function () { return view('emails.notificaciones.notificacion_puerta'); });
 #Route::get('/email-comunicado', [EmailController::class, 'enviarComunicado']);
-Route::get('/prueba-correo', [EmailController::class, 'enviarCorreo']);
+Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
 
 
 require __DIR__.'/auth.php';

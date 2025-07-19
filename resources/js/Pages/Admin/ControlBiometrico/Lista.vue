@@ -14,8 +14,11 @@
         </div>
 
         <div class="flex justify-between" style="position: relative;" >
-            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 30px;"/>
-            <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
+            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 10px;">
+                <template #prefix>
+                    <search-outlined/>
+                </template>
+            </a-input>
         </div>
     </div>
 
@@ -31,7 +34,7 @@
         >
         <template #bodyCell="{ column, index, record }">
             <template v-if="column.dataIndex === 'codigo'">
-                <div><span style="font-size: .9rem">{{ record.codigo }}</span></div>                
+                <div><span style="font-size: .8rem">{{ record.codigo }}</span></div>                
             </template>
             <template v-if="column.dataIndex === 'nro_doc'">
                 <div><span style="font-size: .9rem">{{ record.nro_doc }}</span></div>                
@@ -42,10 +45,11 @@
             </template>
             <template v-if="column.dataIndex === 'modalidad'">
                 <div class="flex" style="justify-content: center;">
-                    <a-tag style="font-size: .8rem;" color="blue" v-if=" record.modalidad == 'EXAMEN GENERAL'">{{ record.modalidad }}</a-tag>
-                    <a-tag style="font-size: .8rem;" color="orange" v-if=" record.modalidad == 'CONADIS'">{{ record.modalidad }}</a-tag>
-                    <a-tag style="font-size: .8rem;" color="purple" v-if=" record.modalidad == 'CEPREUNA'">{{ record.modalidad }}</a-tag>
-                    <a-tag style="font-size: .8rem;" color="pink" v-else>{{ record.modalidad }}</a-tag>
+                    <a-tag style="font-size: .8rem;" color="blue" v-if=" record.modalidad == 'EXAMEN GENERAL'"> GENERAL </a-tag>
+                    <a-tag style="font-size: .8rem;" color="orange" v-if=" record.modalidad == 'CONADIS'"> CONADIS </a-tag>
+                    <a-tag style="font-size: .8rem;" color="purple" v-if=" record.modalidad == 'CEPREUNA'"> CEPREUNA</a-tag>
+                    <a-tag style="font-size: .8rem;" color="pink" v-if=" record.modalidad == 'BENEFICIARIOS DEL PLAN INTEGRAL DE REPARACIONES (PIR)'">LEY DE REPARACIONES</a-tag>
+                    <a-tag style="font-size: .7rem;" color="pink" v-else>{{ record.modalidad }}</a-tag>
                 </div>
             </template>
             
@@ -64,7 +68,7 @@
                 <a-button type="" @click="imprimirConstancia(record.url)" style="border-radius:4px; background: none; color: green" size="small">
                     <template #icon><printer-outlined/></template>
                 </a-button>
-                <a-button type="" @click="abrirEditar(record)" style="border-radius:4px; background: none; color: gray" size="small">
+                <a-button type="" @click="generarConstancia(record.nro_doc)" style="border-radius:4px; background: none; color: gray" size="small">
                     <template #icon><sync-outlined/></template>
                 </a-button>
                 <a-button class="" style="border-radius:4px; background: none; color: cornflowerblue;" shape="" size="small">
@@ -201,6 +205,16 @@ const imprimirConstancia =  (url) => {
     iframe.contentWindow.print();
 }
 
+const generarConstancia =  (dni) => {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = "none";
+    iframe.src = baseUrl+'/admin/pdf-biometrio/'+dni;
+    document.body.appendChild(iframe);
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+}
+
+
 const abrirEditar = (item) => {
     visible.value = true;
     programa.value.id = item.id;
@@ -250,7 +264,7 @@ const eliminar = (item) => {
 }
 
 const columnsProgramas = [
-    { title: 'Cod', dataIndex: 'codigo_ingreso', width:'60px', align:'center', responsive: ['md'],},
+    { title: 'Cod', dataIndex: 'codigo_ingreso', width:'65px', align:'center', responsive: ['md'],},
     { title: 'N° Doc', dataIndex: 'nro_doc', width:'80px', align:'center', responsive: ['md'],},
     { title: 'Nombre', dataIndex: 'nombre'},
     { title: 'Programa', dataIndex: 'programa'},

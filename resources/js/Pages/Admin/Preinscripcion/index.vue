@@ -60,8 +60,10 @@
 
         </div>
         <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 30px;"/>
-        <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
+        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 10px;">
+            <template #prefix><search-outlined /></template>
+        </a-input>
+
         </div>
     </row>
 
@@ -88,35 +90,41 @@
                 {{ record.programa }}
             </template>
 
-            <template v-if="column.dataIndex === 'sexo'" >
+            <!-- <template v-if="column.dataIndex === 'sexo'" >
                 <a-select
                 ref="select"
                 v-model:value="record.sexo"
                 placeholder="Seleccionar"
-                style="width: 60px;"
+                style="width: 54px;"
                 >
                 <a-select-option value='1'><span style="color:blue">M</span></a-select-option>
                 <a-select-option value='2'><span style="color:red">F</span></a-select-option>
                 </a-select>
                 <!-- <a-tag v-if="record.sexo === '1'" color="blue">M</a-tag>
-                <a-tag v-if="record.sexo === '2'" color="pink">F</a-tag> -->
-            </template>
+                <a-tag v-if="record.sexo === '2'" color="pink">F</a-tag>
+            </template> -->
 
             <template v-if="column.dataIndex === 'estado'" >
                 <a-tag v-if="record.estado === 0" color="#476175">INSCRITO</a-tag>
-                <a-tag v-else color="#b01030">SIN INSCRIPCIÓN</a-tag>
+                <a-tag v-else color="#b01030">NO INSCRITO</a-tag>
             </template>
 
             <template v-if="column.dataIndex === 'acciones'">
-                <a-button class="mr-1" type="success" style="color: #476175;" @click="cambiarSexo(record.id_postulante, record.sexo )" size="small">
-                    <template #icon><SaveOutlined/></template>
-                </a-button>
-                <a-button class="mr-1" @click="abrirEditar(record)" style="color: blue;" size="small">
-                    <template #icon><form-outlined/></template>
-                </a-button>
-                <a-button @click="eliminar(record)" size="small" style="color: crimson;">
-                    <template #icon><delete-outlined/></template>
-                </a-button>  
+                <div style="display: flex; gap: 2px;">
+
+                    <a-button size="small" @click="generarSolicitud(record.dni, record.id_proceso)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: gray; display: flex; align-items: center;">
+                        <PrinterOutlined/>
+                    </a-button>
+                    <!-- <a-button class="mr-1" type="success" style="color: #476175;" @click="cambiarSexo(record.id_postulante, record.sexo )" size="small">
+                        <template #icon><SaveOutlined/></template>
+                    </a-button> -->
+                    <a-button size="small" @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #000080; display: flex; align-items: center;">
+                        <form-outlined/>
+                    </a-button>
+                    <a-button size="small" @click="eliminar(record)"  style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                        <delete-outlined/>
+                    </a-button>                                  
+                </div>
             </template>
         </template>
   
@@ -128,7 +136,7 @@
     </AuthenticatedLayout>
     
     <div>
-        <a-modal v-model:visible="visible" title="Modificar Pre inscripción" style="margin-top: -40px;">
+        <a-modal v-model:open="visible" title="Modificar Pre inscripción" style="margin-top: -40px;">
             <a-form
                 ref="formRef"
                 name="custom-validation"
@@ -343,12 +351,10 @@ const columnsInscripcion = [
     // { title: 'ID', dataIndex: 'id' },
     { title: 'DNI', dataIndex: 'dni', align:'center'},
     { title: 'Postulante', dataIndex: 'postulante'},
-    { title: 'Sexo', dataIndex: 'sexo', align:'center' },
     { title: 'Programa', dataIndex:'programa'},
     { title: 'Modalidad', dataIndex:'modalidad', align:'center'},
-    { title: 'Estado', dataIndex: 'estado', align:'center'},
-    { title: 'Observación', dataIndex: 'observacion'},
-    { title: 'Acciones', dataIndex: 'acciones', width:'140px', align:'center'},
+    { title: 'Estado', dataIndex: 'estado', align:' '},
+    { title: 'Acciones', dataIndex: 'acciones', width:'100px', align:'center'},
 ];
 
 const selectedRowKeys = ref([]); 
@@ -372,5 +378,13 @@ const notificacion = (type, titulo, mensaje) => {
     });
 };
 
+const generarSolicitud =  (dni, pro) => {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = "none";
+    iframe.src = baseUrl+'/admin/pdf-solicitud/'+dni;   
+    document.body.appendChild(iframe);
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+}
 getInscripciones()
 </script>

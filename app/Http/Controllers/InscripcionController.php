@@ -382,7 +382,7 @@ class InscripcionController extends Controller
         array_push($query_where,[DB::raw('inscripciones.id_proceso'), '=', auth()->user()->id_proceso]);
 
         $res = Inscripcion::select(
-            'inscripciones.id as id', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni', 'inscripciones.codigo as codigo', 'postulante.nombres AS nombres', 
+            'inscripciones.id as id', 'procesos.id as id_proceso', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni', 'inscripciones.codigo as codigo', 'postulante.nombres AS nombres', 
             'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno', 'programa.nombre as programa', 'inscripciones.id_programa as id_programa',
             'modalidad.id as id_modalidad', 'modalidad.nombre as modalidad', 'procesos.nombre AS proceso', 'inscripciones.created_at as fecha', 'inscripciones.estado'
         )

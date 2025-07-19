@@ -28,7 +28,7 @@
         <template #bodyCell="{ column, index, record }">
 
             <template v-if="column.dataIndex === 'codigo'" >
-                <a-tag color="blue" style="padding-top: 3px; color:#164753; width: 116px;">
+                <a-tag color="blue" style="padding-top: 3px; color:#164753; width: 105px;">
                     <span style="font-size: 1rem; font-weight: bold;">{{ record.codigo }}</span>
                 </a-tag>
                 <!-- <span style="font-size: 1.1rem; font-weight: bold;">{{ record.codigo }}</span> -->
@@ -39,7 +39,7 @@
             </template>
 
             <template v-if="column.dataIndex === 'estado'" >
-                <a-tag v-if="record.estado === 0" color="blue">HABILITADO</a-tag>
+                <a-tag v-if="record.estado === 0" color="blue">INSCRITO</a-tag>
                 <a-tag v-else color="error">ANULADO</a-tag>
             </template>
 
@@ -55,25 +55,27 @@
             </template>
 
             <template v-if="column.dataIndex === 'acciones'">
-                <a-button type="success" style="color: #164753;" @click="imprimirPDF(record.dni)" size="small">
-                    <template #icon><printer-outlined/></template>
-                </a-button>
-                <a-divider type="vertical" />
-                <a-button type="" style="color: #af7200;" @click="abrirEditar(record)" size="small">
-                    <template #icon><form-outlined/></template>
-                </a-button>
-                <a-divider type="vertical" />
-                <a-popconfirm
-                    v-if="inscripciones.length"
-                    title="¿Estas seguro de eliminar?"
-                    disabled
-                    @confirm="eliminar(record)"
-                    >
-                    <a-button style="color:crimson;" shape="" size="small">
-                        <template #icon><delete-outlined/></template>
+                <div style="display: flex; gap: 2px;">
+                    <a-button size="small"  @click="recargar(record.dni)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #23cd23; display: flex; align-items: center;">
+                        <upload-outlined/>
                     </a-button>
-                </a-popconfirm>
-  
+                    <a-button size="small"  @click="imprimirPDF(record.dni, record.id_proceso)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #164753;; display: flex; align-items: center;">
+                        <printer-outlined/>
+                    </a-button>
+                    <a-button size="small"  @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #af7200; display: flex; align-items: center;">
+                        <form-outlined/>
+                    </a-button>
+                    <a-popconfirm
+                        v-if="inscripciones.length"
+                        title="¿Estas seguro de eliminar?"
+                        disabled
+                        @confirm="eliminar(record)"
+                        >
+                        <a-button size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                            <delete-outlined />
+                        </a-button>
+                    </a-popconfirm>
+                </div>  
             </template>
         </template>
   
@@ -142,7 +144,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, unref } from 'vue';
-import { FormOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, } from '@ant-design/icons-vue';
+import { FormOutlined, PrinterOutlined, UploadOutlined, DeleteOutlined, SearchOutlined, } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 const baseUrl = window.location.origin;
@@ -245,13 +247,12 @@ const eliminar = (item) => {
 
 const columnsInscripcion = [
     // { title: 'ID', dataIndex: 'id' },
-    { title: 'Codigo', dataIndex: 'codigo'},
+    { title: 'Codigo', dataIndex: 'codigo', width:"110px"},
     { title: 'DNI', dataIndex: 'dni', align:'center'},
     { title: 'Postulante', dataIndex: 'postulante'},
     { title: 'Programa', dataIndex:'programa'},
     { title: 'Modalidad', dataIndex:'modalidad', align:'center'},
     { title: 'Estado', dataIndex: 'estado', align:'center'},
-    { title: 'Observación', dataIndex: 'observacion'},
     { title: 'Acciones', dataIndex: 'acciones', width:'140px', align:'center'},
 ];
 
@@ -276,10 +277,19 @@ const notificacion = (type, titulo, mensaje) => {
     });
 };
 
-const imprimirPDF =  (dnni) => {
+const imprimirPDF =  (dnni, proc) => {
     var iframe = document.createElement('iframe');
     iframe.style.display = "none";
-    iframe.src = baseUrl+'/documentos/6/inscripciones/constancias/'+dnni+'.pdf';
+    iframe.src = baseUrl+'/documentos/'+proc+'/inscripciones/constancias/'+dnni+'.pdf';
+    document.body.appendChild(iframe);
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+}
+
+const recargar =  (dni) => {
+    var iframe = document.createElement('iframe');
+    iframe.style.display = "none";
+    iframe.src = baseUrl+'/admin/pdf-inscripción/'+dni;
     document.body.appendChild(iframe);
     iframe.contentWindow.focus();
     iframe.contentWindow.print();

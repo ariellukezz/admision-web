@@ -15,13 +15,17 @@ class MensajeCorreo extends Mailable
 
     public $nombre;
     public $correo;
-    public $mensaje;
+    public $programa;
+    public $puerta;
 
-    public function __construct($nombre, $correo, $mensaje)
+
+    public function __construct($nombre, $correo, $programa, $puerta)
     {
         $this->nombre = $nombre;
         $this->correo = $correo;
-        $this->mensaje = $mensaje;
+        $this->programa = $programa;
+        $this->puerta = $puerta;
+        
     }
 
     public function build()
@@ -29,7 +33,8 @@ class MensajeCorreo extends Mailable
         return $this->view('emails.notificaciones.notificacion_puerta', [
             'nombre' => $this->nombre,
             'correo' => $this->correo,
-            'mensaje' => $this->mensaje,
+            'programa' => $this->programa,
+            'puerta' => $this->puerta,
         ])
         ->subject('Notificación puerta de ingreso');
     }

@@ -21,7 +21,7 @@ class RatioController extends Controller
                 DB::raw('COALESCE(i.cantidad, 0) as cantidad'),
                 'vacantes.vacantes',
                 DB::raw('ROUND(COALESCE(i.cantidad, 0) / NULLIF(vacantes.vacantes, 0), 6) as porcentaje_ocupado'),
-                DB::raw('ROUND(COALESCE(i.cantidad, 0) * 0.20, 0) as veinte_por_ciento')
+                DB::raw('ceil(i.cantidad * 0.20) as veinte_por_ciento')
             )
             ->join('programa', 'vacantes.id_programa', '=', 'programa.id')
             ->leftJoin(DB::raw('(

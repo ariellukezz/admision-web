@@ -10,19 +10,22 @@ use DB;
 
 class EmailController extends Controller
 {
-    public function enviarCorreo(Request $request)
+    public function enviarCorreo($area)
     {
-        $destinatarios = [
-        //    (object) ['nombre' =>'QUISPE AQUINO CAROLINA ISABEL', 'correo' => 'carolinaisabelccii@gmail.com'],
-        (object) ['nombre' =>'LUQUE CUSACANI JHON ARIEL', 'correo' => 'arielluqu3@gmail.com']
-        ];
 
+        $destinatarios = DB::select("SELECT * FROM enviar_correos WHERE enviado = 0 AND area = '$area'");
+        
         $errores = [];
 
         foreach ($destinatarios as $destinatario) {
             try {
-                Mail::to($destinatario->correo)->send(new MensajeCorreo($destinatario->nombre, $destinatario->correo, 'mensaje'));
+                Mail::to($destinatario->correo)->send(new MensajeCorreo($destinatario->nombre, $destinatario->correo, $destinatario->programa, $destinatario->puerta));
+                DB::table('enviar_correos')
+                    ->where('id', $destinatario->id)
+                    ->update(['enviado' => 1]);
+               
             } catch (\Exception $e) {
+            
                 $errores[] = [
                     'nombre' => $destinatario->nombre,
                     'correo' => $destinatario->correo,
@@ -30,7 +33,6 @@ class EmailController extends Controller
                 ];
             }
         }
-
 
         if (!empty($errores)) {
             return response()->json([

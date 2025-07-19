@@ -310,84 +310,165 @@ class PreinscripcionController extends Controller
     }
 
 
-  public function pdfsolicitud($pro, $dni) {
+    public function pdfsolicitud($pro, $dni) {
 
-        $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
-        WHERE dni_postulante = $dni");
+            $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
+            WHERE dni_postulante = $dni");
 
 
-        $preinscrito = DB::select("SELECT COUNT(*) AS cont FROM pre_inscripcion
-        JOIN postulante ON postulante.id = pre_inscripcion.id_postulante
-        WHERE postulante.nro_doc = $dni AND pre_inscripcion.id_proceso = $pro");
+            $preinscrito = DB::select("SELECT COUNT(*) AS cont FROM pre_inscripcion
+            JOIN postulante ON postulante.id = pre_inscripcion.id_postulante
+            WHERE postulante.nro_doc = $dni AND pre_inscripcion.id_proceso = $pro");
 
-        $res = Preinscripcion::select(
-            'tipo_documento_identidad.nombre AS tipo_doc',
-            'postulante.direccion',
-            'postulante.id as idP',
-            'postulante.nro_doc as dni',
-            'postulante.nombres', 'postulante.primer_apellido', 'postulante.segundo_apellido',
-            'postulante.anio_egreso AS egreso',
-            'modalidad.id as id_modalidad',
-            'modalidad.nombre as modalidad',
-            'distritos.nombre AS distrito',
-            'procesos.id as id_proceso',
-            'procesos.nombre AS proceso',
-            'procesos.id_modalidad_proceso',
-            'procesos.fecha_examen AS fecha_examen',
-            'programa.nombre AS programa',
-            'carreras_previas.codigo as cod_car',
-            'carreras_previas.nombre as nom_car',
-            'anios.nombre as nombre_anio'
-        )
-          ->leftjoin ('postulante', 'postulante.id', '=','pre_inscripcion.id_postulante')
-          ->join ('procesos', 'procesos.id', '=','pre_inscripcion.id_proceso')
-          ->join ('programa', 'programa.id', '=','pre_inscripcion.id_programa')
-          ->join ('modalidad', 'modalidad.id', '=','pre_inscripcion.id_modalidad')
-          ->join ('ubigeo', 'ubigeo.ubigeo', '=','postulante.ubigeo_residencia')
-          ->join ('distritos', 'distritos.id', '=','ubigeo.id_distrito')
-          ->join ('tipo_documento_identidad','tipo_documento_identidad.id', '=', 'postulante.tipo_doc')
-          ->leftjoin('anios','anios.anio','=','procesos.anio')
-          ->leftjoin ('carreras_previas','carreras_previas.id', '=', 'pre_inscripcion.id_anterior')
-          ->where('pre_inscripcion.id_proceso','=', $pro)
-          ->where('postulante.nro_doc','=', $dni)->get();
+            $res = Preinscripcion::select(
+                'tipo_documento_identidad.nombre AS tipo_doc',
+                'postulante.direccion',
+                'postulante.id as idP',
+                'postulante.nro_doc as dni',
+                'postulante.nombres', 'postulante.primer_apellido', 'postulante.segundo_apellido',
+                'postulante.anio_egreso AS egreso',
+                'modalidad.id as id_modalidad',
+                'modalidad.nombre as modalidad',
+                'distritos.nombre AS distrito',
+                'procesos.id as id_proceso',
+                'procesos.nombre AS proceso',
+                'procesos.id_modalidad_proceso',
+                'procesos.fecha_examen AS fecha_examen',
+                'programa.nombre AS programa',
+                'carreras_previas.codigo as cod_car',
+                'carreras_previas.nombre as nom_car',
+                'anios.nombre as nombre_anio'
+            )
+            ->leftjoin ('postulante', 'postulante.id', '=','pre_inscripcion.id_postulante')
+            ->join ('procesos', 'procesos.id', '=','pre_inscripcion.id_proceso')
+            ->join ('programa', 'programa.id', '=','pre_inscripcion.id_programa')
+            ->join ('modalidad', 'modalidad.id', '=','pre_inscripcion.id_modalidad')
+            ->join ('ubigeo', 'ubigeo.ubigeo', '=','postulante.ubigeo_residencia')
+            ->join ('distritos', 'distritos.id', '=','ubigeo.id_distrito')
+            ->join ('tipo_documento_identidad','tipo_documento_identidad.id', '=', 'postulante.tipo_doc')
+            ->leftjoin('anios','anios.anio','=','procesos.anio')
+            ->leftjoin ('carreras_previas','carreras_previas.id', '=', 'pre_inscripcion.id_anterior')
+            ->where('pre_inscripcion.id_proceso','=', $pro)
+            ->where('postulante.nro_doc','=', $dni)->get();
 
-        if (count($res) === 0) {
-            return "No registrado";
-        }else {
-            $data = $res[0];
+            if (count($res) === 0) {
+                return "No registrado";
+            }else {
+                $data = $res[0];
 
-            setlocale(LC_TIME, 'es_ES.utf8');
-            $date = Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
-            $pdf = Pdf::loadView('solicitud.solicitud', ['data'=>$data, 'date'=>$date,'carreras_previas'=>$carreras_previas, 'fondo'=>$this->fondo]);
-            $pdf->setPaper('A4', 'portrait');
-            $output = $pdf->output();
+                setlocale(LC_TIME, 'es_ES.utf8');
+                $date = Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+                $pdf = Pdf::loadView('solicitud.solicitud', ['data'=>$data, 'date'=>$date,'carreras_previas'=>$carreras_previas, 'fondo'=>$this->fondo]);
+                $pdf->setPaper('A4', 'portrait');
+                $output = $pdf->output();
 
-            $rutaCarpeta = public_path('/documentos/'.$pro.'/preinscripcion/solicitudes/');
+                $rutaCarpeta = public_path('/documentos/'.$pro.'/preinscripcion/solicitudes/');
 
-            if (!File::exists($rutaCarpeta)) {
-                File::makeDirectory($rutaCarpeta, 0755, true, true);
+                if (!File::exists($rutaCarpeta)) {
+                    File::makeDirectory($rutaCarpeta, 0755, true, true);
+                }
+
+                if($preinscrito[0]->cont == 0){
+
+                    $doc = Documento::create([
+                        'codigo' => '23-2-SOL-'.$res[0]->dni.'-1',
+                        'nombre' => 'SOLICITUD DE POSTULACIÓN',
+                        'numero' => 1,
+                        'id_postulante' => $res[0]->idP,
+                        'id_tipo_documento' => 6,
+                        'estado' => 1,
+                        'url' => 'documentos/'.$pro.'/'.'/preinscripcion/solicitudes/'.$res[0]->dni.'.pdf',
+                        'fecha' => date('Y-m-d')
+                    ]);
+                }
+
+                file_put_contents(public_path('/documentos/'.$pro.'/preinscripcion/solicitudes/').$res[0]->dni.'.pdf', $output);
+                return $pdf->download('solicitud-postulante.pdf');
+
             }
-
-            if($preinscrito[0]->cont == 0){
-
-                $doc = Documento::create([
-                    'codigo' => '23-2-SOL-'.$res[0]->dni.'-1',
-                    'nombre' => 'SOLICITUD DE POSTULACIÓN',
-                    'numero' => 1,
-                    'id_postulante' => $res[0]->idP,
-                    'id_tipo_documento' => 6,
-                    'estado' => 1,
-                    'url' => 'documentos/'.$pro.'/'.'/preinscripcion/solicitudes/'.$res[0]->dni.'.pdf',
-                    'fecha' => date('Y-m-d')
-                ]);
-            }
-
-            file_put_contents(public_path('/documentos/'.$pro.'/preinscripcion/solicitudes/').$res[0]->dni.'.pdf', $output);
-            return $pdf->download('solicitud-postulante.pdf');
 
         }
 
-  }
+
+        public function pdfsolicitudAdmin($dni) {
+
+            $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
+            WHERE dni_postulante = $dni");
+
+
+            $preinscrito = DB::select("SELECT COUNT(*) AS cont FROM pre_inscripcion
+            JOIN postulante ON postulante.id = pre_inscripcion.id_postulante
+            WHERE postulante.nro_doc = $dni AND pre_inscripcion.id_proceso = ".auth()->user()->id_proceso);
+
+            $res = Preinscripcion::select(
+                'tipo_documento_identidad.nombre AS tipo_doc',
+                'postulante.direccion',
+                'postulante.id as idP',
+                'postulante.nro_doc as dni',
+                'postulante.nombres', 'postulante.primer_apellido', 'postulante.segundo_apellido',
+                'postulante.anio_egreso AS egreso',
+                'modalidad.id as id_modalidad',
+                'modalidad.nombre as modalidad',
+                'distritos.nombre AS distrito',
+                'procesos.id as id_proceso',
+                'procesos.nombre AS proceso',
+                'procesos.id_modalidad_proceso',
+                'procesos.fecha_examen AS fecha_examen',
+                'programa.nombre AS programa',
+                'carreras_previas.codigo as cod_car',
+                'carreras_previas.nombre as nom_car',
+                'anios.nombre as nombre_anio'
+            )
+            ->leftjoin ('postulante', 'postulante.id', '=','pre_inscripcion.id_postulante')
+            ->join ('procesos', 'procesos.id', '=','pre_inscripcion.id_proceso')
+            ->join ('programa', 'programa.id', '=','pre_inscripcion.id_programa')
+            ->join ('modalidad', 'modalidad.id', '=','pre_inscripcion.id_modalidad')
+            ->join ('ubigeo', 'ubigeo.ubigeo', '=','postulante.ubigeo_residencia')
+            ->join ('distritos', 'distritos.id', '=','ubigeo.id_distrito')
+            ->join ('tipo_documento_identidad','tipo_documento_identidad.id', '=', 'postulante.tipo_doc')
+            ->leftjoin('anios','anios.anio','=','procesos.anio')
+            ->leftjoin ('carreras_previas','carreras_previas.id', '=', 'pre_inscripcion.id_anterior')
+            ->where('pre_inscripcion.id_proceso','=', auth()->user()->id_proceso)
+            ->where('postulante.nro_doc','=', $dni)->get();
+
+            if (count($res) === 0) {
+                return "No registrado";
+            }else {
+                $data = $res[0];
+
+                setlocale(LC_TIME, 'es_ES.utf8');
+                $date = Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+                $pdf = Pdf::loadView('solicitud.solicitud', ['data'=>$data, 'date'=>$date,'carreras_previas'=>$carreras_previas, 'fondo'=>$this->fondo]);
+                $pdf->setPaper('A4', 'portrait');
+                $output = $pdf->output();
+
+                $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/preinscripcion/solicitudes/');
+
+                if (!File::exists($rutaCarpeta)) {
+                    File::makeDirectory($rutaCarpeta, 0755, true, true);
+                }
+
+                if($preinscrito[0]->cont == 0){
+
+                    $doc = Documento::create([
+                        'codigo' => '23-2-SOL-'.$res[0]->dni.'-1',
+                        'nombre' => 'SOLICITUD DE POSTULACIÓN',
+                        'numero' => 1,
+                        'id_postulante' => $res[0]->idP,
+                        'id_tipo_documento' => 6,
+                        'estado' => 1,
+                        'url' => 'documentos/'.auth()->user()->id_proceso.'/'.'/preinscripcion/solicitudes/'.$res[0]->dni.'.pdf',
+                        'fecha' => date('Y-m-d')
+                    ]);
+                }
+
+                file_put_contents(public_path('/documentos/'.auth()->user()->id_proceso.'/preinscripcion/solicitudes/').$res[0]->dni.'.pdf', $output);
+                return $pdf->stream('solicitud-postulante.pdf');
+
+            }
+
+        }
+
 
 
 
@@ -401,7 +482,7 @@ class PreinscripcionController extends Controller
 
         $res = Preinscripcion::select(
             'pre_inscripcion.id as id', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni',
-            'postulante.nombres AS nombres',
+            'postulante.nombres AS nombres', 'procesos.id as id_proceso',
             'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno',
             'programa.nombre as programa', 'pre_inscripcion.id_programa as id_programa',
             'modalidad.id as id_modalidad', 'modalidad.nombre as modalidad', 'procesos.nombre AS proceso',

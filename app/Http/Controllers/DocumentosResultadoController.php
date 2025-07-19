@@ -125,7 +125,7 @@ class DocumentosResultadoController extends Controller
         $archivo->nombre = $request->descripcion;
         $archivo->url = "documentos/".$request->id_proceso."/resultados/{$nombreArchivo}";
         $archivo->id_usuario = auth()->id();
-        $archivo->id_proceso = auth()->user()->id_proceso;
+        $archivo->id_proceso = $request->id_proceso;
         $archivo->id_tipo = 1;
         $archivo->fecha = date('Y-m-d');
         $archivo->estado = $request->estado;
