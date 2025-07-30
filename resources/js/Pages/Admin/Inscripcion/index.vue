@@ -98,6 +98,9 @@
                 @validate="handleValidate"
                 @finishFailed="handleFinishFailed"
                 >
+                <div class="flex justify-end">
+                     <a-switch v-model:checked="inscripcion.estado"/>
+                </div>
                 <a-form-item has-feedback name="codigo">
                     <label>Codigo</label>
                     <a-input type="text" v-model:value="inscripcion.codigo" disabled/>
@@ -203,7 +206,8 @@ const abrirEditar = (item) => {
     inscripcion.value.codigo = item.codigo;
     inscripcion.value.id_programa = item.id_programa;
     inscripcion.value.id_modalidad = item.id_modalidad;
-    inscripcion.value.observacion = item.observaciones;
+    if(item.estado == 0 ){ inscripcion.value.estado = true } else { inscripcion.value.estado = 3 } ;
+    inscripcion.value.observacion = item.observacion;
     postulante.value.id = item.id_postulante;
     postulante.value.dni = item.dni;
     postulante.value.nombre = item.dni+" - "+item.nombres +" "+ item.paterno +" "+ item.materno;
@@ -223,12 +227,15 @@ getProgramas();
 
 
 const guardar = () => {
+    let est = 3;
+    if(inscripcion.value.estado == true ){ est = 0; }
     let post = {
         id:inscripcion.value.id,
         id_postulante: postulante.value.id,
         id_programa: inscripcion.value.id_programa,
         id_modalidad: inscripcion.value.id_modalidad,
         observacion: inscripcion.value.observacion,
+        estado: est,
         dni: postulante.value.dni
     };
     axios.post("actualizar-inscripcion", post).then((result) => {

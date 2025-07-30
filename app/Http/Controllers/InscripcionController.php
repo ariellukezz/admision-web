@@ -278,43 +278,60 @@ class InscripcionController extends Controller
     }
 
 
-    public function Actualizar(Request $request){
-     
+    public function Actualizar(Request $request)
+    {
         $inscripcion = Inscripcion::find($request->id);
         $proceso = Proceso::find(auth()->user()->id_proceso);
 
-        if( $inscripcion->id_programa != $request->id_programa) {
+        $cambioPrograma = $inscripcion->id_programa != $request->id_programa;
+        $cambioModalidad = $inscripcion->id_modalidad != $request->id_modalidad;
+        $solicitaAnulacion = $request->estado;
+
+        if ($cambioPrograma) {
             $inscripcion->estado = 3;
-            $inscripcion->observaciones = "Cambio de programa a $request->id_programa";
+            $inscripcion->observaciones = "Cambio de programa a {$request->id_programa}";
             $inscripcion->save();
-            
+
             $id_programa = str_pad($request->id_programa, 2, '0', STR_PAD_LEFT);
-            $res = $siguiente = Inscripcion::where('codigo', 'like', $proceso->codigo_proceso.$id_programa.'%')
-            ->max(\DB::raw('CAST(SUBSTRING(codigo, 7) AS UNSIGNED)')) + 1;
-            $res = str_pad($res, 4, '0', STR_PAD_LEFT);
+            $ultimoCodigo = Inscripcion::where('codigo', 'like', $proceso->codigo_proceso . $id_programa . '%')
+                ->max(\DB::raw('CAST(SUBSTRING(codigo, 7) AS UNSIGNED)')) + 1;
+            $nuevoCorrelativo = str_pad($ultimoCodigo, 4, '0', STR_PAD_LEFT);
+            $nuevoCodigo = $proceso->codigo_proceso . $id_programa . $nuevoCorrelativo;
+
 
             $inscripcion = Inscripcion::create([
-                'codigo' => $proceso->codigo_proceso . $id_programa . $res,
-                'id_postulante'=> $request->id_postulante,
-                'id_proceso'=> auth()->user()->id_proceso,
+                'codigo' => $nuevoCodigo,
+                'id_postulante' => $request->id_postulante,
+                'id_proceso' => auth()->user()->id_proceso,
                 'id_programa' => $request->id_programa,
-                'id_modalidad' => $request->id_modalidad, 
+                'id_modalidad' => $request->id_modalidad,
                 'estado' => 0,
-                'id_usuario' => auth()->id()
+                'id_usuario' => auth()->id(),
             ]);
-
         }
-        if ( $inscripcion->id_modalidad != $request->id_modalidad ) {
+
+        if ($cambioModalidad) {
+            $observacionActual = $inscripcion->observaciones ?? '';
             $inscripcion->id_modalidad = $request->id_modalidad;
-            $inscripcion->observaciones = "$inscripcion->observaciones Cambio de modalidad a $request->id_modalidad";
+            $inscripcion->observaciones = trim($observacionActual . " Cambio de modalidad a {$request->id_modalidad}");
             $inscripcion->save();
         }
 
-        $this->pdfInscripcion($request->dni);
-        $this->response['titulo'] = 'REGISTRO MODIFICADO';
-        $this->response['mensaje'] = 'DATOS ACTUALIZADOS CORRECTAMENTE';
-        $this->response['estado'] = true;
+        if (!$cambioPrograma && !$cambioModalidad && $request->estado != $inscripcion->estado) {
+            $inscripcion->estado = $request->estado;
+            $inscripcion->observaciones = "Estado actualizado manualmente a {$request->estado}.";
+            $inscripcion->save();
+        }
+
+        // $this->pdfInscripcion($request->dni);
+
+        $this->response = [
+            'titulo' => 'REGISTRO MODIFICADO',
+            'mensaje' => 'DATOS ACTUALIZADOS CORRECTAMENTE',
+            'estado' => true,
+        ];
     }
+
 
 
     public function pdfInscripcion($dni) {

@@ -15,7 +15,7 @@
         :pagination="false"
         size="small"
         :rowClassName="rowClassName"
-        :scroll="{ x: 200, y: 'calc(100vh - 240px)' }"
+        :scroll="{ x: 200, y: 'calc(100vh - 270px)' }"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'programa'">
@@ -71,7 +71,7 @@ const fechas = ref([]);
 const totales = ref([{ total_inscripciones: 0 }]);
 const loading = ref(false);
 const error = ref(null);
-const numeroFilasAmarillas = ref(8); // Variable añadida aquí
+const numeroFilasAmarillas = ref(0);
 
 onMounted(async () => {
   try {

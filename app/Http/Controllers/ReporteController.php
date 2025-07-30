@@ -54,7 +54,7 @@ class ReporteController extends Controller
             $pdf->getDomPDF()->set_option("isHtml5ParserEnabled", true);
             $pdf->setPaper('A4', 'portrait');
 
-            $rutaCarpeta = public_path("/documentos/$sim/reportes/");
+            $rutaCarpeta = public_path("/documentos/".auth()->user()->id_proceso."/reportes/");
             $rutaArchivo = $rutaCarpeta . 'ReporteProgramas_' . date('Y-m-d_H-i-s') .auth()->id(). '.pdf';        
             if (!file_exists($rutaCarpeta)) { mkdir($rutaCarpeta, 0755, true); }
         

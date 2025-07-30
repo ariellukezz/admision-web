@@ -15,7 +15,7 @@
         bordered
         size="small"
         :pagination="false"
-        :scroll="{ x: 200, y: 'calc(100vh - 260px)' }"
+        :scroll="{ x: 200, y: 'calc(100vh - 270px)' }"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'name'">
