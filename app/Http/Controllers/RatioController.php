@@ -16,27 +16,46 @@ class RatioController extends Controller
         $idProceso = auth()->user()->id_proceso;
         $proceso = Proceso::find($idProceso);
 
-        $vacantes = Vacante::select(
-                'programa.nombre as programa',
-                DB::raw('COALESCE(i.cantidad, 0) as cantidad'),
-                'vacantes.vacantes',
-                DB::raw('ROUND(COALESCE(i.cantidad, 0) / NULLIF(vacantes.vacantes, 0), 6) as porcentaje_ocupado'),
-                DB::raw('ceil(i.cantidad * 0.20) as veinte_por_ciento')
-            )
-            ->join('programa', 'vacantes.id_programa', '=', 'programa.id')
-            ->leftJoin(DB::raw('(
-                SELECT id_programa, id_modalidad, COUNT(*) as cantidad
-                FROM inscripciones
-                WHERE id_proceso = ' . intval($idProceso) . ' AND estado = 0
-                GROUP BY id_programa, id_modalidad
-            ) as i'), function($join) {
-                $join->on('vacantes.id_programa', '=', 'i.id_programa')
-                     ->on('vacantes.id_modalidad', '=', 'i.id_modalidad');
-            })
-            ->where('vacantes.id_proceso', $idProceso)
-            ->orderByDesc(DB::raw('porcentaje_ocupado'))
-            ->get();
+        // $vacantes = Vacante::select(
+        //         'programa.nombre as programa',
+        //         DB::raw('COALESCE(i.cantidad, 0) as cantidad'),
+        //         'vacantes.vacantes',
+        //         DB::raw('ROUND(COALESCE(i.cantidad, 0) / NULLIF(vacantes.vacantes, 0), 6) as porcentaje_ocupado'),
+        //         DB::raw('ceil(i.cantidad * 0.20) as veinte_por_ciento')
+        //     )
+        //     ->join('programa', 'vacantes.id_programa', '=', 'programa.id')
+        //     ->leftJoin(DB::raw('(
+        //         SELECT id_programa, id_modalidad, COUNT(*) as cantidad
+        //         FROM inscripciones
+        //         WHERE id_proceso = ' . intval($idProceso) . ' AND estado = 0
+        //         GROUP BY id_programa, id_modalidad
+        //     ) as i'), function($join) {
+        //         $join->on('vacantes.id_programa', '=', 'i.id_programa')
+        //              ->on('vacantes.id_modalidad', '=', 'i.id_modalidad');
+        //     })
+        //     ->where('vacantes.id_proceso', $idProceso)
+        //     ->orderByDesc(DB::raw('porcentaje_ocupado'))
+        //     ->get();
 
+        $vacantes = Vacante::select(
+            'programa.nombre as programa',
+            DB::raw('COALESCE(i.cantidad, 0) as cantidad'),
+            DB::raw('SUM(vacantes.vacantes) as vacantes'),
+            DB::raw('ROUND(COALESCE(i.cantidad, 0) / NULLIF(SUM(vacantes.vacantes), 0), 6) as porcentaje_ocupado'),
+            DB::raw('CEIL(COALESCE(i.cantidad, 0) * 0.20) as veinte_por_ciento')
+        )
+        ->join('programa', 'vacantes.id_programa', '=', 'programa.id')
+        ->leftJoin(DB::raw('(
+            SELECT id_programa, COUNT(*) as cantidad
+            FROM inscripciones
+            WHERE id_proceso = ' . intval($idProceso) . ' AND estado = 0
+            GROUP BY id_programa
+        ) as i'), 'vacantes.id_programa', '=', 'i.id_programa')
+        ->where('vacantes.id_proceso', $idProceso)
+        ->groupBy('vacantes.id_programa', 'programa.nombre', 'i.cantidad')
+        ->orderByDesc('porcentaje_ocupado')
+        ->get();
+        
         $totalVacantes = $vacantes->sum('vacantes');
         $totalCantidad = $vacantes->sum('cantidad');
         $top8VeintePorCiento = $vacantes->take(8)->sum('veinte_por_ciento');

@@ -19,7 +19,7 @@ class EmailController extends Controller
 
         foreach ($destinatarios as $destinatario) {
             try {
-                Mail::to($destinatario->correo)->send(new MensajeCorreo($destinatario->nombre, $destinatario->correo, $destinatario->programa, $destinatario->puerta));
+                Mail::to($destinatario->correo)->send(new MensajeCorreo($destinatario->nombres, $destinatario->correo, $destinatario->programa, $destinatario->puerta));
                 DB::table('enviar_correos')
                     ->where('id', $destinatario->id)
                     ->update(['enviado' => 1]);
@@ -27,7 +27,7 @@ class EmailController extends Controller
             } catch (\Exception $e) {
             
                 $errores[] = [
-                    'nombre' => $destinatario->nombre,
+                    'nombre' => $destinatario->nombres,
                     'correo' => $destinatario->correo,
                     'error' => $e->getMessage(),
                 ];

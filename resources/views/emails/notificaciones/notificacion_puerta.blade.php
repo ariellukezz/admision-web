@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmación de Inscripción - CEPREUNA 2025-II</title>
+  <title>Confirmación de Inscripción - GENERAL 2025-II</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
   </style>
@@ -35,7 +35,7 @@
       <!-- Título -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">
         <h2 style="color: #1a365d; font-size: 24px; margin: 0 0 5px; font-weight: 600;">NOTIFICACIÓN DE PUERTA DE ENTRADA</h2>
-        <p style="color: #4a5568; font-size: 16px; margin: 0; font-weight: 500;">EXAMEN DE ADMISIÓN CEPREUNA 2025-II</p>
+        <p style="color: #4a5568; font-size: 16px; margin: 0; font-weight: 500;">EXAMEN DE ADMISIÓN GENERAL 2025-II</p>
       </div>
 
       <!-- Saludo personalizado -->
@@ -55,7 +55,7 @@
         <div style="display: flex; margin-bottom: 15px;">
           <div style="flex: 1; padding-right: 15px;">
             <p style="margin: 0 0 5px; font-weight: 500;">📅 <strong>Fecha del examen:</strong></p>
-            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">Sábado, 19 de julio de 2025</p>
+            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">Sábado, 02 de Agosto de 2025</p>
           </div>
           <div style="flex: 1;">
             <p style="margin: 0 0 5px; font-weight: 500;">⏰ <strong>Horario de ingreso:</strong></p>
@@ -120,6 +120,16 @@
           <li style="margin-bottom: 5px;">Portar indumentaria sencilla sin capucha</li>
           <li style="margin-bottom: 5px;">Mantener visible el cuellos, orejas y el cabello recogido o corto</li>
           <li>Revisar con anticipación la ubicación de su puerta de ingreso</li>
+        </ul>
+      </div>
+
+      <div style="background: #fff2f0ff; border: 1px solid #e6a09aff; border-radius: 6px; padding: 15px; margin-top:16px;">
+        <h3 style="color: #672727ff; font-size: 16px; margin: 0 0 10px;">⚠️ ADVERTENCIA</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li>
+          Esta prohibido arrancar hojas del examen de admisión. En caso de esta infracción, se anulará su proceso de califiación
+          conforme al Art. 36 del Reglamento General de Admisión 2025-II.
+          </li>
         </ul>
       </div>
 
