@@ -117,7 +117,7 @@ class ApixController extends Controller {
     public function getBiometrico($codigo){
         $res = DB::select("SELECT control_biometrico.estado FROM control_biometrico
             JOIN postulante ON postulante.id = control_biometrico.id_postulante
-            WHERE control_biometrico.id_proceso IN (13,14,15,17,18) AND postulante.nro_doc = ".$codigo );
+            WHERE control_biometrico.id_proceso IN (24,25) AND postulante.nro_doc = ".$codigo );
 
         if (count($res) > 0 ){
             return response()->json(['status' => true, 'data' => $res[0]], 200);

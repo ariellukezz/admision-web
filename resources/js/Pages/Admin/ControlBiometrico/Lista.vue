@@ -45,7 +45,7 @@
             </template>
             <template v-if="column.dataIndex === 'modalidad'">
                 <div class="flex" style="justify-content: center;">
-                    <a-tag style="font-size: .8rem;" color="blue" v-if=" record.modalidad == 'EXAMEN GENERAL'"> GENERAL </a-tag>
+                    <a-tag style="font-size: .8rem;" color="blue" v-if=" record.modalidad == 'GENERAL'"> GENERAL </a-tag>
                     <a-tag style="font-size: .8rem;" color="orange" v-if=" record.modalidad == 'CONADIS'"> CONADIS </a-tag>
                     <a-tag style="font-size: .8rem;" color="purple" v-if=" record.modalidad == 'CEPREUNA'"> CEPREUNA</a-tag>
                     <a-tag style="font-size: .8rem;" color="pink" v-if=" record.modalidad == 'BENEFICIARIOS DEL PLAN INTEGRAL DE REPARACIONES (PIR)'">LEY DE REPARACIONES</a-tag>
