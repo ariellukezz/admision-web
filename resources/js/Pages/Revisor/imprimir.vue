@@ -127,7 +127,6 @@
                             <img
                               :src="fot"
                               class="profile-photo"
-
                             />
                           </div>
 
@@ -137,9 +136,14 @@
                               <span>FOTO DOCUMENTO</span>
                             </div>
                             <img
+                              v-if="ingresante.foto"
                               :src="'../'+ingresante.foto"
                               class="profile-photo"
                             />
+                            <img
+                              v-else
+                              class="profile-photo"
+                              src="https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg" alt="">
                           </div>
                         </div>
                       </a-col>
@@ -539,7 +543,7 @@ const ingresante = ref({
   puntaje:"",
   programa:"",
   fecha:"",
-  foto:"temp/https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg",
+  foto:"",
   puesto:""
 })
 
@@ -975,6 +979,7 @@ const colAnteriores = ref([
 
 .profile-photo {
   width: 100%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
