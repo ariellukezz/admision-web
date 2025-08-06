@@ -47,105 +47,104 @@
                 </div>
                 <div v-if="ingresante">
             <a-card class="elegant-profile-card">
-  <a-row :gutter="[24, 16]">
-    <!-- Columna de datos personales -->
-    <a-col :xs="24" :sm="24" :md="12" :lg="10" :xl="10">
-      <div class="profile-data-section">
-        <div class="header-section">
-          <div class="dni-badge">DNI {{ ingresante.nro_doc }}</div>
-        </div>
-        
-        <div class="form-grid">
-          <a-form-item label="Primer Apellido" class="elegant-form-item">
-            <a-input v-model:value="ingresante.primer_apellido" class="elegant-input">
-              <template #prefix><user-outlined class="input-icon" /></template>
-            </a-input>
-          </a-form-item>
+                    <a-row :gutter="[24, 16]">
+                      <!-- Columna de datos personales -->
+                      <a-col :xs="24" :sm="24" :md="12" :lg="10" :xl="10">
+                        <div class="profile-data-section">
+                          <div class="header-section">
+                            <div class="dni-badge">DNI {{ ingresante.nro_doc }}</div>
+                          </div>
 
-          <a-form-item label="Segundo Apellido" class="elegant-form-item">
-            <a-input v-model:value="ingresante.segundo_apellido" class="elegant-input">
-              <template #prefix><user-outlined class="input-icon" /></template>
-            </a-input>
-          </a-form-item>
+                          <div class="form-grid">
+                            <a-form-item label="Primer Apellido" class="elegant-form-item">
+                              <a-input v-model:value="ingresante.primer_apellido" class="elegant-input">
+                                <template #prefix><user-outlined class="input-icon" /></template>
+                              </a-input>
+                            </a-form-item>
 
-          <a-form-item label="Nombres" class="elegant-form-item">
-            <a-input v-model:value="ingresante.nombres" class="elegant-input">
-              <template #prefix><solution-outlined class="input-icon" /></template>
-            </a-input>
-          </a-form-item>
+                            <a-form-item label="Segundo Apellido" class="elegant-form-item">
+                              <a-input v-model:value="ingresante.segundo_apellido" class="elegant-input">
+                                <template #prefix><user-outlined class="input-icon" /></template>
+                              </a-input>
+                            </a-form-item>
 
-          <a-form-item label="Puesto" class="elegant-form-item">
-            <a-input v-model:value="ingresante.puesto" class="elegant-input">
-              <template #prefix><idcard-outlined class="input-icon" /></template>
-            </a-input>
-          </a-form-item>
+                            <a-form-item label="Nombres" class="elegant-form-item">
+                              <a-input v-model:value="ingresante.nombres" class="elegant-input">
+                                <template #prefix><solution-outlined class="input-icon" /></template>
+                              </a-input>
+                            </a-form-item>
 
-          <a-form-item label="Tipo Documento" class="elegant-form-item">
-            <a-select v-model:value="ingresante.tipo_doc" class="elegant-select">
-              <a-select-option :value="1">DNI</a-select-option>
-              <a-select-option :value="2">Carné Extranjeria</a-select-option>
-            </a-select>
-          </a-form-item>
+                            <a-form-item label="Puesto" class="elegant-form-item">
+                              <a-input v-model:value="ingresante.puesto" class="elegant-input">
+                                <template #prefix><idcard-outlined class="input-icon" /></template>
+                              </a-input>
+                            </a-form-item>
 
-          <a-form-item label="Sexo" class="elegant-form-item">
-            <a-select v-model:value="ingresante.sexo" class="elegant-select">
-              <a-select-option value="1">Masculino</a-select-option>
-              <a-select-option value="2">Femenino</a-select-option>
-            </a-select>
-          </a-form-item>
+                            <a-form-item label="Tipo Documento" class="elegant-form-item">
+                              <a-select v-model:value="ingresante.tipo_doc" class="elegant-select">
+                                <a-select-option :value="1">DNI</a-select-option>
+                                <a-select-option :value="2">Carné Extranjeria</a-select-option>
+                              </a-select>
+                            </a-form-item>
 
-          <a-form-item label="Fecha Nacimiento" class="elegant-form-item">
-            <a-date-picker 
-              v-model:value="ingresante.fec_nacimiento"
-              format="DD/MM/YYYY"
-              class="elegant-date-picker"
-              placeholder="Seleccionar fecha"
-            />
-          </a-form-item>
-        </div>
+                            <a-form-item label="Sexo" class="elegant-form-item">
+                              <a-select v-model:value="ingresante.sexo" class="elegant-select">
+                                <a-select-option value="1">Masculino</a-select-option>
+                                <a-select-option value="2">Femenino</a-select-option>
+                              </a-select>
+                            </a-form-item>
 
-        <a-button 
-          type="primary" 
-          @click="actualizar()" 
-          class="update-button"
-          size="large"
-        >
-          <template #icon><save-outlined /></template>
-          Actualizar Datos
-        </a-button>
-      </div>
-    </a-col>
+                            <a-form-item label="Fecha Nacimiento" class="elegant-form-item">
+                              <a-date-picker
+                                v-model:value="ingresante.fec_nacimiento"
+                                format="DD/MM/YYYY"
+                                class="elegant-date-picker"
+                                placeholder="Seleccionar fecha"
+                              />
+                            </a-form-item>
+                          </div>
 
-    <!-- Columna de fotos para comparación -->
-    <a-col :xs="24" :sm="24" :md="12" :lg="14" :xl="14">
-      <div class="photo-comparison-section">
-        <div class="photo-card">
-          <div class="photo-header">
-            <camera-outlined class="photo-icon" />
-            <span>FOTO ACTUAL</span>
-          </div>
-          <img 
-            :src="fot" 
-            class="profile-photo"
+                          <a-button
+                            type="primary"
+                            @click="actualizar()"
+                            class="update-button"
+                            size="large"
+                          >
+                            <template #icon><save-outlined /></template>
+                            Actualizar Datos
+                          </a-button>
+                        </div>
+                      </a-col>
 
-          />
-        </div>
+                      <!-- Columna de fotos para comparación -->
+                      <a-col :xs="24" :sm="24" :md="12" :lg="14" :xl="14">
+                        <div class="photo-comparison-section">
+                          <div class="photo-card">
+                            <div class="photo-header">
+                              <camera-outlined class="photo-icon" />
+                              <span>FOTO ACTUAL</span>
+                            </div>
+                            <img
+                              :src="fot"
+                              class="profile-photo"
 
-        <div class="photo-card">
-          <div class="photo-header">
-            <idcard-outlined class="photo-icon" />
-            <span>FOTO DOCUMENTO</span>
-          </div>
-          <img 
-            :src="docDniPhoto" 
-            class="profile-photo"
+                            />
+                          </div>
 
-          />
-        </div>
-      </div>
-    </a-col>
-  </a-row>
-</a-card>
+                          <div class="photo-card">
+                            <div class="photo-header">
+                              <idcard-outlined class="photo-icon" />
+                              <span>FOTO DOCUMENTO</span>
+                            </div>
+                            <img
+                              :src="ingresante.foto"
+                              class="profile-photo"
+                            />
+                          </div>
+                        </div>
+                      </a-col>
+                    </a-row>
+                  </a-card>
 
 
                   <div v-if="anteriores[0]" class="flex mb-3 mt-3" :style="anteriores[0] ? 'align-items:center; justify-content: center; width: 100%; height: 40px; background: red; border-radius: 7px;' : 'align-items:center; justify-content: center; width: 100%; height: 40px; background: #cdcdcd4F; border-radius: 7px;'">
@@ -171,7 +170,7 @@
                         <a-form-item :rules="[{ required: true, message: 'El nombre es obligatorio' }]">
                           <label>Proceso</label>
                           <a-input v-model:value="ingresante.proceso">
-                            <template #prefix> <sin-icono/> </template>  
+                            <template #prefix> <sin-icono/> </template>
                           </a-input>
                         </a-form-item>
                       </a-col>
@@ -180,7 +179,7 @@
                         <a-form-item :rules="[{ required: true, message: 'El nombre es obligatorio' }]">
                           <label>Modalidad</label>
                           <a-input v-model:value="ingresante.modalidad">
-                            <template #prefix> <sin-icono/> </template>  
+                            <template #prefix> <sin-icono/> </template>
                           </a-input>
                         </a-form-item>
                       </a-col>
@@ -189,7 +188,7 @@
                         <a-form-item :rules="[{ required: true, message: 'El nombre es obligatorio' }]">
                           <label>Programa</label>
                           <a-input v-model:value="ingresante.programa">
-                            <template #prefix> <sin-icono/> </template>  
+                            <template #prefix> <sin-icono/> </template>
                           </a-input>
                         </a-form-item>
                       </a-col>
@@ -198,7 +197,7 @@
                         <a-form-item :rules="[{ required: true, message: 'El nombre es obligatorio' }]">
                           <label>Puntaje</label>
                           <a-input v-model:value="ingresante.puntaje">
-                            <template #prefix> <sin-icono/> </template>  
+                            <template #prefix> <sin-icono/> </template>
                           </a-input>
                         </a-form-item>
                       </a-col>
@@ -207,7 +206,7 @@
                         <a-form-item :rules="[{ required: true, message: 'El nombre es obligatorio' }]">
                           <label>Fecha ingreso</label>
                           <a-input v-model:value="ingresante.fecha">
-                            <template #prefix> <sin-icono/> </template>  
+                            <template #prefix> <sin-icono/> </template>
                           </a-input>
                         </a-form-item>
                       </a-col>
@@ -547,7 +546,6 @@ const ingresante = ref({
 
 
 const fot = ref("https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg");
-const docDniPhoto = ref("https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg");
 
 const hIzq = ref("https://previews.123rf.com/images/viktorijareut/viktorijareut1511/viktorijareut151100169/47517431-negro-silueta-de-la-ilustraci%C3%B3n-de-huellas-digitales-trama-icono-de-huella-digital-huella-digital.jpg");
 const hDer = ref("https://previews.123rf.com/images/viktorijareut/viktorijareut1511/viktorijareut151100169/47517431-negro-silueta-de-la-ilustraci%C3%B3n-de-huellas-digitales-trama-icono-de-huella-digital-huella-digital.jpg");
@@ -977,7 +975,6 @@ const colAnteriores = ref([
 
 .profile-photo {
   width: 100%;
-  height: 280px;
   object-fit: cover;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
@@ -988,11 +985,11 @@ const colAnteriores = ref([
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .photo-comparison-section {
     flex-direction: column;
   }
-  
+
   .profile-photo {
     height: 200px;
   }
