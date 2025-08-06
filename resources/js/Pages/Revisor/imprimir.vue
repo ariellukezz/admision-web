@@ -137,7 +137,7 @@
                               <span>FOTO DOCUMENTO</span>
                             </div>
                             <img
-                              :src="ingresante.foto"
+                              :src="'../'+ingresante.foto"
                               class="profile-photo"
                             />
                           </div>
