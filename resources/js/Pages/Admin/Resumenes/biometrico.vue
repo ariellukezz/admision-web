@@ -25,7 +25,7 @@
 
 
 
-<div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 230px);">
+<div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 250px);">
   <row class="flex justify-end mb-4" >
       <div class="mr-3">
           <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
