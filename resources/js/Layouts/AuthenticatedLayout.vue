@@ -415,10 +415,10 @@ const menuItems = [
       },
 
       {
-        key: 'resumenobservados',
+        key: 'resumenbiometrico',
         icon: SettingFilled,
-        label: 'Rep observados',
-        route: 'programa-index'
+        label: 'Res. biométrico',
+        route: 'admin-resumenes-biometrico'
       },
 
       {

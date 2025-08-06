@@ -12,11 +12,8 @@
         </div>
 
         <div class="flex justify-center mb-10 mt-0">
-          <span style="font-size: 1rem; color:gray;">Usa tus credenciales de admisión para acceder</span>
+          <span class="text-center" style="font-size: 1rem; color:gray;">Usa tus credenciales de admisión para acceder</span>
         </div>
-
-
-
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}

@@ -19,7 +19,7 @@
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(#ffffff, #e0e0e0da);
+  background: linear-gradient(#ffffff, #e0e0e093);
   background-size: 100% 100%;
 }
 
@@ -38,7 +38,8 @@
   border-radius: 0.75rem;
   width: 100%;
   max-width: 28rem;
-  border: 1px solid #f3f4f6; /* Default border color */
+  border: 1px solid #e2e3e5d0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.020);
 }
 
 /* Styles for screens 768px and up */
@@ -52,33 +53,25 @@
 /* Full width styles only below 480px */
 @media (max-width: 480px) {
   .login-container {
-    background: white;
-    align-items: flex-start;
     padding-top: 0;
   }
 
   .login-wrapper {
-    height: 100vh;
-    min-height: auto;
-    padding: 0;
-    box-shadow: none;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: none;
+   
   }
 
   .login-content {
-    border: 1px solid #9ca3af;
-    padding: 2rem 1rem;
+    padding: 2rem 2rem;
     border-radius: 0;
     max-width: 100%;
-    height: 100%;
     width: 100%;
+    background: none;
   }
 }
 
-/* Styles for 481px to 767px - maintains card layout */
-@media (min-width: 481px) and (max-width: 767px) {
-  .login-content {
-    margin: 2rem;
-    border: 1px solid #e5e7eb;
-  }
-}
 </style>

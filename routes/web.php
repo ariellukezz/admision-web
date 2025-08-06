@@ -51,6 +51,7 @@ use App\Http\Controllers\ReglamentoController;
 use App\Http\Controllers\RatioController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\CarrerasPreviasController;
+use App\Http\Controllers\ResumenBiometricoController;
 use App\Http\Controllers\ResumenInscripcionesController;
 use App\Http\Controllers\DescargarArchivosController;
 use App\Http\Controllers\SyncController;
@@ -304,6 +305,10 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/reporte-usuarios', [ReporteController::class, 'reporteUsuarios'])->middleware('auth');
     Route::post('/get-ratio', [RatioController::class, 'getRatio']);
     Route::get('/ratio', fn () => Inertia::render('Admin/Resumenes/ratio'))->name('admin-ratio');
+
+    Route::get('/resumenes-biometrico', fn () => Inertia::render('Admin/Resumenes/biometrico'))->name('admin-resumenes-biometrico');
+    Route::post('/resumen-biometrico', [ResumenBiometricoController::class, 'resumenBiometrico']);
+
 
     Route::get('/descargar-documentos', fn () => Inertia::render('Procesos/temp'));
     Route::post('/admin/descargar-documentos/prepare', [DescargarArchivosController::class, 'prepareDownload'])
