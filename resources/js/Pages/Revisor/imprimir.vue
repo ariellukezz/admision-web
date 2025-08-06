@@ -539,7 +539,7 @@ const ingresante = ref({
   puntaje:"",
   programa:"",
   fecha:"",
-  foto:"https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg",
+  foto:"temp/https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg",
   puesto:""
 })
 
