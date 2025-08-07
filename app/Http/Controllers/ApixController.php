@@ -192,6 +192,7 @@ class ApixController extends Controller {
     {
         $registro = ControlBiometrico::join('postulante', 'control_biometrico.id_postulante', '=', 'postulante.id')
             ->where('postulante.nro_doc', $dni)
+            ->where(DB::raw(date(control_biometrico.created_at)) > '2025-01-01')
             ->orderBy('control_biometrico.id', 'DESC')
             ->first();
 

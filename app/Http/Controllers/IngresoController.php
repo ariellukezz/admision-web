@@ -527,9 +527,6 @@ class IngresoController extends Controller {
     }
 
 
-    
-
-
     public function crearCorreo(Request $request)
     {
         $url = "https://service6.unap.edu.pe/api/crear-correo";
