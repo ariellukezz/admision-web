@@ -67,7 +67,7 @@ Route::post('/test-correo', [IngresoController::class, 'crearCorreo']);
 
 Route::get('/get-procesos', [ProcesoController::class, 'getProcesoResultados']);
 
-Route::get('/v1/foto-ingresante/{dni}', [ApixController::class, 'ingresanteBase64']);
+Route::get('/v1/get-foto-ingresante/{dni}', [ApixController::class, 'ingresanteBase64']);
 
 
 
