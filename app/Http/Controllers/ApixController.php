@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Postulante;
+use App\Models\ControlBiometrico;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
@@ -187,6 +188,54 @@ class ApixController extends Controller {
     }
 
 
+    function ingresanteBase64($dni)
+    {
+        $registro = ControlBiometrico::join('postulante', 'control_biometrico.id_postulante', '=', 'postulante.id')
+            ->where('postulante.nro_doc', $dni)
+            ->orderBy('control_biometrico.id', 'DESC')
+            ->first();
+
+        if (!$registro) {
+            return response()->json([
+                'status' => false,
+                'mensaje' => 'Registro no encontrado'
+            ], 404);
+        }
+
+        $ruta = "https://inscripciones.admision.unap.edu.pe/documentos/{$registro->id_proceso}/control_biometrico/fotos/{$registro->nro_doc}.jpg";
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 5
+            ]
+        ]);
+
+        $contenidoImagen = @file_get_contents($ruta, false, $context);
+
+        if ($contenidoImagen === false) {
+            return response()->json([
+                'status' => false,
+                'mensaje' => 'No se pudo acceder a la imagen. Puede que la URL esté mal o el servicio no responda.'
+            ], 502);
+        }
+
+        $infoImagen = @getimagesizefromstring($contenidoImagen);
+
+        if (!$infoImagen || !isset($infoImagen['mime'])) {
+            return response()->json([
+                'status' => false,
+                'mensaje' => 'El archivo descargado no es una imagen válida.'
+            ], 415);
+        }
+
+        $mime = $infoImagen['mime'];
+        $base64 = base64_encode($contenidoImagen);
+
+        return response()->json([
+            'status' => true,
+            'foto' => "data:$mime;base64,$base64"
+        ]);
+    }
 
 
 }

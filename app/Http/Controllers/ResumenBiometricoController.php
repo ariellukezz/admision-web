@@ -12,19 +12,15 @@ class ResumenBiometricoController extends Controller
     public function resumenBiometrico(Request $request)
     {
 
-        $totales = collect(DB::select("
-            SELECT 
-                pro.area, 
-                COUNT(*) AS total
-            FROM puntajes pun
+        $totales = collect(DB::select("SELECT pro.area, COUNT(*) AS total FROM puntajes pun
             INNER JOIN postulante pos ON pos.nro_doc = pun.dni
             INNER JOIN inscripciones ins ON ins.id_postulante = pos.id 
                 AND ins.id_proceso = pun.id_proceso 
                 AND ins.estado = 0
             INNER JOIN programa pro ON pro.id = ins.id_programa
             WHERE pun.id_proceso = ? AND pun.apto = 'SI'
-            GROUP BY pro.area WITH ROLLUP
-        ", [auth()->user()->id_proceso]))->map(function ($row) {
+            GROUP BY pro.area WITH ROLLUP", 
+            [auth()->user()->id_proceso]))->map(function ($row) {
             $row->area = $row->area ?? 'TOTAL';
             return $row;
         });
@@ -56,7 +52,6 @@ class ResumenBiometricoController extends Controller
         foreach ($groupByColumns as $alias) {
             if (isset($columnsMap[$alias])) {
                 $column = $columnsMap[$alias];
-
                 if ($column instanceof \Illuminate\Database\Query\Expression) {
                     $selectColumns[] = DB::raw("{$column->getValue(DB::connection()->getQueryGrammar())} as $alias");
                     $groupBy[] = DB::raw($column->getValue(DB::connection()->getQueryGrammar()));
@@ -83,8 +78,6 @@ class ResumenBiometricoController extends Controller
         $total = DB::table('control_biometrico as cb')
             ->where('cb.id_proceso', auth()->user()->id_proceso)
             ->count();
-
-
 
         if( $request->descargar == 1){
             $sim = auth()->user()->id_proceso;

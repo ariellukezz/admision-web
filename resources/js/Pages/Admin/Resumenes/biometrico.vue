@@ -1,8 +1,7 @@
 <template>
-<Head title="Resumen inscripciones"/>
+<Head title="Resumen Biometrico"/>
 <AuthenticatedLayout>
-
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 pr-0">
     <div class="mb-4">
       <span style="font-size: 1.3rem;">Control biometrico</span>
     </div>
@@ -13,7 +12,7 @@
       />
     </div>    
 
-    <div>
+    <div style="margin-top: -10px;">
       <div class="totales-mini">
         <div class="item" v-for="it in totales" :key="it">
           <span class="area">{{ it.area }}:</span>
@@ -23,54 +22,48 @@
     </div>
   </div>
 
+  <div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 245px);">
+    <row class="flex justify-end mb-4" >
+        <div class="mr-3">
+            <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
+        </div>
+    </row>
 
-
-<div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 250px);">
-  <row class="flex justify-end mb-4" >
-      <div class="mr-3">
-          <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
-      </div>
-  </row>
-
-  <div style="">
-     <a-table
-        :columns="columns"
-        :data-source="resumenes"
-        :pagination="false"
-        size="small"
-        :scroll="{ x: 200, y: 'calc(100vh - 400px)' }"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 'total'">
-            {{ record.total }}
+    <div style="">
+      <a-table
+          :columns="columns"
+          :data-source="resumenes"
+          :pagination="false"
+          size="small"
+          :scroll="{ x: 200, y: 'calc(100vh - 400px)' }"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'total'">
+              {{ record.total }}
+            </template>
           </template>
+
+        <template #summary>
+          <a-table-summary fixed="bottom">
+            <a-table-summary-row>
+              <a-table-summary-cell :col-span="columns.length - 1" style="text-align: right;">
+                <span style="font-weight: bold; color: #476175;">
+                  Total Registros:
+                </span>
+              </a-table-summary-cell>
+              <a-table-summary-cell style="text-align: center;">
+                <span style="font-weight: bold; color: #476175;">
+                  {{ totalGeneral }}
+                </span>
+              </a-table-summary-cell>
+            </a-table-summary-row>
+          </a-table-summary>
         </template>
-
-      <template #summary>
-        <a-table-summary fixed="bottom">
-          <a-table-summary-row>
-            <a-table-summary-cell :col-span="columns.length - 1" style="text-align: right;">
-              <span style="font-weight: bold; color: #476175;">
-                Total Registros:
-              </span>
-            </a-table-summary-cell>
-            <a-table-summary-cell style="text-align: center;">
-              <span style="font-weight: bold; color: #476175;">
-                {{ totalGeneral }}
-              </span>
-            </a-table-summary-cell>
-          </a-table-summary-row>
-        </a-table-summary>
-      </template>
-      </a-table>
-  </div>
-
+        </a-table>
+    </div>
   </div>
 
 </AuthenticatedLayout>
-
-
-
 </template>
 
 <script setup>
@@ -90,7 +83,6 @@ const totales = ref([]);
 const totalGeneral = computed(() => {
   return resumenes.value.reduce((acc, item) => acc + item.total, 0);
 });
-
 
 const columnOptions = [
   { label: 'Área', value: 'area' },
@@ -121,7 +113,6 @@ const columns = computed(() => {
     }
   ];
 });
-
 
 const getResumen = async () => {
   try {
@@ -191,66 +182,52 @@ const descargarDetalle = async () => {
 getResumen();
 </script>
 
-
 <style >
 ::-webkit-scrollbar { 
   width: 9px; 
   height: 12px;
 }
-
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
-/* Estilo para un scroll específico */
 .scroll-container {
   overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
 }
-
-/* Estilo para el scroll específico en Webkit (Chrome, Safari) */
 .scroll-container::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
-
 .scroll-container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
-
 .scroll-container::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 10px;
 }
-
 .scroll-container::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
 .checkbox-group-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;              /* espacio entre checkboxes */
-  margin-bottom: 16px;   /* separación con lo de abajo */
+  gap: 8px;           
+  margin-bottom: 16px; 
 }
-
 .checkbox-group-container .ant-checkbox-group-item {
-  margin-right: 8px;     /* opcional: espacio lateral */
-  margin-bottom: 8px;    /* espacio entre filas */
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
-
 .totales-mini {
   display: flex;
   flex-wrap: wrap;
@@ -259,7 +236,6 @@ getResumen();
   color: #555;
   margin-top: -4px;
 }
-
 .totales-mini .item {
   background: #f5f5f5;
   padding: 4px 8px;
@@ -269,14 +245,11 @@ getResumen();
   align-items: center;
   gap: 4px;
 }
-
 .totales-mini .area {
   font-weight: 500;
 }
-
 .totales-mini .valor {
   font-weight: 600;
   color: #333;
 }
-
 </style>
