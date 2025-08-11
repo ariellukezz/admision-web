@@ -451,6 +451,7 @@ class IngresoController extends Controller {
         // DB::connection($database2)
         //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
         //     ->first();
+        
 
         try {
             DB::beginTransaction();        
