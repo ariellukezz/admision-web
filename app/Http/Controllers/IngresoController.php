@@ -215,186 +215,9 @@ class IngresoController extends Controller {
     // }
 
 
-    // public function biometrico(Request $request)
-    // {
-    //     $database2 = 'mysql_secondary';
-
-    //     $re = DB::table('resultados as r')
-    //         ->select([
-    //             'p.anio',
-    //             'p.ciclo_oti',
-    //             'prog.programa_oti',
-    //             'post.primer_apellido as paterno',
-    //             'post.segundo_apellido as materno',
-    //             'post.nombres',
-    //             'tdi.documento_oti as tipo_doc_oti',
-    //             'post.nro_doc as dni',
-    //             'u.name',
-    //             'u.paterno as upaterno',
-    //             'post.fec_nacimiento',
-    //             'post.sexo',
-    //             'post.ubigeo_residencia',
-    //             'post.direccion',
-    //             'post.estado_civil',
-    //             'r.fecha',
-    //             'post.email',
-    //             'post.celular',
-    //             'prog.cod_esp',
-    //             'm.modalidad_oti',
-    //             'r.puntaje',
-    //             'r.puesto',
-    //             'r.puesto_general',
-    //             'post.id as id_postulante',
-    //             'p.id as id_proceso',
-    //             'p.nombre as proceso',
-    //             'm.id as id_modalidad',
-    //             'm.nombre as modalidad',
-    //             'prog.nombre as programa',
-    //             'prog.programa_correo',
-    //             'prog.id as id_programa',
-    //             'f.nombre_correo as facultad_correo',
-    //         ])
-    //         ->join('postulante as post', 'r.dni_postulante', '=', 'post.nro_doc')
-    //         ->join('inscripciones as ins', 'ins.id_postulante', '=', 'post.id')
-    //         ->join('modalidad as m', 'ins.id_modalidad', '=', 'm.id')
-    //         ->join('procesos as p', 'r.id_proceso', '=', 'p.id')
-    //         ->leftJoin('users as u', 'u.id', '=', 'ins.id_usuario')
-    //         ->join('programa as prog', 'ins.id_programa', '=', 'prog.id')
-    //         ->join('facultad as f', 'prog.id_facultad', '=', 'f.id')
-    //         ->join('tipo_documento_identidad as tdi', 'post.tipo_doc', '=', 'tdi.id')
-    //         ->where([
-    //             ['r.apto', '=', 'SI'],
-    //             ['ins.estado', '=', 0],
-    //             ['r.dni_postulante', '=', $request->dni],
-    //             ['r.id_proceso', '=', auth()->user()->id_proceso],
-    //             ['ins.id_proceso', '=', auth()->user()->id_proceso],
-    //         ])
-    //         ->first();
-
-    //     if (!$re) {
-    //         return response()->json(['error' => 'Postulante no encontrado'], 404);
-    //     }
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $control = ControlBiometrico::where('id_proceso', $re->id_proceso)
-    //             ->where('id_postulante', $re->id_postulante)
-    //             ->first();
-
-    //         if (!$control) {
-
-    //             $prefijo = $re->id_programa == 38 ? '26' : '25';
-
-    //             $registrado = collect(
-    //                 DB::connection($database2)->select(
-    //                     "SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ? AND fch_ing = ?",
-    //                     [$re->dni, $re->fecha]
-    //                 )
-    //             )->first();
-
-    //             $nuevoCodigo = $registrado->num_mat ?? DB::connection($database2)
-    //                 ->table('unapnet.estudiante as e')
-    //                 ->whereRaw("LEFT(e.num_mat, 2) = ?", [$prefijo])
-    //                 ->max(DB::raw("CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)")) + 1;
-
-    //             $nuevoCodigo = $registrado->num_mat ?? $prefijo . str_pad($nuevoCodigo, 4, '0', STR_PAD_LEFT);
-
-    //             $control = ControlBiometrico::create([
-    //                 'id_proceso' => $re->id_proceso,
-    //                 'id_postulante' => $re->id_postulante,
-    //                 'codigo_ingreso' => $nuevoCodigo,
-    //                 'estado' => 1,
-    //                 'segunda_carrera' => $request->n_carrera == 1 ? 1 : 0,
-    //                 'id_usuario' => auth()->id(),
-    //                 'tiene_correo' => 0,
-    //                 'correo_institucional' => null
-    //             ]);
-
-    //             if (!$control) {
-    //                 throw new \Exception('Error al crear el registro en ControlBiometrico.');
-    //             }
-
-    //             if (!$registrado) {
-    //                 Estudiante::on($database2)->create([
-    //                     'num_mat' => $nuevoCodigo,
-    //                     'cod_car' => $re->programa_oti,
-    //                     'paterno' => $re->paterno,
-    //                     'materno' => $re->materno,
-    //                     'nombres' => $re->nombres,
-    //                     'tip_doc' => $re->tipo_doc_oti,
-    //                     'num_doc' => $re->dni,
-    //                     'num_car' => $request->n_carrera == 1 ? 2 : 1,
-    //                     'fch_nac' => $re->fec_nacimiento,
-    //                     'sexo' => $re->sexo,
-    //                     'ubigeo' => $re->ubigeo_residencia,
-    //                     'mod_ing' => $re->modalidad_oti,
-    //                     'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
-    //                     'fch_ing' => $re->fecha,
-    //                     'direc' => $re->direccion,
-    //                     'email' => $re->email,
-    //                     'emailins' => $control->correo_institucional,
-    //                     'con_est' => 5,
-    //                     'celular' => $re->celular,
-    //                     'cod_esp' => $re->cod_esp,
-    //                     'puntaje' => $re->puntaje,
-    //                     'puesto_escuela' => $re->puesto,
-    //                     'puesto_general' => $re->puesto_general,
-    //                     'ano_ing' => $re->anio,
-    //                     'per_ing' => $re->ciclo_oti
-    //                 ]);
-    //             }
-    //         } else {
-    //             $control->update(['estado' => 2]);
-    //         }
-
-    //         if ($request->crear_correo == 1) {
-    //             $url = "http://10.1.20.30:6060/api/crear-correo";
-    //             $secretKey = "unap@2025";
-    //             $data = [
-    //                 "apellido_paterno" => $re->paterno,
-    //                 "apellido_materno" => $re->materno,
-    //                 "nombres" => $re->nombres,
-    //                 "dni" => $re->dni,
-    //                 "celular" => $re->celular,
-    //                 "correo_secundario" => $re->email,
-    //                 "facultad" => $re->facultad_correo,
-    //                 "escuela" => $re->programa_correo,
-    //                 "numero_ingresos" => $request->crear_correo,
-    //             ];
-    //             $signature = hash_hmac('sha256', json_encode($data), $secretKey);
-
-    //             $response = Http::withHeaders([
-    //                 'X-Signature' => $signature,
-    //                 'Content-Type' => 'application/json'
-    //             ])->post($url, $data);
-
-    //             if (!$response->successful()) {
-    //                 throw new \Exception('Error al crear el correo: ' . $response->body());
-    //             }
-
-    //             $control->update([
-    //                 'tiene_correo' => 1,
-    //                 'correo_institucional' => $response->json('correo')
-    //             ]);
-    //         }
-
-    //         DB::commit();
-
-    //         $this->pdfbiometrico2($re->dni);
-
-    //         return response()->json(['estado' => true, 'datos' => $request->dni], 200);
-
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return response()->json([
-    //             'error' => 'Ocurrió un error en la transacción: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
-
-    public function biometrico(Request $request){
+    public function biometrico(Request $request)
+    {
+        $database2 = 'mysql_secondary';
 
         $re = DB::table('resultados as r')
             ->select([
@@ -445,40 +268,41 @@ class IngresoController extends Controller {
                 ['r.dni_postulante', '=', $request->dni],
                 ['r.id_proceso', '=', auth()->user()->id_proceso],
                 ['ins.id_proceso', '=', auth()->user()->id_proceso],
-            ])->get();
+            ])
+            ->first();
 
-        // $registrado = collect(
-        // DB::connection($database2)
-        //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
-        //     ->first();
-
+        if (!$re) {
+            return response()->json(['error' => 'Postulante no encontrado'], 404);
+        }
 
         try {
-            DB::beginTransaction();        
-            $database2 = 'mysql_secondary';
-        
-            $control = ControlBiometrico::where('id_proceso', auth()->user()->id_proceso)
-                ->where('id_postulante', $re[0]->id_postulante)
+            DB::beginTransaction();
+
+            $control = ControlBiometrico::where('id_proceso', $re->id_proceso)
+                ->where('id_postulante', $re->id_postulante)
                 ->first();
-        
+
             if (!$control) {
 
-                $prefijo = $re[0]->id_programa == '38' ? '26' : '25';
-                $rs = DB::connection($database2)->select("SELECT CONCAT('$prefijo', LPAD(IFNULL(MAX(CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)) + 1, 1), 4, '0')) AS siguiente 
-                    FROM unapnet.estudiante e 
-                    WHERE LEFT(e.num_mat, 2) = '$prefijo';");
-                $nuevoCodigo = $rs[0]->siguiente;
+                $prefijo = $re->id_programa == 38 ? '26' : '25';
 
-                // $registrado = collect(DB::connection($database2)
-                //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
-                //     ->first();
-                // if($registrado){
-                //     $nuevoCodigo = $registrado;
-                // }
+                $registrado = collect(
+                    DB::connection($database2)->select(
+                        "SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ? AND fch_ing = ?",
+                        [$re->dni, $re->fecha]
+                    )
+                )->first();
+
+                $nuevoCodigo = $registrado->num_mat ?? DB::connection($database2)
+                    ->table('unapnet.estudiante as e')
+                    ->whereRaw("LEFT(e.num_mat, 2) = ?", [$prefijo])
+                    ->max(DB::raw("CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)")) + 1;
+
+                $nuevoCodigo = $registrado->num_mat ?? $prefijo . str_pad($nuevoCodigo, 4, '0', STR_PAD_LEFT);
 
                 $control = ControlBiometrico::create([
-                    'id_proceso' => auth()->user()->id_proceso,
-                    'id_postulante' => $re[0]->id_postulante,
+                    'id_proceso' => $re->id_proceso,
+                    'id_postulante' => $re->id_postulante,
                     'codigo_ingreso' => $nuevoCodigo,
                     'estado' => 1,
                     'segunda_carrera' => $request->n_carrera == 1 ? 1 : 0,
@@ -486,94 +310,270 @@ class IngresoController extends Controller {
                     'tiene_correo' => 0,
                     'correo_institucional' => null
                 ]);
-        
+
                 if (!$control) {
                     throw new \Exception('Error al crear el registro en ControlBiometrico.');
                 }
 
-
-                Estudiante::on($database2)->create([
-                    'num_mat' => $nuevoCodigo,
-                    'cod_car' => $re[0]->programa_oti,
-                    'paterno' => $re[0]->paterno,
-                    'materno' => $re[0]->materno,
-                    'nombres' => $re[0]->nombres,
-                    'tip_doc' => $re[0]->tipo_doc_oti,
-                    'num_doc' => $re[0]->dni,
-                    'num_car' => $request->n_carrera == 1 ? 2 : 1,
-                    'fch_nac' => $re[0]->fec_nacimiento,
-                    'sexo' => $re[0]->sexo,
-                    'ubigeo' => $re[0]->ubigeo_residencia,
-                    'mod_ing' => $re[0]->modalidad_oti,
-                    'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re[0]->estado_civil] ?? 1,
-                    'fch_ing' => $re[0]->fecha,
-                    'direc' => $re[0]->direccion,
-                    'email' => $re[0]->email,
-                    'emailins' => $control->correo_institucional,
-                    'con_est' => 5,
-                    'celular' => $re[0]->celular,
-                    'cod_esp' => $re[0]->cod_esp,
-                    'puntaje' => $re[0]->puntaje,
-                    'puesto_escuela' => $re[0]->puesto,
-                    'puesto_general' => $re[0]->puesto_general,
-                    'ano_ing' => $re[0]->anio,
-                    'per_ing' => $re[0]->ciclo_oti
-                ]);
-                    
-        
-
+                if (!$registrado) {
+                    Estudiante::on($database2)->create([
+                        'num_mat' => $nuevoCodigo,
+                        'cod_car' => $re->programa_oti,
+                        'paterno' => $re->paterno,
+                        'materno' => $re->materno,
+                        'nombres' => $re->nombres,
+                        'tip_doc' => $re->tipo_doc_oti,
+                        'num_doc' => $re->dni,
+                        'num_car' => $request->n_carrera == 1 ? 2 : 1,
+                        'fch_nac' => $re->fec_nacimiento,
+                        'sexo' => $re->sexo,
+                        'ubigeo' => $re->ubigeo_residencia,
+                        'mod_ing' => $re->modalidad_oti,
+                        'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
+                        'fch_ing' => $re->fecha,
+                        'direc' => $re->direccion,
+                        'email' => $re->email,
+                        'emailins' => $control->correo_institucional,
+                        'con_est' => 5,
+                        'celular' => $re->celular,
+                        'cod_esp' => $re->cod_esp,
+                        'puntaje' => $re->puntaje,
+                        'puesto_escuela' => $re->puesto,
+                        'puesto_general' => $re->puesto_general,
+                        'ano_ing' => $re->anio,
+                        'per_ing' => $re->ciclo_oti
+                    ]);
+                }
             } else {
                 $control->update(['estado' => 2]);
             }
- 
+
             if ($request->crear_correo == 1) {
                 $url = "http://10.1.20.30:6060/api/crear-correo";
                 $secretKey = "unap@2025";
                 $data = [
-                    "apellido_paterno" => $re[0]->paterno,
-                    "apellido_materno" => $re[0]->materno,
-                    "nombres" => $re[0]->nombres,
-                    "dni" => $re[0]->dni,
-                    "celular" => $re[0]->celular,
-                    "correo_secundario" => $re[0]->email,
-                    "facultad" => $re[0]->facultad_correo,
-                    "escuela" => $re[0]->programa_correo,
+                    "apellido_paterno" => $re->paterno,
+                    "apellido_materno" => $re->materno,
+                    "nombres" => $re->nombres,
+                    "dni" => $re->dni,
+                    "celular" => $re->celular,
+                    "correo_secundario" => $re->email,
+                    "facultad" => $re->facultad_correo,
+                    "escuela" => $re->programa_correo,
                     "numero_ingresos" => $request->crear_correo,
                 ];
-                $jsonData = json_encode($data);
-                $signature = hash_hmac('sha256', $jsonData, $secretKey);
+                $signature = hash_hmac('sha256', json_encode($data), $secretKey);
+
                 $response = Http::withHeaders([
                     'X-Signature' => $signature,
                     'Content-Type' => 'application/json'
                 ])->post($url, $data);
-        
+
                 if (!$response->successful()) {
                     throw new \Exception('Error al crear el correo: ' . $response->body());
                 }
-        
-                $correoGenerado = $response->json('correo');
-        
+
                 $control->update([
                     'tiene_correo' => 1,
-                    'correo_institucional' => $correoGenerado
+                    'correo_institucional' => $response->json('correo')
                 ]);
             }
-        
+
             DB::commit();
-            $this->pdfbiometrico2($re[0]->dni);
-        
+
+            $this->pdfbiometrico2($re->dni);
+
             return response()->json(['estado' => true, 'datos' => $request->dni], 200);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            //\Log::error('Error en la transacción: ' . $e->getMessage());
-            return response()->json(['error' => 'Ocurrió un error en la transacción: ' . $e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Ocurrió un error en la transacción: ' . $e->getMessage()
+            ], 500);
         }
-
-        $this->response['estado'] = true;
-        $this->response['datos'] = $request->dni;
-        return response()->json($this->response, 200);
-
     }
+
+
+    // public function biometrico(Request $request){
+
+    //     $re = DB::table('resultados as r')
+    //         ->select([
+    //             'p.anio',
+    //             'p.ciclo_oti',
+    //             'prog.programa_oti',
+    //             'post.primer_apellido as paterno',
+    //             'post.segundo_apellido as materno',
+    //             'post.nombres',
+    //             'tdi.documento_oti as tipo_doc_oti',
+    //             'post.nro_doc as dni',
+    //             'u.name',
+    //             'u.paterno as upaterno',
+    //             'post.fec_nacimiento',
+    //             'post.sexo',
+    //             'post.ubigeo_residencia',
+    //             'post.direccion',
+    //             'post.estado_civil',
+    //             'r.fecha',
+    //             'post.email',
+    //             'post.celular',
+    //             'prog.cod_esp',
+    //             'm.modalidad_oti',
+    //             'r.puntaje',
+    //             'r.puesto',
+    //             'r.puesto_general',
+    //             'post.id as id_postulante',
+    //             'p.id as id_proceso',
+    //             'p.nombre as proceso',
+    //             'm.id as id_modalidad',
+    //             'm.nombre as modalidad',
+    //             'prog.nombre as programa',
+    //             'prog.programa_correo',
+    //             'prog.id as id_programa',
+    //             'f.nombre_correo as facultad_correo',
+    //         ])
+    //         ->join('postulante as post', 'r.dni_postulante', '=', 'post.nro_doc')
+    //         ->join('inscripciones as ins', 'ins.id_postulante', '=', 'post.id')
+    //         ->join('modalidad as m', 'ins.id_modalidad', '=', 'm.id')
+    //         ->join('procesos as p', 'r.id_proceso', '=', 'p.id')
+    //         ->leftJoin('users as u', 'u.id', '=', 'ins.id_usuario')
+    //         ->join('programa as prog', 'ins.id_programa', '=', 'prog.id')
+    //         ->join('facultad as f', 'prog.id_facultad', '=', 'f.id')
+    //         ->join('tipo_documento_identidad as tdi', 'post.tipo_doc', '=', 'tdi.id')
+    //         ->where([
+    //             ['r.apto', '=', 'SI'],
+    //             ['ins.estado', '=', 0],
+    //             ['r.dni_postulante', '=', $request->dni],
+    //             ['r.id_proceso', '=', auth()->user()->id_proceso],
+    //             ['ins.id_proceso', '=', auth()->user()->id_proceso],
+    //         ])->get();
+
+    //     // $registrado = collect(
+    //     // DB::connection($database2)
+    //     //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
+    //     //     ->first();
+
+
+    //     try {
+    //         DB::beginTransaction();        
+    //         $database2 = 'mysql_secondary';
+        
+    //         $control = ControlBiometrico::where('id_proceso', auth()->user()->id_proceso)
+    //             ->where('id_postulante', $re[0]->id_postulante)
+    //             ->first();
+        
+    //         if (!$control) {
+
+    //             $prefijo = $re[0]->id_programa == '38' ? '26' : '25';
+    //             $rs = DB::connection($database2)->select("SELECT CONCAT('$prefijo', LPAD(IFNULL(MAX(CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)) + 1, 1), 4, '0')) AS siguiente 
+    //                 FROM unapnet.estudiante e 
+    //                 WHERE LEFT(e.num_mat, 2) = '$prefijo';");
+    //             $nuevoCodigo = $rs[0]->siguiente;
+
+    //             // $registrado = collect(DB::connection($database2)
+    //             //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
+    //             //     ->first();
+    //             // if($registrado){
+    //             //     $nuevoCodigo = $registrado;
+    //             // }
+
+    //             $control = ControlBiometrico::create([
+    //                 'id_proceso' => auth()->user()->id_proceso,
+    //                 'id_postulante' => $re[0]->id_postulante,
+    //                 'codigo_ingreso' => $nuevoCodigo,
+    //                 'estado' => 1,
+    //                 'segunda_carrera' => $request->n_carrera == 1 ? 1 : 0,
+    //                 'id_usuario' => auth()->id(),
+    //                 'tiene_correo' => 0,
+    //                 'correo_institucional' => null
+    //             ]);
+        
+    //             if (!$control) {
+    //                 throw new \Exception('Error al crear el registro en ControlBiometrico.');
+    //             }
+
+
+    //             Estudiante::on($database2)->create([
+    //                 'num_mat' => $nuevoCodigo,
+    //                 'cod_car' => $re[0]->programa_oti,
+    //                 'paterno' => $re[0]->paterno,
+    //                 'materno' => $re[0]->materno,
+    //                 'nombres' => $re[0]->nombres,
+    //                 'tip_doc' => $re[0]->tipo_doc_oti,
+    //                 'num_doc' => $re[0]->dni,
+    //                 'num_car' => $request->n_carrera == 1 ? 2 : 1,
+    //                 'fch_nac' => $re[0]->fec_nacimiento,
+    //                 'sexo' => $re[0]->sexo,
+    //                 'ubigeo' => $re[0]->ubigeo_residencia,
+    //                 'mod_ing' => $re[0]->modalidad_oti,
+    //                 'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re[0]->estado_civil] ?? 1,
+    //                 'fch_ing' => $re[0]->fecha,
+    //                 'direc' => $re[0]->direccion,
+    //                 'email' => $re[0]->email,
+    //                 'emailins' => $control->correo_institucional,
+    //                 'con_est' => 5,
+    //                 'celular' => $re[0]->celular,
+    //                 'cod_esp' => $re[0]->cod_esp,
+    //                 'puntaje' => $re[0]->puntaje,
+    //                 'puesto_escuela' => $re[0]->puesto,
+    //                 'puesto_general' => $re[0]->puesto_general,
+    //                 'ano_ing' => $re[0]->anio,
+    //                 'per_ing' => $re[0]->ciclo_oti
+    //             ]);
+                    
+        
+
+    //         } else {
+    //             $control->update(['estado' => 2]);
+    //         }
+ 
+    //         if ($request->crear_correo == 1) {
+    //             $url = "http://10.1.20.30:6060/api/crear-correo";
+    //             $secretKey = "unap@2025";
+    //             $data = [
+    //                 "apellido_paterno" => $re[0]->paterno,
+    //                 "apellido_materno" => $re[0]->materno,
+    //                 "nombres" => $re[0]->nombres,
+    //                 "dni" => $re[0]->dni,
+    //                 "celular" => $re[0]->celular,
+    //                 "correo_secundario" => $re[0]->email,
+    //                 "facultad" => $re[0]->facultad_correo,
+    //                 "escuela" => $re[0]->programa_correo,
+    //                 "numero_ingresos" => $request->crear_correo,
+    //             ];
+    //             $jsonData = json_encode($data);
+    //             $signature = hash_hmac('sha256', $jsonData, $secretKey);
+    //             $response = Http::withHeaders([
+    //                 'X-Signature' => $signature,
+    //                 'Content-Type' => 'application/json'
+    //             ])->post($url, $data);
+        
+    //             if (!$response->successful()) {
+    //                 throw new \Exception('Error al crear el correo: ' . $response->body());
+    //             }
+        
+    //             $correoGenerado = $response->json('correo');
+        
+    //             $control->update([
+    //                 'tiene_correo' => 1,
+    //                 'correo_institucional' => $correoGenerado
+    //             ]);
+    //         }
+        
+    //         DB::commit();
+    //         $this->pdfbiometrico2($re[0]->dni);
+        
+    //         return response()->json(['estado' => true, 'datos' => $request->dni], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         //\Log::error('Error en la transacción: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Ocurrió un error en la transacción: ' . $e->getMessage()], 500);
+    //     }
+
+    //     $this->response['estado'] = true;
+    //     $this->response['datos'] = $request->dni;
+    //     return response()->json($this->response, 200);
+
+    // }
 
     public function registrar_biometrico($dni)
     {
