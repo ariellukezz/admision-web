@@ -447,12 +447,10 @@ class IngresoController extends Controller {
                 ['ins.id_proceso', '=', auth()->user()->id_proceso],
             ])->get();
 
-        $registrado = collect(
-        DB::connection($database2)
-            ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
-            ->first();
-
-        return $registrado;        
+        // $registrado = collect(
+        // DB::connection($database2)
+        //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
+        //     ->first();
 
         try {
             DB::beginTransaction();        
