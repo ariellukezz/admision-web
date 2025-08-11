@@ -119,7 +119,7 @@
                       <!-- Columna de fotos para comparación -->
                       <a-col :xs="24" :sm="24" :md="12" :lg="14" :xl="14">
                         <div class="photo-comparison-section">
-                          <div class="photo-card">
+                          <div class="photo-card" style="">
                             <div class="photo-header">
                               <camera-outlined class="photo-icon" />
                               <span>FOTO ACTUAL</span>
@@ -574,7 +574,7 @@ const getIngresante =  async ( ) => {
   ingresante.value.puntaje = res.data.datos.puntaje
   ingresante.value.programa = res.data.datos.programa
   ingresante.value.puesto= res.data.datos.puesto
-  ingresante.value.foto= res.data.datos.foto || "https://img.freepik.com/vector-premium/icono-cara-hombre-piel-clara_238404-886.jpg";
+  ingresante.value.foto= res.data.datos.foto || "imagenes/sin_imagen.png";
   if(res.data.datos.fecha){ ingresante.value.fecha = res.data.datos.fecha }
   getCarrerasPrevias();
   correo_anteriores.value = res.data.correos;
@@ -944,7 +944,6 @@ const colAnteriores = ref([
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
-/* Sección de fotos */
 .photo-comparison-section {
   display: flex;
   gap: 24px;
@@ -954,9 +953,7 @@ const colAnteriores = ref([
 
 .photo-card {
   flex: 1;
-  background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   display: flex;
   flex-direction: column;

@@ -62,6 +62,8 @@ class ApixController extends Controller {
             return response()->json(['status' => false, 'mensaje'=>$th->getMessage()], 500);
         }
 
+        
+        
     }
 
 
@@ -186,7 +188,6 @@ class ApixController extends Controller {
       ], 200);
 
     }
-
 
     function ingresanteBase64($dni)
     {
