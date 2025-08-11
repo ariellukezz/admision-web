@@ -451,7 +451,7 @@ class IngresoController extends Controller {
         // DB::connection($database2)
         //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
         //     ->first();
-        
+
 
         try {
             DB::beginTransaction();        
@@ -469,12 +469,12 @@ class IngresoController extends Controller {
                     WHERE LEFT(e.num_mat, 2) = '$prefijo';");
                 $nuevoCodigo = $rs[0]->siguiente;
 
-                $registrado = collect(DB::connection($database2)
-                    ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
-                    ->first();
-                if($registrado){
-                    $nuevoCodigo = $registrado;
-                }
+                // $registrado = collect(DB::connection($database2)
+                //     ->select(" SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ?  AND fch_ing = ?", [$re->dni, $re->fecha]))
+                //     ->first();
+                // if($registrado){
+                //     $nuevoCodigo = $registrado;
+                // }
 
                 $control = ControlBiometrico::create([
                     'id_proceso' => auth()->user()->id_proceso,
