@@ -244,7 +244,12 @@ class ApixController extends Controller {
     public function esIngresante($periodo, $dni){
         $existe = DB::table('resultados as res')
             ->join('procesos as pr', 'res.id_proceso', '=', 'pr.id')
-            ->where(DB::raw("CONCAT(pr.anio, pr.ciclo_oti)"), $periodo)
+            ->join('postulante as pos', 'res.dni_postulante', '=', 'pos.nro_doc')
+            ->leftJoin('control_biometrico as cb', function ($join) {
+                $join->on('cb.id_postulante', '=', 'pos.id')
+                    ->on('pr.id', '=', 'cb.id_proceso');
+            })
+            ->whereRaw("CONCAT(pr.anio, pr.ciclo_oti) = ?", [$periodo])
             ->where('res.dni_postulante', $dni)
             ->exists();
 
