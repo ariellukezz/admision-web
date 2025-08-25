@@ -251,14 +251,16 @@ class ApixController extends Controller {
             })
             ->whereRaw("CONCAT(pr.anio, pr.ciclo_oti) = ?", [$periodo])
             ->where(function ($q) use ($dni) {
-                    $q->where('res.dni_postulante', $dni)
-                    ->orWhere('cb.codigo_ingreso', $dni);
-                })
-            ->exists();
+                $q->where('res.dni_postulante', $dni)
+                ->orWhere('cb.codigo_ingreso', $dni);
+            })
+            ->select('cb.codigo_ingreso as codigo')
+            ->first();
 
         return response()->json([
             'estado' => true,
-            'ingreso' => $existe
+            'ingreso' => $existe ? true : false,
+            'codigo'  => $existe->codigo ?? null,
         ]);
 
     }
