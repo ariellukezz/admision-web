@@ -250,7 +250,7 @@ class ApixController extends Controller {
 
         return response()->json([
             'estado' => true,
-            'periodo' => $existe
+            'ingreso' => $existe
         ]);
 
     }
