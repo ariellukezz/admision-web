@@ -250,8 +250,7 @@ class ApixController extends Controller {
 
         return response()->json([
             'estado' => true,
-            'foto' => "data:$mime;base64,$base64",
-            'periodo' => $registro->anio.$registro->ciclo_oti
+            'periodo' => $existe
         ]);
 
     }
