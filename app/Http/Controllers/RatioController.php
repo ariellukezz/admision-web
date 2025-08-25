@@ -48,11 +48,11 @@ class RatioController extends Controller
         ->leftJoin(DB::raw('(
             SELECT id_programa, COUNT(*) as cantidad
             FROM inscripciones
-            WHERE id_proceso = ' . intval($idProceso) . ' AND estado = 0 AND id_modalidad = 7
+            WHERE id_proceso = ' . intval($idProceso) . ' AND estado = 0 AND id_modalidad = 9
             GROUP BY id_programa
         ) as i'), 'vacantes.id_programa', '=', 'i.id_programa')
         ->where('vacantes.id_proceso', $idProceso)
-        ->where('vacantes.id_modalidad', 7)
+        ->where('vacantes.id_modalidad', 9)
         ->groupBy('vacantes.id_programa', 'programa.nombre', 'i.cantidad')
         ->orderByDesc('porcentaje_ocupado')
         ->get();

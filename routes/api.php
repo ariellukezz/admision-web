@@ -25,6 +25,7 @@ Route::middleware('throttle:50,1')->post('/v1/postulante-cepre-inscrito', [Cepre
 
 Route::get('/get-ingresante-pago/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresantePago']);
 Route::get('/get-postulante-biometrico/{codigo}', [ApixController::class, 'getBiometrico']);
+Route::get('/verificar-ingreso/{periodo}/{dni}', [ApixController::class, 'esIngresante']);
 
 Route::post('/login', [LoginController::class, 'login']);
 

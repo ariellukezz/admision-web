@@ -364,6 +364,9 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
     Route::post('/guardar-foto-biometrico', [FotoController::class, 'guardarFotoBiometrico']);
 
     Route::post('/control-biometrico', [IngresoController::class, 'biometrico']);
+    Route::post('/crear_correo_institucional', [IngresoController::class, 'crearCorreo']);
+    
+
 
     Route::get('/impresion', fn () => Inertia::render('Revisor/impresion'))->name('revisor-impresion-inscripcion');
     Route::get('/get-postulante-dni/{dni}', [InscripcionController::class, 'getPostulanteByDni']);

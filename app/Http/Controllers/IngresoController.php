@@ -57,6 +57,7 @@ class IngresoController extends Controller {
             ->where('p.nro_doc', $dni)
             ->select([
                 'p.id', 'p.nro_doc', 'p.nombres', 'p.primer_apellido', 'p.segundo_apellido',
+                'p.correo_institucional',
                 'p.tipo_doc', 'p.sexo', 'p.foto_url as foto', 'p.fec_nacimiento',
                 'prg.nombre as programa', 'prg.programa_correo',
                 'f.nombre_correo as facultad_correo',
@@ -98,7 +99,7 @@ class IngresoController extends Controller {
             "nombres" => $datos->nombres,
             "dni" => $datos->nro_doc,
             "celular" => '999999999',
-            "correo_secundario" => 'solopruebas@test.com',
+            "correo_secundario" => 'admision@test.com',
             "facultad" => $datos->facultad_correo,
             "escuela" => $datos->programa_correo,
             "numero_ingresos" => false,
@@ -349,7 +350,7 @@ class IngresoController extends Controller {
             }
 
             if ($request->crear_correo == 1) {
-                $url = "http://10.1.20.30:6060/api/crear-correo";
+                $url = "https://service6.unap.edu.pe/api/crear-correo";
                 $secretKey = "unap@2025";
                 $data = [
                     "apellido_paterno" => $re->paterno,
@@ -392,6 +393,9 @@ class IngresoController extends Controller {
             ], 500);
         }
     }
+
+
+    
 
 
     // public function biometrico(Request $request){
@@ -843,6 +847,43 @@ class IngresoController extends Controller {
 
     }
 
+  
+    // public function crearCorreo(Request $request)
+    // {
+    //     $url = "https://service6.unap.edu.pe/api/crear-correo";
+    //     $secretKey = "unap@2025";
+
+    //     $data = [
+    //         "apellido_paterno"   => $request->paterno,
+    //         "apellido_materno"   => $request->materno,
+    //         "nombres"            => $request->nombres,
+    //         "dni"                => $request->dni,
+    //         "celular"            => $request->celular,
+    //         "correo_secundario"  => $request->email,
+    //         "facultad"           => $request->facultad_correo,
+    //         "escuela"            => $request->programa_correo,
+    //         "numero_ingresos"    => $request->numero_ingresos,
+    //     ];
+
+    //     $signature = hash_hmac('sha256', json_encode($data), $secretKey);
+
+    //     try {
+    //         $response = Http::withHeaders([
+    //             'X-Signature' => $signature,
+    //             'Content-Type' => 'application/json'
+    //         ])->post($url, $data);
+
+    //         if ($response->failed()) {
+    //             throw new \Exception($response->body());
+    //         }
+
+    //         return $response->json();
+
+    //     } catch (\Throwable $e) {
+    //         Log::error("Error al crear correo: " . $e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
 
 }

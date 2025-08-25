@@ -46,7 +46,7 @@
                   <span style="font-weight: bold; font-size: 1.2rem;">Datos personales</span>
                 </div>
                 <div v-if="ingresante">
-            <a-card class="elegant-profile-card">
+                <a-card class="elegant-profile-card">
                     <a-row :gutter="[24, 16]">
                       <!-- Columna de datos personales -->
                       <a-col :xs="24" :sm="24" :md="12" :lg="10" :xl="10">
@@ -247,20 +247,66 @@
                             </div>
                           </a-form-item>
 
-                          <div class="mb-4">
-                            <a-table :columns="colAnteriores" :dataSource="correo_anteriores" :pagination="false" :scroll="{ x: 'max-content' }">
-                            </a-table>
-                          </div>
-
-                          <div class="mb-4">
+                          <!-- <div class="mb-4">
                             <a-radio-group v-model:value="crear_correo" size="large" button-style="solid">
                               <a-radio-button :value="1">Crear correo</a-radio-button>
                               <a-radio-button :value="0">No crear correo</a-radio-button>
                             </a-radio-group>
-                          </div>
+                          </div> -->
 
                         </a-col>
                       </a-row>
+                    </a-card>
+
+                      <a-card class="mb-4">
+                         <a-card-title>
+                          <div class="flex justify-between">
+                            <div>
+                               <strong>Correo institucional</strong>
+
+                            </div>
+                            <div class="flex justify-end">
+                              <a-button
+                                v-if="ingresante.correo_institucional == null"
+                                type="primary"
+                                @click="crearCorreo()"
+                                class="update-button"
+                                style="margin-top: -10px; height: 34px;"
+                              >
+                                <template #icon><save-outlined /></template>
+                                Crear correo
+                              </a-button>
+                              <a-button
+                                v-else
+                                type="primary"
+                                @click="crearCorreo()"
+                                class="update-button"
+                                size="large"
+                              >
+                                <template #icon><save-outlined /></template>
+                                Crear correo
+                              </a-button>
+                            </div>
+                          </div>
+                          
+                         </a-card-title>
+                          <div class="mt-4 mb-6"  v-if="correo_anteriores.length == 0">
+                            <div>
+                              <div  v-if="ingresante.correo_institucional != null"> <i> {{ ingresante.correo_institucional }} </i> </div>
+                              <div v-else > <i> El ingresante aún no tiene correo institucional </i> </div>
+                            </div>
+                          </div>
+
+                          <div class="mt-3" v-else>
+                            <div>
+                              <span><strong>Otros correos registrados</strong></span>
+                            </div>
+
+                            <div class="mb-4">
+                              <a-table :columns="colAnteriores" :dataSource="correo_anteriores" :pagination="false" :scroll="{ x: 'max-content' }">
+                              </a-table>
+                            </div>
+                          </div>
                     </a-card>
 
                 </div>
@@ -355,7 +401,15 @@
         </a-col>
       </a-row>
       <div class="mt-4 flex justify-end" style="margin-right: -10px;">
-        <a-button type="primary" size="large" @click="abrirVentana()">Registrar</a-button>
+         <a-button
+              type="primary"
+              @click="abrirVentana()"
+              class="update-button"
+              size="large"
+            >
+              <template #icon><save-outlined /></template>
+              Registrar Ingreso
+          </a-button>
       </div>
     </a-card>
 
@@ -538,14 +592,33 @@ const ingresante = ref({
   fec_nacimiento: null,
   primer_apellido:"",
   segundo_apellido:"",
+  programa_correo:"",
   proceso:"",
   modalidad:"",
   puntaje:"",
   programa:"",
+  facultad:"",
+  correo_institucional:null,
   fecha:"",
   foto:"",
   puesto:""
 })
+
+                         
+const crearCorreo = async () => {
+  let res = await axios.post('crear_correo_institucional',{
+    id: ingresante.value.id,
+    apellido_paterno: ingresante.value.primer_apellido,
+    apellido_materno: ingresante.value.segundo_apellido,
+    nombres: ingresante.value.nombres,
+    dni: ingresante.value.nro_doc,
+    celular: ingresante.value.celular,
+    correo_secundario: ingresante.value.email,
+    facultad: ingresante.value.facultad_correo,
+    escuela: ingresante.value.programa_correo,
+    numero_ingresos: anteriores.value.length + 1,
+  });
+}
 
 
 
@@ -573,6 +646,9 @@ const getIngresante =  async ( ) => {
   ingresante.value.modalidad = res.data.datos.modalidad
   ingresante.value.puntaje = res.data.datos.puntaje
   ingresante.value.programa = res.data.datos.programa
+  ingresante.value.programa_correo = res.data.datos.programa_correo
+  ingresante.value.facultad_correo = res.data.datos.facultad_correo
+  ingresante.value.correo_institucional = res.data.datos.correo_institucional
   ingresante.value.puesto= res.data.datos.puesto
   ingresante.value.foto= res.data.datos.foto || "imagenes/sin_imagen.png";
   if(res.data.datos.fecha){ ingresante.value.fecha = res.data.datos.fecha }
@@ -659,18 +735,6 @@ const getCarrerasPrevias = async() => {
     if(ingresante.value.dni != null){
       const response = await axios.post('https://service2.unap.edu.pe/TieneCarrerasPrevias/',  {
         doc_:ingresante.value.nro_doc,
-        nom_: "SDSFASD",
-        app_: "SDSFASD",
-        apm_: "SDSFASD"
-      }, { headers: { 'Content-Type': 'application/json'}  });
-      anteriores.value = response.data;
-      if( anteriores.value[0]){
-        n_carrera.value = 1;
-      }
-    }
-    else{
-      const response = await axios.post('https://service2.unap.edu.pe/TieneCarrerasPrevias/',  {
-        doc_: dniseleccionado.value,
         nom_: "SDSFASD",
         app_: "SDSFASD",
         apm_: "SDSFASD"

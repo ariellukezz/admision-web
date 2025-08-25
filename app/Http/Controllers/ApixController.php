@@ -192,6 +192,7 @@ class ApixController extends Controller {
     function ingresanteBase64($dni)
     {
         $registro = ControlBiometrico::join('postulante', 'control_biometrico.id_postulante', '=', 'postulante.id')
+            ->join('procesos','control_biometrico.id_proceso', '=', 'procesos.id')        
             ->where('postulante.nro_doc', $dni)
             ->whereDate('control_biometrico.created_at', '>', '2025-01-01')
             ->orderBy('control_biometrico.id', 'DESC')
@@ -234,10 +235,27 @@ class ApixController extends Controller {
         $base64 = base64_encode($contenidoImagen);
 
         return response()->json([
-            'status' => true,
-            'foto' => "data:$mime;base64,$base64"
+            'estado' => true,
+            'foto' => "data:$mime;base64,$base64",
+            'periodo' => $registro->anio.$registro->ciclo_oti
         ]);
     }
+
+    public function esIngresante($periodo, $dni){
+        $existe = DB::table('resultados as res')
+            ->join('procesos as pr', 'res.id_proceso', '=', 'pr.id')
+            ->where(DB::raw("CONCAT(pr.anio, pr.ciclo_oti)"), $periodo)
+            ->where('res.dni_postulante', $dni)
+            ->exists();
+
+        return response()->json([
+            'estado' => true,
+            'foto' => "data:$mime;base64,$base64",
+            'periodo' => $registro->anio.$registro->ciclo_oti
+        ]);
+
+    }
+
 
 
 }
