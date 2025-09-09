@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Proceso;
+use App\Exports\ResumenInscripcionExport;
+use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use Pdf;
 
@@ -45,6 +47,7 @@ class ResumenInscripcionesController extends Controller
             }
         }
 
+
         if (empty($selectColumns)) {
             return response()->json([
                 'success' => false,
@@ -62,6 +65,14 @@ class ResumenInscripcionesController extends Controller
             ->where('ins.id_proceso', auth()->user()->id_proceso)
             ->where('ins.estado', 0)
             ->count();
+
+        if($request->excel == 1){
+
+            $headings = array_map('strtoupper', $groupByColumns);
+            $headings[] = 'TOTAL';
+            return Excel::download(new ResumenInscripcionExport($res, $headings), 'reporte.xlsx');
+            
+        }
 
         if( $request->descargar == 1){
             $sim = auth()->user()->id_proceso;

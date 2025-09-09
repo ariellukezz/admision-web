@@ -16,8 +16,17 @@
 
 <div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 230px);">
   <row class="flex justify-end mb-4" >
-      <div class="mr-3">
-          <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
+      <div class="flex gap-2">
+          <a-button type="primary" style="background: #40DE7A;" @click="descargarExcel()">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <FileExcelOutlined/> EXCEL
+            </div>
+          </a-button>
+          <a-button type="primary" sise="large" style="background: crimson;" @click="descargarDetalle()">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <FilePdfOutlined/> PDF
+            </div>
+          </a-button>
       </div>
   </row>
 
@@ -66,7 +75,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref } from 'vue';
-import { SearchOutlined } from '@ant-design/icons-vue';
+import { FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -159,6 +168,41 @@ const descargarDetalle = async () => {
     const fecha = new Date();
     const formatoFecha = `${fecha.getDate().toString().padStart(2, '0')}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getFullYear()}_${fecha.getHours().toString().padStart(2, '0')}-${fecha.getMinutes().toString().padStart(2, '0')}-${fecha.getSeconds().toString().padStart(2, '0')}`;
     const nombreArchivo = `${formatoFecha}_resumen_inscripciones.pdf`;
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', nombreArchivo);
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error al descargar el archivo:', error);
+  }
+};
+
+const descargarExcel = async () => {
+  try {
+    const response = await axios.post('resumen-inscripciones',
+      {
+        descargar: 1,
+        excel: 1,
+        group_by: selectedColumns.value,
+      },
+      {
+        responseType: 'blob'
+      }
+    );
+
+    if (response.status !== 200) {
+      throw new Error('Error al obtener el archivo');
+    }
+
+    const fecha = new Date();
+    const formatoFecha = `${fecha.getDate().toString().padStart(2, '0')}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getFullYear()}_${fecha.getHours().toString().padStart(2, '0')}-${fecha.getMinutes().toString().padStart(2, '0')}-${fecha.getSeconds().toString().padStart(2, '0')}`;
+    const nombreArchivo = `${formatoFecha}_resumen_inscripciones.xlsx`;
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');

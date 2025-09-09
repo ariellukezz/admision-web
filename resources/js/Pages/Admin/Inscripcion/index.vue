@@ -6,16 +6,28 @@
     <row class="flex justify-between mb-4" >
         <div class="mr-3">
             <a-select ref="select" v-model:value="programa" placeholder="Seleccionar programa de estudios" :options="programas" allowClear></a-select>
-
+        </div>
+        <div class="flex justify-between gap-3">
+            <div>
+                <a-button @click="descargarExcel()" type="primary" style="background: #40DE7A;" :size="size">
+                        xls
+                    <template #icon>
+                       <DownloadOutlined />
+                    </template>
+                </a-button>
+            </div>
+            <div>
+                <div class="flex justify-between" style="position: relative;" >
+                    <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 260px;">
+                        <template #prefix>
+                            <search-outlined />
+                        </template>
+                    </a-input>
+                </div>
+            </div>
 
         </div>
-        <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px;">
-            <template #prefix>
-                <search-outlined />
-            </template>
-       </a-input>
-        </div>
+
     </row>
 
     <!-- {{ inscripciones }} -->
@@ -57,7 +69,7 @@
             <template v-if="column.dataIndex === 'acciones'">
                 <div style="display: flex; gap: 2px;">
                     <a-button size="small"  @click="recargar(record.dni)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #23cd23; display: flex; align-items: center;">
-                        <upload-outlined/>
+                        <RedoOutlined/>
                     </a-button>
                     <a-button size="small"  @click="imprimirPDF(record.dni, record.id_proceso)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #164753;; display: flex; align-items: center;">
                         <printer-outlined/>
@@ -147,7 +159,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, unref } from 'vue';
-import { FormOutlined, PrinterOutlined, UploadOutlined, DeleteOutlined, SearchOutlined, } from '@ant-design/icons-vue';
+import { RedoOutlined, FormOutlined, PrinterOutlined, UploadOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 const baseUrl = window.location.origin;
@@ -301,6 +313,35 @@ const recargar =  (dni) => {
     iframe.contentWindow.focus();
     iframe.contentWindow.print();
 }
+
+const descargarExcel = async () => {
+  try {
+    const response = await axios.get('inscripciones/descargar-lista', {
+      params: { descargar: 1 },
+      responseType: 'blob' 
+    });
+
+    if (response.status !== 200) {
+      throw new Error('Error al obtener el archivo');
+    }
+
+    const fecha = new Date();
+    const formatoFecha = `${fecha.getDate().toString().padStart(2, '0')}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getFullYear()}_${fecha.getHours().toString().padStart(2, '0')}-${fecha.getMinutes().toString().padStart(2, '0')}-${fecha.getSeconds().toString().padStart(2, '0')}`;
+    const nombreArchivo = `${formatoFecha}_lista_postulantes.xlsx`;
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', nombreArchivo);
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error al descargar el archivo:', error);
+  }
+};
 
 getInscripciones()
 </script>

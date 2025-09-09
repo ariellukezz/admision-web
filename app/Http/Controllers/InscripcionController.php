@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Exports\InscripcionExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InscripcionController extends Controller
 {
@@ -421,6 +423,56 @@ class InscripcionController extends Controller
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
+
+    }
+
+
+    public function descargarListaExcel(Request $request){
+
+        $data = Inscripcion::select([
+            'inscripciones.created_at as FECHA DE INSCRIPCIÓN',
+            'pro.id as COD PROGRAMA',
+            'pro.nombre as PROGRAMA DE ESTUDIOS',
+            'pro.area as AREA',
+            'moda.id as COD MODALIDAD',
+            'moda.nombre as MODALIDAD',
+            'pos.nro_doc as N° DOCUMENTO',
+            DB::raw('UPPER(pos.primer_apellido) as PATERNO'),
+            DB::raw('UPPER(pos.segundo_apellido) as MATERNO'),
+            DB::raw('UPPER(pos.nombres) as NOMBRES'),
+            DB::raw('IF(pos.sexo = 1, "M", "F") as SEXO'),
+            'pos.fec_nacimiento as FEC NACIMIENTO',
+            DB::raw('TIMESTAMPDIFF(YEAR, pos.fec_nacimiento, CURDATE()) as EDAD'),
+            'pos.ubigeo_residencia as UBIGEO RESIDENCIA',
+            'dep.nombre as DEPARTAMENTO RESIDENCIA',
+            'prov.nombre as PROVINCIA RESIDENCIA',
+            'dist.nombre as DISTRITO RESIDENCIA',
+            'pos.anio_egreso as EGRESO',
+            'col.cod_modular as COD MODULAR',
+            'col.ubigeo as UBIGEO COLEGIO',
+            'depC.nombre as DEPARTAMENTO COLEGIO',
+            'provC.nombre as PROVINCIA COLEGIO',
+            'distC.nombre as DISTRITO COLEGIO'
+        ])
+        ->join('postulante as pos', 'inscripciones.id_postulante', '=', 'pos.id')
+        ->join('programa as pro', 'pro.id', '=', 'inscripciones.id_programa')
+        ->join('modalidad as moda', 'moda.id', '=', 'inscripciones.id_modalidad')
+        ->join('colegios as col', 'col.id', '=', 'pos.id_colegio')
+        ->join('ubigeo as ub', 'ub.ubigeo', '=', 'pos.ubigeo_residencia')
+        ->join('departamento as dep', 'dep.id', '=', 'ub.id_departamento')
+        ->join('provincia as prov', 'prov.id', '=', 'ub.id_provincia')
+        ->join('distritos as dist', 'dist.id', '=', 'ub.id_distrito')
+        ->join('ubigeo as ubc', 'ubc.ubigeo', '=', 'col.ubigeo')
+        ->join('departamento as depC', 'depC.id', '=', 'ubc.id_departamento')
+        ->join('provincia as provC', 'provC.id', '=', 'ubc.id_provincia')
+        ->join('distritos as distC', 'distC.id', '=', 'ubc.id_distrito')
+        ->where('inscripciones.id_proceso', auth()->user()->id_proceso)
+        ->where('inscripciones.estado', 0)
+        ->orderBy('pro.nombre')
+        ->orderBy('pos.primer_apellido')
+        ->get();
+
+         return Excel::download(new InscripcionExport($data), 'reporte.xlsx');
 
     }
 

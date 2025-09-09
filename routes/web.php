@@ -120,6 +120,8 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/pdf-inscripción/{dni}', [InscripcionController::class, 'pdfInscripcion']);
     Route::post('/inscripciones/inscribir', [InscripcionController::class, 'Inscribir']);
 
+    Route::get('/inscripciones/descargar-lista', [InscripcionController::class, 'descargarListaExcel']);
+
     Route::post('/get-inscripciones-admin', [InscripcionController::class, 'getInscripcionesAdmin']);
     Route::post('/get-preinscripciones-admin', [PreinscripcionController::class, 'getPreinscripcionesAdmin']);
     Route::post('/actualizar-sexo-postulante', [PreinscripcionController::class, 'actualizarSexo']);
@@ -773,6 +775,8 @@ Route::get('/phpinfo', function () { phpinfo();});
 Route::get('/notifiacion-correo', function () { return view('emails.notificaciones.notificacion_puerta'); });
 #Route::get('/email-comunicado', [EmailController::class, 'enviarComunicado']);
 Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
+
+Route::get('/actualizar-correos-ingresantes', [IngresoController::class, 'actualizarCorreos']);
 
 
 require __DIR__.'/auth.php';

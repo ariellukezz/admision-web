@@ -847,6 +847,107 @@ class IngresoController extends Controller {
 
     }
 
+
+    public function actualizarCorreos(Request $request)
+    {
+        $batchSize = 100;
+        $url = "https://service6.unap.edu.pe/api/crear-correo";
+        $secretKey = "unap@2025";
+
+        $totalProcesados = [];
+        $totalErrores = [];
+
+        $res = DB::table('control_biometrico as cb')
+            ->join('postulante as pos', 'cb.id_postulante', '=', 'pos.id')
+            ->join('inscripciones as ins', function ($join) {
+                $join->on('pos.id', '=', 'ins.id_postulante')
+                    ->on('ins.id_proceso', '=', 'cb.id_proceso')
+                    ->where('ins.estado', 0);
+            })
+            ->join('programa as pro', 'ins.id_programa', '=', 'pro.id')
+            ->join('facultad as fac', 'fac.id', '=', 'pro.id_facultad')
+            ->where('cb.id_proceso', 24)
+            ->whereNull('cb.correo_institucional')
+            ->select(
+                'cb.id as id_biometrico',
+                'pos.primer_apellido',
+                'pos.segundo_apellido',
+                'pos.nombres',
+                'pos.nro_doc',
+                'pos.celular',
+                'pos.email',
+                'fac.nombre_correo',
+                'pro.programa_correo',
+                DB::raw('0 as ingresos')
+            )->get();
+
+        $chunks = $res->chunk($batchSize);
+
+        foreach ($chunks as $index => $chunk) {
+            $procesados = [];
+            $errores = [];
+
+            foreach ($chunk as $r) {
+                try {
+                    $data = [
+                        'apellido_paterno'  => $r->primer_apellido,
+                        'apellido_materno'  => $r->segundo_apellido,
+                        'nombres'           => $r->nombres,
+                        'dni'               => $r->nro_doc,
+                        'celular'           => $r->celular,
+                        'correo_secundario' => $r->email,
+                        'facultad'          => $r->nombre_correo,
+                        'escuela'           => $r->programa_correo,
+                        'numero_ingresos'   => $r->ingresos
+                    ];
+
+                    $jsonData  = json_encode($data);
+                    $signature = hash_hmac('sha256', $jsonData, $secretKey);
+
+                    $response = Http::withHeaders([
+                        'X-Signature'   => $signature,
+                        'Content-Type'  => 'application/json'
+                    ])->post($url, $data);
+
+                    if ($response->successful() && isset($response['users'][0]['email'])) {
+                        $cb = ControlBiometrico::find($r->id_biometrico);
+                        $cb->correo_institucional = $response['users'][0]['email'];
+                        $cb->save();
+
+                        $procesados[] = [
+                            'id_biometrico' => $r->id_biometrico,
+                            'correo' => $response['users'][0]['email']
+                        ];
+                    } else {
+                        $errores[] = [
+                            'id_biometrico' => $r->id_biometrico,
+                            'error' => $response->json()
+                        ];
+                    }
+                } catch (\Exception $e) {
+                    $errores[] = [
+                        'id_biometrico' => $r->id_biometrico,
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+
+            $totalProcesados = array_merge($totalProcesados, $procesados);
+            $totalErrores = array_merge($totalErrores, $errores);
+
+            if ($index < $chunks->count() - 1) {
+                sleep(60);
+            }
+        }
+
+        return response()->json([
+            'total_procesados' => count($totalProcesados),
+            'total_errores' => count($totalErrores),
+            'procesados' => $totalProcesados,
+            'errores' => $totalErrores
+        ]);
+    }
+
   
     // public function crearCorreo(Request $request)
     // {
