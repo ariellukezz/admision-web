@@ -8,6 +8,7 @@ use App\Models\Matricula\Estudiante;
 
 class EstudianteController extends Controller
 {
+  
   // public function store() {
   //   $estudiante = Estudiante::on('mysql_secondary')->create([
   //     'dni' => '70757838',
