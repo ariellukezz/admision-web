@@ -11,7 +11,7 @@ class InscripcionExport implements FromCollection, WithHeadings, ShouldAutoSize,
 {
     protected $data;
 
-    public function __construct($data)
+    public function __construct($data) 
     {
         $this->data = $data;
     }
