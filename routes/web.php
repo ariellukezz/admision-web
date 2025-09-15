@@ -776,7 +776,7 @@ Route::get('/notifiacion-correo', function () { return view('emails.notificacion
 #Route::get('/email-comunicado', [EmailController::class, 'enviarComunicado']);
 Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
 
-Route::get('/actualizar-correos-ingresantes', [IngresoController::class, 'actualizarCorreos']);
+Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::class, 'actualizarCorreos']);
 
 
 require __DIR__.'/auth.php';

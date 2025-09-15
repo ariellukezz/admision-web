@@ -848,7 +848,7 @@ class IngresoController extends Controller {
     }
 
 
-    public function actualizarCorreos(Request $request)
+    public function actualizarCorreos($actualizar)
     {
         $batchSize = 100;
         $url = "https://service6.unap.edu.pe/api/crear-correo";
@@ -866,7 +866,7 @@ class IngresoController extends Controller {
             })
             ->join('programa as pro', 'ins.id_programa', '=', 'pro.id')
             ->join('facultad as fac', 'fac.id', '=', 'pro.id_facultad')
-            ->where('cb.id_proceso', 24)
+            ->where('cb.id_proceso', auth()->user()->id_proceso)
             ->whereNull('cb.correo_institucional')
             ->select(
                 'cb.id as id_biometrico',
@@ -878,7 +878,7 @@ class IngresoController extends Controller {
                 'pos.email',
                 'fac.nombre_correo',
                 'pro.programa_correo',
-                DB::raw('0 as ingresos')
+                DB::raw($actualizar . ' as ingresos')
             )->get();
 
         $chunks = $res->chunk($batchSize);
