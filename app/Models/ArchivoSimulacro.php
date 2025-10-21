@@ -17,6 +17,9 @@ class ArchivoSimulacro extends Model
         'area',
         'fecha',
         'url',
+        'cod_examen',
+        'unidad',
+        'puesto',
         'categoria'
     ];
 

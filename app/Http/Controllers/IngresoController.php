@@ -349,36 +349,36 @@ class IngresoController extends Controller {
                 $control->update(['estado' => 2]);
             }
 
-            if ($request->crear_correo == 1) {
-                $url = "https://service6.unap.edu.pe/api/crear-correo";
-                $secretKey = "unap@2025";
-                $data = [
-                    "apellido_paterno" => $re->paterno,
-                    "apellido_materno" => $re->materno,
-                    "nombres" => $re->nombres,
-                    "dni" => $re->dni,
-                    "celular" => $re->celular,
-                    "correo_secundario" => $re->email,
-                    "facultad" => $re->facultad_correo,
-                    "escuela" => $re->programa_correo,
-                    "numero_ingresos" => $request->crear_correo,
-                ];
-                $signature = hash_hmac('sha256', json_encode($data), $secretKey);
+            // if ($request->crear_correo == 1) {
+            //     $url = "https://service6.unap.edu.pe/api/crear-correo";
+            //     $secretKey = "unap@2025";
+            //     $data = [
+            //         "apellido_paterno" => $re->paterno,
+            //         "apellido_materno" => $re->materno,
+            //         "nombres" => $re->nombres,
+            //         "dni" => $re->dni,
+            //         "celular" => $re->celular,
+            //         "correo_secundario" => $re->email,
+            //         "facultad" => $re->facultad_correo,
+            //         "escuela" => $re->programa_correo,
+            //         "numero_ingresos" => $request->crear_correo,
+            //     ];
+            //     $signature = hash_hmac('sha256', json_encode($data), $secretKey);
 
-                $response = Http::withHeaders([
-                    'X-Signature' => $signature,
-                    'Content-Type' => 'application/json'
-                ])->post($url, $data);
+            //     $response = Http::withHeaders([
+            //         'X-Signature' => $signature,
+            //         'Content-Type' => 'application/json'
+            //     ])->post($url, $data);
 
-                if (!$response->successful()) {
-                    throw new \Exception('Error al crear el correo: ' . $response->body());
-                }
+            //     if (!$response->successful()) {
+            //         throw new \Exception('Error al crear el correo: ' . $response->body());
+            //     }
 
-                $control->update([
-                    'tiene_correo' => 1,
-                    'correo_institucional' => $response->json('correo')
-                ]);
-            }
+            //     $control->update([
+            //         'tiene_correo' => 1,
+            //         'correo_institucional' => $response->json('correo')
+            //     ]);
+            // }
 
             DB::commit();
 

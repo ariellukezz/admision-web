@@ -108,7 +108,7 @@
             </div>
 
 
-            <a-modal v-model:visible="modalNuevo" :closable="false" centered style="" :footer="false">
+            <a-modal v-model:open="modalNuevo" :closable="false" centered style="" :footer="false">
 
                 <div style="background: #476175; height: 42px; margin-left:-24px; margin-right:-24px; margin-top:-24px;">
                     <div class="flex justify-between ml-3 mr-1" style="height:36px; align-items: center;">
@@ -404,7 +404,7 @@ const cerramodal = () => {
 
 
 
-getCarpetas();
+//getCarpetas();
 
 const showContextMenu = ref(false);
 const contextMenuTop = ref(0);

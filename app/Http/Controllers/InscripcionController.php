@@ -20,7 +20,6 @@ class InscripcionController extends Controller
     public function index()
     {
         return Inertia::render('Inscripciones/impresion');
-        
     }
 
     public function getPostulantes(Request $request)

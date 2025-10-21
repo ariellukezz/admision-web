@@ -66,22 +66,23 @@
             <table style="width: 100%">
                 <tr style="">
                     <td align="right" style="border:none;" width="50">
-                        <div style="margin-top: -5px;">
-                            <img src="{{ public_path('imagenes/logotiny.png')}}"  width="65"/>
+                        <div style="margin-top: 5px;">
+                            <img src="http://admision.test/imagenes/logo_poder_judicial.png" width="64">
                         </div>
                     </td>
-                    <td style="width: 350px; border:none;">
+                    <td style="border:none;">
                         <div style="text-align: left; margin-left:-10px; margin-top: 10px; font-size:10pt;">
-                            <div>UNIVERSIDAD NACIONAL DEL ALTIPLANO</div>
-                            <div>VICERRECTORADO ACADÉMICO</div>
-                            <div>DIRECCIÓN DE ADMISIÓN </div>
+                            <div>CORTE SUPERIOR DE JUSTICIA DE PUNO</div>
+                            <div style="text-align: left; font-size:9pt;">PROCESO DE SELECCIÓN PERSONAL 728 A PLAZO INDETERMINADO N° 001-2025-UE-PUNO</div>
                         </div>
                     </td>
-                    <td v-align="top" align="right" style="text-align:right; border:none;">
-                        <div style="margin-top: 5px">
-                            <img src="{{ public_path('imagenes/logoDAD.jpg')}}"  width="75">
+                    {{-- <td style="text-align:right; font-size:11px; width:90px; border:none;">
+                        <div>
+                            <span>Fecha y hora</span>
                         </div>
-                    </td>
+                        <div>{DATE j-m-Y}</div>
+                        <div>{DATE H:i:s}</div>
+                    </td> --}}
                 </tr>
             </table>
         </div>

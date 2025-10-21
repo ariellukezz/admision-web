@@ -492,16 +492,22 @@ Route::prefix('calificacion')->group(function () {
 
     //CALIFICACIÓN
     Route::get('/calificacion', fn () => Inertia::render('Simulacro/Calificacion/lecturas'))->name('simulacro-calificacion');
-
     Route::post('/carga-ide', [ResultadosController::class, 'cargaArchivoIde']);
+    Route::post('/actualizar-ide', [ResultadosController::class, 'actualizarIde']);
+    
 
     //TEMP
     Route::post('/carga-ide/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoIde'])->withoutMiddleware(['web']);
-    Route::post('/carga-res/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoRes'])->withoutMiddleware(['web']);
-    Route::post('/carga-pat/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoPat'])->withoutMiddleware(['web']);
+    Route::post('/carga-res/{proceso}', [ResultadosController::class, 'cargaArchivoRes'])->withoutMiddleware(['web']);
+    Route::post('/carga-pat/{proceso}', [ResultadosController::class, 'cargaArchivoPat'])->withoutMiddleware(['web']);
 
+    Route::get('/get-select-puestos', [ResultadosController::class, 'selectPuestos']);
     // Route::post('/carga-res', [ResultadosController::class, 'cargaArchivoRes']);
     Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
+
+    Route::get('/descargar-excel', [ResultadosController::class, 'descargarExcel']);
+
+    
 
 
 });
@@ -666,7 +672,7 @@ Route::get('/pdf-errores/{D}', [ResultadosController::class, 'PdfErroresCalifaci
 
 Route::post('/calificar-examen', [ResultadosController::class, 'CalificarExamen']);
 Route::post('/get-puntajes-examen', [ResultadosController::class, 'getPuntajes']);
-Route::get('/get-pdf-resultados/{sim}', [ResultadosController::class, 'getResultadosPDF']);
+Route::post('/get-pdf-resultados/{sim}', [ResultadosController::class, 'getResultadosPDF']);
 
 Route::get('{p}/preinscripcion', [ProcesoController::class, 'getFormulario']);
 Route::get('/get-participante-cepre/{dni}', [CepreController::class, 'getParticipanteCepre']);

@@ -26,8 +26,8 @@
 
 
                     <div class="flex justify-center">
-                        <a-card class="pl-4" style="width: 300px;">
-                            <a-radio-group v-model:value="ficha_respuesta.ide_tipo">
+                        <a-card>
+                            <a-radio-group v-model:value="ficha_respuesta.ide_tipo" style="width: 100%;">
                                 <a-radio value="P">P</a-radio>
                                 <a-radio value="Q">Q</a-radio>
                                 <a-radio value="R">R</a-radio>
@@ -37,36 +37,32 @@
                         </a-card>
                     </div>
 
-                    <!-- {{ ficha_respuesta }} -->
-
-
                     <div class="ml-3 pr-4" style="">
-
-                        <!-- <div class="mt-3">
-                            <a-select ref="select" v-model:value="area_examen" style="width: 175px">
-                                <a-select-option :value="4">BIOMEDICAS</a-select-option>
-                                <a-select-option :value="6">INGENIERIAS</a-select-option>
-                                <a-select-option :value="5">SOCIALES</a-select-option>
-                            </a-select>
-
-                        </div> -->
 
 
                         <div class="mt-3">
                             <label>N° Documento</label>
-                            <a-input v-model:value="ficha_respuesta.dni" />
+                            <a-input v-model:value="ficha_respuesta.dni">
+                                <template #prefix> <Icono/> </template>
+                            </a-input>
                         </div>
                         <div class="mt-3">
                             <label>Nombres</label>
-                            <a-input v-model:value="ficha_respuesta.nombres" />
+                            <a-input v-model:value="ficha_respuesta.nombres">
+                                <template #prefix> <Icono/> </template>
+                            </a-input>
                         </div>
                         <div class="mt-3">
                             <label>Apellido Paterno</label>
-                            <a-input v-model:value="ficha_respuesta.paterno" />
+                            <a-input v-model:value="ficha_respuesta.paterno">
+                                <template #prefix> <Icono/> </template>
+                            </a-input>
                         </div>
                         <div class="mt-3">
                             <label>Apellido Materno</label>
-                            <a-input v-model:value="ficha_respuesta.materno" />
+                            <a-input v-model:value="ficha_respuesta.materno">
+                                <template #prefix> <Icono/> </template>
+                            </a-input>
                         </div>
                     </div>
                 </div>

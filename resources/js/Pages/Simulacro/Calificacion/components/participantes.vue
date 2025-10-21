@@ -1,45 +1,50 @@
 <template>
-<Head title="Inicio"/>    
-
+<Head title="Participantes"/>    
 <div class="p-4" style="width:100%; background:white; border-radius:8px;">
     <form @submit.prevent="submit">
         <div class="flex justify-between">
-            <label for="fileInput" class="" style="padding-top: 14px; border: solid 2px var(--primary-color); border-radius: 6px; cursor: pointer; padding: 8px 14px; ">
-                Seleccionar
+            <label
+            for="fileInput"
+            class="inline-block bg-[var(--primary-color)] border border-[var(--primary-color)] text-white font-medium px-4 py-1 rounded-md cursor-pointer transition-all duration-300 shadow-sm hover:bg-[#cdcdcd] hover:text-gray-700 hover:shadow-lg active:scale-95"
+            >
+            Seleccionar archivo
             </label>
             <input id="fileInput" type="file" @change="handleFileUpload" style="display:none;" />
+            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 230px;">
+                <template #prefix>
+                    <search-outlined />
+                </template>
+            </a-input>
 
-         <div style="display:flex; justify-content:flex-end;">
-            <a-button class="mr-2" style="border-radius: 5px; height:38px; border: solid 1px var(--primary-color); color:var(--primary-color); " @click="descargar">Plantilla</a-button>              
-            <a-button style="height:38px; border-radius: 5px; border:none; color:white; background: var(--primary-color)" @click="subirResultados"> Subir</a-button>              
-        </div>
         </div>
     </form> 
 
-    <div style="display:flex;">
-        <a-progress :percent="progress" :status="estado"/>
-    </div>
 
-    <div>
-        <a-table :dataSource="excelData" :columns="columns" size="small" :pagination="false">
+    <a-modal v-model:open="verParticipantes" title="Participantes del proceso" @ok="handleOk" width="94%">
+        <a-table 
+            :dataSource="excelData" 
+            centerd
+            :scroll="{ y: 'calc(100vh - 300px)' }"
+            :columns="columns" size="small" :pagination="false">
             <template #bodyCell="{ column, index, record }">
                 <template v-if="column.dataIndex === 'nro'">
                     <span>{{ index + 1 }}</span>
                 </template>
             </template>     
         </a-table> 
-    </div>
+        <template #footer>
+            <div style="text-align: right;">
+                <a-button style="height:38px; border-radius: 5px; border:none; color:white; background: var(--primary-color)" @click="subirResultados"> Subir</a-button>           
+            </div>
+        </template>
+    </a-modal>
 
 
     <div class="flex justify-end mt-2 mb-4" style="margin-right: -20px;">
-      <a-input v-model:value="buscar" style="max-width: 260px; border-radius: 6px; height: 32px;" placeholder="Buscar">
-          <template #prefix>
-              <span style="color: #0000009d; margin-top: -6px;"><SearchOutlined/></span>
-          </template>
-      </a-input>
+
     </div>
     <div style="margin-right: -20px;">
-        <a-table :dataSource="participantes" :columns="columnsParticipante" size="small" :pagination="false">
+        <a-table :dataSource="participantes" :columns="columns" :scroll="{ y: 'calc(100vh - 310px)' }" size="small" :pagination="false">
             <template #bodyCell="{ column, index, record }">
                 <template v-if="column.dataIndex === 'nro'">
                     <span>{{ index + 1 }}</span>
@@ -62,8 +67,11 @@ import { Head } from '@inertiajs/vue3';
 import Layout from '@/Layouts/LayoutCalificador.vue'
 import { defineProps,computed, ref, watch } from 'vue';
 import * as XLSX from 'xlsx';
+import { PrinterOutlined, UploadOutlined, SearchOutlined } from '@ant-design/icons-vue';
 import axios from 'axios';
+import { message } from 'ant-design-vue';
 
+const verParticipantes = ref(false);
 const props = defineProps(['proceso']);
 const excelData = ref([]);
 const progress = ref(0);
@@ -71,23 +79,34 @@ const estado = ref("");
 const buscar = ref("");
 
 const subirResultados = async () => {
-    progress.value = 0; 
-    try {
-        const response = await axios.post('subir-participantes-simulacro', { data: excelData.value, proceso: props.proceso }, {
-            onUploadProgress: (progressEvent) => {
-            if (progressEvent.lengthComputable) {
-                progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-            }
-            },
-        });
-        console.log('Respuesta del servidor:', response.data);
-        progress.value = 100; 
-        getParticipantes();
-    } catch (error) {
-        progress.value = 70;
-        estado.value = "exception"
-        console.error('Error:', error);
-    }
+  progress.value = 0;
+  try {
+    const response = await axios.post(
+      'subir-participantes-simulacro',
+      { data: excelData.value, proceso: props.proceso },
+      {
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.lengthComputable) {
+            progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          }
+        },
+      }
+    );
+
+    progress.value = 100;
+    message.success(response.data.message || 'Participantes subidos correctamente');
+    verParticipantes.value = false;
+    await getParticipantes();
+
+  } catch (error) {
+    progress.value = 70;
+    estado.value = 'exception';
+    console.error('Error:', error);
+
+    // Mostrar mensaje de error
+    const msg = error.response?.data?.error || 'Error al subir los participantes';
+    message.error(msg);
+  }
 };
 
 
@@ -112,6 +131,7 @@ const handleFileUpload = (event) => {
         return obj;
         });
 
+        verParticipantes.value = true;  
         excelData.value = arrayOfObjects;
     };
 
@@ -146,62 +166,15 @@ watch(buscar, ( newValue, oldValue ) => {
 getParticipantes();
 
 const columns = ref([
-    {
-        title: 'N°',
-        dataIndex: 'nro',
-        align:'center'
-    },
-    {
-        title: 'DNI',
-        dataIndex: 'dni'
-    },
-    {
-        title: 'Ap. Paterno',
-        dataIndex: 'paterno'
-    },
-    {
-        title: 'Ap. Materno',
-        dataIndex: 'materno'
-    },
-    {
-        title: 'Nombres',
-        dataIndex: 'nombres'
-    },
-    {
-        title: 'Programa',
-        dataIndex: 'programa'
-    },    
+    { title: 'N°', dataIndex: 'nro', align:'center', width:50 },
+    { title: 'DNI', dataIndex: 'dni', width:90 },
+    { title: 'Ap. Paterno', dataIndex: 'paterno' },
+    { title: 'Ap. Materno', dataIndex: 'materno'},
+    { title: 'Nombres', dataIndex: 'nombres' },
+    { title: 'Cod puesto', dataIndex: 'cod_puesto', width:90, align:'center' },
+    { title: 'Puesto', dataIndex: 'puesto' },
+    { title: 'Unidad de organizacion', dataIndex: 'unidad' },    
 ]);
-
-const columnsParticipante = ref([
-    {
-        title: 'N°',
-        dataIndex: 'nro',
-        align:'center'
-    },
-    {
-        title: 'DNI',
-        dataIndex: 'dni'
-    },
-    {
-        title: 'Ap. Paterno',
-        dataIndex: 'paterno'
-    },
-    {
-        title: 'Ap. Materno',
-        dataIndex: 'materno'
-    },
-    {
-        title: 'Nombres',
-        dataIndex: 'nombres'
-    },
-    {
-        title: 'Programa',
-        dataIndex: 'programa',
-        align:'center'
-    },    
-]);
-
 
 </script>
 

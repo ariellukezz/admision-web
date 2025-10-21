@@ -1,293 +1,219 @@
 <template>
-    <div>
-      <!-- Listado de TÍTULO PROFESIONAL -->
-      <div class="mt-0">
-        <div class="flex justify-between border-b-2" style="border-bottom: solid 1px #d9d9d9; padding-bottom: 8px;">
-            <div><span style="font-weight: bold; font-size: 1rem; color:teal;">FOTO POSTULANTE</span></div>
-            <div style="margin-top: -5px;"><a-button @click="abrirModal()">Agregar</a-button></div>
-        </div>
-        <div class="mt-3">
-            <div class="mb-2" v-for="item in dnis" :key="item.id">
-                <a-row :gutter="16">
-                    <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                        <div class="flex justify-between">
-                            <div>
-                                <div v-if="item.id_tipo == 8">
-                                    <span class="font-bold" style="font-size:1rem;">FOTO DEL POSTULANTE</span>
-                                </div>
-                            </div>
-                            <div class="flex" style="margin-top: 0px;">
-                                <a-button @click="abriPDf(item.url)" class="mr-2" style="width: 20px; height: 20px; padding-left: 3px; border: solid #1a2843 1px;">
-                                    <!-- Icono ver -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </a-button>
-                                <a-button @click="abrirEditar(item)" class="mr-2" style="width: 20px; height: 20px; padding-left: 3px; border: solid #1a2843 1px;">
-                                    <!-- Icono editar -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a2843" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                                    </svg>
-                                </a-button>
-                                <a-button danger @click="eliminarTitulo(item.id)" style="width: 20px; height: 20px; padding-left: 3px;">
-                                    <!-- Icono eliminar -->
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </a-button>
-                            </div>
-                        </div>
-                    </a-col>
-                </a-row>            
-            </div>
-        </div>
-      </div>
-  
-      <!-- Modal principal para registro (similar al de PDF pero para imágenes) -->
-      <a-modal v-model:visible="modaltitulo" width="700px" class="w-full md:w-3/4" title="Registro de título" @ok="handleOk">
-        <a-form ref="formDatos" name="form" :model="form" :rules="formRules">
-            <a-row :gutter="16">
-                <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                    <label>Tipo<span style="color:red;">*</span></label>
-                    <a-form-item name="tipo" :rules="[{ required: true, message: 'Este campo es obligatorio' }]">
-                        <a-select ref="select" v-model:value="form.tipo" style="width: 100%" :options="tipos" @focus="focus" @change="selecionarTipo" />
-                    </a-form-item>
-                </a-col>
-  
-                <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                    <label>Observación<span style="color:red;"></span></label>
-                    <a-form-item name="observacion">
-                        <a-input v-model:value="form.observacion" style="height: 32px;" />
-                    </a-form-item>
-                </a-col>
-  
-                <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                    <label>Archivo de imagen (Max. 2mb)<span style="color:red;">*</span></label>
-                    <!-- En este caso se usa un input file que dispara el recorte -->
-                    <a-form-item v-if="form.fileList.length === 0" name="fileList" :rules="[{ required: true, message: 'Este campo es obligatorio' }]">
-                        <input type="file" accept="image/*" @change="onFileChange" />
-                        <div class="mt-2" v-if="croppedImage">
-                            <img :src="croppedImage" alt="Vista previa" style="max-width: 100%;" />
-                        </div>
-                    </a-form-item>
-                    <a-form-item v-else name="fileList">
-                        <input type="file" accept="image/*" @change="onFileChange" />
-                        <div class="mt-2" v-if="croppedImage">
-                            <img :src="croppedImage" alt="Vista previa" style="max-width: 100%;" />
-                        </div>
-                    </a-form-item>
-                </a-col>
-            </a-row>
-        </a-form>
-        <template #footer>
-            <div class="flex justify-end">
-                <a-button type="primary" :disabled="!croppedImage" :loading="loading" style="margin-top: 16px" @click="save">
-                    {{ loading ? 'Subiendo...' : 'Guardar datos' }}
-                </a-button>
-            </div>
-        </template>
-      </a-modal>
-  
-      <!-- Modal de recorte de imagen -->
-      <a-modal v-model:open="openCropperModal" title="Recortar foto" :footer="false">
-        <cropper
-            v-if="imageSource"
-            :src="imageSource"
-            :stencil-props="stencilProps"
-            :default-size="defaultSize"
-            @change="onCrop"
-        />
-        <div style="margin-top: 10px; text-align: right;">
-            <a-button type="primary" @click="confirmCrop">Confirmar recorte</a-button>
-        </div>
-      </a-modal>
-  
-      <!-- Modal para ver la imagen (opcional) -->
-      <a-modal v-model:visible="modalPDF" title="Registro de título" style="min-width: 400px;">
-        <a-row :gutter="16">
-            <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                <div class="mt-2" v-if="pdfItem">
-                    <img :src="baseUrl+'/'+pdfItem" alt="Imagen" style="width: 100%;" />
-                </div>
-            </a-col>
-        </a-row>
-        <template #footer>
-            <div class="flex justify-end">
-                <a-button @click="modalPDF = false">Aceptar</a-button>
-            </div>
-        </template>
-      </a-modal>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref, reactive } from 'vue';
-  import { message } from 'ant-design-vue';
-  import axios from 'axios';
-  import { Cropper } from 'vue-advanced-cropper';
-  import 'vue-advanced-cropper/dist/style.css';
-  const baseUrl = window.location.origin;
-  
-  const props = defineProps(['id_proceso', 'dni']);
-  
-  // Variables para el listado de títulos
-  const dnis = ref([]);
-  const tipos = ref([{ value: 8, label: "FOTO DEL POSTULANTE" }]);
-  const modaltitulo = ref(false);
-  const modalPDF = ref(false);
-  const pdfItem = ref(null);
-  const loading = ref(false);
-  
-  // Variables del formulario
-  const formDatos = ref();
-  const form = reactive({  
-    id: null,
-    observacion: "",
-    tipo: 8,
-    fileList: [] // Se almacenará el Blob del archivo de imagen recortado
-  });
-  
-  // Variables para el recorte de imagen
-  const openCropperModal = ref(false);
-  const imageSource = ref(null);
-  const croppedImage = ref(null); // Almacenará la imagen recortada (dataURL)
-  const stencilProps = { aspectRatio: 5 / 6 };
-  const defaultSize = ({ imageSize }) => ({ width: 240, height: 288 });
-  
-  // Funciones para abrir y editar registros
-  const abrirModal = () => { 
-    modaltitulo.value = true;
-  };
-  
-  const abrirEditar = (item) => {
-    form.id = item.id;
-    form.observacion = item.observacion;
-    // Asumimos que item.url contiene la ruta de la imagen recortada
-    croppedImage.value = baseUrl + '/' + item.url;
-    // Si se requiere, se podría asignar un valor a form.fileList, pero usualmente no es posible reconstruir el archivo desde la URL.
-    modaltitulo.value = true;
-  };
+  <a-modal
+    :open="visible"
+    :title="localFormData.id ? 'Editar usuario' : 'Nuevo usuario'"
+    :confirm-loading="loading"
+    ok-text="Guardar"
+    cancel-text="Cancelar"
+    @ok="handleSave"
+    @cancel="handleCancel"
+    width="720px"
+    centered
+  >
+    <a-form ref="formRef" :model="localFormData" layout="vertical" size="middle">
+      <a-tabs default-active-key="1">
+        <!-- Tab 1: Datos Personales -->
+        <a-tab-pane key="1" tab="Datos Personales">
+          <div class="space-y-4">
+            <a-form-item label="DNI" name="dni">
+              <a-input v-model:value="localFormData.dni" placeholder="Ej: 12345678" size="large" allow-clear :maxlength="8"/>
+            </a-form-item>
 
-  const eliminarTitulo = async (id) => {
-    let res = await axios.get("/eliminar-documentos-segundas/" + id);
-    if (res.data.estado === true) {
-        getdnis();
+            <a-form-item label="Nombres" name="nombres">
+              <a-input v-model:value="localFormData.nombres" placeholder="Ej: Juan Carlos" size="large" allow-clear/>
+            </a-form-item>
+
+            <div class="grid grid-cols-2 gap-4">
+              <a-form-item label="Apellido Paterno" name="paterno">
+                <a-input v-model:value="localFormData.paterno" placeholder="Ej: Pérez" size="large" allow-clear/>
+              </a-form-item>
+
+              <a-form-item label="Apellido Materno" name="materno">
+                <a-input v-model:value="localFormData.materno" placeholder="Ej: Gómez" size="large" allow-clear/>
+              </a-form-item>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <a-form-item label="Celular" name="celular">
+                <a-input v-model:value="localFormData.celular" placeholder="Ej: 999888777" size="large" allow-clear/>
+              </a-form-item>
+
+              <a-form-item label="Correo" name="email">
+                <a-input v-model:value="localFormData.email" placeholder="ejemplo@correo.com" size="large" allow-clear/>
+              </a-form-item>
+            </div>
+          </div>
+        </a-tab-pane>
+
+        <!-- Tab 2: Datos de Usuario -->
+        <a-tab-pane key="2" tab="Datos de Usuario">
+          <div class="grid grid-cols-12 gap-4">
+            <!-- Foto a la izquierda -->
+            <div class="col-span-4 flex flex-col items-center">
+              <div 
+                class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors w-full"
+                @click="$refs.fileInput.click()"
+              >
+                <div v-if="!previewImage" class="py-8">
+                  <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <span class="text-gray-500 text-sm mt-2 block">Haz clic para subir foto</span>
+                </div>
+                <img v-else :src="previewImage" class="rounded-lg w-full max-h-48 object-cover"/>
+              </div>
+              
+              <input 
+                ref="fileInput"
+                type="file" 
+                accept="image/*" 
+                @change="handleFileChange" 
+                class="hidden"
+              />
+              
+              <a-button v-if="previewImage" type="link" size="small" @click="removeFile" danger class="mt-2">
+                Eliminar foto
+              </a-button>
+              
+              <div v-if="selectedFile" class="text-xs text-gray-500 mt-1">
+                Archivo: {{ selectedFile.name }} ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+              </div>
+            </div>
+
+            <!-- Credenciales y configuración -->
+            <div class="col-span-8 space-y-4">
+              <a-form-item label="Contraseña" name="password">
+                <a-input-password v-model:value="localFormData.password" placeholder="Ingresa contraseña" size="large"/>
+              </a-form-item>
+
+              <a-form-item label="Confirmar" name="password_confirmation">
+                <a-input-password v-model:value="localFormData.password_confirmation" placeholder="Confirma contraseña" size="large"/>
+              </a-form-item>
+
+              <a-form-item label="Rol" name="rol">
+                <a-select
+                  v-model:value="localFormData.rol"
+                  placeholder="Selecciona rol"
+                  size="large"
+                  :options="[ 
+                    { value: 1, label: '👑 Administrador' },
+                    { value: 2, label: '📊 Calificador' },
+                    { value: 3, label: '📢 Publicador' }
+                  ]"
+                />
+              </a-form-item>
+
+              <a-form-item label="Estado" name="estado">
+                <a-select
+                  v-model:value="localFormData.estado"
+                  placeholder="Selecciona estado"
+                  size="large"
+                  :options="[ 
+                    { value: 1, label: '🟢 Activo' },
+                    { value: 0, label: '🔴 Inactivo' }
+                  ]"
+                />
+              </a-form-item>
+            </div>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+    </a-form>
+  </a-modal>
+</template>
+
+<script setup>
+import { reactive, ref, watch } from 'vue'
+import { message } from 'ant-design-vue'
+
+const props = defineProps({ visible: Boolean, formData: Object, loading: Boolean })
+const emit = defineEmits(['save', 'cancel'])
+
+const formRef = ref()
+const fileInput = ref()
+const previewImage = ref('')
+const selectedFile = ref(null)
+
+const localFormData = reactive({
+  id: null, dni: '', nombres: '', paterno: '', materno: '',
+  celular: '', email: '', password: '', password_confirmation: '',
+  foto: null, rol: null, estado: 1, fec_inicio: null, fec_fin: null
+})
+
+// Cargar datos existentes
+watch(() => props.formData, (newData) => {
+  if (newData) {
+    Object.assign(localFormData, newData)
+    
+    if (newData.foto && typeof newData.foto === 'string') {
+      previewImage.value = newData.foto.startsWith('data:') 
+        ? newData.foto 
+        : `${window.location.origin}/${newData.foto}`
+      selectedFile.value = null
+    }
+  }
+}, { immediate: true })
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    message.error('Solo se permiten imágenes')
+    return
+  }
+  
+  if (file.size / 1024 / 1024 > 2) {
+    message.error('La imagen debe ser menor a 2MB')
+    return
+  }
+
+  selectedFile.value = file
+
+  const reader = new FileReader()
+  reader.onload = e => previewImage.value = e.target.result
+  reader.readAsDataURL(file)
+}
+
+const removeFile = () => {
+  previewImage.value = ''
+  selectedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+const handleSave = async () => {
+  try {
+    const values = await formRef.value.validateFields()
+    const dataToSend = { ...localFormData, ...values }
+
+    if (selectedFile.value) {
+      dataToSend.foto = selectedFile.value // ✅ Aquí va el Blob/File real
     } else {
-        console.log("Ocurrió un error");
+      dataToSend.foto = null
     }
-  };
-  
-  const abriPDf = (pdf) => {
-    pdfItem.value = pdf;
-    modalPDF.value = true;
-  };
-  
-  // Función para obtener el listado de registros
-  const getdnis = async () => {
-    const response = await axios.post('/get-documentos-segundas-postulante-fotos', { dni: props.dni, id_proceso: props.id_proceso });
-    if (response.data.estado === true){
-        dnis.value = response.data.datos;
-    } else { 
-        console.log("No se encontraron datos"); 
-    }
-  };
-  
-  getdnis();
-  
-  // Función que se dispara al seleccionar un archivo de imagen
-  const onFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            imageSource.value = e.target.result;
-            openCropperModal.value = true;
-        };
-        reader.readAsDataURL(file);
-    }
-  };
-  
-  // Evento del cropper que actualiza la imagen recortada
-  const onCrop = ({ canvas }) => {
-    if (canvas) {
-        croppedImage.value = canvas.toDataURL('image/jpeg');
-    }
-  };
-  
-  // Al confirmar el recorte se convierte la imagen en Blob y se asigna al formulario
-  const confirmCrop = () => {
-    const blob = dataURLtoBlob(croppedImage.value);
-    form.fileList = [blob];
-    openCropperModal.value = false;
-  };
-  
-  // Función auxiliar para convertir dataURL a Blob
-  function dataURLtoBlob(dataurl) {
-    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
+
+    console.log('🔍 Enviando foto:', dataToSend.foto)
+    emit('save', dataToSend)
+
+  } catch (err) {
+    message.error('Corrige los errores del formulario')
   }
-  
-  // Función para guardar los datos y enviar el archivo recortado al servidor
-  const save = async () => {
-    // Se puede agregar validación del formulario aquí
-    const formData = new FormData();
-    if(form.fileList[0]) { 
-      formData.append('file', form.fileList[0]); 
-    }
-    if(form.id != null) { 
-      formData.append('id', form.id);
-    }
-    formData.append('id_proceso', props.id_proceso);    
-    formData.append('dni', props.dni);    
-    formData.append('observacion', form.observacion);
-    formData.append('tipo', form.tipo);
-  
-    try {
-        loading.value = true;
-        await axios.post("/save-documentos-segundas", formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: 'Bearer your-auth-token',
-            },
-            onUploadProgress: progressEvent => {
-                // Se puede actualizar la barra de progreso aquí si se desea
-            }
-        });
-        modaltitulo.value = false;
-        loading.value = false;
-        message.success('¡Archivo cargado exitosamente!');
-        getdnis();
-    } catch (error) {
-        loading.value = false;
-        message.error('Error al cargar el archivo.');
-        console.error('File upload failed:', error);
-    }
-  };
-  
-  // Función dummy para el botón "OK" del modal (si se usa)
-  const handleOk = () => {};
-  
-  const selecionarTipo = value => {
-    console.log(`selected ${value}`);
-  };
-  
-  const focus = () => {};
-  
-  const handleRemove = () => {
-    croppedImage.value = null;
-    form.fileList = [];
-  };
-  </script>
-  
-  <style scoped>
-  img {
-    max-width: 100%;
-  }
-  </style>
-  
+}
+
+const handleCancel = () => {
+  formRef.value?.resetFields()
+  previewImage.value = ''
+  selectedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+  Object.assign(localFormData, {
+    id: null, dni: '', nombres: '', paterno: '', materno: '',
+    celular: '', email: '', password: '', password_confirmation: '',
+    foto: null, rol: null, estado: 1, fec_inicio: null, fec_fin: null
+  })
+  emit('cancel')
+}
+</script>
+
+<style scoped>
+.border-dashed { border-style: dashed; }
+</style>

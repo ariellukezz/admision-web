@@ -189,7 +189,7 @@
 
   </div>  
 
-    <div v-if="ingresante === 1" class="mt-6">
+    <div v-if="ingresante === 3" class="mt-6">
       <a-alert
           message="! MUY IMPORTANTE !"
           description="Los postulantes que hayan alcanzado una vacante deberán subir su Certificado de Estudios y DNI en formato PDF con un peso max. de 2mb"

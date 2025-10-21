@@ -7,15 +7,11 @@
             <a-radio-button value="contenido" style="border-radius: 9px 0px 0px 9px;">Respuestas</a-radio-button>
             <a-radio-button value="archivos" style="border-radius: 0px 9px 9px 0px;">Archivos</a-radio-button>
           </a-radio-group>
-          {{ tabPosition }}
           <a-input v-model:value="buscar" style="max-width: 260px; border-radius: 6px; height: 32px;" placeholder="Buscar">
               <template #prefix>
                   <span style="color: #0000009d; margin-top: -6px;"><SearchOutlined/></span>
               </template>
           </a-input>
-              <!-- <div><a-button type="primary" @click="visible = true" style="background: #476175; border: none; border-radius: 5px;">subir Ides</a-button></div>
-              -->
-                <!-- <p>proceso: {{ proceso }}</p> -->
         </div>
     
     
@@ -74,6 +70,7 @@
             :data-source="identificaciones"
             :key="id"
             size="small"
+            :scroll="{ y: 'calc(100vh - 300px)' }"
             :pagination="false"
             style="scale: .7rem;"
             > 
@@ -85,7 +82,6 @@
     
                 <template v-if="column.dataIndex === 'observaciones'">
                     <a-tag v-if="record.dni === null && record.ide_litho !== null" color="pink"> Sin DNI</a-tag>
-                    <a-tag v-if="record.aula === ''" color="purple"> Sin aula</a-tag>
                     <a-tag v-if="record.len_doc !== 8 && record.ide_litho !== null && record.dni !== null" color="green"> Dni erroneo</a-tag>
                     <a-tag v-if="record.vaula === 0" color="blue"> Error de aula</a-tag>
                     <a-tag v-if="record.tipo === '' && record.ide_litho !== null" color="yellow"> Sin tipo</a-tag>
@@ -97,43 +93,38 @@
                 </template>
     
                 <template v-if="column.dataIndex === 'acciones'">
-                    <a-button type="success" class="mr-1" style="color: #476175;" size="small" @click="verFicha(record.id)">
-                        <template #icon><EyeOutlined/></template>
-                    </a-button>
-                    <a-button @click="abrirEditar(record)" class="mr-1" style="color: blue;" size="small">
-                        <template #icon><form-outlined/></template>
-                    </a-button>
-                    <a-popconfirm
-                        title="¿Estas seguro de eliminar?"
-                        @confirm="eliminar(record)"
-                        >
-                        <a-button shape="" size="small" style="color: crimson;">
-                            <template #icon><delete-outlined/></template>
+                    <div style="display: flex; gap: 3px; padding-right: 0px;">                      
+                        <a-button size="small"  @click="verFicha(record.id)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: gray; display: flex; align-items: center;">
+                            <eye-outlined/>
                         </a-button>
-                    </a-popconfirm>
-    
+
+                        <a-button size="small"  @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #af7200; display: flex; align-items: center;">
+                            <form-outlined/>
+                        </a-button>
+                        <a-popconfirm
+                            title="¿Estas seguro de eliminar?"
+                            @confirm="eliminar(record)"
+                            >
+                            <a-button size="small"  @click="eliminar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: crimson; display: flex; align-items: center;">
+                                    <delete-outlined/>
+                            </a-button>
+                        </a-popconfirm>
+                    </div>
+
                 </template> 
             </template>
         </a-table> 
         </div>
     
-        <a-modal v-model:visible="visible" title="Cargar fichas de respuestas" @ok="okey" :centered="true" style="max-height: calc(100vh - 100px); overflow-x: scroll; cursor: pointer;">
+        <a-modal v-model:open="visible" title="Cargar fichas de respuestas" @ok="okey" :centered="true" style="max-height: calc(100vh - 100px); overflow-x: scroll; cursor: pointer;">
           <div class=" flex justify-between mb-4">
-            <a-select
-                class="mb-2"
-                style="width: 75%;"
-                v-model:value="area">
-                <a-select-option :value="1">Biomédicas</a-select-option>
-                <a-select-option :value="2">Ingenierías</a-select-option>    
-                <a-select-option :value="3">Sociales</a-select-option>    
-            </a-select>
-            <a-input style="width: 23%;" v-model:value="aula" placeholder="Aula"/>
+            <!-- <a-input style="width: 23%;" v-model:value="aula" placeholder="Aula"/> -->
           </div>
           <a-upload-dragger
             v-model:fileList="fileList"
             name="file"
             :multiple="true"
-            :action="baseUrl + '/calificacion/carga-res/'+proceso+'/'+area+aula"
+            :action="baseUrl + '/calificacion/carga-res/'+proceso+'/'"
             @change="handleChange"
             @drop="handleDrop"
             list-type="picture"
@@ -169,7 +160,7 @@
             </a-menu>
         </div>
 
-        <a-modal v-model:visible="modalficha" :footer="false" style="width: 880px;">
+        <a-modal v-model:open="modalficha" :centered="true" :footer="false" style="scale: .85; width: 880px;">
             <VerFicha :id_resp="id_respuesta"/>
         </a-modal>
     
@@ -199,14 +190,16 @@
     // const area = ref(null); 
     
     const handleChange = (info) => {
-      const status = info.file.status;
-      if (status !== 'uploading') { console.log(info.file, fileList.value); }
-      if (status === 'done') {
-        message.success(`${info.file.name} archivo(s) subido(s) exitosamente.`);
-        getArchivos();
-      } else if (status === 'error') {
-        message.error(`${info.file.name} falló al subir.`);
-      }
+        const status = info.file.status;
+        if (status !== 'uploading') { console.log(info.file, fileList.value); }
+        if (status === 'done') {
+            message.success(`${info.file.name} archivo(s) subido(s) exitosamente.`);
+            getArchivos();
+            getIdes();
+            visible.value = false;
+        } else if (status === 'error') {
+            message.error(`${info.file.name} falló al subir.`);
+        }
     };
     
     const okey = () => { fileList.value = null;};
@@ -221,6 +214,8 @@
       event.preventDefault();
     };
     
+
+
     const handleMenuItemClick = ( opcion ) => {
         if(opcion === '1'){ visible.value = true; showContextMenu.value = false;}
     };
@@ -285,20 +280,18 @@ const verFicha = (id_res) => {
         { title: 'Area', dataIndex: 'area',},
         { title: 'Fecha', dataIndex: 'fecha', align:'center'},
         { title: 'Registros', dataIndex: 'registros', align:'center'},
-        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
-    
+        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'}
     ];
     
     const columnsIdes = [
         { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
-        { title: 'N° lectura', dataIndex: 'n_lectura', align:'center'},
-        { title: 'DNI', dataIndex: 'dni', align:'center'},
-        { title: 'Aula', dataIndex: 'aula', width:'60px', align:"center"},
-        { title: 'Tip', dataIndex: 'tipo', width:'60px', align:"center"},
-        { title: 'Litho', dataIndex: 'res_litho', align:'center'},
-        { title: 'Respuestas', dataIndex: 'respuestas', align:'center'},
+        { title: 'N° lectura', dataIndex: 'n_lectura', align:'center', width:'80px'},
+        { title: 'DNI', dataIndex: 'dni', align:'center', width:'90px'},
+        { title: 'Tip', dataIndex: 'tipo', width:'60px', align:"center",width:'40px'},
+        { title: 'Litho', dataIndex: 'res_litho', align:'center',width:'80px'},
+        { title: 'Respuestas', dataIndex: 'respuestas', align:'left' },
         { title: 'Observaciones', dataIndex: 'observaciones', align:'center'},
-        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
+        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'106px'},
     ];
     
     const eliminar = (item) => {
