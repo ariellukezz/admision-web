@@ -50,8 +50,8 @@
                 <img src="http://admision.test/imagenes/logo_poder_judicial.png" width="64">
             </td>
             <td style="text-align:center; font-size:16px; border:none;">
-                <div>CORTE SUPERIOR DE JUSTICIA DE PUNO</div>
-                <div style="text-align:center; font-size:12px; border:none;">PROCESO DE SELECCIÓN PERSONAL 728 A PLAZO INDETERMINADO N° 001-2025-UE-PUNO</div>
+                <div>UNIVERSIDAD NACIONAL DEL ALTIPLANO DE PUNO</div>
+                <div style="text-align:center; font-size:12px; border:none;">RESULTADOS DEL EXAMEN SIMULACRO 2025</div>
                 <div></div>
             </td>
             <td style="text-align:right; font-size:11px; width:90px; border:none;">
@@ -79,14 +79,14 @@
           <div style="width: 100%; text-align:center; font-size:10pt;">
               <div>
                   <div><span style=" font-size:11pt; letter-spacing: .05rem; text-transform:uppercase">
-                      DEPENDENCIA {{ $item['unidad'] }}    
+                       {{ $item['unidad'] }}    
                   </span></div>
 
                     <div style="font-size: 12pt; font-weight:bold;">
-                      <span style="text-transform: uppercase"> {{ $item['puesto'] }} </span>
+                      <span style="text-transform: uppercase"> GRADO {{ $item['puesto'] }} </span>
                     </div>
                     <div style="font-size: 12pt;">
-                      <span style=""> CÓDIGO DE PLAZA {{ $item['cod_puesto'] }} </span>
+                      {{-- <span style=""> CÓDIGO DE PLAZA {{ $item['cod_puesto'] }} </span> --}}
                     </div>
 
               </div>
