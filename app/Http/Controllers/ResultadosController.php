@@ -1286,7 +1286,7 @@ class ResultadosController extends Controller
                 ORDER BY ide_lectura ASC
             ) AS participantes
             LEFT JOIN res ON res.litho = participantes.litho
-            -- Quitamos el WHERE que filtraba por puntaje > 0
+            -- Quitamos el WHERE que filtraba por puntaje > 0 
         ");
 
         return Excel::download(new ResultadosExport($data), 'reporte.xlsx');
