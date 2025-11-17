@@ -884,7 +884,7 @@ class ResultadosController extends Controller
             $puntaje = 0;
             $correctas = $patron->respuestas; 
 
-            for ($i = 0; $i < 30; $i++) {
+            for ($i = 0; $i < 60; $i++) {
 
                 $excepcion = collect($excepciones)->firstWhere('nro_pregunta', $i+1);
 
@@ -1136,7 +1136,7 @@ class ResultadosController extends Controller
     public function getPuntajes(Request $request){
 
         $res = DB::select("SELECT  participantes.*, 
-        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND((20*res.puntaje)/30, 2)) AS puntaje,
+        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND(res.puntaje, 3) AS puntaje,
         IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
             FROM ( 
                 SELECT par.dni, par.paterno, par.materno, par.nombres, 
@@ -1166,7 +1166,7 @@ class ResultadosController extends Controller
         $convocatoria = Simulacro::find($sim);
 
         $estudiantesPorPrograma = DB::select("SELECT  participantes.*, 
-        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND((20*res.puntaje)/30, 2)) AS puntaje,
+        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND(res.puntaje, 3) AS puntaje,
         IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
             FROM ( 
                 SELECT par.dni, par.paterno, par.materno, par.nombres, 
@@ -1275,7 +1275,7 @@ class ResultadosController extends Controller
     {
         $data = DB::select("SELECT  
                 participantes.*, res.litho as litho_res, res.n_lectura as lectura_res, res.respuestas,
-                IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND((20*res.puntaje)/30, 2)) AS puntaje
+                IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, ROUND(res.puntaje, 3) AS puntaje
             FROM ( 
                 SELECT 
                     par.dni, par.paterno, par.materno, par.nombres, par.cod_puesto,

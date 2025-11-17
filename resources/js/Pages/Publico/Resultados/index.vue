@@ -35,7 +35,6 @@
 
       <div>
         <div class="flex">
-
           <div  v-if="props.admin === 1" class="mr-1">
             <a-button @click="elimarArchivo(documento.id)" size="small" style=" height: 30px; background: crimson; color: white; border: none;">
               <div class="flex">
