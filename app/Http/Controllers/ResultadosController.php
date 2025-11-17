@@ -1242,14 +1242,14 @@ class ResultadosController extends Controller
 
         $puestos = DB::table('participantes')
         ->select('puesto as label', 'puesto as value')
-        ->where('id_proceso',15)
+        ->where('id_proceso',14)
         ->distinct()
         ->orderBy('puesto')
         ->get();
 
         $codigos = DB::table('participantes')
         ->select('cod_puesto as label', 'cod_puesto as value')
-        ->where('id_proceso',15)
+        ->where('id_proceso',14)
         ->distinct()
         ->orderBy('cod_puesto')
         ->get();
@@ -1258,7 +1258,7 @@ class ResultadosController extends Controller
         ->select('cod_examen as label', 'cod_examen as value')
         ->groupBy('cod_examen')
         ->distinct()
-        ->where('id_proceso',15)
+        ->where('id_proceso',14)
         ->orderBy('cod_examen')
         ->get();
 
