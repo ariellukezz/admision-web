@@ -1136,7 +1136,7 @@ class ResultadosController extends Controller
     public function getPuntajes(Request $request){
 
         $res = DB::select("SELECT  participantes.*, 
-        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje, 3 AS puntaje,
+        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje AS puntaje,
         IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
             FROM ( 
                 SELECT par.dni, par.paterno, par.materno, par.nombres, 
@@ -1166,7 +1166,7 @@ class ResultadosController extends Controller
         $convocatoria = Simulacro::find($sim);
 
         $estudiantesPorPrograma = DB::select("SELECT  participantes.*, 
-        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje, 3 AS puntaje,
+        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje AS puntaje,
         IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
             FROM ( 
                 SELECT par.dni, par.paterno, par.materno, par.nombres, 
