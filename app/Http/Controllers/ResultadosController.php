@@ -1285,7 +1285,7 @@ class ResultadosController extends Controller
                 WHERE par.id_proceso = 16
                 ORDER BY ide_lectura ASC
             ) AS participantes
-            LEFT JO IN res ON res.litho = participantes.litho
+            LEFT JOIN res ON res.litho = participantes.litho
             -- Quitamos el WHERE que filtraba por puntaje > 0
         ");
 
