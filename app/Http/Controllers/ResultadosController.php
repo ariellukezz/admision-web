@@ -1282,7 +1282,7 @@ class ResultadosController extends Controller
                     par.puesto,par.unidad, ide.aula,ide.litho, ide.camp2 AS ide_lectura,par.cod_examen
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
-                WHERE par.id_proceso = 16
+                WHERE par.id_proceso = 14
                 ORDER BY ide_lectura ASC
             ) AS participantes
             LEFT JOIN res ON res.litho = participantes.litho
