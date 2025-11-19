@@ -1,7 +1,7 @@
 <template>
 <div style="" @click="clicIzquierdo" @contextmenu.prevent="handleContextMenu">
     <div class="pl-4" style="background: white; width: 100%; min-height: calc(100vh - 190px); border-radius: 12px;" >
-        
+
     <div class="flex justify-between mt-2">
         <a-radio-group v-model:value="tabPosition" style="margin-left: -3px;">
         <a-radio-button value="contenido" style="border-radius: 9px 0px 0px 9px;">Respuestas</a-radio-button>
@@ -15,14 +15,14 @@
     </div>
 
     <div v-if="tabPosition === 'archivos'" class="mt-3 mb-3" style="margin-left: -5px;">
-    <a-table 
+    <a-table
         :columns="columnsArchivos"
         :data-source="archivos"
         :key="id"
         size="small"
         :pagination="false"
         style="scale: .7rem;"
-        > 
+        >
         <template #bodyCell="{ column, index, record }">
 
             <template v-if="column.dataIndex === 'nro'">
@@ -57,21 +57,21 @@
                     </a-button>
                 </a-popconfirm>
 
-            </template> 
+            </template>
         </template>
-    </a-table> 
+    </a-table>
     </div>
 
 
     <div v-if="tabPosition === 'contenido' " class="mt-3 mb-3" style="margin-left: -5px;">
-    <a-table 
+    <a-table
         :columns="columnsIdes"
         :data-source="identificaciones"
         :key="id"
         size="small"
         :pagination="false"
         style="scale: .7rem;"
-        > 
+        >
         <template #bodyCell="{ column, index, record }">
 
             <template v-if="column.dataIndex === 'nro'">
@@ -94,9 +94,9 @@
                     </a-button>
                 </a-popconfirm>
 
-            </template> 
+            </template>
         </template>
-    </a-table> 
+    </a-table>
     </div>
 
     <a-modal v-model:open="visible" title="Cargar fichas de respuestas" @ok="okey" :centered="true" style="max-height: calc(100vh - 100px); overflow-x: scroll; cursor: pointer;">
@@ -113,7 +113,7 @@
             />
         </div>
         <div class="mb-3">
-            <a-select            
+            <a-select
                 v-model:value="selectCodigo"
                 style="width: 100%;"
                 placeholder="Selecciona un puesto"
@@ -135,9 +135,9 @@
             />
         </div>
 
-        
+
         </div>
-        
+
         <a-upload-dragger
         v-model:fileList="fileList"
         name="file"
@@ -155,7 +155,7 @@
         <p class="ant-upload-hint">
             Soporte para carga única o múltiple. Prohibido subir datos de la empresa u otros archivos prohibidos.
         </p>
-        </a-upload-dragger>  
+        </a-upload-dragger>
         <!-- {{ selectPuesto }} - {{ selectCodigo }} - {{ selectUnidad }} -->
     </a-modal>
     </div>
@@ -185,9 +185,9 @@
     </a-modal>
 
 
-</div>  
+</div>
 </template>
-    
+
 <script setup>
 import { defineProps, watch, ref, computed  } from 'vue';
 import axios from 'axios';
@@ -200,7 +200,7 @@ const baseUrl = window.location.origin;
 const tabPosition = ref('contenido')
 const fileList = ref([]);
 const id_respuesta = ref(null);
-const props = defineProps(['proceso']);    
+const props = defineProps(['proceso']);
 const visible = ref(false);
 const area = ref(1);
 
@@ -222,7 +222,7 @@ const handleChange = (info) => {
         setTimeout(() => {
         visible.value = false
         }, 300)
-    } 
+    }
     else if (status === 'error') {
         message.error(`${info.file.name} falló al subir.`)
     }
@@ -290,7 +290,7 @@ const selectCodigo = ref(null);
 const selectUnidad = ref(null);
 
 const getSelect = async () => {
-    axios.get("/calificacion/get-select-puestos")
+    axios.get("/calificacion/get-select-puestos/"+props.proceso)
     .then((response) => {
         puestos.value = response.data.puestos;
         codigos_puesto.value = response.data.codigos_puesto;
@@ -308,11 +308,11 @@ const getSelect = async () => {
 getSelect();
 
 let timeoutId;
-watch(buscar, ( newValue, oldValue ) => { 
+watch(buscar, ( newValue, oldValue ) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
-        getIdes() 
-    }, 300);    
+        getIdes()
+    }, 300);
 })
 
 const aula = ref("");
@@ -333,7 +333,7 @@ const columnsArchivos = [
     { title: 'Area', dataIndex: 'area',},
     { title: 'Fecha', dataIndex: 'fecha', align:'center'},
     { title: 'Registros', dataIndex: 'registros', align:'center'},
-    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},  
+    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
 ];
 
 const columnsIdes = [
@@ -344,13 +344,13 @@ const columnsIdes = [
     { title: 'Cod examen', dataIndex: 'cod_examen', align:'center'},
     { title: 'Respuestas', dataIndex: 'respuestas', align:'center'},
     { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
-    
+
 ];
 
 const eliminar = (item) => {
     axios.get("eliminar-archivo/"+item.id).then((result) => {
         getArchivos();
-        getIdes();     
+        getIdes();
         notificacion('error', result.data.titulo, result.data.mensaje );
     });
 }
@@ -358,4 +358,3 @@ const eliminar = (item) => {
 const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
 
 </script>
-    
