@@ -1274,20 +1274,30 @@ class ResultadosController extends Controller
     public function descargarExcel(Request $request)
     {
         $data = DB::select("SELECT
-                participantes.*, res.litho as litho_res, res.n_lectura as lectura_res, res.respuestas,
-                IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje
+                distinct
+                participantes.*,
+                r.litho_res,
+                r.lectura_res,
+                r.respuestas,
+                r.puntaje
             FROM (
                 SELECT
                     par.dni, par.paterno, par.materno, par.nombres, par.cod_puesto,
-                    par.puesto,par.unidad, ide.aula,ide.litho, ide.camp2 AS ide_lectura,par.cod_examen
+                    par.puesto, par.unidad, ide.aula, ide.litho, ide.camp2 AS ide_lectura, par.cod_examen
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
                 WHERE par.id_proceso = $request->id_proceso
-                ORDER BY ide_lectura ASC
-            ) AS participantes
-            LEFT JOIN res ON res.litho = participantes.litho
-            -- Quitamos el WHERE que filtraba por puntaje > 0
-        ");
+            ) participantes
+            LEFT JOIN (
+                SELECT
+                    litho,
+                    MAX(n_lectura) AS lectura_res,
+                    MAX(respuestas) AS respuestas,
+                    MAX(IF(puntaje <= 0 OR puntaje IS NULL, 0, puntaje)) AS puntaje,
+                    MAX(litho) AS litho_res
+                FROM res
+                GROUP BY litho
+            ) r ON r.litho = participantes.litho");
 
         return Excel::download(new ResultadosExport($data), 'reporte.xlsx');
     }
