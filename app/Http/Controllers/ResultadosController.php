@@ -1169,12 +1169,18 @@ class ResultadosController extends Controller
         IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje,
         IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion
             FROM (
-                SELECT par.dni, par.paterno, par.materno, par.nombres,
-                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa,
-                ide.litho, ide.id AS id_ide
-                FROM participantes par
-                LEFT JOIN ides ide ON ide.dni = par.dni
-                WHERE par.id_proceso = ?
+                 SELECT par.dni, par.paterno, par.materno, par.nombres,
+                      CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa,
+                  ide.litho, ide.id AS id_ide
+                  FROM participantes par
+                    LEFT JOIN ides ide
+                      ON ide.dni = par.dni
+                    AND ide.id_archivo IN (
+                          SELECT id
+                          FROM archivos_simulacro arc
+                          WHERE arc.id_simulacro = 16
+                    )
+                  WHERE par.id_proceso = ?
             ) AS participantes
             LEFT JOIN res ON res.litho = participantes.litho
             WHERE res.puntaje > 0
