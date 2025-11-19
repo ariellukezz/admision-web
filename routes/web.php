@@ -787,3 +787,4 @@ Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::c
 
 require __DIR__.'/auth.php';
 require __DIR__.'/segundas.php';
+require __DIR__.'/adminv2.php';

@@ -213,6 +213,12 @@ const menuItems = [
         route: 'admin-observados'
       },
       {
+        key: 'observados v2',
+        icon: SettingFilled,
+        label: 'Observados v2',
+        route: 'adminv2.observados'
+      },
+      {
         key: 'estudiantes',
         icon: SettingFilled,
         label: 'Estudiantes',
