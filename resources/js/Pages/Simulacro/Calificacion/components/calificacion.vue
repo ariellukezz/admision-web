@@ -8,15 +8,15 @@
                 <div class="flex" style="gap:5px">
                     <div v-if="resultados != []" class="mt-0 mb-4">
                         <a-button style="width: 140px; background:crimson; border:none; color:white;" @click="descargar()">Descargar</a-button>
-                    </div> 
+                    </div>
 
                     <div class="mt-0 mb-4">
                         <a-button style="width: 140px; background:green; border:none; color:white;" @click="descargarExcel()" >Descargar Excel</a-button>
-                    </div> 
+                    </div>
                 </div>
-            </div>  
-        </div>   
-        
+            </div>
+        </div>
+
 
         <a-table :dataSource="resultados" :columns="columns" size="small" :pagination="false">
             <template #bodyCell="{ column, index, record }">
@@ -29,10 +29,10 @@
                     </div>
 
                 </template>
-            </template>   
-            
-        </a-table> 
-        
+            </template>
+
+        </a-table>
+
 
         <a-modal title="Modal de calificación" v-model:open="visible" :footer="false">
 
@@ -43,7 +43,7 @@
                     <a-select-option value="cod_puesto">COD PUESTO</a-select-option>
                     <a-select-option value="unidad">UNIDAD</a-select-option>
                 </a-select>
-            </div> -->  
+            </div> -->
 
             <div style="display:flex; gap:16px;" class="mt-4">
                 <div>
@@ -70,12 +70,12 @@
                 <label>Ponderacion</label>
                 <div>
                     <a-auto-complete
-                        v-model:value="ponderacion"                
+                        v-model:value="ponderacion"
                         :options="ponderaciones"
                         @select="onSelectPonderacion"
                         style="width:100%;"
                         >
-                        <a-input 
+                        <a-input
                             placeholder="Ponderación ..."
                             v-model:value="buscarPonderacion"
                         >
@@ -85,7 +85,7 @@
                         </a-input>
                     </a-auto-complete>
                 </div>
-            
+
             </div>
 
             <!-- <div>{{ props.proceso }}</div> -->
@@ -102,7 +102,7 @@
 
     </div>
 </template>
-        
+
 <script setup>
 import { watch, computed, defineProps, ref, unref } from 'vue';
 import { DownOutlined, SearchOutlined, EyeOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons-vue';
@@ -145,9 +145,9 @@ const getPonderaciones =  async () => {
 }
 
 const califar =  async () => {
-    let res = await axios.post("/calificar-examen", 
-    { 
-        id_simulacro: props.proceso, 
+    let res = await axios.post("/calificar-examen",
+    {
+        id_simulacro: props.proceso,
         id_ponderacion: ponderacion.value.key,
         correctas: correctas.value,
         incorrectas: incorrectas.value,
@@ -163,7 +163,7 @@ const getPuntajes =  async () => {
 }
 
 getPuntajes();
-const visible = ref(false);     
+const visible = ref(false);
 getPonderaciones();
 
 const formatPuntaje = (puntaje) =>  {
@@ -177,12 +177,12 @@ const columns = ref([
     { title: 'Ap. Paterno', dataIndex: 'paterno'},
     { title: 'Ap. Materno', dataIndex: 'materno'},
     { title: 'Nombres', dataIndex: 'nombres' },
-    { title: 'Puntaje', dataIndex: 'puntaje', align:'center'},    
+    { title: 'Puntaje', dataIndex: 'puntaje', align:'center'},
 
 ]);
 
 const getSelect = async () => {
-    axios.get("/calificacion/get-select-puestos")
+    axios.get("/calificacion/get-select-puestos/"+props.proceso)
     .then((response) => {
         puestos.value = response.data.puestos;
         codigos_puesto.value = response.data.codigos_puesto;
@@ -233,8 +233,8 @@ const descargar = async (items) => {
 const descargarExcel = async () => {
   try {
     const response = await axios.get('calificacion/descargar-excel', {
-      params: { descargar: 1 },
-      responseType: 'blob' 
+      params: { descargar: 1, id_proceso: props.proceso },
+      responseType: 'blob'
     });
 
     if (response.status !== 200) {
@@ -258,4 +258,4 @@ const descargarExcel = async () => {
     console.error('Error al descargar el archivo:', error);
   }
 };
-</script> 
+</script>

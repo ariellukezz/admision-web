@@ -367,7 +367,7 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
 
     Route::post('/control-biometrico', [IngresoController::class, 'biometrico']);
     Route::post('/crear_correo_institucional', [IngresoController::class, 'crearCorreo']);
-    
+
 
 
     Route::get('/impresion', fn () => Inertia::render('Revisor/impresion'))->name('revisor-impresion-inscripcion');
@@ -494,20 +494,20 @@ Route::prefix('calificacion')->group(function () {
     Route::get('/calificacion', fn () => Inertia::render('Simulacro/Calificacion/lecturas'))->name('simulacro-calificacion');
     Route::post('/carga-ide', [ResultadosController::class, 'cargaArchivoIde']);
     Route::post('/actualizar-ide', [ResultadosController::class, 'actualizarIde']);
-    
+
 
     //TEMP
     Route::post('/carga-ide/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoIde'])->withoutMiddleware(['web']);
     Route::post('/carga-res/{proceso}', [ResultadosController::class, 'cargaArchivoRes'])->withoutMiddleware(['web']);
     Route::post('/carga-pat/{proceso}', [ResultadosController::class, 'cargaArchivoPat'])->withoutMiddleware(['web']);
 
-    Route::get('/get-select-puestos', [ResultadosController::class, 'selectPuestos']);
+    Route::get('/get-select-puestos/{id_proceso}', [ResultadosController::class, 'selectPuestos']);
     // Route::post('/carga-res', [ResultadosController::class, 'cargaArchivoRes']);
     Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
 
     Route::get('/descargar-excel', [ResultadosController::class, 'descargarExcel']);
 
-    
+
 
 
 });

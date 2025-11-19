@@ -101,7 +101,7 @@ class ResultadosController extends Controller
             $tipo = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
 
-            $archivo->move(storage_path('app/calificar/'.$proceso.'/ides/'), $nombreArchivo); 
+            $archivo->move(storage_path('app/calificar/'.$proceso.'/ides/'), $nombreArchivo);
 
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
@@ -135,7 +135,7 @@ class ResultadosController extends Controller
             $nombreArchivo = $archivo->getClientOriginalName();
             $areanombre = "";
             $archivo->move(storage_path('app/calificar/'.$proceso.'/resp/'), $nombreArchivo);
-            
+
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
                 'tipo' => $extension,
@@ -163,8 +163,8 @@ class ResultadosController extends Controller
 
             $tipo = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
-            $archivo->move(storage_path('app/calificar/'.$proceso.'/patron/'), $nombreArchivo); 
-            
+            $archivo->move(storage_path('app/calificar/'.$proceso.'/patron/'), $nombreArchivo);
+
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
                 'tipo' => $extension,
@@ -330,7 +330,7 @@ class ResultadosController extends Controller
             $campo3 = substr(substr($linea, 26, 9),3,5);
             $campo4 = substr($linea, 38, 1);
             $campo5 = substr($linea, 40);
-            
+
             // Descomposición de campo5
             $litho = substr($campo5, 0, 6);
             $tipo = substr($campo5, 6, 1);
@@ -419,7 +419,7 @@ class ResultadosController extends Controller
 
     }
 
-    
+
     //ARCHIVOS
     public function getArchivosIde(Request $request){
 
@@ -433,10 +433,10 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-      
+
           $this->response['estado'] = true;
           $this->response['datos'] = $res;
-          return response()->json($this->response, 200);            
+          return response()->json($this->response, 200);
     }
 
     //ARCHIVOS
@@ -452,10 +452,10 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-        
+
             $this->response['estado'] = true;
             $this->response['datos'] = $res;
-            return response()->json($this->response, 200);            
+            return response()->json($this->response, 200);
     }
 
 
@@ -471,13 +471,13 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-        
+
             $this->response['estado'] = true;
             $this->response['datos'] = $res;
-            return response()->json($this->response, 200);            
+            return response()->json($this->response, 200);
     }
 
-    
+
     public function getIdes(Request $request){
 
         $res = Ide::select(
@@ -490,7 +490,7 @@ class ResultadosController extends Controller
             \DB::raw('(ides.aula REGEXP \'^[0-9]+$\' ) AS vaula'),
             \DB::raw('IF(participantes.id IS NULL, "Participante no encontrado", "") AS participa')
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','ides.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','ides.id_archivo')
             ->leftJoin('participantes', 'ides.dni', '=', 'participantes.dni')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where(function ($query) use ($request) {
@@ -500,10 +500,10 @@ class ResultadosController extends Controller
                     ->orWhere('ides.dni', 'LIKE', '%' . $request->term . '%');
             })->orderBy('ides.id', 'ASC')
             ->paginate(2000);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
     public function getRes(Request $request){
@@ -524,7 +524,7 @@ class ResultadosController extends Controller
             // \DB::raw('if(res.aula = ides.aula, 1, 0) as c_aula'),
             'ides.id as id_ides'
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo')
             ->leftJoin('ides', 'res.litho', '=', 'ides.litho')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where('archivos_simulacro.categoria','=', 'respuesta')
@@ -535,10 +535,10 @@ class ResultadosController extends Controller
                     ->orWhere('ides.dni', 'LIKE', '%' . $request->term . '%');
             })->orderBy('res.id', 'ASC')
             ->paginate(2000);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
     public function getPat(Request $request){
@@ -550,7 +550,7 @@ class ResultadosController extends Controller
             'res.respuestas',
             'archivos_simulacro.cod_examen'
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where('archivos_simulacro.categoria','=', 'patron')
             ->where(function ($query) use ($request) {
@@ -558,15 +558,15 @@ class ResultadosController extends Controller
                     ->orWhere('res.litho', 'LIKE', '%' . $request->term . '%');
             })->orderBy('res.id', 'ASC')
             ->paginate(500);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
 
     public function getParticipantesSimulacro(Request $request){
-      
+
         $res = DB::table('participantes')
         ->select('participantes.*', DB::raw('if(ides.id is null, 0, ides.id) as id_ide'))
         ->leftjoin('ides','ides.dni','participantes.dni')
@@ -575,36 +575,36 @@ class ResultadosController extends Controller
             return $query
                 ->orWhere('participantes.dni', 'LIKE', '%' . $request->term . '%')
                 ->orWhere('nombres', 'LIKE', '%' . $request->term . '%')
-                ->orWhere('paterno', 'LIKE', '%' . $request->term . '%');   
+                ->orWhere('paterno', 'LIKE', '%' . $request->term . '%');
         })
         ->orderBy('paterno', 'ASC')
         ->paginate(10000);
-      
+
           $this->response['estado'] = true;
           $this->response['datos'] = $res;
-          return response()->json($this->response, 200);            
+          return response()->json($this->response, 200);
     }
 
 
 
     public function eliminarArchivo($id)
     {
-        
+
         $archivo = ArchivoSimulacro::find($id);
-    
+
         if (!$archivo) {
             $this->response['titulo'] = 'ERROR';
             $this->response['mensaje'] = 'Archivo no encontrado.';
             $this->response['estado'] = false;
             return response()->json($this->response, 404);
         }
-    
+
         $archivoNombre = $archivo->nombre;
         $filePath = storage_path($archivo->url);
-    
+
         if (File::exists($filePath)) {
             File::delete($filePath);
-    
+
             if (File::exists($filePath)) {
                 $this->response['titulo'] = 'ERROR';
                 $this->response['mensaje'] = 'No se pudo eliminar el archivo físico.';
@@ -612,9 +612,9 @@ class ResultadosController extends Controller
                 return response()->json($this->response, 500);
             }
         }
-    
+
         $archivo->delete();
-    
+
         $this->response['titulo'] = '¡REGISTRO ELIMINADO!';
         $this->response['mensaje'] = 'Archivo ' . $archivoNombre . ' eliminado correctamente.';
         $this->response['estado'] = true;
@@ -626,21 +626,21 @@ class ResultadosController extends Controller
     public function subirIdeBD($archivo, $id)
     {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    
+
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $campo1 = substr($linea, 0, 21);
             $campo2 = substr($linea, 3, 6);
             $campo3 = substr($linea, 24, 5);
             $campo4 = substr($linea, 38, 1);
             $campo5 = substr($linea, 40);
-    
+
             $litho = substr($campo5, 0, 6);
             $tipo = substr($campo5, 6, 1);
             $dni = substr($campo5, 7, 8);
             $aula = substr($campo5, 15, 3);
-    
+
             if (strlen($campo1) > 1) {
                 $datosParaInsercion[] = [
                     'camp1' => $campo1,
@@ -655,17 +655,17 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Ide::insert($datosParaInsercion);
     }
 
     public function subirResBD($archivo, $id)
-    { 
+    {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $now = now();
 
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $c1 = substr($linea, 0, 3);
             $lectura = substr($linea, 3, 6);
@@ -674,11 +674,11 @@ class ResultadosController extends Controller
             $c5 = substr($linea, 17,4);
             $c6 = substr($linea, 24,4);
             $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));    
+            $c8 = trim(substr($linea, 38,1));
             $litho = substr($linea, 40, 6);
             $tipo = substr($linea, 46, 1);
             $respuestas = substr($linea, 47, 60);
-    
+
             if (strlen($c1) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
@@ -698,16 +698,16 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Resp::insert($datosParaInsercion);
     }
 
     public function subirPatBD($archivo, $id)
-    { 
+    {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    
+
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $c1 = substr($linea, 0, 3);
             $lectura = substr($linea, 3, 6);
@@ -716,11 +716,11 @@ class ResultadosController extends Controller
             $c5 = substr($linea, 17,4);
             $c6 = substr($linea, 24,4);
             $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));    
+            $c8 = trim(substr($linea, 38,1));
             $litho = substr($linea, 40, 6);
             $tipo = substr($linea, 46, 1);
             $respuestas = substr($linea, 47, 60);
-    
+
             if (strlen($c1) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
@@ -738,7 +738,7 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Resp::insert($datosParaInsercion);
     }
 
@@ -763,7 +763,7 @@ class ResultadosController extends Controller
             ->leftJoin('ides', 'res.litho', '=', 'ides.litho')
             ->leftJoin('participantes as pex', 'pex.dni', '=', 'ides.dni')
             ->where('res.id', $id)
-            ->first(); 
+            ->first();
 
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
@@ -804,7 +804,7 @@ class ResultadosController extends Controller
             if($line->tipo == 'R'){ $correctas = $patrones[2]->respuestas; }
             if($line->tipo == 'S'){ $correctas = $patrones[3]->respuestas; }
             if($line->tipo == 'T'){ $correctas = $patrones[4]->respuestas; }
-            
+
             for ($i = 0; $i < 60; $i++) {
                 if(strlen($line->respuestas) == 60 && strlen($correctas) == 60 ){
                     $caracterResp = $line->respuestas[$i];
@@ -823,7 +823,7 @@ class ResultadosController extends Controller
                     $comparacionActual = $comparacionActual.$caracterResp;
                     $puntaje = $puntaje + $puntuacion;
                 }
-        
+
             }
 
             $resp = Resp::find($line->id);
@@ -854,7 +854,7 @@ class ResultadosController extends Controller
         $pond = $request->id_ponderacion;
 
         $ponderaciones = DB::select("SELECT numero, ponderacion FROM ponderacion WHERE id_ponderacion_simulacro = $pond");
-       
+
         $patrones = DB::select("SELECT i.respuestas, asim.cod_examen FROM res i
         JOIN archivos_simulacro asim ON asim.id = i.id_archivo
         JOIN simulacro sim ON sim.id = asim.id_simulacro
@@ -865,7 +865,7 @@ class ResultadosController extends Controller
             JOIN archivos_simulacro asim ON asim.id = re.id_archivo AND asim.categoria = 'respuesta'
             JOIN simulacro sim ON sim.id = asim.id_simulacro
             LEFT JOIN ides i ON i.litho = re.litho AND sim.id = $id_sim
-            LEFT JOIN participantes p ON p.dni = i.dni 
+            LEFT JOIN participantes p ON p.dni = i.dni
             AND asim.categoria = 'respuesta'");
 
         $comparaciones = [];
@@ -877,23 +877,23 @@ class ResultadosController extends Controller
 
             if($line->dni){
 
-                            $excepciones = DB::select( "SELECT nro_pregunta, accion, puntaje, claves_validas  FROM excepciones  
+                            $excepciones = DB::select( "SELECT nro_pregunta, accion, puntaje, claves_validas  FROM excepciones
                 WHERE cod_examen = ?",  [$line->cod_examen]);
 
             $comparacionActual = "";
             $puntaje = 0;
-            $correctas = $patron->respuestas; 
+            $correctas = $patron->respuestas;
 
             for ($i = 0; $i < 60; $i++) {
 
                 $excepcion = collect($excepciones)->firstWhere('nro_pregunta', $i+1);
 
                 if (strlen($line->respuestas) > 0 && strlen($correctas) >= 0) {
-                
+
                     $caracterResp = $line->respuestas[$i];
                     $caracterPatron = $correctas[$i];
                     $puntuacion = 0;
-            
+
                     if($excepcion){
                         switch ($excepcion->accion) {
                             case "todas_validas":
@@ -904,7 +904,7 @@ class ResultadosController extends Controller
                         }
 
                     }else{
-                        
+
                         if ($caracterResp === " ") {
                             $puntuacion = ($ponderaciones[$i]->ponderacion * $request->blanco);
                         } else {
@@ -915,7 +915,7 @@ class ResultadosController extends Controller
                             }
                         }
                     }
-            
+
                     $comparacionActual = $comparacionActual . $caracterResp;
                     $puntaje = $puntaje + $puntuacion;
                 }
@@ -951,9 +951,9 @@ class ResultadosController extends Controller
             'archivos_simulacro.nombre AS archivo',
             'ides.camp2 AS lectura',
             'ides.litho',
-            'ides.dni', 
-            'ides.tipo', 
-            'ides.aula', 
+            'ides.dni',
+            'ides.tipo',
+            'ides.aula',
             'participantes.dni AS dnip',
             \DB::raw('LENGTH(TRIM(ides.dni)) AS len_doc'),
             \DB::raw('(ides.dni REGEXP \'^[0-9]+$\' ) AS vdni'),
@@ -979,7 +979,7 @@ class ResultadosController extends Controller
             'archivos_simulacro.nombre AS archivo',
             'ides.camp2 AS lectura',
             'ides.litho',
-            'ides.dni',     
+            'ides.dni',
             'participantes.dni AS dnip'
         )
         ->join('archivos_simulacro', 'archivos_simulacro.id', '=', 'ides.id_archivo')
@@ -1007,7 +1007,7 @@ class ResultadosController extends Controller
         $rutaCarpeta = storage_path("/app/calificar/$sim/");
         file_put_contents(storage_path("/app/calificar/$sim/").'reporte.pdf', $output);
 
-        
+
         $rutaArchivo = "calificar/{$sim}/reporte.pdf";
 
         if (Storage::exists($rutaArchivo)) {
@@ -1026,7 +1026,7 @@ class ResultadosController extends Controller
                 ]
             );
         }
-        
+
 
     }
 
@@ -1035,21 +1035,21 @@ class ResultadosController extends Controller
     {
         $rutaFuente = storage_path('app/fonts/Arialnl.ttf');
 
-        $estudiantesPorPrograma = DB::select("SELECT dni, paterno, materno, nombres, puntaje, programa, apto AS ingreso 
+        $estudiantesPorPrograma = DB::select("SELECT dni, paterno, materno, nombres, puntaje, programa, apto AS ingreso
         FROM puntajes
         WHERE programa IS NOT NULL
         ORDER BY programa, puntaje DESC LIMIT 200");
-    
+
         $programaEstudiantes = [];
-    
+
         // Recorre los estudiantes y agrúpalos por programa
         foreach ($estudiantesPorPrograma as $estudiante) {
             $programaActual = $estudiante->programa;
-    
+
             if (!isset($programaEstudiantes[$programaActual])) {
                 $programaEstudiantes[$programaActual] = [];
             }
-    
+
             // Agrega el estudiante al programa actual
             $programaEstudiantes[$programaActual][] = [
                 'dni' => $estudiante->dni,
@@ -1060,21 +1060,21 @@ class ResultadosController extends Controller
                 'ingreso' => $estudiante->ingreso,
             ];
         }
-    
+
         foreach ($programaEstudiantes as $programa => $estudiantes) {
             // Cargar la vista 'Calificacion.puntajes' con los datos de los estudiantes
             $pdf = PDF::loadView('Calificacion.puntajes', compact('estudiantes','programa'));
             $pdf->getDomPDF()->set_option("isPhpEnabled", true);
             $pdf->getDomPDF()->set_option("isHtml5ParserEnabled", true);
             $pdf->setPaper('A4', 'portrait');
-        
+
             // Guardar el PDF en el almacenamiento de Laravel
             $rutaCarpeta = storage_path("/app/");
             $nombreArchivo = "reporte_{$programa}.pdf";
             $rutaCompleta = $rutaCarpeta . $nombreArchivo;
-        
+
             $pdf->save($rutaCompleta);
-    
+
         }
 
     }
@@ -1086,15 +1086,15 @@ class ResultadosController extends Controller
             $archivo = $request->file('file');
             $extension = $archivo->getClientOriginalExtension();
 
-            if (!in_array($extension, ['pdf'])) { 
+            if (!in_array($extension, ['pdf'])) {
                 return response()->json(['error' => 'El archivo debe ser de tipo pdf'], 400); }
 
             $tipoA = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
 
             $post = Postulante::where('nro_doc', $dni)->first();
-            
-            if( $tipo == print($tipo)){ 
+
+            if( $tipo == print($tipo)){
                 $archivo->move(public_path('documentos/8/inscripciones/certificados/'), $dni.$codigo.'.pdf');
                 $datosDocumento = [
                     'codigo' => $codigo,
@@ -1109,7 +1109,7 @@ class ResultadosController extends Controller
 
                 $postulante = Documento::create($datosDocumento);
 
-            } else { 
+            } else {
                 $archivo->move(public_path('documentos/8/inscripciones/dnis/'), $codigo.$dni.'.pdf');
                 $datosDocumento = [
                     'codigo' => $codigo,
@@ -1135,13 +1135,13 @@ class ResultadosController extends Controller
 
     public function getPuntajes(Request $request){
 
-        $res = DB::select("SELECT  participantes.*, 
+        $res = DB::select("SELECT  participantes.*,
         IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje,
-        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
-            FROM ( 
-                SELECT par.dni, par.paterno, par.materno, par.nombres, 
-                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa, 
-                ide.litho, ide.id AS id_ide 
+        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion
+            FROM (
+                SELECT par.dni, par.paterno, par.materno, par.nombres,
+                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa,
+                ide.litho, ide.id AS id_ide
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
                 WHERE par.id_proceso = ?
@@ -1165,13 +1165,13 @@ class ResultadosController extends Controller
     {
         $convocatoria = Simulacro::find($sim);
 
-        $estudiantesPorPrograma = DB::select("SELECT  participantes.*, 
+        $estudiantesPorPrograma = DB::select("SELECT  participantes.*,
         IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje,
-        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
-            FROM ( 
-                SELECT par.dni, par.paterno, par.materno, par.nombres, 
-                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa, 
-                ide.litho, ide.id AS id_ide 
+        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion
+            FROM (
+                SELECT par.dni, par.paterno, par.materno, par.nombres,
+                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa,
+                ide.litho, ide.id AS id_ide
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
                 WHERE par.id_proceso = ?
@@ -1181,7 +1181,7 @@ class ResultadosController extends Controller
             order by res.puntaje desc
             ;
         ", [$sim]);
-   
+
         $datos = collect($estudiantesPorPrograma)
             ->groupBy('programa')
             ->map(function ($items, $programa) {
@@ -1226,30 +1226,30 @@ class ResultadosController extends Controller
     public function actualizarIde(Request $request){
 
         $ide = Ide::find($request->id);
-        $ide->dni = $request->dni;              
+        $ide->dni = $request->dni;
         $ide->tipo = $request->tipo;
-        $ide->aula = $request->aula; 
+        $ide->aula = $request->aula;
         $ide->estado = $request->estado;
         $ide->save();
-        
+
         $this->response['estado'] = true;
         $this->response['datos'] = $ide;
         return response()->json($this->response, 200);
 
     }
 
-    public function selectPuestos(){
+    public function selectPuestos($id_proceso){
 
         $puestos = DB::table('participantes')
         ->select('puesto as label', 'puesto as value')
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->distinct()
         ->orderBy('puesto')
         ->get();
 
         $codigos = DB::table('participantes')
         ->select('cod_puesto as label', 'cod_puesto as value')
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->distinct()
         ->orderBy('cod_puesto')
         ->get();
@@ -1258,7 +1258,7 @@ class ResultadosController extends Controller
         ->select('cod_examen as label', 'cod_examen as value')
         ->groupBy('cod_examen')
         ->distinct()
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->orderBy('cod_examen')
         ->get();
 
@@ -1273,20 +1273,20 @@ class ResultadosController extends Controller
 
     public function descargarExcel(Request $request)
     {
-        $data = DB::select("SELECT  
+        $data = DB::select("SELECT
                 participantes.*, res.litho as litho_res, res.n_lectura as lectura_res, res.respuestas,
                 IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje
-            FROM ( 
-                SELECT 
+            FROM (
+                SELECT
                     par.dni, par.paterno, par.materno, par.nombres, par.cod_puesto,
                     par.puesto,par.unidad, ide.aula,ide.litho, ide.camp2 AS ide_lectura,par.cod_examen
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
-                WHERE par.id_proceso = 14
+                WHERE par.id_proceso = $request->id_proceso
                 ORDER BY ide_lectura ASC
             ) AS participantes
             LEFT JOIN res ON res.litho = participantes.litho
-            -- Quitamos el WHERE que filtraba por puntaje > 0 
+            -- Quitamos el WHERE que filtraba por puntaje > 0
         ");
 
         return Excel::download(new ResultadosExport($data), 'reporte.xlsx');
