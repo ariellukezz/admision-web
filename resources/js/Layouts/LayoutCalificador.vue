@@ -31,11 +31,11 @@ import Navigation from './NavigationCalificador.vue';
 import TopMenu from "./TopMenu.vue";
 import {ref, onMounted} from 'vue'
 
-const sidewidth = ref('230px')
+const sidewidth = ref('260px')
 
 const sidechange = () => {
   if( sidewidth.value === '0px'){
-    sidewidth.value = '230px';
+    sidewidth.value = '260px';
   }else{
     sidewidth.value = '0px';
   }

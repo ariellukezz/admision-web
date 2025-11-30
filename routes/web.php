@@ -485,7 +485,10 @@ Route::prefix('simulacros')->group(function () {
 
 
 
-Route::prefix('calificacion')->group(function () {
+Route::prefix('calificacion')->middleware('auth','calificador')->group(function () {
+
+    Route::get('/', fn () => Inertia::render('Simulacro/Calificacion/calificacion'))->name('calificar-cal') ;
+
     Route::get('/subir-resultado', fn () => Inertia::render('Simulacro/SubirResultado'));
     Route::get('/resultado-simulacro', fn () => Inertia::render('Simulacro/resultados'));
     Route::post('/subir-excel-simulacro', [ResultadosController::class, 'SubirResultado']);
@@ -506,8 +509,13 @@ Route::prefix('calificacion')->group(function () {
     Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
 
     Route::get('/descargar-excel', [ResultadosController::class, 'descargarExcel']);
-
+    Route::get('/ponderacion', fn () => Inertia::render('Simulacro/Calificacion/ponderacion'))->name('calificar-ponderacion');
     
+    Route::post('/save-ponderacion', [PonderacionController::class, 'save']);
+    Route::post('/get-ponderaciones', [PonderacionController::class, 'getPonderaciones']);
+    Route::post('/save-ponderacion-detalle', [PonderacionController::class, 'insertarPonderacion']);
+
+    Route::post('/get-ponderaciones-select', [PonderacionController::class, 'getPonderacionesSelect']);
 
 
 });
@@ -643,7 +651,7 @@ Route::middleware('redirect')->get('/', fn () => Inertia::render('Auth/Login'));
 //RUTAS TEMPORALES
 Route::get('/leer-ides', fn () => Inertia::render('Simulacro/Calificacion/components/leer-ide'));
 Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
-Route::get('/cal', fn () => Inertia::render('Simulacro/Calificacion/calificacion'))->name('calificar-cal') ;
+
 Route::post('/get-sim', [SimulacroController::class, 'getSimulacros']);
 Route::post('/get-archivos', [ResultadosController::class, 'getArchivosIde']);
 Route::post('/get-archivos-res', [ResultadosController::class, 'getArchivosRes']);
@@ -657,15 +665,10 @@ Route::post('/get-participantes-externo', [ResultadosController::class, 'getPart
 
 Route::get('/ver-ficha', fn () => Inertia::render('Simulacro/Calificacion/components/ficha'));
 
-Route::get('/ponderacion', fn () => Inertia::render('Simulacro/Calificacion/ponderacion'))->name('calificar-ponderacion');
+
 
 Route::post('/get-simulacros', [SimulacroController::class, 'getSimulacrosSelect']);
 Route::get('/get-ficha-respuesta/{id}', [ResultadosController::class, 'getFichaRespuesta']);
-Route::post('/save-ponderacion', [PonderacionController::class, 'save']);
-Route::post('/get-ponderaciones', [PonderacionController::class, 'getPonderaciones']);
-Route::post('/save-ponderacion-detalle', [PonderacionController::class, 'insertarPonderacion']);
-
-Route::post('/get-ponderaciones-select', [PonderacionController::class, 'getPonderacionesSelect']);
 
 Route::get('/calific/{a}', [ResultadosController::class, 'Calificar']);
 Route::get('/pdf-errores/{D}', [ResultadosController::class, 'PdfErroresCalifacion']);
@@ -783,6 +786,8 @@ Route::get('/notifiacion-correo', function () { return view('emails.notificacion
 Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
 
 Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::class, 'actualizarCorreos']);
+
+
 
 
 require __DIR__.'/auth.php';

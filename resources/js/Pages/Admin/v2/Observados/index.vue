@@ -755,7 +755,6 @@ const onShowSizeChange = (current, size) => {
   pageSize.value = size;
 };
 
-// Inicialización
 onMounted(() => {
   getObservados();
   getTipos();

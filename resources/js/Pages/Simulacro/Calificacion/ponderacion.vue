@@ -8,8 +8,9 @@
         <a-button type="primary" @click="showModalFilial" style="background: #476175; border: none; border-radius: 5px;">Nuevo</a-button>
         </div>
         <div class="flex justify-between" style="position: relative;" >
-            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; border-radius:6px; padding-left: 30px;"/>
-        <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
+            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; border-radius:6px; padding-left: 10px;">
+                <template #prefix><search-outlined /></template>
+            </a-input>        
         </div>
     </div>
 
@@ -30,22 +31,59 @@
             </template>
     
             <template v-if="column.dataIndex === 'acciones'">
-                <a-button type="success" class="mr-1" style="color: #476175;" @click="abrirDetallePonderacion(record.id)" size="small">
-                    <template #icon><EyeOutlined/></template>
-                </a-button>
-                <a-button @click="abrirEditar(record)" class="mr-1" style="color: blue;" size="small">
-                    <template #icon><form-outlined/></template>
-                </a-button>
-                <a-popconfirm
-                    title="¿Estas seguro de eliminar?"
-                    @confirm="eliminar(record)"
-                    >
-                    <a-button shape="" size="small" style="color: crimson;">
-                        <template #icon><delete-outlined/></template>
-                    </a-button>
-                </a-popconfirm>
-    
-            </template> 
+                <div class="acciones-container">
+                    <a-tooltip title="Ver detalles" placement="top">
+                        <a-button 
+                            class="accion-btn ver-btn"
+                            @click="abrirDetallePonderacion(record)"
+                            size="small"
+                            type="text"
+                        >
+                            <template #icon>
+                                <div class="btn-icon-wrapper">
+                                    <EyeOutlined class="btn-icon" />
+                                </div>
+                            </template>
+                        </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="Editar" placement="top">
+                        <a-button 
+                            class="accion-btn editar-btn"
+                            @click="abrirEditarPonderacion(record)"
+                            size="small"
+                            type="text"
+                        >
+                            <template #icon>
+                                <div class="btn-icon-wrapper">
+                                    <FormOutlined class="btn-icon" />
+                                </div>
+                            </template>
+                        </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip title="Eliminar" placement="top">
+                        <a-popconfirm
+                            title="¿Estás seguro de eliminar esta ponderación?"
+                            ok-text="Sí, eliminar"
+                            cancel-text="Cancelar"
+                            @confirm="eliminarPonderacion(record)"
+                        >
+                            <a-button 
+                                class="accion-btn eliminar-btn"
+                                size="small"
+                                type="text"
+                            >
+                                <template #icon>
+                                    <div class="btn-icon-wrapper">
+                                        <DeleteOutlined class="btn-icon" />
+                                    </div>
+                                </template>
+                            </a-button>
+                        </a-popconfirm>
+                    </a-tooltip>
+                </div>
+            </template>
         </template>
     </a-table> 
     
@@ -71,43 +109,21 @@
     </AuthenticatedLayout>
     
     <div>
-        <a-modal v-model:visible="visible" style="margin-top: -40px; margin-bottom: -40px;" :closable="false">
-            <div style="background: #476175; height: 36px; margin-left:-24px; margin-right:-24px; margin-top:-24px; margin-bottom: 28px;">
-                <div class="flex justify-between ml-3 mr-1" style="height:36px; align-items: center;">
-                    <div><span style="font-weight: bold; color:white; font-size:1rem;"> Ponderacion </span></div>
-                    <div><span ><a-button @click="cerramodal()" style="background:none; border:none; color:white;">X</a-button></span></div>
-                </div>
-            </div>
-    
+        <a-modal v-model:open="visible" :title="ponderacion.id?'Editar Ponderación':'Nueva ponderación'">
+        <div class="mt-6">
             <a-form
                 ref="formPonderacion"
                 name="form"
                 :model="ponderacion"
                 v-bind="layout"
-                style="margin-bottom: -30px;"
                 >
-                <a-form-item 
-                    label="Nombre" 
-                    :rules="[{ required: true, message: 'Ingrese el nombre', trigger: 'change' },]"
-                    name="nombre">
-                    <a-input style="border-radius:6px;" type="text" placeholder="Ingrese el nombre" v-model:value="ponderacion.nombre" autocomplete="off" />
+                <a-form-item label="Nombre" :rules="[{ required: true, message: 'Ingrese el nombre', trigger: 'change' },]"name="nombre">
+                    <a-input type="text" placeholder="Ingrese el nombre" v-model:value="ponderacion.nombre" autocomplete="off"  >
+                        <template #prefix><sin-icono /></template>
+                    </a-input>
                 </a-form-item>
 
-                <!-- <a-form-item label="Simulacro" name="simulacro">
-                    <a-auto-complete
-                        v-model:value="ponderacion.simulacro"                
-                        :options="simulacros"
-                        @select="onSelect"
-                        >
-                        <a-input 
-                            placeholder="Buscar ..."
-                            v-model:value="buscarSimulacro"
-                        >
-                        </a-input>
-                    </a-auto-complete>
-                </a-form-item> -->
-
-                <a-form-item name="area" label="Area" :rules="[{ required: true, message: 'Seleccione un area', trigger: 'change' },]">
+                <a-form-item class="mt-4" name="area" label="Area" :rules="[{ required: true, message: 'Seleccione un area', trigger: 'change' },]">
                     <a-select ref="select" v-model:value="ponderacion.area" style="width: 100%">
                         <a-select-option :value="1">BIOMEDICAS</a-select-option>
                         <a-select-option :value="2">INGENIERIAS</a-select-option>
@@ -116,6 +132,7 @@
                 </a-form-item>
         
             </a-form>
+        </div>
     
         <template #footer>
             <a-button style="margin-left: 6px; border-radius: 4px;" @click="resetForm">Cancelar</a-button>
@@ -126,170 +143,173 @@
 
 
 
-    <div>
-        <a-modal v-model:visible="modalDetallePonderacion" style="margin-top: -40px; margin-bottom: -40px; width:900px;"  :closable="false">
-            <div style="background: #476175; height: 36px; margin-left:-24px; margin-right:-24px; margin-top:-24px; margin-bottom: 28px;">
-                <div class="flex justify-between ml-3 mr-1" style="height:36px; align-items: center;">
-                    <div><span style="font-weight: bold; color:white; font-size:1rem;"> Detalle Ponderacion </span></div>
-                    <div><span ><a-button @click="cerramodal()" style="background:none; border:none; color:white;">X</a-button></span></div>
-                </div>
-            </div>
-    
-            <div style="width:100%;">
-            <a-form
-                ref="formPesos"
-                name="formpesos"
-                :model="pesos"
-                style="margin-bottom: -30px;"
-    
-                >
-                    <div v-for="(i,index) in nroItems">
-                        <a-row :gutter="[16, 10]">
-                            <a-col :xs="24" :sm="12" :md="8" :lg="1">
-                                <div class="mr-2">
-                                    <label><br></label>
-                                    <div class="flex justify-center">
-                                        <a-button>{{ index + 1 }}</a-button>
-                                    </div>
-                                </div>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="15">
-                                <div class="mr-2">
-                                    <label>Asignatura</label>
-                                    <a-form-item name="nombre" >
-                                        <a-input v-model:value="pesos[index].nombre"/>
-                                    </a-form-item>
-                                </div>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="4">
-                                <div>
-                                    <label>N° preguntas</label>
-                                    <a-form-item name="npreguntas">
-                                        <a-input v-model:value="pesos[index].n_preguntas"/>
-                                    </a-form-item>
-                                </div>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="4">
-                                <div class="mr-2">
-                                    <label>Ponderacion</label>
-                                    <a-form-item name="ponderacion">
-                                        <a-input v-model:value="pesos[index].ponderacion"/>
-                                    </a-form-item>
-                                </div>
-                            </a-col>
-                            
-                        </a-row>
-                    </div>
+<div>
+  <a-modal
+    v-model:open="modalDetallePonderacion"
+    title="Detalle Ponderación"
+    :width="900"
+    body-style="max-height: 600px; overflow-y: auto; padding: 16px;"
+    centered
+  >
+    <a-form
+      ref="formPesos"
+      name="formpesos"
+      :model="pesos"
+      layout="horizontal"
+    >
+      <div v-for="(item, index) in nroItems" :key="index" class="mb-0">
+        <a-row :gutter="[8, 0]" align="middle">
 
+          <a-col :xs="24" :sm="2" :md="1" class="flex justify-center">
+            <a-button type="default" size="small" style="height: 30px; width: 30px; margin-top: -22px;">{{ index + 1 }}</a-button>
+          </a-col>
 
-                <div class="flex justify-end">
-                    <a-button @click="agregarFila()">1 más</a-button>
-                </div>
-        
-            </a-form>
-            </div>
-        <template #footer>
-            <a-button style="margin-left: 6px; border-radius: 4px;" @click="resetForm">Cancelar</a-button>
-            <a-button type="primary" style="background: #476175; border:none; border-radius: 4px;" @click="saveDetalle()">Guardar</a-button>
-        </template>
-        </a-modal>
-    </div>
-    
+          <a-col :xs="24" :sm="11" :md="15">
+            <a-form-item :name="'nombre_' + index">
+              <a-input 
+                v-model:value="pesos[index].nombre" 
+                placeholder="Asignatura" 
+                size=""
+              >
+                <template #prefix><sin-icono /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :xs="12" :sm="6" :md="4">
+            <a-form-item :name="'npreguntas_' + index">
+              <a-input 
+                v-model:value="pesos[index].n_preguntas" 
+                placeholder="N° preguntas" 
+                size=""
+              >
+                <template #prefix><sin-icono /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :xs="12" :sm="5" :md="4">
+            <a-form-item :name="'ponderacion_' + index">
+              <a-input 
+                v-model:value="pesos[index].ponderacion" 
+                placeholder="Ponderación 0.000" 
+                size=""
+              >
+                <template #prefix><sin-icono /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+        </a-row>
+      </div>
+    </a-form>
+
+    <template #footer>
+      <div class="flex justify-between w-full items-center mt-2">
+        <a-button type="dashed"  @click="agregarFila">+ 1 más</a-button>
+
+        <div class="flex gap-2">
+          <a-button  @click="resetForm">Cancelar</a-button>
+          <a-button
+            type="primary"
+            style="background: #476175; border:none; border-radius: 4px;"
+            @click="saveDetalle"
+          >
+            Guardar
+          </a-button>
+        </div>
+      </div>
     </template>
-        
-    <script setup>
-    import { Head } from '@inertiajs/vue3';
-    import AuthenticatedLayout from '@/Layouts/LayoutCalificador.vue'
-    import { watch, computed, ref, onMounted, reactive } from 'vue';
-    import { FormOutlined, DeleteOutlined, SearchOutlined, DownOutlined, EyeOutlined } from '@ant-design/icons-vue';
-    import { notification } from 'ant-design-vue';
-    
-    import axios from 'axios';
-    const loading = ref(false);
-    const buscar = ref("");
-    const filiales= ref([]);
-    const visible = ref(false);
-    const formFilial = ref();
-    
-    const buscarResidencia = ref("")
+  </a-modal>
+</div>
 
-    const pagina = ref(1);
-    const paginasize = ref(10);
-    const totalRegistros = ref(1);
-    
 
     
-    const showModalFilial = () => { visible.value = true; };
-    let timeoutId;
-    watch(buscar, ( newValue, oldValue ) => { 
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            getFiliales(); 
-        }, 500);    
-    })
-    watch(pagina, ( newValue, oldValue ) => { getFiliales(); })
-    watch(paginasize, ( newValue, oldValue ) => { getFiliales(); })
+</template>
     
-    let timeout2;
-    watch(buscarResidencia, ( newValue, oldValue ) => {  
-        clearTimeout(timeout2);
-        timeout2 = setTimeout(() => {
-            getUbigeosResidencia() 
-        }, 500); 
-    })
-    
-    
-    const abrirEditar = (item) => {
-    
-        visible.value = true;
-        filial.id = item.id;
-        filial.codigo = item.codigo;
-        filial.nombre = item.nombre;
-        filial.lugar = item.ubigeo;
-        filial.direccion = item.direccion;
-        residencia.value = item.lugar;
-        if(item.estado == 1){ filial.estado = true }
-        else { filial.estado = false}
-    }
-    
+<script setup>
+import { Head } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/LayoutCalificador.vue'
+import { watch, computed, ref, onMounted, reactive } from 'vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, DownOutlined, EyeOutlined } from '@ant-design/icons-vue';
+import { notification } from 'ant-design-vue';
 
-    
-    const eliminar = (item) => {
-        axios.get("eliminar-filial/"+item.id).then((result) => {
-            getFiliales();
-            notificacion('error', 'PROCESO ELIMINADO', result.data.mensaje );
-        });
-    }
-    
-    const resetForm = () => {
-    
-        filial.id = null;
-        filial.codigo = "";
-        filial.nombre = "";
-        filial.lugar = null;
-        filial.direccion = "";
-        filial.estado =  "";
-        residencia.value = "";
-        redseleccionado.value = ""
-        cerramodal();
-    
-    }
-    
-    const notificacion = (type, titulo, mensaje) => {
-        notification[type]({
-        message: titulo,
-        description: mensaje,
-        });
-    };
-    
-    const cerramodal = () => { visible.value = false; }
-    
+import axios from 'axios';
+const loading = ref(false);
+const buscar = ref("");
+const visible = ref(false);
+const buscarResidencia = ref("")
+const pagina = ref(1);
+const paginasize = ref(10);
+const totalRegistros = ref(1);
 
 
 
-const residencias = ref([])
+const showModalFilial = () => { visible.value = true; };
+let timeoutId;
+watch(buscar, ( newValue, oldValue ) => { 
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+        getFiliales(); 
+    }, 500);    
+})
+watch(pagina, ( newValue, oldValue ) => { getFiliales(); })
+watch(paginasize, ( newValue, oldValue ) => { getFiliales(); })
 
-//SIMULACROS
+let timeout2;
+watch(buscarResidencia, ( newValue, oldValue ) => {  
+    clearTimeout(timeout2);
+    timeout2 = setTimeout(() => {
+        getUbigeosResidencia() 
+    }, 500); 
+})
+
+
+const abrirEditar = (item) => {
+
+    visible.value = true;
+    filial.id = item.id;
+    filial.codigo = item.codigo;
+    filial.nombre = item.nombre;
+    filial.lugar = item.ubigeo;
+    filial.direccion = item.direccion;
+    residencia.value = item.lugar;
+    if(item.estado == 1){ filial.estado = true }
+    else { filial.estado = false}
+}
+
+
+
+const eliminar = (item) => {
+    axios.get("eliminar-filial/"+item.id).then((result) => {
+        getFiliales();
+        notificacion('error', 'PROCESO ELIMINADO', result.data.mensaje );
+    });
+}
+
+const resetForm = () => {
+
+    filial.id = null;
+    filial.codigo = "";
+    filial.nombre = "";
+    filial.lugar = null;
+    filial.direccion = "";
+    filial.estado =  "";
+    residencia.value = "";
+    redseleccionado.value = ""
+    cerramodal();
+
+}
+
+const notificacion = (type, titulo, mensaje) => {
+    notification[type]({
+    message: titulo,
+    description: mensaje,
+    });
+};
+
+const cerramodal = () => { visible.value = false; }
+
 const ponderaciones = ref([])
 
 const getPonderaciones =  async () => {
@@ -304,8 +324,6 @@ const ponderacion = reactive({ id:null, nombre:"", area:null, simulacro:"" })
 const buscarSimulacro = ref("")
 const simulacro = ref(null)
 const simulacros = ref([])
-
-const area = ref(1)
 
 const modalDetallePonderacion = ref(false)
 
@@ -339,7 +357,6 @@ const guardar = async () => {
         const values = await formPonderacion.value.validateFields();
         axios.post("save-ponderacion", ponderacion).then((result) => {
             notificacion('success',result.data.titulo, result.data.mensaje);
-            //resetForm()
             getPonderaciones()
             visible.value = false;
         });
@@ -354,10 +371,8 @@ const guardar = async () => {
 const saveDetalle = async () => {
     loading.value = true;
     try {
-        // const values = await formPonderacion.value.validateFields();
         axios.post("save-ponderacion-detalle", {"pesos":pesos.value, "id_ponderacion": id_ponderacion.value }).then((result) => {
             notificacion('success',result.data.titulo, result.data.mensaje);
-            //resetForm()
             getPonderaciones()
             visible.value = false;
         });
@@ -398,5 +413,102 @@ const columnsFiliales = [
 
 </script>
 <style scoped>
+.acciones-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+}
 
+.accion-btn {
+    width: 30px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+}
+
+.accion-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.btn-icon {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+}
+
+.accion-btn:hover .btn-icon {
+    transform: scale(1.1);
+}
+
+.ver-btn {
+    color: #476175;
+    background: rgba(71, 97, 117, 0.08);
+}
+
+.ver-btn:hover {
+    color: #476175;
+    background: rgba(71, 97, 117, 0.12);
+    border-color: rgba(71, 97, 117, 0.3);
+}
+
+.editar-btn {
+    color: #1890ff;
+    background: rgba(24, 144, 255, 0.08);
+}
+
+.editar-btn:hover {
+    color: #1890ff;
+    background: rgba(24, 144, 255, 0.12);
+    border-color: rgba(24, 144, 255, 0.3);
+}
+
+.eliminar-btn {
+    color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.08);
+}
+
+.eliminar-btn:hover {
+    color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.12);
+    border-color: rgba(255, 77, 79, 0.3);
+}
+
+:deep(.ant-btn) {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.ant-tooltip-inner) {
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+@media (max-width: 768px) {
+    .acciones-container {
+        gap: 2px;
+    }
+    
+    .accion-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .btn-icon {
+        font-size: 12px;
+    }
+}
 </style>
