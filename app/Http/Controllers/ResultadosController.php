@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
-use App\Models\ParticipanteSimulacro;
 use App\Models\Ide;
 use App\Models\Resp;
+use App\Models\Documento;
 use App\Models\Simulacro;
 use App\Models\Postulante;
 use App\Models\ArchivoSimulacro;
-use App\Models\Documento;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
+use App\Models\ParticipanteSimulacro;
 use App\Exports\ResultadosExport;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use MPDF;
 use DB;
 
@@ -26,34 +27,92 @@ class ResultadosController extends Controller
         return response()->json(['message' => 'Datos insertados con éxito']);
     }
 
-    public function SubirParticipantes(Request $request)
-    {
-        $data = $request->data;
-        $idSimulacro = $request->proceso;
+  public function SubirParticipantes(Request $request)
+{
+    $data = $request->data;
+    $idSimulacro = $request->proceso;
 
-        if (!is_array($data) || empty($data)) {
-            return response()->json(['error' => 'Datos inválidos o vacíos'], 400);
-        }
-
-        $now = now();
-
-        foreach ($data as &$row) {
-            $row['id_proceso'] = $idSimulacro;
-            $row['created_at'] = $now;
-            $row['updated_at'] = $now;
-        }
-
-        try {
-            DB::table('participantes')->insert($data);
-            return response()->json(['message' => 'Datos insertados con éxito']);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'error' => 'Error al insertar los participantes',
-                'detalle' => $e->getMessage()
-            ], 500);
-        }
+    if (!is_array($data) || empty($data)) {
+        return response()->json([
+            'estado' => false,
+            'error' => 'Datos inválidos o vacíos'
+        ], 400);
     }
 
+    $now = now();
+
+    // COLUMNAS REALES DE LA TABLA participantes
+    $columnas = [
+        'dni',
+        'paterno',
+        'materno',
+        'nombres',
+        'unidad',
+        'cod_examen',
+        'observaciones',
+        'id_proceso',
+        'created_at',
+        'updated_at',
+    ];
+
+    $limpios = [];
+
+    foreach ($data as $row) {
+
+        // Normalizar cada fila
+        $fila = [];
+
+        foreach ($columnas as $col) {
+            if (isset($row[$col]) && $row[$col] !== '') {
+                $fila[$col] = $row[$col];
+            } else {
+                $fila[$col] = null;
+            }
+        }
+
+        $fila['id_proceso'] = $idSimulacro;
+        $fila['created_at'] = $now;
+        $fila['updated_at'] = $now;
+
+        if (empty($fila['dni'])) {
+            continue;
+        }
+
+        $limpios[] = $fila;
+    }
+
+    if (empty($limpios)) {
+        return response()->json([
+            'estado' => false,
+            'error' => 'No hay filas válidas para insertar'
+        ], 400);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        foreach (array_chunk($limpios, 500) as $chunk) {
+            DB::table('participantes')->insertOrIgnore($chunk);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'estado' => true,
+            'message' => 'Participantes insertados correctamente',
+            'total' => count($limpios)
+        ]);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'estado' => false,
+            'error' => 'Error al insertar los participantes',
+            'detalle' => $e->getMessage()
+        ], 500);
+    }
+}
 
 
     public function getResultados(Request $request){
@@ -101,7 +160,7 @@ class ResultadosController extends Controller
             $tipo = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
 
-            $archivo->move(storage_path('app/calificar/'.$proceso.'/ides/'), $nombreArchivo); 
+            $archivo->move(storage_path('app/calificar/'.$proceso.'/ides/'), $nombreArchivo);
 
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
@@ -135,7 +194,7 @@ class ResultadosController extends Controller
             $nombreArchivo = $archivo->getClientOriginalName();
             $areanombre = "";
             $archivo->move(storage_path('app/calificar/'.$proceso.'/resp/'), $nombreArchivo);
-            
+
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
                 'tipo' => $extension,
@@ -163,8 +222,8 @@ class ResultadosController extends Controller
 
             $tipo = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
-            $archivo->move(storage_path('app/calificar/'.$proceso.'/patron/'), $nombreArchivo); 
-            
+            $archivo->move(storage_path('app/calificar/'.$proceso.'/patron/'), $nombreArchivo);
+
             $archivo = ArchivoSimulacro::create([
                 'nombre' => $nombreArchivo ,
                 'tipo' => $extension,
@@ -330,7 +389,7 @@ class ResultadosController extends Controller
             $campo3 = substr(substr($linea, 26, 9),3,5);
             $campo4 = substr($linea, 38, 1);
             $campo5 = substr($linea, 40);
-            
+
             // Descomposición de campo5
             $litho = substr($campo5, 0, 6);
             $tipo = substr($campo5, 6, 1);
@@ -419,7 +478,7 @@ class ResultadosController extends Controller
 
     }
 
-    
+
     //ARCHIVOS
     public function getArchivosIde(Request $request){
 
@@ -433,10 +492,10 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-      
+
           $this->response['estado'] = true;
           $this->response['datos'] = $res;
-          return response()->json($this->response, 200);            
+          return response()->json($this->response, 200);
     }
 
     //ARCHIVOS
@@ -452,10 +511,10 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-        
+
             $this->response['estado'] = true;
             $this->response['datos'] = $res;
-            return response()->json($this->response, 200);            
+            return response()->json($this->response, 200);
     }
 
 
@@ -471,13 +530,13 @@ class ResultadosController extends Controller
             })->groupBy('archivos_simulacro.id')
             ->orderBy('archivos_simulacro.id', 'DESC')
             ->paginate(10);
-        
+
             $this->response['estado'] = true;
             $this->response['datos'] = $res;
-            return response()->json($this->response, 200);            
+            return response()->json($this->response, 200);
     }
 
-    
+
     public function getIdes(Request $request){
 
         $res = Ide::select(
@@ -490,7 +549,7 @@ class ResultadosController extends Controller
             \DB::raw('(ides.aula REGEXP \'^[0-9]+$\' ) AS vaula'),
             \DB::raw('IF(participantes.id IS NULL, "Participante no encontrado", "") AS participa')
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','ides.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','ides.id_archivo')
             ->leftJoin('participantes', 'ides.dni', '=', 'participantes.dni')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where(function ($query) use ($request) {
@@ -500,10 +559,10 @@ class ResultadosController extends Controller
                     ->orWhere('ides.dni', 'LIKE', '%' . $request->term . '%');
             })->orderBy('ides.id', 'ASC')
             ->paginate(2000);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
     public function getRes(Request $request){
@@ -524,7 +583,7 @@ class ResultadosController extends Controller
             // \DB::raw('if(res.aula = ides.aula, 1, 0) as c_aula'),
             'ides.id as id_ides'
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo')
             ->leftJoin('ides', 'res.litho', '=', 'ides.litho')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where('archivos_simulacro.categoria','=', 'respuesta')
@@ -535,10 +594,10 @@ class ResultadosController extends Controller
                     ->orWhere('ides.dni', 'LIKE', '%' . $request->term . '%');
             })->orderBy('res.id', 'ASC')
             ->paginate(2000);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
     public function getPat(Request $request){
@@ -550,7 +609,7 @@ class ResultadosController extends Controller
             'res.respuestas',
             'archivos_simulacro.cod_examen'
             )
-            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo') 
+            ->join('archivos_simulacro','archivos_simulacro.id','res.id_archivo')
             ->where('archivos_simulacro.id_simulacro','=', $request->proceso)
             ->where('archivos_simulacro.categoria','=', 'patron')
             ->where(function ($query) use ($request) {
@@ -558,15 +617,15 @@ class ResultadosController extends Controller
                     ->orWhere('res.litho', 'LIKE', '%' . $request->term . '%');
             })->orderBy('res.id', 'ASC')
             ->paginate(500);
-      
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
-        return response()->json($this->response, 200);            
+        return response()->json($this->response, 200);
     }
 
 
     public function getParticipantesSimulacro(Request $request){
-      
+
         $res = DB::table('participantes')
         ->select('participantes.*', DB::raw('if(ides.id is null, 0, ides.id) as id_ide'))
         ->leftjoin('ides','ides.dni','participantes.dni')
@@ -575,36 +634,36 @@ class ResultadosController extends Controller
             return $query
                 ->orWhere('participantes.dni', 'LIKE', '%' . $request->term . '%')
                 ->orWhere('nombres', 'LIKE', '%' . $request->term . '%')
-                ->orWhere('paterno', 'LIKE', '%' . $request->term . '%');   
+                ->orWhere('paterno', 'LIKE', '%' . $request->term . '%');
         })
         ->orderBy('paterno', 'ASC')
         ->paginate(10000);
-      
+
           $this->response['estado'] = true;
           $this->response['datos'] = $res;
-          return response()->json($this->response, 200);            
+          return response()->json($this->response, 200);
     }
 
 
 
     public function eliminarArchivo($id)
     {
-        
+
         $archivo = ArchivoSimulacro::find($id);
-    
+
         if (!$archivo) {
             $this->response['titulo'] = 'ERROR';
             $this->response['mensaje'] = 'Archivo no encontrado.';
             $this->response['estado'] = false;
             return response()->json($this->response, 404);
         }
-    
+
         $archivoNombre = $archivo->nombre;
         $filePath = storage_path($archivo->url);
-    
+
         if (File::exists($filePath)) {
             File::delete($filePath);
-    
+
             if (File::exists($filePath)) {
                 $this->response['titulo'] = 'ERROR';
                 $this->response['mensaje'] = 'No se pudo eliminar el archivo físico.';
@@ -612,9 +671,9 @@ class ResultadosController extends Controller
                 return response()->json($this->response, 500);
             }
         }
-    
+
         $archivo->delete();
-    
+
         $this->response['titulo'] = '¡REGISTRO ELIMINADO!';
         $this->response['mensaje'] = 'Archivo ' . $archivoNombre . ' eliminado correctamente.';
         $this->response['estado'] = true;
@@ -626,21 +685,21 @@ class ResultadosController extends Controller
     public function subirIdeBD($archivo, $id)
     {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    
+
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $campo1 = substr($linea, 0, 21);
             $campo2 = substr($linea, 3, 6);
             $campo3 = substr($linea, 24, 5);
             $campo4 = substr($linea, 38, 1);
             $campo5 = substr($linea, 40);
-    
+
             $litho = substr($campo5, 0, 6);
             $tipo = substr($campo5, 6, 1);
             $dni = substr($campo5, 7, 8);
             $aula = substr($campo5, 15, 3);
-    
+
             if (strlen($campo1) > 1) {
                 $datosParaInsercion[] = [
                     'camp1' => $campo1,
@@ -655,17 +714,17 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Ide::insert($datosParaInsercion);
     }
 
     public function subirResBD($archivo, $id)
-    { 
+    {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $now = now();
 
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $c1 = substr($linea, 0, 3);
             $lectura = substr($linea, 3, 6);
@@ -674,11 +733,11 @@ class ResultadosController extends Controller
             $c5 = substr($linea, 17,4);
             $c6 = substr($linea, 24,4);
             $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));    
+            $c8 = trim(substr($linea, 38,1));
             $litho = substr($linea, 40, 6);
             $tipo = substr($linea, 46, 1);
             $respuestas = substr($linea, 47, 60);
-    
+
             if (strlen($c1) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
@@ -698,16 +757,16 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Resp::insert($datosParaInsercion);
     }
 
     public function subirPatBD($archivo, $id)
-    { 
+    {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    
+
         $datosParaInsercion = [];
-    
+
         foreach ($ides as $linea) {
             $c1 = substr($linea, 0, 3);
             $lectura = substr($linea, 3, 6);
@@ -716,11 +775,11 @@ class ResultadosController extends Controller
             $c5 = substr($linea, 17,4);
             $c6 = substr($linea, 24,4);
             $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));    
+            $c8 = trim(substr($linea, 38,1));
             $litho = substr($linea, 40, 6);
             $tipo = substr($linea, 46, 1);
             $respuestas = substr($linea, 47, 60);
-    
+
             if (strlen($c1) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
@@ -738,7 +797,7 @@ class ResultadosController extends Controller
                 ];
             }
         }
-    
+
         Resp::insert($datosParaInsercion);
     }
 
@@ -763,7 +822,7 @@ class ResultadosController extends Controller
             ->leftJoin('ides', 'res.litho', '=', 'ides.litho')
             ->leftJoin('participantes as pex', 'pex.dni', '=', 'ides.dni')
             ->where('res.id', $id)
-            ->first(); 
+            ->first();
 
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
@@ -804,7 +863,7 @@ class ResultadosController extends Controller
             if($line->tipo == 'R'){ $correctas = $patrones[2]->respuestas; }
             if($line->tipo == 'S'){ $correctas = $patrones[3]->respuestas; }
             if($line->tipo == 'T'){ $correctas = $patrones[4]->respuestas; }
-            
+
             for ($i = 0; $i < 60; $i++) {
                 if(strlen($line->respuestas) == 60 && strlen($correctas) == 60 ){
                     $caracterResp = $line->respuestas[$i];
@@ -823,7 +882,7 @@ class ResultadosController extends Controller
                     $comparacionActual = $comparacionActual.$caracterResp;
                     $puntaje = $puntaje + $puntuacion;
                 }
-        
+
             }
 
             $resp = Resp::find($line->id);
@@ -854,89 +913,85 @@ class ResultadosController extends Controller
         $pond = $request->id_ponderacion;
 
         $ponderaciones = DB::select("SELECT numero, ponderacion FROM ponderacion WHERE id_ponderacion_simulacro = $pond");
-       
-        $patrones = DB::select("SELECT i.respuestas, asim.cod_examen FROM res i
-        JOIN archivos_simulacro asim ON asim.id = i.id_archivo
-        JOIN simulacro sim ON sim.id = asim.id_simulacro
-        WHERE sim.id = $id_sim AND asim.categoria = 'patron'");
 
+        $patrones = DB::select("SELECT i.respuestas, asim.cod_examen, i.tipo FROM res i
+        JOIN archivos_simulacro asim ON asim.id = i.id_archivo AND asim.id_simulacro = $id_sim
+        JOIN simulacro sim ON sim.id = $id_sim
+        WHERE asim.categoria = 'patron'");
 
-        $respuestas = DB::select("SELECT re.id, re.litho, re.respuestas, re.tipo, i.litho AS id_litho, i.camp2, p.dni, p.cod_examen FROM res re
+        $respuestas = DB::select(" SELECT  re.id, re.litho, re.respuestas, re.tipo, i.litho AS id_litho, i.camp2, p.dni, p.cod_examen
+            FROM res re
             JOIN archivos_simulacro asim ON asim.id = re.id_archivo AND asim.categoria = 'respuesta'
             JOIN simulacro sim ON sim.id = asim.id_simulacro
-            LEFT JOIN ides i ON i.litho = re.litho AND sim.id = $id_sim
-            LEFT JOIN participantes p ON p.dni = i.dni 
-            AND asim.categoria = 'respuesta'");
+            LEFT JOIN ides i ON i.litho = re.litho AND sim.id = ?
+            LEFT JOIN participantes p ON p.dni = i.dni AND p.unidad = ?
+        ", [ $id_sim, $request->area]);
 
         $comparaciones = [];
         $comparacionActual = "";
 
-        foreach ($respuestas as $index=>$line ){
+        foreach ($respuestas as $line) {
 
-            $patron = collect($patrones)->firstWhere('cod_examen', $line->cod_examen);
+            if (!$line->dni) continue;
 
-            if($line->dni){
+            $patron = collect($patrones)->first(function ($p) use ($line) {
+                return $p->cod_examen === $line->cod_examen
+                    && $p->tipo === $line->tipo;
+            });
 
-                            $excepciones = DB::select( "SELECT nro_pregunta, accion, puntaje, claves_validas  FROM excepciones  
-                WHERE cod_examen = ?",  [$line->cod_examen]);
+            if (!$patron) continue;
 
-            $comparacionActual = "";
+            $correctas = $patron->respuestas;
             $puntaje = 0;
-            $correctas = $patron->respuestas; 
+            $comparacionActual = '';
+
+            $excepciones = DB::select("
+                SELECT nro_pregunta, accion, puntaje 
+                FROM excepciones
+                WHERE cod_examen = ?
+            ", [$line->cod_examen]);
 
             for ($i = 0; $i < 60; $i++) {
 
-                $excepcion = collect($excepciones)->firstWhere('nro_pregunta', $i+1);
-
-                if (strlen($line->respuestas) > 0 && strlen($correctas) >= 0) {
-                
-                    $caracterResp = $line->respuestas[$i];
-                    $caracterPatron = $correctas[$i];
-                    $puntuacion = 0;
-            
-                    if($excepcion){
-                        switch ($excepcion->accion) {
-                            case "todas_validas":
-                                $puntuacion = $excepcion->puntaje;
-                                break;
-                            default:
-                                return null;
-                        }
-
-                    }else{
-                        
-                        if ($caracterResp === " ") {
-                            $puntuacion = ($ponderaciones[$i]->ponderacion * $request->blanco);
-                        } else {
-                            if ($caracterResp === $caracterPatron) {
-                                $puntuacion = ($ponderaciones[$i]->ponderacion * $request->correctas);
-                            } else {
-                                $puntuacion = $request->incorrectas;
-                            }
-                        }
-                    }
-            
-                    $comparacionActual = $comparacionActual . $caracterResp;
-                    $puntaje = $puntaje + $puntuacion;
+                if (!isset($line->respuestas[$i]) || !isset($correctas[$i])) {
+                    continue;
                 }
+
+                $resp = $line->respuestas[$i];
+                $pat  = $correctas[$i];
+                $puntuacion = 0;
+
+                $excepcion = collect($excepciones)
+                    ->firstWhere('nro_pregunta', $i + 1);
+
+                if ($excepcion && $excepcion->accion === 'todas_validas') {
+                    $puntuacion = $excepcion->puntaje;
+                } else {
+                    if ($resp === ' ') {
+                        $puntuacion = $ponderaciones[$i]->ponderacion * $request->blanco;
+                    } elseif ($resp === $pat) {
+                        $puntuacion = $ponderaciones[$i]->ponderacion * $request->correctas;
+                    } else {
+                        $puntuacion = $request->incorrectas;
+                    }
+                }
+
+                $puntaje += $puntuacion;
+                $comparacionActual .= $resp;
             }
-            }
 
-
-
-            $resp = Resp::find($line->id);
-            $resp->puntaje = round($puntaje,3);
-            $resp->save();
+            Resp::where('id', $line->id)
+                ->update(['puntaje' => round($puntaje, 3)]);
 
             $comparaciones[] = [
-                'id'=> $line->id,
+                'id' => $line->id,
+                'tipo' => $line->tipo,
                 'respuestas' => $comparacionActual,
-                'correctass' => $correctas,
-                'puntaje' => round($puntaje,3),
-
+                'correctas' => $correctas,
+                'puntaje' => round($puntaje, 3),
             ];
-
         }
+
 
         return response()->json(['comparaciones' => $comparaciones]);
 
@@ -951,9 +1006,9 @@ class ResultadosController extends Controller
             'archivos_simulacro.nombre AS archivo',
             'ides.camp2 AS lectura',
             'ides.litho',
-            'ides.dni', 
-            'ides.tipo', 
-            'ides.aula', 
+            'ides.dni',
+            'ides.tipo',
+            'ides.aula',
             'participantes.dni AS dnip',
             \DB::raw('LENGTH(TRIM(ides.dni)) AS len_doc'),
             \DB::raw('(ides.dni REGEXP \'^[0-9]+$\' ) AS vdni'),
@@ -979,7 +1034,7 @@ class ResultadosController extends Controller
             'archivos_simulacro.nombre AS archivo',
             'ides.camp2 AS lectura',
             'ides.litho',
-            'ides.dni',     
+            'ides.dni',
             'participantes.dni AS dnip'
         )
         ->join('archivos_simulacro', 'archivos_simulacro.id', '=', 'ides.id_archivo')
@@ -1007,7 +1062,7 @@ class ResultadosController extends Controller
         $rutaCarpeta = storage_path("/app/calificar/$sim/");
         file_put_contents(storage_path("/app/calificar/$sim/").'reporte.pdf', $output);
 
-        
+
         $rutaArchivo = "calificar/{$sim}/reporte.pdf";
 
         if (Storage::exists($rutaArchivo)) {
@@ -1026,7 +1081,7 @@ class ResultadosController extends Controller
                 ]
             );
         }
-        
+
 
     }
 
@@ -1035,21 +1090,21 @@ class ResultadosController extends Controller
     {
         $rutaFuente = storage_path('app/fonts/Arialnl.ttf');
 
-        $estudiantesPorPrograma = DB::select("SELECT dni, paterno, materno, nombres, puntaje, programa, apto AS ingreso 
+        $estudiantesPorPrograma = DB::select("SELECT dni, paterno, materno, nombres, puntaje, programa, apto AS ingreso
         FROM puntajes
         WHERE programa IS NOT NULL
         ORDER BY programa, puntaje DESC LIMIT 200");
-    
+
         $programaEstudiantes = [];
-    
+
         // Recorre los estudiantes y agrúpalos por programa
         foreach ($estudiantesPorPrograma as $estudiante) {
             $programaActual = $estudiante->programa;
-    
+
             if (!isset($programaEstudiantes[$programaActual])) {
                 $programaEstudiantes[$programaActual] = [];
             }
-    
+
             // Agrega el estudiante al programa actual
             $programaEstudiantes[$programaActual][] = [
                 'dni' => $estudiante->dni,
@@ -1060,21 +1115,21 @@ class ResultadosController extends Controller
                 'ingreso' => $estudiante->ingreso,
             ];
         }
-    
+
         foreach ($programaEstudiantes as $programa => $estudiantes) {
             // Cargar la vista 'Calificacion.puntajes' con los datos de los estudiantes
             $pdf = PDF::loadView('Calificacion.puntajes', compact('estudiantes','programa'));
             $pdf->getDomPDF()->set_option("isPhpEnabled", true);
             $pdf->getDomPDF()->set_option("isHtml5ParserEnabled", true);
             $pdf->setPaper('A4', 'portrait');
-        
+
             // Guardar el PDF en el almacenamiento de Laravel
             $rutaCarpeta = storage_path("/app/");
             $nombreArchivo = "reporte_{$programa}.pdf";
             $rutaCompleta = $rutaCarpeta . $nombreArchivo;
-        
+
             $pdf->save($rutaCompleta);
-    
+
         }
 
     }
@@ -1086,15 +1141,15 @@ class ResultadosController extends Controller
             $archivo = $request->file('file');
             $extension = $archivo->getClientOriginalExtension();
 
-            if (!in_array($extension, ['pdf'])) { 
+            if (!in_array($extension, ['pdf'])) {
                 return response()->json(['error' => 'El archivo debe ser de tipo pdf'], 400); }
 
             $tipoA = $archivo->getClientOriginalExtension();
             $nombreArchivo = $archivo->getClientOriginalName();
 
             $post = Postulante::where('nro_doc', $dni)->first();
-            
-            if( $tipo == print($tipo)){ 
+
+            if( $tipo == print($tipo)){
                 $archivo->move(public_path('documentos/8/inscripciones/certificados/'), $dni.$codigo.'.pdf');
                 $datosDocumento = [
                     'codigo' => $codigo,
@@ -1109,7 +1164,7 @@ class ResultadosController extends Controller
 
                 $postulante = Documento::create($datosDocumento);
 
-            } else { 
+            } else {
                 $archivo->move(public_path('documentos/8/inscripciones/dnis/'), $codigo.$dni.'.pdf');
                 $datosDocumento = [
                     'codigo' => $codigo,
@@ -1135,13 +1190,13 @@ class ResultadosController extends Controller
 
     public function getPuntajes(Request $request){
 
-        $res = DB::select("SELECT  participantes.*, 
+        $res = DB::select("SELECT  participantes.*,
         IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje,
-        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
-            FROM ( 
-                SELECT par.dni, par.paterno, par.materno, par.nombres, 
-                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa, 
-                ide.litho, ide.id AS id_ide 
+        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion
+            FROM (
+                SELECT par.dni, par.paterno, par.materno, par.nombres,
+                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa,
+                ide.litho, ide.id AS id_ide
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
                 WHERE par.id_proceso = ?
@@ -1161,95 +1216,110 @@ class ResultadosController extends Controller
 
 
 
-    public function getResultadosPDF($sim)
-    {
-        $convocatoria = Simulacro::find($sim);
+public function getResultadosPDF($sim)
+{
+    $convocatoria = Simulacro::find($sim);
 
-        $estudiantesPorPrograma = DB::select("SELECT  participantes.*, 
-        IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje,
-        IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion   
-            FROM ( 
-                SELECT par.dni, par.paterno, par.materno, par.nombres, 
-                    CONCAT(par.cod_puesto,'-',par.puesto,'-',par.unidad) as programa, 
-                ide.litho, ide.id AS id_ide 
-                FROM participantes par
-                LEFT JOIN ides ide ON ide.dni = par.dni
-                WHERE par.id_proceso = ?
-            ) AS participantes
-            LEFT JOIN res ON res.litho = participantes.litho
-            WHERE res.puntaje > 0
-            order by res.puntaje desc
-            ;
-        ", [$sim]);
-   
-        $datos = collect($estudiantesPorPrograma)
-            ->groupBy('programa')
-            ->map(function ($items, $programa) {
-                $cadena = $programa;
-                $partes = explode('-', $cadena);
-                $cod_puesto = $partes[0] ?? '';
-                $puesto = $partes[1] ?? '';
-                $unidad = $partes[2] ?? '';
-                return [
-                    'cod_puesto' => $partes[0],
-                    'puesto' => $partes[1],
-                    'unidad' => $partes[2],
-                    'data' => $items->map(function ($item) {
-                        return [
-                            'dni' => $item->dni,
-                            'paterno' => $item->paterno,
-                            'materno' => $item->materno,
-                            'nombres' => $item->nombres,
-                            'puntaje' => number_format($item->puntaje, 2),
-                            'condicion' => $item->condicion,
-                        ];
-                    })->toArray()
-                ];
-            })
-            ->values();
+    // Selecciono par.unidad explícitamente y casteo puntaje a decimal
+    $estudiantesPorPrograma = DB::select("
+        SELECT participantes.*,
+               CAST(IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS DECIMAL(10,2)) AS puntaje,
+               IF(res.puntaje > 0, 'APTO', 'NO APTO') AS condicion
+        FROM (
+            SELECT par.dni, par.paterno, par.materno, par.nombres, par.observaciones,
+                   par.cod_puesto,
+                   par.unidad,
+                   CONCAT(par.cod_puesto,'-',par.unidad) as programa,
+                   ide.litho, ide.id AS id_ide
+            FROM participantes par
+            LEFT JOIN ides ide
+              ON ide.dni = par.dni
+             AND ide.id_archivo IN (
+                 SELECT id
+                 FROM archivos_simulacro arc
+                 WHERE arc.id_simulacro = ?
+             )
+            WHERE par.id_proceso = ?
+        ) AS participantes
+        LEFT JOIN res ON res.litho = participantes.litho
+        -- Opcional: si quieres excluir puntaje 0, descomenta la siguiente línea
+        -- WHERE res.puntaje > 0
+        ORDER BY puntaje DESC;
+    ", [$sim, $sim]); // pasamos $sim para el subquery y para id_archivo IN
+
+    // DEBUG rápido: descomenta si quieres ver cómo vienen los registros
+    // dd($estudiantesPorPrograma);
+
+    $datos = collect($estudiantesPorPrograma)
+        ->groupBy(function ($item) {
+            // Agrupamos directamente por la columna unidad (más seguro)
+            $unidad = trim($item->unidad ?? '');
+            return $unidad === '' ? 'SIN_UNIDAD' : strtoupper($unidad);
+        })
+        ->map(function ($items, $unidad) {
+            // Ordenar por puntaje numérico dentro de cada unidad (desc)
+            $ordenados = $items->sortByDesc(function ($it) {
+                return floatval($it->puntaje ?? 0);
+            })->values();
+
+            return [
+                'unidad' => $unidad,
+                'data' => $ordenados->map(function ($item) {
+                    return [
+                        'dni' => $item->dni,
+                        'paterno' => trim($item->paterno),
+                        'materno' => trim($item->materno),
+                        'nombres' => trim($item->nombres),
+                        'colegio' => trim($item->observaciones),
+                        'puntaje' => number_format(floatval($item->puntaje ?? 0), 2),
+                        'condicion' => $item->condicion,
+                        'cod_puesto' => $item->cod_puesto,
+                        // si quieres mantener programa completo:
+                        'programa' => $item->programa,
+                    ];
+                })->toArray()
+            ];
+        })
+        ->values();
+
+    // Si todavía no ves los grupos correctos, descomenta esto para ver la estructura:
+    // return $datos;
+
+    $logo = asset('imagenes/logo_poder_judicial.png');
+    $html = view('Calificacion.resultados', compact('datos','logo','convocatoria'))->render();
+    $pdf = MPDF::loadHTML($html);
+    return $pdf->stream('documento.pdf');
+}
 
 
-            $logo = asset('imagenes/logo_poder_judicial.png');
-            $html = view('Calificacion.resultados', compact('datos','logo','convocatoria'))->render();
-            $pdf = MPDF::loadHTML($html);
-            $mpdf = $pdf->getMpdf();
-            return $pdf->stream('documento.pdf');
-
-            return response()->streamDownload(
-                fn () => print($pdf->output()),
-                "Resumen por programa.pdf",
-                ['Content-Type' => 'application/pdf']
-            );
-
-    }
 
     public function actualizarIde(Request $request){
 
         $ide = Ide::find($request->id);
-        $ide->dni = $request->dni;              
+        $ide->dni = $request->dni;
         $ide->tipo = $request->tipo;
-        $ide->aula = $request->aula; 
+        $ide->aula = $request->aula;
         $ide->estado = $request->estado;
         $ide->save();
-        
+
         $this->response['estado'] = true;
         $this->response['datos'] = $ide;
         return response()->json($this->response, 200);
 
     }
 
-    public function selectPuestos(){
+    public function selectPuestos($id_proceso){
 
         $puestos = DB::table('participantes')
         ->select('puesto as label', 'puesto as value')
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->distinct()
         ->orderBy('puesto')
         ->get();
 
         $codigos = DB::table('participantes')
         ->select('cod_puesto as label', 'cod_puesto as value')
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->distinct()
         ->orderBy('cod_puesto')
         ->get();
@@ -1258,7 +1328,7 @@ class ResultadosController extends Controller
         ->select('cod_examen as label', 'cod_examen as value')
         ->groupBy('cod_examen')
         ->distinct()
-        ->where('id_proceso',14)
+        ->where('id_proceso',$id_proceso)
         ->orderBy('cod_examen')
         ->get();
 
@@ -1273,24 +1343,173 @@ class ResultadosController extends Controller
 
     public function descargarExcel(Request $request)
     {
-        $data = DB::select("SELECT  
-                participantes.*, res.litho as litho_res, res.n_lectura as lectura_res, res.respuestas,
-                IF(res.puntaje <= 0 OR res.puntaje IS NULL, 0, res.puntaje) AS puntaje
-            FROM ( 
-                SELECT 
+        $data = DB::select("SELECT
+                distinct
+                participantes.*,
+                r.litho_res,
+                r.lectura_res,
+                r.respuestas,
+                r.puntaje
+            FROM (
+                SELECT
                     par.dni, par.paterno, par.materno, par.nombres, par.cod_puesto,
-                    par.puesto,par.unidad, ide.aula,ide.litho, ide.camp2 AS ide_lectura,par.cod_examen
+                    par.puesto, par.unidad, ide.aula, ide.litho, ide.camp2 AS ide_lectura, par.cod_examen
                 FROM participantes par
                 LEFT JOIN ides ide ON ide.dni = par.dni
-                WHERE par.id_proceso = 14
-                ORDER BY ide_lectura ASC
-            ) AS participantes
-            LEFT JOIN res ON res.litho = participantes.litho
-            -- Quitamos el WHERE que filtraba por puntaje > 0 
-        ");
+                WHERE par.id_proceso = $request->id_proceso
+            ) participantes
+            LEFT JOIN (
+                SELECT
+                    litho,
+                    MAX(n_lectura) AS lectura_res,
+                    MAX(respuestas) AS respuestas,
+                    MAX(IF(puntaje <= 0 OR puntaje IS NULL, 0, puntaje)) AS puntaje,
+                    MAX(litho) AS litho_res
+                FROM res
+                GROUP BY litho
+            ) r ON r.litho = participantes.litho");
 
         return Excel::download(new ResultadosExport($data), 'reporte.xlsx');
     }
+
+    public function descargarTemplate()
+    {
+        $path = storage_path('/app/calificar/template.xlsx');
+
+        return response()->download($path, 'template.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ]);
+    }
+
+
+    public function updateParticipantes(Request $request, $id) {
+        // Validación
+        $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|max:20',
+            'cod_puesto' => 'nullable|string|max:50',
+            'puesto' => 'nullable|string|max:255',
+            'unidad' => 'nullable|string|max:255',
+            'cod_examen' => 'nullable|string|max:50',
+            'id_proceso' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Error de validación',
+                'errores' => $validator->errors()
+            ], 422);
+        }
+
+        // Verificar si existe el participante
+        $part = DB::table('participantes')->where('id', $id)->first();
+
+        if (!$part) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Participante no encontrado.'
+            ], 404);
+        }
+
+        // Verificar que el DNI no se repita en este proceso
+        if ($part->dni !== $request->dni) {
+            $existeDNI = DB::table('participantes')
+                ->where('dni', $request->dni)
+                ->where('id_proceso', $request->id_proceso)
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($existeDNI) {
+                return response()->json([
+                    'estado' => false,
+                    'mensaje' => 'El DNI ya existe para otro participante en este proceso.'
+                ], 409);
+            }
+        }
+
+        DB::table('participantes')->where('id', $id)->update([
+            'dni' => $request->dni,
+            'nombres' => $request->nombres,
+            'paterno' => $request->paterno,
+            'materno' => $request->materno,
+            'cod_puesto' => $request->cod_puesto,
+            'puesto' => $request->puesto,
+            'unidad' => $request->unidad,
+            'cod_examen' => $request->cod_examen,
+            'id_proceso' => $request->id_proceso,
+            'updated_at' => now()
+        ]);
+
+        $partActualizado = DB::table('participantes')->where('id', $id)->first();
+
+        return response()->json([
+            'estado' => true,
+            'mensaje' => 'Participante actualizado correctamente',
+            'datos' => $partActualizado
+        ], 200);
+    }
+
+    public function guardarParticipante(Request $request) {
+
+        $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|max:20',
+            'cod_puesto' => 'nullable|string|max:50',
+            'puesto' => 'nullable|string|max:255',
+            'unidad' => 'nullable|string|max:255',
+            'cod_examen' => 'nullable|string|max:50',
+            'id_proceso' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Error de validación',
+                'errores' => $validator->errors()
+            ], 422);
+        }
+
+        $existeDNI = DB::table('participantes')
+            ->where('dni', $request->dni)
+            ->where('id_proceso', $request->id_proceso)
+            ->first();
+
+        if ($existeDNI) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'El DNI ya existe para otro participante en este proceso.'
+            ], 409);
+        }
+
+        $id = DB::table('participantes')->insertGetId([
+            'dni' => $request->dni,
+            'nombres' => $request->nombres,
+            'paterno' => $request->paterno,
+            'materno' => $request->materno,
+            'cod_puesto' => $request->cod_puesto,
+            'puesto' => $request->puesto,
+            'unidad' => $request->unidad,
+            'cod_examen' => $request->cod_examen,
+            'id_proceso' => $request->id_proceso,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        $participante = DB::table('participantes')->where('id', $id)->first();
+
+        return response()->json([
+            'estado' => true,
+            'mensaje' => 'Participante guardado correctamente',
+            'datos' => $participante
+        ], 201);
+
+    }
+
+
+
+
+
+
+    
 
 
 }

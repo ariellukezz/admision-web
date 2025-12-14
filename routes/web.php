@@ -367,7 +367,7 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
 
     Route::post('/control-biometrico', [IngresoController::class, 'biometrico']);
     Route::post('/crear_correo_institucional', [IngresoController::class, 'crearCorreo']);
-    
+
 
 
     Route::get('/impresion', fn () => Inertia::render('Revisor/impresion'))->name('revisor-impresion-inscripcion');
@@ -485,7 +485,7 @@ Route::prefix('simulacros')->group(function () {
 
 
 
-Route::prefix('calificacion')->middleware('auth','calificador')->group(function () {
+Route::prefix('calificacion')->group(function () {
 
     Route::get('/', fn () => Inertia::render('Simulacro/Calificacion/calificacion'))->name('calificar-cal') ;
 
@@ -497,14 +497,14 @@ Route::prefix('calificacion')->middleware('auth','calificador')->group(function 
     Route::get('/calificacion', fn () => Inertia::render('Simulacro/Calificacion/lecturas'))->name('simulacro-calificacion');
     Route::post('/carga-ide', [ResultadosController::class, 'cargaArchivoIde']);
     Route::post('/actualizar-ide', [ResultadosController::class, 'actualizarIde']);
-    
+
 
     //TEMP
     Route::post('/carga-ide/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoIde'])->withoutMiddleware(['web']);
     Route::post('/carga-res/{proceso}', [ResultadosController::class, 'cargaArchivoRes'])->withoutMiddleware(['web']);
     Route::post('/carga-pat/{proceso}', [ResultadosController::class, 'cargaArchivoPat'])->withoutMiddleware(['web']);
 
-    Route::get('/get-select-puestos', [ResultadosController::class, 'selectPuestos']);
+    Route::get('/get-select-puestos/{id_proceso}', [ResultadosController::class, 'selectPuestos']);
     // Route::post('/carga-res', [ResultadosController::class, 'cargaArchivoRes']);
     Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
 
@@ -662,6 +662,7 @@ Route::post('/get-res', [ResultadosController::class, 'getRes']);
 Route::post('/get-pat', [ResultadosController::class, 'getPat']);
 Route::post('/subir-participantes-simulacro', [ResultadosController::class, 'SubirParticipantes']);
 Route::post('/get-participantes-externo', [ResultadosController::class, 'getParticipantesSimulacro']);
+Route::get('/descargar-template-participantes-simulacro', [ResultadosController::class, 'descargarTemplate']);
 
 Route::get('/ver-ficha', fn () => Inertia::render('Simulacro/Calificacion/components/ficha'));
 
@@ -786,6 +787,9 @@ Route::get('/notifiacion-correo', function () { return view('emails.notificacion
 Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
 
 Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::class, 'actualizarCorreos']);
+
+Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipantes']);
+Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
 
 
 

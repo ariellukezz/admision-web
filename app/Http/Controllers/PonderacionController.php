@@ -77,29 +77,32 @@ class PonderacionController extends Controller
   }
 
 
-  public function insertarPonderacion(Request $request) {
+  public function insertarPonderacion(Request $request)
+  {
+      $data = $request->input('pesos');
 
-    $data = $request->input('pesos');
-    $id_ponderacion = $request->id_ponderacion;
-    $cont = 1;
-    foreach ($data as $index => $item) {
-        $nombre = $item['nombre'];
-        $ponderacion = $item['ponderacion'];
-        $n_preguntas = $item['n_preguntas'];
+      // 👇 SOLO el ID, no el objeto
+      $id_ponderacion = (int) $request->id_ponderacion['id'];
 
-        for ($i = 0; $i < $n_preguntas; $i++) {
-            PonderacionDetalle::create([
-                'asignatura' => $nombre,
-                'ponderacion' => $ponderacion,
-                'numero' => $cont,
-                'id_ponderacion_simulacro' => $id_ponderacion
+      $cont = 1;
 
-            ]);
-            $cont += 1;
-        }
-    }
+      foreach ($data as $item) {
 
-  } 
+          for ($i = 0; $i < (int)$item['n_preguntas']; $i++) {
+              PonderacionDetalle::create([
+                  'asignatura' => $item['nombre'],
+                  'ponderacion' => (float) $item['ponderacion'],
+                  'numero' => $cont,
+                  'id_ponderacion_simulacro' => $id_ponderacion
+              ]);
+
+              $cont++;
+          }
+      }
+
+      return response()->json(['ok' => true]);
+  }
+ 
   
   public function getPonderacionesSelect(Request $request){
     $res = Ponderacion::select(

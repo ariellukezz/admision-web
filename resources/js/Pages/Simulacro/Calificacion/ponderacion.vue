@@ -376,7 +376,6 @@ const saveDetalle = async () => {
             getPonderaciones()
             visible.value = false;
         });
-        
     } catch (error) {
         console.error(error);
     }

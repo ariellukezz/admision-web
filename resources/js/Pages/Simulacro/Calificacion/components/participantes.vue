@@ -1,199 +1,240 @@
 <template>
 <Head title="Participantes"/>    
+
 <div class="p-4" style="width:100%; background:white; border-radius:8px;">
-    <form @submit.prevent="submit">
-        <div class="flex justify-between">
+
+    <!-- BOTONES -->
+    <div class="flex justify-between mb-2">
+        <div class="flex gap-2">
             <label
-            for="fileInput"
-            class="inline-block bg-[var(--primary-color)] border border-[var(--primary-color)] text-white font-medium px-4 py-1 rounded-md cursor-pointer transition-all duration-300 shadow-sm hover:bg-[#cdcdcd] hover:text-gray-700 hover:shadow-lg active:scale-95"
+                for="fileInput"
+                class="inline-block bg-[var(--primary-color)] text-white px-4 py-1 rounded-md cursor-pointer"
+                style="height: 32px;"
             >
-            Seleccionar archivo
+                Seleccionar archivo
             </label>
             <input id="fileInput" type="file" @change="handleFileUpload" style="display:none;" />
-            <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 230px;">
-                <template #prefix>
-                    <search-outlined />
-                </template>
-            </a-input>
-
         </div>
-    </form> 
 
+        <div class="flex gap-2">
+            <a-button type="primary" @click="abrirModalNuevo">Nuevo</a-button>
+            <a-button @click="descargarTemplate" style="background: green; color: white;">
+                Descargar ejemplo
+            </a-button>
+            <a-input v-model:value="buscar" placeholder="Buscar" style="max-width:230px">
+                <template #prefix><search-outlined /></template>
+            </a-input>
+        </div>
+    </div>
 
-    <a-modal v-model:open="verParticipantes" title="Participantes del proceso" @ok="handleOk" width="94%">
-        <a-table 
-            :dataSource="excelData" 
-            centerd
-            :scroll="{ y: 'calc(100vh - 300px)' }"
-            :columns="columns" size="small" :pagination="false">
-            <template #bodyCell="{ column, index, record }">
+    <!-- MODAL EXCEL -->
+    <a-modal v-model:open="verParticipantes" title="Participantes del proceso" width="94%">
+        <a-table
+            :dataSource="excelData"
+            :columns="columnsExcel"
+            rowKey="dni"
+            size="small"
+            :pagination="false"
+        >
+            <template #bodyCell="{ column, index }">
                 <template v-if="column.dataIndex === 'nro'">
-                    <span>{{ index + 1 }}</span>
+                    {{ index + 1 }}
                 </template>
-            </template>     
-        </a-table> 
+            </template>
+        </a-table>
+
         <template #footer>
-            <div style="text-align: right;">
-                <a-button style="height:38px; border-radius: 5px; border:none; color:white; background: var(--primary-color)" @click="subirResultados"> Subir</a-button>           
-            </div>
+            <a-button type="primary" @click="subirResultados">
+                Subir
+            </a-button>
         </template>
     </a-modal>
 
+    <!-- TABLA PRINCIPAL -->
+    <a-table
+        :dataSource="participantes"
+        :columns="columns"
+        size="small"
+        :pagination="false"
+        :scroll="{ y: 'calc(100vh - 310px)' }"
+    >
+        <template #bodyCell="{ column, index, record }">
+            <template v-if="column.dataIndex === 'nro'">
+                {{ index + 1 }}
+            </template>
 
-    <div class="flex justify-end mt-2 mb-4" style="margin-right: -20px;">
+            <template v-if="column.dataIndex === 'acciones'">
+                <a-space>
+                    <a-button type="text" @click="abrirModalEditar(record)">Edit</a-button>
+                    <a-popconfirm title="¿Eliminar?" @confirm="eliminarParticipante(record)">
+                        <a-button type="text" danger>Delete</a-button>
+                    </a-popconfirm>
+                </a-space>
+            </template>
+        </template>
+    </a-table>
 
-    </div>
-    <div style="margin-right: -20px;">
-        <a-table :dataSource="participantes" :columns="columns" :scroll="{ y: 'calc(100vh - 310px)' }" size="small" :pagination="false">
-            <template #bodyCell="{ column, index, record }">
-                <template v-if="column.dataIndex === 'nro'">
-                    <span>{{ index + 1 }}</span>
-                </template>
-                <template v-if="column.dataIndex === 'id_ide'">
-                    <div style="scale: 0.8rem;">
-                        <a-tag v-if="record.id_ide == 0" color="red" class="small-text" style="border-radius: 14px;" > sin ide </a-tag>
-                        <a-tag v-if="record.area == null" color="purple"> sin area </a-tag>
-                        <span v-else> </span>
-                    </div>
-                </template>
-            </template>     
-        </a-table> 
-    </div>
+    <!-- MODAL CRUD -->
+    <a-modal v-model:open="showModal" :title="modalTitle" @ok="guardarParticipante">
+        <a-form layout="vertical">
+            <a-form-item label="DNI"><a-input v-model:value="form.dni" /></a-form-item>
+            <a-form-item label="Ap. Paterno"><a-input v-model:value="form.paterno" /></a-form-item>
+            <a-form-item label="Ap. Materno"><a-input v-model:value="form.materno" /></a-form-item>
+            <a-form-item label="Nombres"><a-input v-model:value="form.nombres" /></a-form-item>
+            <a-form-item label="Unidad"><a-input v-model:value="form.unidad" /></a-form-item>
+            <a-form-item label="Cod Examen"><a-input v-model:value="form.cod_examen" /></a-form-item>
+        </a-form>
+    </a-modal>
+
 </div>
 </template>
-    
+
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import Layout from '@/Layouts/LayoutCalificador.vue'
-import { defineProps,computed, ref, watch } from 'vue';
-import * as XLSX from 'xlsx';
-import { PrinterOutlined, UploadOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import axios from 'axios';
-import { message } from 'ant-design-vue';
+import { Head } from '@inertiajs/vue3'
+import { ref, reactive, watch, defineProps } from 'vue'
+import * as XLSX from 'xlsx'
+import axios from 'axios'
+import { message } from 'ant-design-vue'
+import { SearchOutlined } from '@ant-design/icons-vue'
 
-const verParticipantes = ref(false);
-const props = defineProps(['proceso']);
-const excelData = ref([]);
-const progress = ref(0);
-const estado = ref("");
-const buscar = ref("");
+const props = defineProps(['proceso'])
 
-const subirResultados = async () => {
-  progress.value = 0;
-  try {
-    const response = await axios.post(
-      'subir-participantes-simulacro',
-      { data: excelData.value, proceso: props.proceso },
-      {
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.lengthComputable) {
-            progress.value = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-          }
-        },
-      }
-    );
-
-    progress.value = 100;
-    message.success(response.data.message || 'Participantes subidos correctamente');
-    verParticipantes.value = false;
-    await getParticipantes();
-
-  } catch (error) {
-    progress.value = 70;
-    estado.value = 'exception';
-    console.error('Error:', error);
-
-    // Mostrar mensaje de error
-    const msg = error.response?.data?.error || 'Error al subir los participantes';
-    message.error(msg);
-  }
-};
-
-
-const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-        const headers = jsonData[0]; 
-
-        const arrayOfObjects = jsonData.slice(1).map((row) => {
-        const obj = {};
-        headers.forEach((header, index) => {
-            obj[header] = row[index];
-        });
-        return obj;
-        });
-
-        verParticipantes.value = true;  
-        excelData.value = arrayOfObjects;
-    };
-
-    reader.readAsArrayBuffer(file);
-}
-    
 const participantes = ref([])
+const excelData = ref([])
+const buscar = ref('')
+const verParticipantes = ref(false)
 
-const getParticipantes = async () => {
-    axios.post("/get-participantes-externo",{"term": buscar.value, "proceso": props.proceso})
-    .then((response) => {
-        participantes.value = response.data.datos.data;
-    })
-    .catch((error) => {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-            } else { console.error('Error de configuración:', error.message); }
-  });
-}
+const showModal = ref(false)
+const modalTitle = ref('Nuevo Participante')
 
-let timeoutId;
-
-watch(buscar, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-        getParticipantes() 
-    }, 300);    
+const form = reactive({
+    id: null,
+    dni: '',
+    paterno: '',
+    materno: '',
+    nombres: '',
+    unidad: '',
+    cod_examen: ''
 })
 
-getParticipantes();
-
-const columns = ref([
-    { title: 'N°', dataIndex: 'nro', align:'center', width:50 },
-    { title: 'DNI', dataIndex: 'dni', width:90 },
+const columnsExcel = [
+    { title: 'N°', dataIndex: 'nro', width: 50 },
+    { title: 'DNI', dataIndex: 'dni' },
     { title: 'Ap. Paterno', dataIndex: 'paterno' },
-    { title: 'Ap. Materno', dataIndex: 'materno'},
+    { title: 'Ap. Materno', dataIndex: 'materno' },
     { title: 'Nombres', dataIndex: 'nombres' },
-    { title: 'Cod puesto', dataIndex: 'cod_puesto', width:90, align:'center' },
-    { title: 'Puesto', dataIndex: 'puesto' },
-    { title: 'Unidad de organizacion', dataIndex: 'unidad' },    
-]);
+    { title: 'Unidad', dataIndex: 'unidad' },
+    { title: 'Cod Examen', dataIndex: 'cod_examen' }
+]
 
+const columns = [
+    { title: 'N°', dataIndex: 'nro', width: 50 },
+    { title: 'DNI', dataIndex: 'dni' },
+    { title: 'Ap. Paterno', dataIndex: 'paterno' },
+    { title: 'Ap. Materno', dataIndex: 'materno' },
+    { title: 'Nombres', dataIndex: 'nombres' },
+    { title: 'Unidad', dataIndex: 'unidad' },
+    { title: 'Cod Examen', dataIndex: 'cod_examen' },
+    { title: 'Acciones', dataIndex: 'acciones', width: 150 }
+]
+
+/* ================= CRUD ================= */
+
+const getParticipantes = async () => {
+    const res = await axios.post('/get-participantes-externo', {
+        term: buscar.value,
+        proceso: props.proceso
+    })
+    participantes.value = res.data.datos.data
+}
+
+watch(buscar, () => {
+    clearTimeout(window.t)
+    window.t = setTimeout(getParticipantes, 300)
+})
+
+getParticipantes()
+
+const abrirModalNuevo = () => {
+    modalTitle.value = 'Nuevo Participante'
+    Object.assign(form, {
+        id: null, dni:'', paterno:'', materno:'', nombres:'', unidad:'', cod_examen:''
+    })
+    showModal.value = true
+}
+
+const abrirModalEditar = (p) => {
+    modalTitle.value = 'Editar Participante'
+    Object.assign(form, p)
+    showModal.value = true
+}
+
+const guardarParticipante = async () => {
+    form.id_proceso = props.proceso
+    if (form.id) {
+        await axios.put(`/participantes/${form.id}`, form)
+    } else {
+        await axios.post('/participantes', form)
+    }
+    message.success('Guardado')
+    showModal.value = false
+    getParticipantes()
+}
+
+const eliminarParticipante = async (p) => {
+    await axios.delete(`/api/participantes/${p.id}`)
+    message.success('Eliminado')
+    getParticipantes()
+}
+
+/* ================= EXCEL ================= */
+
+const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    const reader = new FileReader()
+
+    reader.onload = (ev) => {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' })
+        const ws = wb.Sheets[wb.SheetNames[0]]
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 })
+
+        const headers = data[0]
+
+        excelData.value = data.slice(1).map(row => {
+            let obj = {}
+            headers.forEach((h, i) => {
+                const key = h
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .replace(/ /g, '_')
+                obj[key] = row[i]
+            })
+            return obj
+        })
+
+        verParticipantes.value = true
+    }
+
+    reader.readAsArrayBuffer(file)
+}
+
+const subirResultados = async () => {
+    await axios.post('/subir-participantes-simulacro', {
+        data: excelData.value,
+        proceso: props.proceso
+    })
+    message.success('Subido')
+    verParticipantes.value = false
+    getParticipantes()
+}
+
+const descargarTemplate = async () => {
+    const res = await axios.get('/descargar-template-participantes-simulacro', { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'template.xlsx'
+    a.click()
+    URL.revokeObjectURL(url)
+}
 </script>
-
-<style scoped>
-
-input[type=file]::file-selector-button {
-    margin-right: 10px;
-    border: none;
-    background: var(--primary-color);
-    padding: 9px 20px;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
-    transition: background .2s ease-in-out;
-}
-
-input[type=file]::file-selector-button:hover { background: #143253; }
-
-.custom-file-input span {
-  display: inline-block;
-}
-</style>

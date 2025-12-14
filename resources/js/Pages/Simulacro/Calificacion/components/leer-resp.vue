@@ -169,98 +169,98 @@
     </template>
       
 <script setup>
-    import { defineProps, watch, ref } from 'vue';
-    import axios from 'axios';
-    import { FolderOutlined, HomeOutlined, EnvironmentOutlined, DownOutlined, FormOutlined, DeleteOutlined, SaveOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons-vue';
-    import { message } from 'ant-design-vue';
-    import VerFicha from './ficha.vue'
-    import { notification } from 'ant-design-vue';
-    const baseUrl = window.location.origin;
+import { defineProps, watch, ref } from 'vue';
+import axios from 'axios';
+import { FolderOutlined, HomeOutlined, EnvironmentOutlined, DownOutlined, FormOutlined, DeleteOutlined, SaveOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons-vue';
+import { message } from 'ant-design-vue';
+import VerFicha from './ficha.vue'
+import { notification } from 'ant-design-vue';
+const baseUrl = window.location.origin;
 
-    const tabPosition = ref('contenido')
-    const aula = ref()
-    const fileList = ref([]);
+const tabPosition = ref('contenido')
+const aula = ref()
+const fileList = ref([]);
 
-    const id_respuesta = ref(null);
+const id_respuesta = ref(null);
 
-    const props = defineProps(['proceso']);
-    
-    const visible = ref(false);
-    const area = ref(1);
-    // const area = ref(null); 
-    
-    const handleChange = (info) => {
-        const status = info.file.status;
-        if (status !== 'uploading') { console.log(info.file, fileList.value); }
-        if (status === 'done') {
-            message.success(`${info.file.name} archivo(s) subido(s) exitosamente.`);
-            getArchivos();
-            getIdes();
-            visible.value = false;
-        } else if (status === 'error') {
-            message.error(`${info.file.name} falló al subir.`);
-        }
-    };
-    
-    const okey = () => { fileList.value = null;};
-    const showContextMenu = ref(false);
-    const contextMenuTop = ref(0);
-    const contextMenuLeft = ref(0);
-    
-    const handleContextMenu = (event) => {
-      showContextMenu.value = true;
-      contextMenuTop.value = event.clientY;
-      contextMenuLeft.value = event.clientX;
-      event.preventDefault();
-    };
-    
+const props = defineProps(['proceso']);
 
+const visible = ref(false);
+const area = ref(1);
+// const area = ref(null); 
 
-    const handleMenuItemClick = ( opcion ) => {
-        if(opcion === '1'){ visible.value = true; showContextMenu.value = false;}
-    };
-    
-    const clicIzquierdo = (event) => { showContextMenu.value = false;}
-    
-    const archivos = ref([]);
-    const identificaciones = ref([]);
-    const buscar = ref("");
-    
-    const getArchivos = async () => {
-        axios.post("/get-archivos-res",{"term": buscar.value, "proceso": props.proceso})
-        .then((response) => {
-            archivos.value = response.data.datos.data;
-        })
-        .catch((error) => {
-            if (error.response) {
-                console.error('Error de servidor:', error.response.data);
-            } else if (error.request) {
-                console.error('Error de red:', error.request);
-                } else { console.error('Error de configuración:', error.message); }
-      });
+const handleChange = (info) => {
+    const status = info.file.status;
+    if (status !== 'uploading') { console.log(info.file, fileList.value); }
+    if (status === 'done') {
+        message.success(`${info.file.name} archivo(s) subido(s) exitosamente.`);
+        getArchivos();
+        getIdes();
+        visible.value = false;
+    } else if (status === 'error') {
+        message.error(`${info.file.name} falló al subir.`);
     }
-    
-    const getIdes = async () => {
-        axios.post("/get-res",{"term": buscar.value, "proceso": props.proceso})
-        .then((response) => {
-            identificaciones.value = response.data.datos.data;
-        })
-        .catch((error) => {
-            if (error.response) {
-                console.error('Error de servidor:', error.response.data);
-            } else if (error.request) {
-                console.error('Error de red:', error.request);
-                } else { console.error('Error de configuración:', error.message); }
-      });
-    }
-    
-    let timeoutId;
-    watch(buscar, ( newValue, oldValue ) => { 
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            getIdes() 
-        }, 300);    
+};
+
+const okey = () => { fileList.value = null;};
+const showContextMenu = ref(false);
+const contextMenuTop = ref(0);
+const contextMenuLeft = ref(0);
+
+const handleContextMenu = (event) => {
+    showContextMenu.value = true;
+    contextMenuTop.value = event.clientY;
+    contextMenuLeft.value = event.clientX;
+    event.preventDefault();
+};
+
+
+
+const handleMenuItemClick = ( opcion ) => {
+    if(opcion === '1'){ visible.value = true; showContextMenu.value = false;}
+};
+
+const clicIzquierdo = (event) => { showContextMenu.value = false;}
+
+const archivos = ref([]);
+const identificaciones = ref([]);
+const buscar = ref("");
+
+const getArchivos = async () => {
+    axios.post("/get-archivos-res",{"term": buscar.value, "proceso": props.proceso})
+    .then((response) => {
+        archivos.value = response.data.datos.data;
     })
+    .catch((error) => {
+        if (error.response) {
+            console.error('Error de servidor:', error.response.data);
+        } else if (error.request) {
+            console.error('Error de red:', error.request);
+            } else { console.error('Error de configuración:', error.message); }
+    });
+}
+
+const getIdes = async () => {
+    axios.post("/get-res",{"term": buscar.value, "proceso": props.proceso})
+    .then((response) => {
+        identificaciones.value = response.data.datos.data;
+    })
+    .catch((error) => {
+        if (error.response) {
+            console.error('Error de servidor:', error.response.data);
+        } else if (error.request) {
+            console.error('Error de red:', error.request);
+            } else { console.error('Error de configuración:', error.message); }
+    });
+}
+
+let timeoutId;
+watch(buscar, ( newValue, oldValue ) => { 
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+        getIdes() 
+    }, 300);    
+})
 
 
 const modalficha = ref(false);
@@ -270,39 +270,39 @@ const verFicha = (id_res) => {
 }
     
     
-    getArchivos()
-    getIdes()
-    
-    const columnsArchivos = [
-        { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
-        { title: 'Tipo', dataIndex: 'tipo', align:'center', width:'100px'},
-        { title: 'Nombre', dataIndex: 'nombre',},
-        { title: 'Area', dataIndex: 'area',},
-        { title: 'Fecha', dataIndex: 'fecha', align:'center'},
-        { title: 'Registros', dataIndex: 'registros', align:'center'},
-        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'}
-    ];
-    
-    const columnsIdes = [
-        { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
-        { title: 'N° lectura', dataIndex: 'n_lectura', align:'center', width:'80px'},
-        { title: 'DNI', dataIndex: 'dni', align:'center', width:'90px'},
-        { title: 'Tip', dataIndex: 'tipo', width:'60px', align:"center",width:'40px'},
-        { title: 'Litho', dataIndex: 'res_litho', align:'center',width:'80px'},
-        { title: 'Respuestas', dataIndex: 'respuestas', align:'left' },
-        { title: 'Observaciones', dataIndex: 'observaciones', align:'center'},
-        { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'106px'},
-    ];
-    
-    const eliminar = (item) => {
-        axios.get("eliminar-archivo/"+item.id).then((result) => {
-            getArchivos();
-            getIdes();
-            notificacion('error', result.data.titulo, result.data.mensaje );
-        });
-    }
-    
-    const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
-    
+getArchivos()
+getIdes()
+
+const columnsArchivos = [
+    { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
+    { title: 'Tipo', dataIndex: 'tipo', align:'center', width:'100px'},
+    { title: 'Nombre', dataIndex: 'nombre',},
+    { title: 'Area', dataIndex: 'area',},
+    { title: 'Fecha', dataIndex: 'fecha', align:'center'},
+    { title: 'Registros', dataIndex: 'registros', align:'center'},
+    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'}
+];
+
+const columnsIdes = [
+    { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
+    { title: 'N° lectura', dataIndex: 'n_lectura', align:'center', width:'80px'},
+    { title: 'DNI', dataIndex: 'dni', align:'center', width:'90px'},
+    { title: 'Tip', dataIndex: 'tipo', width:'60px', align:"center",width:'40px'},
+    { title: 'Litho', dataIndex: 'res_litho', align:'center',width:'80px'},
+    { title: 'Respuestas', dataIndex: 'respuestas', align:'left' },
+    { title: 'Observaciones', dataIndex: 'observaciones', align:'center'},
+    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'106px'},
+];
+
+const eliminar = (item) => {
+    axios.get("eliminar-archivo/"+item.id).then((result) => {
+        getArchivos();
+        getIdes();
+        notificacion('error', result.data.titulo, result.data.mensaje );
+    });
+}
+
+const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
+
 </script>
       

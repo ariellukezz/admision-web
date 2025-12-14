@@ -67,13 +67,13 @@
                 <tr style="">
                     <td align="right" style="border:none;" width="50">
                         <div style="margin-top: 5px;">
-                            <img src="http://admision.test/imagenes/logo_poder_judicial.png" width="64">
+                            <img src="https://scontent.flim26-1.fna.fbcdn.net/v/t39.30808-6/353644010_108723658921929_7184930734696563854_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFEnCu6GAfcwuWxsnOWTKC-G75UH-iYCU8bvlQf6JgJT3ewPW8n0Q201pYlh09LvbY-TKekMIjRPJE701lZ9AQ_&_nc_ohc=AdmFEvctTnIQ7kNvwGBMQSk&_nc_oc=AdkGv44sRR6LHXXNrXSQmNVxWkyuJ_CdxnPclGzcWPFtXIik2k5EzAPeAZSFp5mCcZc&_nc_zt=23&_nc_ht=scontent.flim26-1.fna&_nc_gid=Do-PIkLDmITh39bcRtIeTA&oh=00_Afh26f0usftSSVP13WmktnCiNj-bDehko4ii1Mzsdwr7Rg&oe=69324E91" width="64">
                         </div>
                     </td>
                     <td style="border:none;">
                         <div style="text-align: left; margin-left:-10px; margin-top: 10px; font-size:10pt;">
-                            <div>CORTE SUPERIOR DE JUSTICIA DE PUNO</div>
-                            <div style="text-align: left; font-size:9pt;">PROCESO DE SELECCIÓN PERSONAL 728 A PLAZO INDETERMINADO N° 001-2025-UE-PUNO</div>
+                            <div>V CONCURSO REGIONAL DE QUÍMICA DE ALTURA</div>
+                            <div style="text-align: left; font-size:9pt;">Promoviendo la ciencia y el conocimiento químico en nuestra región</div>
                         </div>
                     </td>
                     {{-- <td style="text-align:right; font-size:11px; width:90px; border:none;">

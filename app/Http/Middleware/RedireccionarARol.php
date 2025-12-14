@@ -20,7 +20,7 @@ class RedireccionarARol
             $userRole = auth()->user()->id_rol;
 
             if ($userRole == 7) {
-                return redirect('/calificacion/subir-resultado');
+                return redirect('/calificacion');
             } elseif ($userRole == 6) {
                 return redirect('/simulacro');
             } elseif ($userRole == 1) {
@@ -31,7 +31,7 @@ class RedireccionarARol
                 return redirect('/segundas');
             }
         }
-        
+
         return $next($request);
     }
 }

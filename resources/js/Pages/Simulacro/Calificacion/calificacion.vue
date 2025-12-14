@@ -1,462 +1,877 @@
 <template>
-<Head title="Calificación"/>
-<Layout>  
-<div class="mb-4" style="width: 100%;">
-    <div class="p-4" style="background: white; width: 100%; min-height: calc(100vh - 90px); border-radius: 12px;" @click="clicIzquierdo" @contextmenu.prevent="handleContextMenu">
-        <div class="ml-0 flex mb-0 mt-0" >
-            <div class="flex">
-                <div style="margin-top: -4px;"><HomeOutlined/></div>
-                <div  v-for="it in breadcrumb" :key="it.id" @click="entrarCarpeta(it)">
-                    <div class="flex" style="height:20px; align-items:center;"> <div class="carpetas-select px-1"> {{ it.nombre }} </div>  </div>
-                </div>
-            </div>
-        </div>
+  <Head title="Calificación" />
+  <Layout>
+    <div class="container">
+      <div class="content-wrapper">
+        <!-- Breadcrumb Navigation -->
+        <a-breadcrumb class="mb-4">
+          <a-breadcrumb-item>
+            <HomeOutlined />
+            <span class="breadcrumb-text">Simulacros</span>
+          </a-breadcrumb-item>
+          <a-breadcrumb-item v-for="(item, index) in breadcrumb.slice(1)" :key="item.id">
+            <a @click="entrarCarpeta(item)" class="breadcrumb-link">
+              {{ item.nombre }}
+            </a>
+          </a-breadcrumb-item>
+        </a-breadcrumb>
 
-        <div v-if="breadcrumb.length === 1">
-            <div class="flex justify-end mt-0 mb-3" style="margin-top:-2px;">
-                <a-input v-model:value="buscar" style="max-width: 300px; border-radius: 6px; height: 36px;" placeholder="Buscar">
-                    <template #prefix>
-                        <span style="color: #0000009d; margin-top: -6px;"><SearchOutlined/></span>
-                    </template>
-                </a-input>
+        <!-- Main Content Area -->
+        <div @click="clicIzquierdo" @contextmenu.prevent="handleContextMenu">
+          
+          <!-- Lista de Simulacros -->
+          <div v-if="breadcrumb.length === 1">
+            <!-- Header with Search and Actions -->
+            <div class="page-header">
+              <div class="header-left">
+                <h1 class="page-title">Simulacros</h1>
+              </div>
+              <div class="header-right">
+                <a-input-search
+                  v-model:value="buscar"
+                  placeholder="Buscar simulacro..."
+                  style="width: 300px"
+                  @search="getSimulacros"
+                >
+                  <template #prefix>
+                    <SearchOutlined />
+                  </template>
+                </a-input-search>
+                <a-button 
+                  type="primary" 
+                  class="ml-2"
+                  @click="modalNuevo = true"
+                >
+                  <template #icon>
+                    <plus-outlined />
+                  </template>
+                  Nuevo Proceso
+                </a-button>
+              </div>
             </div>
 
-            <a-table 
-                :columns="columnsSimulacros" 
+            <!-- Simulacros Table -->
+
+              <a-table
+                :columns="columnsSimulacros"
                 :data-source="simulacros"
-                :key="id"
-                size="small"
-                :pagination="false"
-                style="scale: .7rem;"
-                > 
-                <template #bodyCell="{ column, index, record }">
+                :pagination="pagination"
+                :loading="loading"
+                @change="handleTableChange"
+                size="middle"
+              >
+                <template #bodyCell="{ column, record, index }">
+                  <!-- Número -->
+                  <template v-if="column.dataIndex === 'nro'">
+                    <span class="row-number">{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</span>
+                  </template>
 
-                    <template v-if="column.dataIndex === 'nro'">
-                        <span>{{ index + 1 }}</span>
-                    </template>
-                    <template v-if="column.dataIndex === 'nombre'">
-                        <div style="width:100%; cursor:pointer;" @dblclick="customRow(record)" >
-                            <span>{{ record.nombre }}</span>
-                        </div>
-                    </template>
-
-                    <template v-if="column.dataIndex === 'estado'">
-                        <div class="flex" style="justify-content: center;">
-                            <div v-if="1 === record.estado">
-                                <a-tag color="cyan" >Vigente</a-tag>
-                            </div>
-                            <div v-else>
-                                <a-tag color="red">No Vigente</a-tag>
-                            </div>
-                        </div>
-                    </template>
-                    <template v-if="column.dataIndex === 'acciones'">
-                        <a-button type="gray" class="mr-1" style="color: #476175;" @click="verFicha(record.id)" size="small">
-                            <template #icon><EyeOutlined/></template>
-                        </a-button>
-                        <a-button @click="abrirEditar(record)" class="mr-1" style="color: blue;" size="small">
-                            <template #icon><form-outlined/></template>
-                        </a-button>
-                        <a-popconfirm
-                            title="¿Estas seguro de eliminar?"
-                            @confirm="eliminar(record)"
-                            >
-                            <a-button shape="" size="small" style="color: crimson;">
-                                <template #icon><delete-outlined/></template>
-                            </a-button>
-                        </a-popconfirm>
-
-                    </template> 
-                </template>
-            </a-table> 
-
-
-            <!-- <pre>{{ simulacros }}</pre> -->
-            
-
-            <!-- <div class="flex" @contextmenu.prevent="clickderecho()">
-                <div class="carpetas-select" v-for="item in carpetas" :key="item.id" @dblclick="entrarCarpeta(item)" >
-                    <div>
-                        <svg width="80px" height="60px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <g><path d="M27,9v5c0,0.55-0.45,1-1,1H6.74L2.96,27.29C2.83,27.72,2.43,28,2,28c-0.05,0-0.1,0-0.15-0.01    C1.36,27.92,1,27.5,1,27V5c0-0.55,0.45-1,1-1h7c0.31,0,0.61,0.15,0.8,0.4L12.5,8H26C26.55,8,27,8.45,27,9z" fill="#476175"/></g>
-                            <g><path d="M30.96,14.29l-4,13C26.83,27.71,26.44,28,26,28H2c-0.32,0-0.62-0.15-0.8-0.41    c-0.19-0.25-0.25-0.58-0.16-0.88l4-13C5.17,13.29,5.56,13,6,13h24c0.32,0,0.62,0.15,0.8,0.41C30.99,13.66,31.05,13.99,30.96,14.29    z" fill="#4761ac"/></g>
-                        </svg>
+                  <!-- Nombre con doble click -->
+                  <template v-if="column.dataIndex === 'nombre'">
+                    <div class="nombre-cell" @dblclick="customRow(record)">
+                      <FolderOutlined class="folder-icon" />
+                      <span class="nombre-text">{{ record.nombre }}</span>
                     </div>
-                    <div>{{ item.nombre }}</div>
-                </div>
-            </div> -->
+                  </template>
 
+                  <!-- Fecha -->
+                  <template v-if="column.dataIndex === 'fecha'">
+                    <span class="date-text">{{ formatDate(record.fecha) }}</span>
+                  </template>
 
-            <div style=" position: absolute; border: solid 1px #d9d9d943; padding-top: 0px; border-radius:8px; overflow: hidden;" v-if="showContextMenu" :style="{ top: `${contextMenuTop }px`, left: `${contextMenuLeft}px`}">
-                <a-menu size="small" style="margin-top: -4px; margin-bottom: -4px;" >
-                    <a-menu-item key="1" class="selec-menu" @click="handleMenuItemClick('1')">
-                        <div style="margin-top: 0px;">
-                            Nuevo Proceso
-                        </div>
-                    </a-menu-item>
-                    <a-menu-item key="2" class="selec-menu" @click="handleMenuItemClick('2')">
-                        <div style="margin-top: 0px;">
-                            Subir archivo
-                        </div>
-                    </a-menu-item>
-                    <a-menu-item key="2" class="selec-menu" @click="handleMenuItemClick('2')">
-                        <div style="margin-top: 0px;">
-                            selees
-                        </div>
-                    </a-menu-item>
-                </a-menu>
+                  <!-- Estado -->
+                  <template v-if="column.dataIndex === 'estado'">
+                    <a-badge
+                      :status="record.estado === 1 ? 'processing' : 'error'"
+                      :text="record.estado === 1 ? 'Vigente' : 'No Vigente'"
+                    />
+                  </template>
+
+                  <!-- Ubigeo -->
+                  <template v-if="column.dataIndex === 'ubigeo'">
+                    <span class="ubigeo-text">{{ record.ubigeo_nombre || 'N/A' }}</span>
+                  </template>
+
+                  <!-- Acciones -->
+                  <template v-if="column.dataIndex === 'acciones'">
+                    <a-space size="small">
+                      <a-tooltip title="Ver ficha">
+                        <a-button 
+                          type="text" 
+                          size="small"
+                          @click="verFicha(record)"
+                        >
+                          <template #icon>
+                            <EyeOutlined class="action-icon" />
+                          </template>
+                        </a-button>
+                      </a-tooltip>
+                      
+                      <a-tooltip title="Editar">
+                        <a-button 
+                          type="text" 
+                          size="small"
+                          @click="abrirEditar(record)"
+                        >
+                          <template #icon>
+                            <FormOutlined class="action-icon edit-icon" />
+                          </template>
+                        </a-button>
+                      </a-tooltip>
+                      
+                      <a-tooltip title="Eliminar">
+                        <a-popconfirm
+                          title="¿Está seguro de eliminar este simulacro?"
+                          ok-text="Sí"
+                          cancel-text="No"
+                          @confirm="eliminar(record)"
+                        >
+                          <a-button 
+                            type="text" 
+                            size="small"
+                            danger
+                          >
+                            <template #icon>
+                              <DeleteOutlined class="action-icon" />
+                            </template>
+                          </a-button>
+                        </a-popconfirm>
+                      </a-tooltip>
+                    </a-space>
+                  </template>
+                </template>
+
+                <!-- Empty State -->
+                <template #emptyText>
+                  <div class="empty-state">
+                    <FolderOutlined style="font-size: 48px; color: #d9d9d9;" />
+                    <p>No hay simulacros disponibles</p>
+                    <a-button type="primary" @click="modalNuevo = true">
+                      Crear nuevo proceso
+                    </a-button>
+                  </div>
+                </template>
+              </a-table>
+
+          </div>
+
+          <!-- Detalle del Proceso Seleccionado -->
+          <div v-if="breadcrumb.length === 2">
+            <div class="process-header">
+              <a-button 
+                type="text" 
+                @click="entrarCarpeta(breadcrumb[0])"
+                class="back-button"
+              >
+                <template #icon>
+                  <arrow-left-outlined />
+                </template>
+                Volver
+              </a-button>
+
             </div>
 
-
-            <a-modal v-model:open="modalNuevo" :closable="false" centered style="" :footer="false">
-
-                <div style="background: #476175; height: 42px; margin-left:-24px; margin-right:-24px; margin-top:-24px;">
-                    <div class="flex justify-between ml-3 mr-1" style="height:36px; align-items: center;">
-                        <div class="flex pt-2" >
-                            <div class="mt-0" style="margin-top: 2px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 22 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                            </div>
-                            <span class="ml-2" style="font-weight: 500; color:white; font-size:1rem;">Nuevo proceso</span>
-                        </div>
-                        <div><span ><a-button @click="cerramodal()" style="background:none; border:none; color:white; font-size: 1.1rem;">x</a-button></span></div>
-                    </div>
-
-                </div> 
-
-            <a-form
-                ref="formDatos"
-                name="form"
-                :model="form" 
-                :rules="formRules">
-                <div class="flex">
-                    <div style="width: 100%;" class="mt-4">
-                        <div>
-                            <a-form-item
-                                    name="nombre"
-                                    :rules="[ { required: true, message: 'Ingresa el nombre del proceso', trigger: 'change'},
-                                    ]"
-                                >
-                                <label>Nombre<span style="">*</span></label>
-                                <a-input v-model:value="form.nombre" style="width:100%; border-radius: 4px; height: 36px;" placeholder="Nombre del proceso">
-                                    <template #prefix>
-                                        <span style="color: #0000009d; margin-top: -6px;"><FolderOutlined/></span>
-                                    </template>
-                                </a-input>
-                            </a-form-item>
-                        </div>
-
-                        <div class="mt-2" style="width: 100%;">
-                            <label>Ubicación<span style="color:red;">*</span></label>
-                            <a-form-item 
-                                name="ubigeo"
-                                :rules="[ { required: true, message: 'Seleccione la ubicación', trigger: ['change', 'blur']},]"
-                            >
-                                <a-auto-complete
-                                    v-model:value="ubigeo"                
-                                    :options="ubigeos"
-                                    @select="onSelectUbigeo"
-                                >
-                                    <a-input
-                                        placeholder="Procedencia del Colegio"
-                                        v-model:value="buscarUbigeo"
-                                        style=" border-radius: 4px; height: 36px;"
-                                    >
-                                        <template #prefix>
-                                            <span style="color: #0000009d; margin-top: -6px;"><EnvironmentOutlined/></span>
-                                        </template>
-                                        <template #suffix>
-                                            <down-outlined/>
-                                        </template>
-                                    </a-input>
-                                </a-auto-complete>
-                            </a-form-item>
-                        </div>
-
-                        <div class="mt-2" style="width: 100%;">
-                            <label>Fecha<span style="color:red;">*</span></label>
-                            <a-form-item
-                                    name="fecha"
-                                    :rules="[ { required: true, message: 'Ingresa tu fecha de nacimiento', trigger: 'change'},]"
-                                >
-                                <a-date-picker style="width:100%; border-radius: 4px; height: 36px;" placeholder="Seleccionar fec. nacimiento" v-model:value="form.fecha" format="DD/MM/YYYY">
-                                    <template #prefix>
-                                        <span style="color: #0000009d; margin-top: -6px;"><EnvironmentOutlined/></span>
-                                    </template>
-                                </a-date-picker>
-                            </a-form-item>
-                        </div>
-                    </div>
-
-                </div>
-
-            </a-form>
-            
-                <div class="mt-0 mb-2">
-                    <div style="margin:-24px; margin-top: -5px;" class="px-6 pt-4 pb-3 flex justify-end">
-                        <div class="mr-2">
-                            <a-button  style="border: 1px solid #476175; color:#476175; width:100px; height: 36px; border-radius:4px;"> Cancelar </a-button>
-                        </div>
-                        <div>
-                            <a-button @click="guardar()" style="background: #476175; border:none; color:white; width:100px; height: 36px; border-radius:4px;"> _Guardar </a-button>
-                        </div>
-                    </div>
-                </div>
-            </a-modal>
-        </div>
-        
-        
-        <div v-if="breadcrumb.length === 2" class="mt-3">
-            <a-tabs v-model:activeKey="activeKey" type="card" tab-position="top">
-                <a-tab-pane key="1" tab="Participantes" style="margin: -10px;">
-                    <div>
-                        <Participantes :proceso="procesoseleccionado"/>
-                    </div>
+            <!-- Tabs del Proceso -->
+            <a-card class="tabs-card">
+              <a-tabs 
+                v-model:activeKey="activeKey" 
+                type="card"
+                @change="handleTabChange"
+              >
+                <a-tab-pane key="1" tab="Participantes">
+                  <Participantes :proceso="procesoseleccionado" />
                 </a-tab-pane>
-                <a-tab-pane key="2" tab="Ides" style="margin: -10px;">
-                    <div>
-                        <Ides :proceso="procesoseleccionado"/>
-                    </div>
+                <a-tab-pane key="2" tab="IDEs">
+                  <Ides :proceso="procesoseleccionado" />
                 </a-tab-pane>
-                <a-tab-pane key="3" tab="Respuestas" style="margin: -10px;">
-                    <div>
-                        <Resp :proceso="procesoseleccionado"/>
-                    </div>
+                <a-tab-pane key="3" tab="Respuestas">
+                  <Resp :proceso="procesoseleccionado" />
                 </a-tab-pane>
-                <a-tab-pane key="4" tab="Res correctas">
-                    <div>
-                        <Patron :proceso="procesoseleccionado"/>
-                    </div>
+                <a-tab-pane key="4" tab="Respuestas Correctas">
+                  <Patron :proceso="procesoseleccionado" />
                 </a-tab-pane>
                 <a-tab-pane key="5" tab="Calificación">
-                    <Calificacion :proceso="procesoseleccionado"/>
+                  <Calificacion :proceso="procesoseleccionado" />
                 </a-tab-pane>
-            </a-tabs>
+                <a-tab-pane key="6" tab="Exepciones">
+                  <Excepcion :id_proceso="procesoseleccionado" />
+                </a-tab-pane>
+              </a-tabs>
+            </a-card>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-</Layout>    
+
+    <!-- Context Menu -->
+    <div 
+      v-if="showContextMenu" 
+      class="context-menu"
+      :style="{ top: `${contextMenuTop}px`, left: `${contextMenuLeft}px` }"
+      @click.stop
+    >
+      <a-menu @click="handleMenuItemClick">
+        <a-menu-item key="1">
+          <template #icon>
+            <plus-outlined />
+          </template>
+          Nuevo Proceso
+        </a-menu-item>
+        <a-menu-item key="2">
+          <template #icon>
+            <upload-outlined />
+          </template>
+          Subir archivo
+        </a-menu-item>
+        <a-menu-item key="3">
+          <template #icon>
+            <copy-outlined />
+          </template>
+          Duplicar selección
+        </a-menu-item>
+      </a-menu>
+    </div>
+
+    <!-- Modal para Nuevo Proceso -->
+    <a-modal
+      v-model:open="modalNuevo"
+      :title="modalTitle"
+      width="500px"
+      centered
+      :closable="true"
+      @cancel="handleModalCancel"
+      :maskClosable="false"
+    >
+      <a-form
+        ref="formDatos"
+        :model="form"
+        :rules="formRules"
+        layout="vertical"
+      >
+        <a-form-item
+          label="Nombre del proceso"
+          name="nombre"
+          required
+        >
+          <a-input
+            v-model:value="form.nombre"
+            placeholder="Ingrese el nombre del proceso"
+            size="large"
+          >
+            <template #prefix>
+              <FolderOutlined />
+            </template>
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          label="Ubicación"
+          name="ubigeo"
+          required
+        >
+          <a-auto-complete
+            v-model:value="ubigeo"
+            :options="ubigeos"
+            @select="onSelectUbigeo"
+            placeholder="Buscar ubicación..."
+            size="large"
+          >
+            <template #prefix>
+              <EnvironmentOutlined />
+            </template>
+          </a-auto-complete>
+        </a-form-item>
+
+        <a-form-item
+          label="Fecha"
+          name="fecha"
+          required
+        >
+          <a-date-picker
+            v-model:value="form.fecha"
+            placeholder="Seleccionar fecha"
+            style="width: 100%"
+            size="large"
+            format="DD/MM/YYYY"
+          />
+        </a-form-item>
+
+        <a-form-item
+          label="Estado"
+          name="estado"
+        >
+          <a-radio-group v-model:value="form.estado">
+            <a-radio :value="1">Vigente</a-radio>
+            <a-radio :value="0">No vigente</a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
+
+      <template #footer>
+        <a-space>
+          <a-button @click="handleModalCancel">
+            Cancelar
+          </a-button>
+          <a-button 
+            type="primary" 
+            @click="guardar"
+            :loading="saving"
+          >
+            Guardar
+          </a-button>
+        </a-space>
+      </template>
+    </a-modal>
+  </Layout>
 </template>
 
 <script setup>
-import {ref, watch, reactive} from 'vue';
+import { ref, reactive, watch, computed, onMounted } from 'vue';
 import axios from 'axios';
-import { FolderOutlined, HomeOutlined, EnvironmentOutlined, DownOutlined, FormOutlined, DeleteOutlined, SaveOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons-vue';
+import { 
+  HomeOutlined, 
+  FolderOutlined, 
+  EnvironmentOutlined, 
+  SearchOutlined,
+  EyeOutlined,
+  FormOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+  CopyOutlined,
+  ArrowLeftOutlined,
+  CalendarOutlined
+} from '@ant-design/icons-vue';
 import { Head } from '@inertiajs/vue3';
-import Layout from '@/Layouts/LayoutCalificador.vue'
-import Ides from './components/leer-ide.vue'
-import Resp from './components/leer-resp.vue'
-import Patron from './components/leer-patron.vue'
-import Participantes from './components/participantes.vue'
-import Calificacion from './components/calificacion.vue'
+import Layout from '@/Layouts/LayoutCalificador.vue';
+import Ides from './components/leer-ide.vue';
+import Resp from './components/leer-resp.vue';
+import Patron from './components/leer-patron.vue';
+import Participantes from './components/participantes.vue';
+import Calificacion from './components/calificacion.vue';
+import Excepcion from './components/excepciones.vue';
+import dayjs from 'dayjs';
 
-const breadcrumb = ref([{ "id": 0, "nombre": "Simulacros"}]);
-
-const archivos = ref([]);
-const carpeta = ref(null);
-const carpetas = ref([]);
-const carpetaId = ref(1);
+// Estado reactivo
+const breadcrumb = ref([{ id: 0, nombre: 'Simulacros' }]);
+const simulacros = ref([]);
+const loading = ref(false);
+const saving = ref(false);
 const modalNuevo = ref(false);
-const nombre = ref("");
-
-const procesoseleccionado = ref(null)
-
-const formDatos = ref();
-const form = reactive({  
-    nombre:'',  
-    fecha:'', 
-    ubigeo:null,
-});
-
-const ubigeo = ref(null)
-const ubigeoseleccionado = ref(null)
-const buscarUbigeo = ref(null)
-const ubigeos = ref([])
-let timeoutId;
 const activeKey = ref('1');
+const procesoseleccionado = ref(null);
+const procesoDetalle = ref(null);
 
-const simulacros = ref([])
-const buscar = ref("")
+// Búsqueda
+const buscar = ref('');
+let searchTimeout;
 
-const customRow = (record) => {
-    breadcrumb.value.push({ "id": record.id, "nombre": "/ "+record.nombre});
-    procesoseleccionado.value = record.id;
-}
+// Ubigeos
+const ubigeo = ref('');
+const ubigeos = ref([]);
+const buscarUbigeo = ref('');
 
-
-watch(ubigeoseleccionado, ( newValue, oldValue ) => { form.ubigeo = newValue })
-watch(buscarUbigeo, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-        getUbigeosColegio() 
-    }, 500);    
-})
-
-watch(buscar, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-        getSimulacros() 
-    }, 400);    
-})
-
-
-const onSelectUbigeo = (value, option) => { ubigeoseleccionado.value = option.key; };
-
-const getUbigeosColegio = async () => {
-    axios.post("/get-ubigeo",{"term": buscarUbigeo.value})
-    .then((response) => {
-        ubigeos.value = response.data.datos.data;
-    })
-    .catch((error) => {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-            } else { console.error('Error de configuración:', error.message); }
-  });
-}
-
-
-const getSimulacros = async () => {
-    axios.post("/get-sim",{"term": buscar.value})
-    .then((response) => {
-        simulacros.value = response.data.datos.data;
-    })
-    .catch((error) => {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-            } else { console.error('Error de configuración:', error.message); }
-  });
-}
-
-getSimulacros()
-
-
-const guardar = async () => {
-    const values = await formDatos.value.validateFields();
-    const response = await axios.post("/simulacro/save-simulacro",{
-        nombre: form.nombre,
-        estado: 1,
-        ubigeo: form.ubigeo,
-        anio:'2024',
-        fecha: form.fecha,
-    });
-    modalNuevo.value = false;
-    await getSimulacros();
-}
-
-const getCarpetas = async ( ) => {
-    try {
-        const response = await axios.get("/raiz/ver-contenido-carpeta/"+carpetaId.value);
-        carpetas.value = response.data.carpetas;
-        carpeta.value = response.data.carpeta;
-    } catch (error) {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-        } else {
-            console.error('Error de configuración:', error.message);
-        }
-    }
-};
-
-const creatCarpeta = async ( ) => {
-    try {
-        const response = await axios.post("/carpetas/crear-carpeta",{nombre: nombre.value, carpeta_padre_id: carpetaId.value });
-        getCarpetas();
-        modalNuevo.value = false;
-    } catch (error) {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-        } else {
-            console.error('Error de configuración:', error.message);
-        }
-    }
-};
-
-
-
-const entrarCarpeta = async (elemento) => {
-    const indice = breadcrumb.value.indexOf(elemento);
-    
-    if (indice !== -1) {
-        breadcrumb.value.splice(indice + 1, breadcrumb.value.length - indice);
-    } else {
-        breadcrumb.value.push(elemento);
-    }
-    carpetaId.value = elemento.id;
-} 
-
-watch(carpetaId, ( newValue, oldValue ) => { getCarpetas() })
-
-const clicIzquierdo = (event) => {
-    showContextMenu.value = false;
-}
-
-const cerramodal = () => {
-    modalNuevo.value = false;
-}
-
-
-
-
-//getCarpetas();
-
+// Context Menu
 const showContextMenu = ref(false);
 const contextMenuTop = ref(0);
 const contextMenuLeft = ref(0);
 
+// Paginación
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ['10', '20', '50', '100'],
+  showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} simulacros`,
+});
+
+// Formulario
+const formDatos = ref();
+const form = reactive({
+  nombre: '',
+  fecha: null,
+  ubigeo: null,
+  estado: 1,
+});
+
+const formRules = {
+  nombre: [
+    { required: true, message: 'Por favor ingrese el nombre del proceso', trigger: 'blur' },
+  ],
+  ubigeo: [
+    { required: true, message: 'Por favor seleccione una ubicación', trigger: 'change' },
+  ],
+  fecha: [
+    { required: true, message: 'Por favor seleccione una fecha', trigger: 'change' },
+  ],
+};
+
+// Computed
+const modalTitle = computed(() => form.id ? 'Editar Proceso' : 'Nuevo Proceso');
+
+// Métodos
+const formatDate = (date) => {
+  if (!date) return 'N/A';
+  return dayjs(date).format('DD/MM/YYYY');
+};
+
+const getSimulacros = async (params = {}) => {
+  loading.value = true;
+  try {
+    const response = await axios.post('/get-sim', {
+      term: buscar.value,
+      page: pagination.current,
+      per_page: pagination.pageSize,
+      ...params,
+    });
+    
+    const data = response.data.datos;
+    simulacros.value = data.data;
+    pagination.total = data.total;
+    pagination.current = data.current_page;
+    pagination.pageSize = data.per_page;
+  } catch (error) {
+    console.error('Error al cargar simulacros:', error);
+    message.error('Error al cargar los simulacros');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const getUbigeosColegio = async () => {
+  if (!buscarUbigeo.value.trim()) {
+    ubigeos.value = [];
+    return;
+  }
+
+  try {
+    const response = await axios.post('/get-ubigeo', {
+      term: buscarUbigeo.value,
+    });
+    ubigeos.value = response.data.datos.data.map(item => ({
+      value: item.nombre,
+      key: item.id,
+      label: item.nombre,
+    }));
+  } catch (error) {
+    console.error('Error al cargar ubigeos:', error);
+  }
+};
+
+const onSelectUbigeo = (value, option) => {
+  form.ubigeo = option.key;
+};
+
+const customRow = async (record) => {
+  breadcrumb.value = [
+    { id: 0, nombre: 'Simulacros' },
+    { id: record.id, nombre: record.nombre }
+  ];
+  procesoseleccionado.value = record.id;
+  procesoDetalle.value = record;
+  activeKey.value = '1';
+};
+
+const entrarCarpeta = (item) => {
+  const index = breadcrumb.value.findIndex(b => b.id === item.id);
+  if (index !== -1) {
+    breadcrumb.value = breadcrumb.value.slice(0, index + 1);
+  }
+  
+  if (item.id === 0) {
+    procesoseleccionado.value = null;
+    procesoDetalle.value = null;
+  }
+};
+
+const guardar = async () => {
+  try {
+    const values = await formDatos.value.validate();
+    saving.value = true;
+    
+    const url = form.id ? '/simulacro/update-simulacro' : '/simulacro/save-simulacro';
+    const data = {
+      ...form,
+      fecha: form.fecha ? dayjs(form.fecha).format('YYYY-MM-DD') : null,
+    };
+    
+    if (form.id) {
+      data.id = form.id;
+    }
+
+    await axios.post(url, data);
+    
+    message.success(form.id ? 'Proceso actualizado exitosamente' : 'Proceso creado exitosamente');
+    modalNuevo.value = false;
+    resetForm();
+    await getSimulacros();
+  } catch (error) {
+    console.error('Error al guardar:', error);
+    if (error.response?.data?.message) {
+      message.error(error.response.data.message);
+    }
+  } finally {
+    saving.value = false;
+  }
+};
+
+const abrirEditar = (record) => {
+  form.id = record.id;
+  form.nombre = record.nombre;
+  form.fecha = record.fecha ? dayjs(record.fecha) : null;
+  form.ubigeo = record.ubigeo_id;
+  form.estado = record.estado;
+  ubigeo.value = record.ubigeo_nombre || '';
+  modalNuevo.value = true;
+};
+
+const eliminar = async (record) => {
+  try {
+    await axios.post('/simulacro/delete-simulacro', { id: record.id });
+    message.success('Simulacro eliminado exitosamente');
+    await getSimulacros();
+  } catch (error) {
+    console.error('Error al eliminar:', error);
+    message.error('Error al eliminar el simulacro');
+  }
+};
+
+const verFicha = (record) => {
+  // Implementar lógica para ver ficha detallada
+  console.log('Ver ficha:', record);
+};
+
+const handleTableChange = (pag, filters, sorter) => {
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  getSimulacros({
+    sortField: sorter.field,
+    sortOrder: sorter.order,
+    filters,
+  });
+};
+
+const handleModalCancel = () => {
+  modalNuevo.value = false;
+  resetForm();
+};
+
+const resetForm = () => {
+  form.id = null;
+  form.nombre = '';
+  form.fecha = null;
+  form.ubigeo = null;
+  form.estado = 1;
+  ubigeo.value = '';
+  if (formDatos.value) {
+    formDatos.value.resetFields();
+  }
+};
+
+const clicIzquierdo = () => {
+  showContextMenu.value = false;
+};
 
 const handleContextMenu = (event) => {
-    
   showContextMenu.value = true;
   contextMenuTop.value = event.clientY;
   contextMenuLeft.value = event.clientX;
   event.preventDefault();
 };
 
-const handleMenuItemClick = ( opcion ) => {
-    if(opcion === '1'){
-        modalNuevo.value = true;
-        showContextMenu.value = false;
-    }else{
-        console.log("2");
-    }
-
+const handleMenuItemClick = (e) => {
+  showContextMenu.value = false;
+  if (e.key === '1') {
+    modalNuevo.value = true;
+  }
 };
 
+const handleTabChange = (key) => {
+  activeKey.value = key;
+};
 
+// Watchers
+watch(buscar, (newValue) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    pagination.current = 1;
+    getSimulacros();
+  }, 500);
+});
 
+watch(buscarUbigeo, (newValue) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    getUbigeosColegio();
+  }, 500);
+});
+
+// Columnas de la tabla
 const columnsSimulacros = [
-    { title: 'N°', dataIndex: 'nro', width:'40px', align:"center"},
-    { title: 'Nombre', dataIndex: 'nombre',},
-    { title: 'Fecha', dataIndex: 'fecha', align:'center'},
-    { title: 'Vigente', dataIndex: 'estado', align:'center', width:'100px'},
-    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
+  {
+    title: 'N°',
+    dataIndex: 'nro',
+    width: 60,
+    align: 'center',
+  },
+  {
+    title: 'Nombre',
+    dataIndex: 'nombre',
+    sorter: true,
+  },
+  {
+    title: 'Fecha',
+    dataIndex: 'fecha',
+    width: 120,
+    align: 'center',
+    sorter: true,
+  },
+  {
+    title: 'Ubigeo',
+    dataIndex: 'ubigeo',
+    width: 150,
+  },
+  {
+    title: 'Estado',
+    dataIndex: 'estado',
+    width: 120,
+    align: 'center',
+    filters: [
+      { text: 'Vigente', value: 1 },
+      { text: 'No Vigente', value: 0 },
+    ],
+  },
+  {
+    title: 'Acciones',
+    dataIndex: 'acciones',
+    width: 150,
+    align: 'center',
+  },
 ];
 
-getUbigeosColegio()
+// Ciclo de vida
+onMounted(() => {
+  getSimulacros();
+});
 </script>
-<style>
-.carpetas-select{
-    cursor:pointer;
-    text-align: center;
-    background: none;
-}
-.carpetas-select:hover{
-    text-align: center;
-    background: #0f0f002c;
-    border-radius: 5px;
-}
-.selec-menu{
-    height:26px; 
-}
-.selec-menu:hover{
-    background:#cdf3f3; 
+
+<style scoped>
+.container {
+  min-height: 100vh;
 }
 
+.content-wrapper {
+  padding: 20px;
+}
+
+.main-content {
+  background: white;
+  border-radius: 12px;
+  min-height: calc(100vh - 100px);
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Breadcrumb */
+.breadcrumb-text {
+  font-weight: 500;
+  color: #595959;
+}
+
+.breadcrumb-link {
+  color: #1890ff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.breadcrumb-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: #8c8c8c;
+  margin: 4px 0 0 0;
+  font-size: 14px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Table Card */
+.table-card {
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Table Cells */
+.nombre-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.nombre-cell:hover {
+  background-color: #f5f5f5;
+}
+
+.folder-icon {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.nombre-text {
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.row-number {
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.date-text {
+  color: #595959;
+}
+
+.ubigeo-text {
+  color: #434343;
+}
+
+/* Action Icons */
+.action-icon {
+  color: #8c8c8c;
+  transition: color 0.3s;
+}
+
+.action-icon:hover {
+  color: #1890ff;
+}
+
+.edit-icon:hover {
+  color: #52c41a;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 0;
+}
+
+.empty-state p {
+  color: #8c8c8c;
+  margin: 16px 0 24px;
+}
+
+/* Process Header */
+.process-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.back-button {
+  color: #8c8c8c;
+}
+
+.process-info {
+  flex: 1;
+}
+
+.process-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.process-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Tabs Card */
+.tabs-card {
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+:deep(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+:deep(.ant-tabs-tab) {
+  padding: 12px 16px;
+}
+
+/* Context Menu */
+.context-menu {
+  position: fixed;
+  z-index: 1000;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12),
+              0 6px 16px 0 rgba(0, 0, 0, 0.08),
+              0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.context-menu :deep(.ant-menu-item) {
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  padding: 0 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+  }
+  
+  .header-right {
+    width: 100%;
+  }
+  
+  .header-right :deep(.ant-input-search) {
+    width: 100% !important;
+  }
+}
 </style>

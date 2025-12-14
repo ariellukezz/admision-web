@@ -12,7 +12,7 @@
     @page {
       header: page-header;
       footer: page-footer;
-      margin-top: 70px;
+      margin-top: 90px;
       margin-bottom: 40px;
       margin-left: 10mm;
       margin-right: 10mm;
@@ -47,11 +47,11 @@
         <table style="width:100%; padding-bottom:5px; border-bottom: 1px solid #d9d9d9;">
             <tr>
             <td style="text-align:left; width:60px; border:none;">
-                <img src="http://admision.test/imagenes/logo_poder_judicial.png" width="64">
+                <img src="https://inscripciones.admision.unap.edu.pe/build/assets/logotiny-e0fccd92.png" width="64">
             </td>
             <td style="text-align:center; font-size:16px; border:none;">
                 <div>UNIVERSIDAD NACIONAL DEL ALTIPLANO DE PUNO</div>
-                <div style="text-align:center; font-size:12px; border:none;">RESULTADOS DEL EXAMEN SIMULACRO 2025</div>
+                <div style="text-align:center; font-size:12px; border:none;">RESULTADOS DEL V CONCURSO REGIONAL DE QUÍMICA DE ALTURA</div>
                 <div></div>
             </td>
             <td style="text-align:right; font-size:11px; width:90px; border:none;">
@@ -77,23 +77,29 @@
       @if (count($datos) > 0 )
           @foreach ($datos as $item)
           <div style="width: 100%; text-align:center; font-size:10pt;">
-              <div>
+              {{-- <div>
                   <div><span style=" font-size:11pt; letter-spacing: .05rem; text-transform:uppercase">
                        {{ $item['unidad'] }}    
                   </span></div>
 
                     <div style="font-size: 12pt; font-weight:bold;">
-                      <span style="text-transform: uppercase"> GRADO {{ $item['puesto'] }} </span>
                     </div>
                     <div style="font-size: 12pt;">
-                      {{-- <span style=""> CÓDIGO DE PLAZA {{ $item['cod_puesto'] }} </span> --}}
+
                     </div>
 
-              </div>
+              </div> --}}
 
               <table style="width: 100%" class="l-table">
                 <thead>
-
+                    <tr style="border: none" align="center">
+                        <td colspan="4" style="border: none">
+                        <div>
+                            <span style=" font-size:11pt; letter-spacing: .05rem; text-transform:uppercase">
+                            Nivel   {{ $item['unidad'] }}    
+                          </span></div>
+                        </td>
+                    </tr>
                     <tr style="background:#e4e4e4;">
                         {{-- <th><div style="text-align: center; width:50px;">PUESTO</div></th> --}}
                         <th><div style="text-align: left; width:80px;">NRO</div></th>
@@ -108,7 +114,7 @@
                         <tr>
                             <td width="40px" align="center">{{ $index+1 }}</td>
                             <td width="90px" align="center"> {{ $itemEst['dni'] }}</td>
-                            <td align="left">{{ $itemEst['paterno'] }} {{ $itemEst['materno'] }} {{ $itemEst['nombres'] }}</td>
+                            <td align="left">{{ $itemEst['paterno'] }} {{ $itemEst['materno'] }} {{ $itemEst['nombres'] }} ( {{ $itemEst['colegio'] }})</td>
                             <td align="center" width="60px">{{ $itemEst['puntaje'] }}</td>
                         </tr>
                     @endforeach
