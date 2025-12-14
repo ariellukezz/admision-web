@@ -51,7 +51,7 @@
             </td>
             <td style="text-align:center; font-size:16px; border:none;">
                 <div>UNIVERSIDAD NACIONAL DEL ALTIPLANO DE PUNO</div>
-                <div style="text-align:center; font-size:12px; border:none;">RESULTADOS DEL V CONCURSO REGIONAL DE QUÍMICA DE ALTURA</div>
+                <div style="text-align:center; font-size:12px; border:none;">EXAMEN SIMULACRO CEPREUNA CICLO 2025-II</div>
                 <div></div>
             </td>
             <td style="text-align:right; font-size:11px; width:90px; border:none;">
@@ -93,10 +93,10 @@
               <table style="width: 100%" class="l-table">
                 <thead>
                     <tr style="border: none" align="center">
-                        <td colspan="4" style="border: none">
+                        <td colspan="4" style="border: none" align="center">
                         <div>
                             <span style=" font-size:11pt; letter-spacing: .05rem; text-transform:uppercase">
-                            Nivel   {{ $item['unidad'] }}    
+                            AREA   {{ $item['unidad'] }}    
                           </span></div>
                         </td>
                     </tr>
