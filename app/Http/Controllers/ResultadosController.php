@@ -726,19 +726,20 @@ class ResultadosController extends Controller
         $datosParaInsercion = [];
 
         foreach ($ides as $linea) {
-            $c1 = substr($linea, 0, 3);
-            $lectura = substr($linea, 3, 6);
-            $c3 = substr($linea, 9, 3);
-            $c4 = substr($linea, 12, 5);
-            $c5 = substr($linea, 17,4);
-            $c6 = substr($linea, 24,4);
-            $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));
-            $litho = substr($linea, 40, 6);
-            $tipo = substr($linea, 46, 1);
-            $respuestas = substr($linea, 47, 60);
 
-            if (strlen($c1) > 1) {
+            $c1       = substr($linea, 0, 3);
+            $lectura  = substr($linea, 3, 6);
+            $c3       = substr($linea, 9, 3);
+            $c4       = substr($linea, 12, 5);
+            $c5       = substr($linea, 17, 4);
+            $c6       = substr($linea, 24, 4);
+            $c7       = trim(substr($linea, 29, 5));
+            $c8       = trim(substr($linea, 38, 1));
+            $litho    = substr($linea, 40, 6);
+
+            $respuestas = substr($linea, 46, 60);
+
+            if (strlen(trim($c1)) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
                     'n_lectura' => $lectura,
@@ -749,7 +750,7 @@ class ResultadosController extends Controller
                     'c7' => $c7,
                     'c8' => $c8,
                     'litho' => $litho,
-                    'tipo' => $tipo,
+                    'tipo' => null,
                     'respuestas' => $respuestas,
                     'id_archivo' => $id,
                     'created_at' => $now,
@@ -761,6 +762,7 @@ class ResultadosController extends Controller
         Resp::insert($datosParaInsercion);
     }
 
+
     public function subirPatBD($archivo, $id)
     {
         $ides = file($archivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -768,19 +770,20 @@ class ResultadosController extends Controller
         $datosParaInsercion = [];
 
         foreach ($ides as $linea) {
-            $c1 = substr($linea, 0, 3);
-            $lectura = substr($linea, 3, 6);
-            $c3 = substr($linea, 9, 3);
-            $c4 = substr($linea, 12, 5);
-            $c5 = substr($linea, 17,4);
-            $c6 = substr($linea, 24,4);
-            $c7 = trim(substr($linea, 29,5));
-            $c8 = trim(substr($linea, 38,1));
-            $litho = substr($linea, 40, 6);
-            $tipo = substr($linea, 46, 1);
-            $respuestas = substr($linea, 47, 60);
 
-            if (strlen($c1) > 1) {
+            $c1       = substr($linea, 0, 3);
+            $lectura  = substr($linea, 3, 6);
+            $c3       = substr($linea, 9, 3);
+            $c4       = substr($linea, 12, 5);
+            $c5       = substr($linea, 17, 4);
+            $c6       = substr($linea, 24, 4);
+            $c7       = trim(substr($linea, 29, 5));
+            $c8       = trim(substr($linea, 38, 1));
+            $litho    = substr($linea, 40, 6);
+
+            $respuestas = substr($linea, 46, 60);
+
+            if (strlen(trim($c1)) > 1) {
                 $datosParaInsercion[] = [
                     'c1' => $c1,
                     'n_lectura' => $lectura,
@@ -791,7 +794,7 @@ class ResultadosController extends Controller
                     'c7' => $c7,
                     'c8' => $c8,
                     'litho' => $litho,
-                    'tipo' => $tipo,
+                    'tipo' => null,
                     'respuestas' => $respuestas,
                     'id_archivo' => $id
                 ];
@@ -800,6 +803,7 @@ class ResultadosController extends Controller
 
         Resp::insert($datosParaInsercion);
     }
+
 
 
     public function getFichaRespuesta($id){
@@ -919,7 +923,7 @@ class ResultadosController extends Controller
         JOIN simulacro sim ON sim.id = $id_sim
         WHERE asim.categoria = 'patron'");
 
-        $respuestas = DB::select(" SELECT  re.id, re.litho, re.respuestas, re.tipo, i.litho AS id_litho, i.camp2, p.dni, p.cod_examen
+        $respuestas = DB::select(" SELECT  re.id, re.litho, re.respuestas, i.tipo, i.litho AS id_litho, i.camp2, p.dni, p.cod_examen
             FROM res re
             JOIN archivos_simulacro asim ON asim.id = re.id_archivo AND asim.categoria = 'respuesta'
             JOIN simulacro sim ON sim.id = asim.id_simulacro

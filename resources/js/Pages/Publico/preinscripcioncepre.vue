@@ -1287,7 +1287,7 @@
                   </div>
 
                   <div class="flex justify-center mt-4 mb-4 mr-2">
-                    <a-button @click="descargaReglamento()" class="custom-button" shape="round">
+                    <a-button @click="descargaReglamento()" disabled class="custom-button" shape="round">
                             <div>DESCARGAR REGLAMENTO</div>
                       </a-button>
                   </div>
