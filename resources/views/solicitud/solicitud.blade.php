@@ -121,6 +121,7 @@
                               <tr><td style="height: 23px;">1.</td><td>Váuchers de pago.</td></tr>
                               <tr><td style="height: 23px;">2.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia).</td></tr>
                               <tr><td style="height: 23px;">3.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
+                              <tr><td style="height: 23px;">3.</td><td>Constancia de no adeudo al CEPREUNA(<span style="color:red;">*</span>original y copia).</td></tr>
                               <tr><td v-align="top"><div style="margin-top:-20px;">4.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2025 conforme a la modalidad de postulación.</td></tr>
                           </table>
                           @endif
