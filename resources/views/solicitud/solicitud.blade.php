@@ -101,7 +101,7 @@
                                 <strong>SOLICITO la inscripción para postular en el EXAMEN
                                 {{ $data->proceso }}</strong>
                                 que se llevará a cabo el {{ $data->fecha_examen }}
-                                del año en curso. Asimismo, pongo a vuestro conocimiento que
+                                de enero de 2026. Asimismo, pongo a vuestro conocimiento que
                                 postulo al programa de estudios de<span style="font-weight: bold;"> {{ $data->programa }}</span>
                                 bajo la modalidad  <span style="font-weight: bold;">{{ $data->modalidad }}</span>.
                             </div>
@@ -114,15 +114,15 @@
                             <table>
                                 <tr><td style="height: 23px;">1.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia).</td></tr>
                                 <tr><td style="height: 23px;">2.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
-                                <tr><td v-align="top"><div style="margin-top:-20px;">3.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2025 conforme a la modalidad de postulación.</td></tr>
+                                <tr><td v-align="top"><div style="margin-top:-20px;">3.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2026 conforme a la modalidad de postulación.</td></tr>
                             </table>
                           @else
                             <table>
                               <tr><td style="height: 23px;">1.</td><td>Váuchers de pago.</td></tr>
                               <tr><td style="height: 23px;">2.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia).</td></tr>
-                              <tr><td style="height: 23px;">3.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
-                              <tr><td style="height: 23px;">3.</td><td>Constancia de no adeudo al CEPREUNA(<span style="color:red;">*</span>original y copia).</td></tr>
-                              <tr><td v-align="top"><div style="margin-top:-20px;">4.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2025 conforme a la modalidad de postulación.</td></tr>
+                              <tr><td style="height: 23px;">4.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
+                              <tr><td style="height: 23px;">5.</td><td>Constancia de no adeudo al CEPREUNA(<span style="color:red;">*</span>original y copia).</td></tr>
+                              <tr><td v-align="top"><div style="margin-top:-20px;">5.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2026 conforme a la modalidad de postulación.</td></tr>
                           </table>
                           @endif
                         </div>
