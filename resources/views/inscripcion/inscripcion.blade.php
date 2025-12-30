@@ -111,7 +111,7 @@
                                 El que suscribe declara bajo juramento que la información proporcionada 
                                 durante el proceso de inscripción es veraz y de mi entera responsabilidad. 
                                 Reconozco y acepto los términos establecidos en el 
-                                Reglamento General de Admisión de 2025,
+                                Reglamento General de Admisión de 2026,
                                 así como permitir una rigurosa revisión física exhaustiva
                                 para acceder a la Ciudad Universitaria y realizar el examen de admisión. 
                                 En caso de obtener una vacante, me comprometo a cumplir con lo estipulado en el reglamento. 

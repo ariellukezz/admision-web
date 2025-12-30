@@ -29,7 +29,6 @@
       </div>
 </div>
 
-
     <div style="padding: 0px 15px; background: white; border-radius: 10px; margin-top:-10px;">
       <div class="flex justify-end pt-6" style="background:white;">
         <div>
@@ -513,79 +512,21 @@ const Inscribir =  async () => {
 }
 
 const observados = [
-'76535958',
-'75976209',
-'60417373',
-'72979295',
-'77438840',
-'71465589',
-'60857514',
-'72757847',
-'76950626',
-'70869508',
-'60316888',
-'60180054',
-'74202757',
-'71478256',
-'61514136',
-'60509538',
-'60983672',
-'60908934',
-'60850613',
-'75855507',
-'75197157',
-'73950287',
-'75950305',
-'75864795',
-'60173861',
-'70244520',
-'60909658',
-'60181061',
-'71445229',
-'77086486',
-'73959508',
-'71738875',
-'75606038',
-'75088446',
-'76988648',
-'77686000',
-'74349169',
-'75691493',
-'71888467',
-'76766749',
-'73135799',
-'73379983',
-'75471068',
-'60759084',
-'73459137',
-'73772047',
-'75896114',
-'74204726',
-'70679850',
-'60909370',
-'73757959',
-'61194241',
-'75213792',
-'76770771',
-'75403251',
-'74803849',
-'60067936',
-'77800950',
-'60850137',
-'71493950',
-'60759183',
-'74325936',
-'71440923',
-'60443021',
-'60220628',
-'61063505',
-'60206586',
-'60487645',
-'60068729',
-'60604099',
-'71913989',
-'61152631'
-];
+'61001464','60068800','60066705','60171563','61320806','61064509','70279455','60324574','60658775','60065685','61094020','61093375',
+'71154109','73741501','75055639','73810787','74059827','61320079','61063914','61255036','76333236','60536341','61093328','61152794',
+'61093741','60476909','60558336','60303055','73770883','60220640','74205408','60836931','60065670','60066325','60725160','60758860',
+'60066480','73075570','76134981','60173661','60487641','60937992','60172762','77021942','60178672','60178424','61063205','45744705',
+'73822245','60538226','76699436','75692266','60525786','74211287','60417167','60983687','61310357','60561138','60275829','61063509',
+'60525940','76038411','76737361','61718992','75925332','60066412','73494673','61206353','77918513','60066734','60525904','60531124',
+'60173935','60371865','60561245','74808476','60525826','60507007','60486318','75555479','60850299','71913959','60362169','60506380',
+'60558300','60518610','75659270','75803970','60589330','61093300','60518500','60589380','60374560','72320310','74161080','74058160',
+'71958380','60363701','74396951','73361341','60558391','73215601','71621211','60171221','74057171','60300681','60557482','60065492',
+'60518482','75818322','75732732','61255092','76989623','61320473','74042273','60518453','75531103','73448923','71708884','71897534',
+'60324174','60589324','74056934','74653424','60558265','60554825','60509495','60518496','63746086','62348846','60558316','60538326',
+'73745426','60554806','71877806','60214886','71160837','75189317','60909457','60170797','74159037','75021637','60509517','78884987',
+'71644737','60558388','60589368','60443088','60732728','61094388','60518548','71634548','73698698','60270018','74631368','60558409',
+'74150999','60568569','60558349','60958619','60251889','74497249','60518479','73215609','73575769','60518599','60272029','60665159',
+'75324949','61300870','60850130','77282020'];
 
 
 let timeout2;
@@ -613,16 +554,6 @@ watch(dniseleccionado, ( newValue, oldValue ) => {
 
     }, 500);
 })
-
-///revisor/nuevo-pdf-inscripcion/73903851
-// const GenerarNuevoPDF =  (dnni) => {
-//     var iframe = document.createElement('iframe');
-//     iframe.style.display = "none";
-//     iframe.src = baseUrl+'/documentos/10/inscripciones/constancias/'+dnni+'.pdf';
-//     document.body.appendChild(iframe);
-//     iframe.contentWindow.focus();
-//     iframe.contentWindow.print();
-// }
 
 const imprimirPDF =  (dnni) => {
     var iframe = document.createElement('iframe');
@@ -777,49 +708,14 @@ getPostulantes()
   }
 }
 
-::-webkit-scrollbar {
-  width: 9px;
-  height: 12px;
-}
+::-webkit-scrollbar { width: 9px; height: 12px; }
+::-webkit-scrollbar-track { background: #f1f1f1;  border-radius: 10px; } 
+::-webkit-scrollbar-thumb {background: #888; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover {  background: #555; }
+.scroll-container {  overflow-y: auto;  scrollbar-width: thin; scrollbar-color: #888 #f1f1f1;}
+.scroll-container::-webkit-scrollbar { width: 12px; height: 12px; }
+.scroll-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px;}
+.scroll-container::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+.scroll-container::-webkit-scrollbar-thumb:hover { background: #555;}
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1; 
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888; 
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555; 
-}
-
-/* Estilo para un scroll específico */
-.scroll-container {
-  overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
-}
-
-/* Estilo para el scroll específico en Webkit (Chrome, Safari) */
-.scroll-container::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1; 
-  border-radius: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb {
-  background: #888; 
-  border-radius: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #555; 
-}
 </style>
