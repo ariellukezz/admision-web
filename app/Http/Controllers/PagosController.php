@@ -26,7 +26,7 @@ class PagosController extends Controller
             '000000000000000' AS universityId
             FROM banco_pagos bp
             LEFT JOIN pagos_general pg ON pg.operacion = bp.secuencia
-            WHERE bp.fch_pag > '2025-01-01'
+            WHERE bp.fch_pag > '2025-12-01'
             AND bp.concepto IN ('00000026', '00000039', '00000028', '00000027')
             AND bp.secuencia NOT IN (SELECT operacion FROM pagos_general WHERE proceso != ".auth()->user()->id_proceso." )
             AND $dni = substr(num_doc, 8,8)");
