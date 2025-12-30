@@ -706,7 +706,7 @@ Route::post('subir-pdf/{dni}/{cod}/{tipo}', [ResultadosController::class, 'carga
 
 Route::get('/get-pago-caja/{dni}', function ($dni) {
     try {
-        $response = Http::get('http://tesoreria.unap.edu.pe/services/document/?w=' . $dni . '&d=2025-10-01');
+        $response = Http::get('http://tesoreria.unap.edu.pe/services/document/?w=' . $dni . '&d=2025-12-01');
          if ($response->successful()) {
             $datosCaja = $response->json(['data']);
             return response()->json($datosCaja);

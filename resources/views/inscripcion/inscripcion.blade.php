@@ -160,7 +160,7 @@
                                 </span>
                                 <div style="margin-top: -8px;">
                                     <ul>
-                                        <li>Ingreso: 08:00 a 09:30 horas.</li>
+                                        <li>Ingreso: 06:30 a 09:30 horas.</li>
                                     </ul>
                                 </div>
                             @endif
