@@ -11,9 +11,9 @@
     <div>
       <h1 style="font-size: 1.7rem;">Resultados <span v-if="props.proceso_seleccionado.nivel == 1">del examen</span></h1>
       <p style="text-align: justify; font-size: 1em;">
-        Para consultar la relación de ingresantes del 
+        Para consultar la relación de ingresantes del
         <span v-if="props.proceso_seleccionado.nivel == 1">
-          EXAMEN 
+          EXAMEN
         </span>
         {{ props.proceso_seleccionado.nombre }},
         haga clic en el botón "Descargar" correspondiente a la fecha de su interés.
@@ -186,9 +186,9 @@
       </div>
     </div>
 
-  </div>  
+  </div>
 
-    <div v-if="ingresante === 3" class="mt-6">
+    <div v-if="ingresante === 1" class="mt-6">
       <a-alert
           message="! MUY IMPORTANTE !"
           description="Los postulantes que hayan alcanzado una vacante deberán subir su Certificado de Estudios y DNI en formato PDF con un peso max. de 2mb"

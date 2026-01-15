@@ -12,15 +12,15 @@
                     <a-input v-model:value="dni" type="text" Placeholder="Ingrese DNI" style="padding-left:20px;"/>
                     <a-button @click="getPuntaje()" type="primary" style="height: 38px; width: 160px;">Consultar</a-button>
                 </div>
-            </div>      
+            </div>
 
             <div v-if="resultados.length > 0 " class="mt-6" style="-o-transition-duration: .3s;">
-                <a-table 
-                    :columns="columnsResultados" 
+                <a-table
+                    :columns="columnsResultados"
                     :data-source="resultados"
                     :pagination="false"
                     size="small"
-                    > 
+                    >
                     <template #bodyCell="{ column, index, record }" >
                         <template v-if="column.dataIndex === 'puntaje'">
                             <div>
@@ -52,8 +52,8 @@
                         </template>
 
                     </template>
-            
-                </a-table> 
+
+                </a-table>
             </div>
 
             <div class="mt-2" v-if="ingresante === 5" style="background: white;">
@@ -64,9 +64,9 @@
                         show-icon
                         type="info"
                     >
-                    <a-button> Subir Archivos </a-button>    
+                    <a-button> Subir Archivos </a-button>
                     </a-alert>
-                </div>   
+                </div>
             </div>
 
             <div class="p-3 mt-3" v-if="ingresante === 5" style="background: white;">
@@ -75,14 +75,14 @@
                     <h3 style="font-size:1.1rem;"> Formulario de registro</h3>
                 </div>
 
-                <div class="p-3"> 
+                <div class="p-3">
                     <label>DNI del padre<span style="color:red;"> (*)</span></label>
                     <div class="flex">
                         <a-input v-model:value="dnipadre" type="text" Placeholder="Ingrese DNI del padre" style="padding-left:20px;"/>
                     </div>
                 </div>
 
-                <div class="p-3"> 
+                <div class="p-3">
                     <label>DNI de la madre<span style="color:red;"> (*)</span></label>
                     <div class="flex">
                         <a-input v-model:value="dnimadre" type="text" Placeholder="Ingrese DNI de la madre" style="padding-left:20px;"/>
@@ -93,7 +93,7 @@
                     <div class="ml-3 mt-4">
                         <span style="font-size: 1.1rem;"> Subir Archivos</span>
                     </div>
-                    
+
                     <div class="p-3 mt-5" style="background: #e3e3e33d; border-radius: 5px;">
                         <div class="mb-3">
                             <span style="font-size: 1rem;">Certificado en PDF </span>
@@ -139,7 +139,7 @@
 
                         <div style="border-radius: 8px; border:solid 1px #d9d9d9; text-align:center;">
                             <span style="font-family: 'Courier New', Courier, monospace; font-wight:bold; font-size: 2.3rem;">
-                                {{ codigo }}                                                        
+                                {{ codigo }}
                             </span>
                             <div class="mb-2" style="margin-top:-10px;">
                                 código secreto
@@ -168,7 +168,7 @@
                 </div>
             </div>
         </div>
-    </div>  
+    </div>
 </Layout>
 
 </template>
@@ -185,7 +185,7 @@ const ingresante = ref(0)
 const verificado = ref(false);
 const codigo = ref("");
 
-const getPuntaje = async () => {  
+const getPuntaje = async () => {
     ingresante.value = 0;
     const res = await axios.get(`/get-puntajes/` + dni.value);
     resultados.value = res.data.datos;
@@ -203,28 +203,28 @@ const getPuntaje = async () => {
 
 
 // const verificarPadres = async () => {
-//     const res = await axios.post("/verificar-padres",{ 
-//         dni: dni.value, 
-//         dnipadre: dnipadre.value, 
-//         dnimadre: dnimadre.value 
+//     const res = await axios.post("/verificar-padres",{
+//         dni: dni.value,
+//         dnipadre: dnipadre.value,
+//         dnimadre: dnimadre.value
 //     });
 
 //     verificado.value = res.data.estado;
 // }
 
 
-watch(dnipadre, ( newValue, oldValue ) => { 
+watch(dnipadre, ( newValue, oldValue ) => {
     if(dnipadre.value.length == 8 && dnipadre.value.length == 8  && dnimadre.value.length != dnipadre.value){
         verificarPadres();
         getCodigoAleatorio();
-    } 
+    }
 });
 
-watch(dnimadre, ( newValue, oldValue ) => { 
+watch(dnimadre, ( newValue, oldValue ) => {
     if(dnipadre.value.length == 8 && dnipadre.value.length == 8 && dnimadre.value != dnipadre.value ){
         verificarPadres();
         getCodigoAleatorio();
-    } 
+    }
 });
 
 
@@ -237,7 +237,7 @@ const arc1 = ref(false);
 const arc2 = ref(false);
 
 const columnsResultados = [
-    { title: 'Nombre', dataIndex: 'nombres'},    
+    { title: 'Nombre', dataIndex: 'nombres'},
     { title: 'Programa', dataIndex:'programa', responsive: ['sm'], },
     { title: 'Puntaje', dataIndex:'puntaje', align:'center'},
     { title: 'Vocacional', dataIndex:'puntaje_vocacional', align:'center'},
@@ -277,7 +277,7 @@ function finalizar() {
     resultados.value = [];
 }
 
-  
+
 </script>
 
 <style scope>
@@ -293,7 +293,7 @@ function finalizar() {
     width: 100%;
   }
   @media screen and (min-width: 1300px) {
-    max-width: 900px; 
+    max-width: 900px;
   }
 
 }
