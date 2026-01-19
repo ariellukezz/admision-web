@@ -74,12 +74,12 @@ class ProgramaProcesoController extends Controller
                 return response()->json($this->response, 400);
             }
 
-            $res = DB::table('programas_proceso')
+            $res = DB::table('vacantes')
                 ->select('programa.id as value', 'programa.nombre as label')
-                ->join('programa', 'programa.id', '=', 'programas_proceso.id_programa')
-                ->where('programas_proceso.id_modalidad', $request->id_modalidad)
-                ->where('programas_proceso.id_proceso', $request->id_proceso)
-                ->where('programas_proceso.estado', 1)
+                ->join('programa', 'programa.id', '=', 'vacantes.id_programa')
+                ->where('vacantes.id_modalidad', $request->id_modalidad)
+                ->where('vacantes.id_proceso', $request->id_proceso)
+                ->where('vacantes.estado', 1)
                 ->where('programa.area', $request->area)
                 ->distinct()
                 ->get();
