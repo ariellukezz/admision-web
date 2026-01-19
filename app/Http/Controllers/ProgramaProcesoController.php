@@ -66,29 +66,34 @@ class ProgramaProcesoController extends Controller
         return response()->json($this->response, 200);
     }
 
-
     public function getSelectProgramasProcesoArea(Request $request) {
+        try {
+            if (!$request->id_modalidad || !$request->id_proceso || !$request->area) {
+                $this->response['estado'] = false;
+                $this->response['mensaje'] = 'Faltan parámetros requeridos';
+                return response()->json($this->response, 400);
+            }
 
-      $res = DB::select("SELECT programa.id AS value, programa.nombre AS label
-      FROM (
-          SELECT id_programa
-          FROM programas_proceso
-          WHERE id_modalidad = :id_modalidad
-                AND id_proceso = :id_proceso
-                AND programas_proceso.estado = 1
-          ) AS programas_proceso
-          JOIN programa ON programa.id = programas_proceso.id_programa
-          WHERE programa.area = :area", [
-              'id_modalidad' => $request->id_modalidad,
-              'id_proceso' => $request->id_proceso,
-              'area' => $request->area,
-          ]
-  );
+            $res = DB::table('programas_proceso')
+                ->select('programa.id as value', 'programa.nombre as label')
+                ->join('programa', 'programa.id', '=', 'programas_proceso.id_programa')
+                ->where('programas_proceso.id_modalidad', $request->id_modalidad)
+                ->where('programas_proceso.id_proceso', $request->id_proceso)
+                ->where('programas_proceso.estado', 1)
+                ->where('programa.area', $request->area)
+                ->distinct()
+                ->get();
 
-      $this->response['estado'] = true;
-      $this->response['datos'] = $res;
-      return response()->json($this->response, 200);
-  }
+            $this->response['estado'] = true;
+            $this->response['datos'] = $res;
+            return response()->json($this->response, 200);
+
+        } catch (\Exception $e) {
+            $this->response['estado'] = false;
+            $this->response['mensaje'] = 'Error en la consulta: ' . $e->getMessage();
+            return response()->json($this->response, 500);
+        }
+    }
 
 
 
