@@ -10,6 +10,8 @@ use DB;
 class ProgramaProcesoController extends Controller
 {
 
+
+
     public function getProgramaProceso() {
         $res = DB::select('SELECT
             pro.nombre_corto AS programa,
@@ -52,11 +54,11 @@ class ProgramaProcesoController extends Controller
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
     }
-    
+
 
     public function getSelectProgramasProcesoAdmin() {
 
-        $res = DB::select("SELECT id AS value, nombre AS label  FROM programa 
+        $res = DB::select("SELECT id AS value, nombre AS label  FROM programa
         WHERE id IN ( SELECT DISTINCT id_programa  FROM vacantes  WHERE id_proceso = ".auth()->user()->id_proceso.");");
 
         $this->response['estado'] = true;
@@ -113,16 +115,53 @@ class ProgramaProcesoController extends Controller
         return response()->json($this->response, 200);
     }
 
-    public function getAreaByCodigo($codigo){
+    public function getAreaByCodigoCarrera($codigo)
+    {
+        $mapeoAreas = [
+            '07' => 'SOCIALES', '13' => 'SOCIALES', '33' => 'INGENIERÍAS',
+            '56' => 'SOCIALES', '15' => 'BIOMÉDICAS', '06' => 'SOCIALES',
+            '14' => 'SOCIALES', '34' => 'INGENIERÍAS', '25' => 'SOCIALES',
+            '18' => 'SOCIALES', '21' => 'SOCIALES', '20' => 'SOCIALES',
+            '16' => 'SOCIALES', '17' => 'SOCIALES', '08' => 'BIOMÉDICAS',
+            '35' => 'INGENIERÍAS', '02' => 'INGENIERÍAS', '01' => 'INGENIERÍAS',
+            '32' => 'INGENIERÍAS', '10' => 'INGENIERÍAS', '23' => 'INGENIERÍAS',
+            '05' => 'INGENIERÍAS', '24' => 'INGENIERÍAS', '22' => 'INGENIERÍAS',
+            '31' => 'INGENIERÍAS', '36' => 'INGENIERÍAS', '30' => 'INGENIERÍAS',
+            '26' => 'INGENIERÍAS', '03' => 'INGENIERÍAS', '27' => 'BIOMÉDICAS',
+            '04' => 'BIOMÉDICAS', '28' => 'BIOMÉDICAS', '29' => 'BIOMÉDICAS',
+            '11' => 'SOCIALES', '09' => 'SOCIALES', '12' => 'SOCIALES',
+            '178' => 'SOCIALES', '180' => 'INGENIERÍAS', '181' => 'INGENIERÍAS',
+            '182' => 'INGENIERÍAS', '183' => 'SOCIALES', '184' => 'INGENIERÍAS',
+            '185' => 'INGENIERÍAS',
+        ];
 
-      $res = DB::select("SELECT distinct pro.area FROM carreras_previas car
-          JOIN programa pro ON car.cod_car = pro.programa_oti
-          WHERE car.codigo = $codigo");
+        if (isset($mapeoAreas[(string)$codigo])) {
+            $this->response['estado'] = true;
+            $this->response['datos'] = (object)['area' => $mapeoAreas[(string)$codigo]];
+            return response()->json($this->response, 200);
+        }
 
-      $this->response['estado'] = true;
-      $this->response['datos'] = $res[0];
-      return response()->json($this->response, 200);
-
+        $this->response['estado'] = false;
+        $this->response['mensaje'] = 'Área no encontrada';
+        $this->response['datos'] = (object)[];
+        return response()->json($this->response, 404);
     }
 
+
+    public function getAreaByCodigo($numMat)
+    {
+        $estudiante = DB::connection('mysql_third')
+            ->table('estudiante')
+            ->where('num_mat', $numMat)
+            ->orderByRaw('COALESCE(fecha_actualizacion, fch_reg) DESC')
+            ->first();
+
+        if (!$estudiante) {
+            $this->response['estado'] = false;
+            $this->response['mensaje'] = 'Estudiante no encontrado';
+            $this->response['datos'] = (object)[];
+            return response()->json($this->response, 404);
+        }
+        return $this->getAreaByCodigoCarrera($estudiante->cod_car);
+    }
 }

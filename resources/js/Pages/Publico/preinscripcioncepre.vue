@@ -1195,7 +1195,11 @@
                         :rules="[{ required: true, message: 'Código requerido', trigger: 'change' },]"
                       >
                         <div><label>Código de matricula</label></div>
-                        <a-input placeholder="Código de matrícula actual" v-model:value="datos_preinscripcion.observacion"/>
+                        <a-input placeholder="Código de matrícula actual" v-model:value="datos_preinscripcion.observacion">
+                          <template #prefix>
+                            <sin-icono/>
+                          </template>
+                        </a-input>
                       </a-form-item>
                     </a-col>
 
