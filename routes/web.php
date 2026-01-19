@@ -510,7 +510,7 @@ Route::prefix('calificacion')->group(function () {
 
     Route::get('/descargar-excel', [ResultadosController::class, 'descargarExcel']);
     Route::get('/ponderacion', fn () => Inertia::render('Simulacro/Calificacion/ponderacion'))->name('calificar-ponderacion');
-    
+
     Route::post('/save-ponderacion', [PonderacionController::class, 'save']);
     Route::post('/get-ponderaciones', [PonderacionController::class, 'getPonderaciones']);
     Route::post('/save-ponderacion-detalle', [PonderacionController::class, 'insertarPonderacion']);
@@ -790,6 +790,8 @@ Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::c
 
 Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipantes']);
 Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
+
+
 
 
 
