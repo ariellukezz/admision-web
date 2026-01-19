@@ -71,6 +71,34 @@ Route::get('/get-procesos', [ProcesoController::class, 'getProcesoResultados']);
 Route::get('/v1/get-foto-ingresante/{dni}', [ApixController::class, 'ingresanteBase64']);
 
 
+Route::get('/api-pagos/{dni}/{secuencia}', function ($dni, $secuencia) {
+    try {
+        $response = Http::get('http://unap.scielodigital.net.pe/caja/pago_admision/server/CHECK_PAYMENT/?w=' . $dni);
+
+        if (!$response->successful()) {
+            return response()->json(['error' => 'Error al consultar el servicio externo'], 500);
+        }
+
+        $pagos = $response->json();
+
+        if (!is_array($pagos) || empty($pagos)) {
+            return response()->json(['error' => 'No se encontraron pagos'], 404);
+        }
+
+        $pagoFiltrado = collect($pagos)->first(function ($pago) use ($secuencia) {
+            return isset($pago['paymentTitle']) && $pago['paymentTitle'] === $secuencia;
+        });
+
+        if (!$pagoFiltrado) {
+            return response()->json(['error' => 'No se encontró el pago con la secuencia: ' . $secuencia], 404);
+        }
+
+        return response()->json($pagoFiltrado);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error en la solicitud: ' . $e->getMessage()], 500);
+    }
+});
 
 
 
