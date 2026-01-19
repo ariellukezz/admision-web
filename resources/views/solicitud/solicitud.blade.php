@@ -34,6 +34,46 @@
         padding: 20px;
         *{margin:2cm 2cm; padding:65px 65px 0px 90px; }
     }
+    .footer {
+    position: fixed;
+    bottom: 20px;
+    left: 40px;
+    right: 40px;
+    font-size: 8.5pt;
+    color: #333;
+  }
+
+.step-box {
+    width: 180px;
+    border: 1px solid #333;
+    border-right: none;
+    font-size: 8pt;
+}
+
+.step-box.last {
+    border-right: 1px solid #333;
+}
+
+.step-header {
+    border-bottom: 1px solid #333;
+    padding: 4px;
+}
+
+.step-header table {
+    width: 100%;
+}
+
+.step-circle {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #333;
+}
+
+.step-body {
+    padding: 6px 4px;
+    text-align: left;
+    line-height: 1rem;
+}
 </style>
 </head>
 <body>
@@ -121,8 +161,8 @@
                               <tr><td style="height: 23px;">1.</td><td>Váuchers de pago.</td></tr>
                               <tr><td style="height: 23px;">2.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia).</td></tr>
                               <tr><td style="height: 23px;">4.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
-                              <tr><td style="height: 23px;">5.</td><td>Constancia de no adeudo al CEPREUNA.</td></tr>
-                              <tr><td v-align="top"><div style="margin-top:-20px;">6.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2026 conforme a la modalidad de postulación.</td></tr>
+                              {{-- <tr><td style="height: 23px;">5.</td><td>Constancia de no adeudo al CEPREUNA.</td></tr> --}}
+                              <tr><td v-align="top"><div style="margin-top:-20px;">5.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2026 conforme a la modalidad de postulación.</td></tr>
                           </table>
                           @endif
                         </div>
@@ -233,8 +273,92 @@
                 </tr>
             </table>
         </div>
-
     </div>
 </div>
+
+<div class="footer">
+    <div>Seguimiento de inscripción presencial</div>
+    <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+            <!-- PASO 1 -->
+            <td>
+                <div class="step-box">
+                    <div class="step-header">
+                        <table>
+                            <tr>
+                                <td width="18" align="center">
+                                    <div class="step-circle"></div>
+                                </td>
+                                <td align="left">Paso 1</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="step-body">
+                        Recepción de<br>Documentos
+                    </div>
+                </div>
+            </td>
+
+            <!-- PASO 2 -->
+            <td>
+                <div class="step-box">
+                    <div class="step-header">
+                        <table>
+                            <tr>
+                                <td width="18" align="center">
+                                    <div class="step-circle"></div>
+                                </td>
+                                <td align="left">Paso 2</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="step-body">
+                        Toma de fotos<br>y huellas
+                    </div>
+                </div>
+            </td>
+
+            <!-- PASO 3 -->
+            <td>
+                <div class="step-box">
+                    <div class="step-header">
+                        <table>
+                            <tr>
+                                <td width="18" align="center">
+                                    <div class="step-circle"></div>
+                                </td>
+                                <td align="left">Paso 3</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="step-body">
+                        Revisión de<br>documentos
+                    </div>
+                </div>
+            </td>
+
+            <!-- PASO 4 -->
+            <td>
+                <div class="step-box last">
+                    <div class="step-header">
+                        <table>
+                            <tr>
+                                <td width="18" align="center">
+                                    <div class="step-circle"></div>
+                                </td>
+                                <td align="left">Paso 4</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="step-body">
+                        Entrega de<br>constancia
+                    </div>
+                </div>
+            </td>
+
+        </tr>
+    </table>
+</div>
+
 </body>
 </html>
