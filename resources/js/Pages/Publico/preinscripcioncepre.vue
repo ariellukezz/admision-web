@@ -1287,8 +1287,13 @@
                   </div>
 
                   <div class="flex justify-center mt-4 mb-4 mr-2">
-                    <a-button @click="descargaReglamento()" disabled class="custom-button" shape="round">
+                    <a-button @click="descargaReglamento()" class="custom-button" shape="round">
                             <div>DESCARGAR REGLAMENTO</div>
+                      </a-button>
+                  </div>
+                  <div class="flex justify-center mt-4 mb-4 mr-2">
+                    <a-button @click="irDiagnostico()" class="custom-button" shape="round">
+                            <div>TEST DIAGNÓSTICO</div>
                       </a-button>
                   </div>
                 </div>
@@ -2320,9 +2325,33 @@ const getDocs = async () => {
   }else{
     window.open("/pdf-solicitud-extranjeros/"+props.procceso_seleccionado.id+"/"+formState.dni, '_blank');
   }
+}
 
+const irDiagnostico = async () => {
+  if (datospersonales.tipo_doc !== 1) return;
 
+  try {
+    const response = await axios.get(
+      "https://admision.unap.edu.pe/codigo-acceso",
+      {
+        params: { dni: formState.dni },
+        headers: { 'Accept': 'application/json' }
+      }
+    );
 
+    if (response.data?.url) {
+      window.open(response.data.url);
+    } else if (typeof response.data === 'string' && response.data.startsWith('http')) {
+      window.open(response.data, "_blank");
+    } else {
+      console.error("Respuesta inesperada:", response.data);
+    }
+
+  } catch (error) {
+    console.error("Error:", error);
+    const fallbackUrl = `https://admision.unap.edu.pe/codigo-acceso?dni=${formState.dni}`;
+    window.open(fallbackUrl, "_blank");
+  }
 }
 
 const tipo_docs = { 1: 'DNI', 2: 'PASAPORTE' }
