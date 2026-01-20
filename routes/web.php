@@ -29,6 +29,7 @@ use App\Http\Controllers\FotoController;
 use App\Http\Controllers\PagoSimulacroController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\AdministrativoController;
+use App\Http\Controllers\ReniecController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PruebasController;
 use App\Http\Controllers\ResultadosController;
@@ -286,6 +287,10 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/get-vacantes-admin', [VacantesController::class, 'getVacantes']);
     Route::post('/save-numero-vacantes', [VacantesController::class, 'saveNumeroVacantes']);
     Route::post('/delete-vacante', [VacantesController::class, 'eliminar']);
+
+    //RENIEC
+    Route::get('/consulta-reniec', fn () => Inertia::render('Admin/Reniec/index'))->name('admin-consulta-reniec');
+    Route::get('/get-datos-reniec/{dni}', [ReniecController::class, 'consultarReniecPorDni']);
 
     //ESTUDIOS ANTERIORES
     Route::get('/carreras-previas', fn () => Inertia::render('Admin/Estudios/carreras_previas'))->name('admin-carreras-previas');

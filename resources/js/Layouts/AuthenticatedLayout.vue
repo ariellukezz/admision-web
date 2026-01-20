@@ -365,6 +365,12 @@ const menuItems = [
         route: 'admin-postulante-index'
       },
       {
+        key: 'consultaReniec',
+        icon: SettingFilled,
+        label: 'Consulta Reniec',
+        route: 'admin-consulta-reniec'
+      },
+      {
         key: 'documentos',
         icon: SettingFilled,
         label: 'Documentos',
