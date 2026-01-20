@@ -105,6 +105,7 @@ class ProcesoController extends Controller
         $proceso->id_sede_filial = $request->sede;
         $proceso->nro_convocatoria = $request->convocatoria;
         $proceso->observaciones = $request->observacion;
+        $proceso->id_reglamento = $request->id_reglamento;
         $proceso->id_usuario = auth()->id();
         $proceso->save();
 
@@ -228,7 +229,7 @@ class ProcesoController extends Controller
   }
 
 
-  
+
 
 
 

@@ -11,8 +11,8 @@ class ModalidadController extends Controller
     public function index()
     {
         return Inertia::render('Modalidad/index');
-        
-    }  
+
+    }
 
     public function getModalidades(Request $request)
     {
@@ -22,50 +22,75 @@ class ModalidadController extends Controller
         'modalidad.id',
         'modalidad.codigo',
         'modalidad.nombre',
+        'modalidad.estado'
       )
       ->where($query_where)
       ->where(function ($query) use ($request) {
           return $query
               ->orWhere('modalidad.codigo', 'LIKE', '%' . $request->term . '%')
               ->orWhere('modalidad.nombre', 'LIKE', '%' . $request->term . '%');
-      })->orderBy('modalidad.id', 'DESC')
+      })->orderBy('modalidad.estado', 'DESC')->orderBy('modalidad.id', 'asc')
       ->paginate(10);
-  
+
       $this->response['estado'] = true;
       $this->response['datos'] = $res;
       return response()->json($this->response, 200);
     }
 
 
-    public function saveModalidad(Request $request ) {
+    public function saveModalidad(Request $request)
+    {
+        $request->validate([
+            'codigo' => 'required|string|max:50',
+            'nombre' => 'required|string|max:255',
+            'estado' => 'nullable|boolean',
+            'id' => 'nullable|integer'
+        ]);
 
-        $modalidad = null;
-        if (!$request->id) {
-            $modalidad = Modalidad::create([
-                'codigo' => $request->codigo,
-                'nombre' => $request->nombre,
-                'id_usuario' => auth()->id()
-            ]);
-            $this->response['titulo'] = 'REGISTRO NUEVO';
-            $this->response['mensaje'] = 'MODALIDAD '.$modalidad->nombre.' CREADA CON EXITO';
-            $this->response['estado'] = true;
-            $this->response['datos'] = $modalidad;
-        } else {
+        try {
+            if (!$request->id) {
+                $modalidad = Modalidad::create([
+                    'codigo' => $request->codigo,
+                    'nombre' => $request->nombre,
+                    'estado' => 1,
+                    'id_usuario' => auth()->id()
+                ]);
 
-            $modalidad = Modalidad::find($request->id);
-            $modalidad->nombre = $request->nombre;
-            $modalidad->codigo = $request->codigo;
-            $modalidad->id_usuario = auth()->id();
-            $modalidad->save();
+                return response()->json([
+                    'estado' => true,
+                    'titulo' => 'REGISTRO NUEVO',
+                    'mensaje' => "MODALIDAD {$modalidad->nombre} CREADA CON ÉXITO",
+                    'datos' => $modalidad
+                ], 200);
 
-            $this->response['titulo'] = '!REGISTRO MODIFICADO!';
-            $this->response['mensaje'] = 'MODALIDAD '.$modalidad->nombre.' MODIFICADA CON EXITO';
-            $this->response['estado'] = true;
-            $this->response['datos'] = $modalidad;
+            } else {
+                $modalidad = Modalidad::findOrFail($request->id);
+                $modalidad->update([
+                    'codigo' => $request->codigo,
+                    'nombre' => $request->nombre,
+                    'estado' => $request->estado ? 1 : 0,
+                    'id_usuario' => auth()->id()
+                ]);
+
+                return response()->json([
+                    'estado' => true,
+                    'titulo' => 'REGISTRO MODIFICADO',
+                    'mensaje' => "MODALIDAD {$modalidad->nombre} MODIFICADA CON ÉXITO",
+                    'datos' => $modalidad
+                ], 200);
+            }
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'estado' => false,
+                'titulo' => 'ERROR',
+                'mensaje' => 'Ocurrió un error al guardar la modalidad',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-    return response()->json($this->response, 200);
-  }
 
   public function deleteModalidad($id){
     $modalidad = Modalidad::find($id);
@@ -80,7 +105,7 @@ class ModalidadController extends Controller
   }
 
 
-  public function getSelectModalidades(Request $request) 
+  public function getSelectModalidades(Request $request)
   {
     $res = Modalidad::select('id as dataIndex', 'nombre as title')
         ->where('estado', '=', 1)
@@ -107,11 +132,11 @@ class ModalidadController extends Controller
     $res = Modalidad::where('estado', 1)
     ->select('id as value', 'nombre as label')
     ->get();
-    
+
     $this->response['estado'] = true;
     $this->response['datos'] = $res;
     return response()->json($this->response, 200);
   }
-  
-    
+
+
 }

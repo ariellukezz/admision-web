@@ -14,6 +14,11 @@ class Modalidad extends Model
     protected $fillable = [
         'nombre',
         'codigo',
+        'estado',
         'id_usuario'
+    ];
+
+    protected $casts = [
+        'estado' => 'boolean'
     ];
 }

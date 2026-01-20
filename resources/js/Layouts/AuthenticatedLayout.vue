@@ -287,6 +287,13 @@ const menuItems = [
         route: 'admin-reglamento'
       },
 
+      {
+        key: 'anios',
+        icon: SettingFilled,
+        label: 'Años',
+        route: 'anio-index'
+      },
+
     ]
   },
   {
@@ -387,7 +394,7 @@ const menuItems = [
     key: 'reportes',
     icon: SettingFilled,
     label: 'Reportes',
-    children: [       
+    children: [
       {
         key: 'resumen_general',
         icon: SettingFilled,
@@ -468,11 +475,11 @@ const findParentKey = (routeName) => {
 };
 
 const procesos = ref([])
-const getProcesos = async () => {  
+const getProcesos = async () => {
     let res = await axios.get(`/admin/get-select-procesos`);
-    procesos.value = res.data.datos;  
+    procesos.value = res.data.datos;
 }
-getProcesos();  
+getProcesos();
 
 watch(() => router.page.url, () => {
   const activeItem = menuItems
@@ -485,7 +492,7 @@ watch(() => router.page.url, () => {
   openKeys.value = parentKey ? [parentKey] : [];
 }, { immediate: true });
 
-const cambiarProceso = async () => {  
+const cambiarProceso = async () => {
   let res = await axios.post("/admin/cambiar_proceso",{ "id_proceso": proceso.value});
   if(res.data.estado == true){
     location.reload();

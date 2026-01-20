@@ -13,6 +13,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\FilialController;
 use App\Http\Controllers\VerificacionFotosController;
 use App\Http\Controllers\ModalidadController;
+use App\Http\Controllers\AnioController;
 use App\Http\Controllers\ApoderadoController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PostulanteController;
@@ -173,6 +174,12 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/modalidad/get-modalidades', [ModalidadController::class, 'getModalidades']);
     Route::get('/eliminar-modalidad/{id}', [ModalidadController::class, 'deleteModalidad']);
     Route::get('/get-modalidades-activas', [ModalidadController::class, 'getModalidadesActivas']);
+
+    // AÑOS
+    Route::get('/anios', [AnioController::class, 'index'])->name('anio-index');
+    Route::post('/anio/get-anios', [AnioController::class, 'getAnios']);
+    Route::post('/save-anios', [AnioController::class, 'saveAnio']);
+    Route::get('/eliminar-anio/{id}', [AnioController::class, 'deleteAnio']);
 
     //PRE-INSCRIPCIONES
     Route::get('/pre-inscripcion', [PreinscripcionController::class, 'index'])->name('preincripcion-index');

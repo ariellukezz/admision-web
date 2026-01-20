@@ -29,14 +29,12 @@ const handleDownload = async () => {
     isPreparing.value = true;
     message.info('Preparando archivo, esto puede tomar unos minutos...');
 
-    // 1. Iniciar la preparación del ZIP
     const prepareResponse = await axios.post(route('download.prepare'), {}, {
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
       }
     });
 
-    // 2. Verificar estado periódicamente
     const checkInterval = setInterval(async () => {
       try {
         const statusResponse = await axios.get(route('download.status'));
@@ -49,7 +47,6 @@ const handleDownload = async () => {
           isPreparing.value = false;
           message.success('Archivo listo para descargar');
 
-          // 3. Iniciar la descarga automáticamente
           startDownload(statusData.download_url);
         } else if (statusData.status === 'failed') {
           clearInterval(checkInterval);
@@ -61,7 +58,7 @@ const handleDownload = async () => {
         isPreparing.value = false;
         message.error('Error al verificar el estado');
       }
-    }, 5000); // Verificar cada 5 segundos
+    }, 5000);
 
   } catch (error) {
     isPreparing.value = false;
@@ -70,7 +67,6 @@ const handleDownload = async () => {
 };
 
 const startDownload = (url) => {
-  // Crear un enlace temporal y hacer click para iniciar la descarga
   const link = document.createElement('a');
   link.href = url;
   link.target = '_blank';
