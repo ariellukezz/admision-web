@@ -34,6 +34,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PruebasController;
 use App\Http\Controllers\ResultadosController;
 use App\Http\Controllers\CarpetaController;
+use App\Http\Controllers\CertificadoFirmaController;
 use App\Http\Controllers\PonderacionController;
 use App\Http\Controllers\ProgramaProcesoController;
 use App\Http\Controllers\SancionadoController;
@@ -336,6 +337,17 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::get('/pdf-solicitud/{dni}', [PreinscripcionController::class, 'pdfsolicitudAdmin']);
     Route::get('/pdf-biometrio/{dni}', [IngresoController::class, 'pdfbiometrico2']);
+
+    Route::get('/certificados-firma', fn () => Inertia::render('Admin/CertificadosFirma/index'))->name('admin-certificados-firma');
+    Route::prefix('certificados')->group(function () {
+        Route::get('/', [CertificadoFirmaController::class, 'index']);
+        Route::post('/', [CertificadoFirmaController::class, 'store']);
+        Route::get('/{id}', [CertificadoFirmaController::class, 'show']);
+        Route::put('/{id}', [CertificadoFirmaController::class, 'update']);
+        Route::delete('/{id}', [CertificadoFirmaController::class, 'destroy']);
+    });
+
+
 });
 
 #Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
