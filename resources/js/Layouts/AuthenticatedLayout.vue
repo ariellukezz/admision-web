@@ -394,6 +394,12 @@ const menuItems = [
         label: 'Pagos BN',
         route: 'admin-pagos-banco'
       },
+      {
+        key: 'cerfitificadosfirma',
+        icon: SettingFilled,
+        label: 'Certificados Firma',
+        route: 'admin-certificados-firma'
+      },
     ]
   },
   {

@@ -170,9 +170,9 @@
                     <td valign="top">
                         <div style="font-size: 8pt;">
                             <div style=" width 80px; height: 101px; border:solid 1px black;">
-                                <img src="{{ $huellaDerecha }}" alt="foto" width="76">
+                                <img src="{{ $huellaIzquierda }}" alt="foto" width="76">
                             </div>
-                            <div style="text-align: center; margin-top:6px;"><span>Indice Derecho</span></div>
+                            <div style="text-align: center; margin-top:6px;"><span>Indice Izquierdo</span></div>
                             <div style=" width 80px; height: 101px; margin-top:10px; overflow:hidden;">
 
                             </div>
