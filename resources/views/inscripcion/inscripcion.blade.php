@@ -26,15 +26,15 @@
                         <div style="text-align: center"><span style="font-weight:bold; letter-spacing:.11rem; "> CONSTANCIA DE INSCRIPCIÓN AL EXAMEN {{$data->proceso}}</span></div>
                         <div style="display: none;"> {{ $nro_carreras = count($carreras_previas) }}  </div>
                         @if ($nro_carreras == 1 )
-                            <div style=" font-weight:bold; text-transform:uppercase; font-family:'helvetica';  font-size:10pt; letter-spacing:.16rem">(Postulante a segunda carrera)</div>                            
+                            <div style=" font-weight:bold; text-transform:uppercase; font-family:'helvetica';  font-size:10pt; letter-spacing:.16rem">(Postulante a segunda carrera)</div>
                         @elseif ($nro_carreras == 2 )
-                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a tercera carrera)</div>                            
+                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a tercera carrera)</div>
                         @elseif ($nro_carreras == 3 )
-                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a cuarta carrera)</div>                            
+                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a cuarta carrera)</div>
                         @elseif ($nro_carreras == 4 )
-                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a quinta carrera)</div>                            
+                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a quinta carrera)</div>
                         @elseif ($nro_carreras == 5 )
-                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a sexta carrera)</div>                            
+                            <div style="text-transform:uppercase; font-family:'Roboto Condensed';  font-size:10pt; letter-spacing:.06rem">(Postulante a sexta carrera)</div>
                         @else
                             <div style="height: 14px;"></div>
                         @endif
@@ -57,7 +57,7 @@
                             </div>
 
                             <div style="overflow: hidden; height:170px; width:140px; margin-right:-10px;">
-                                <img src="{{ $foto }}" alt="foto" width="150"> 
+                                <img src="{{ $foto }}" alt="foto" width="150">
                             </div>
                             {{-- <div ><span style="color:red; font-size:14pt;">DUPLICADO</span></div> --}}
                         </div>
@@ -108,19 +108,19 @@
                         </div>
                         <div style="text-align: justify; margin-top:-10px; font-size:11pt;">
                             <p>
-                                El que suscribe declara bajo juramento que la información proporcionada 
-                                durante el proceso de inscripción es veraz y de mi entera responsabilidad. 
-                                Reconozco y acepto los términos establecidos en el 
+                                El que suscribe declara bajo juramento que la información proporcionada
+                                durante el proceso de inscripción es veraz y de mi entera responsabilidad.
+                                Reconozco y acepto los términos establecidos en el
                                 Reglamento General de Admisión de 2026,
                                 así como permitir una rigurosa revisión física exhaustiva
-                                para acceder a la Ciudad Universitaria y realizar el examen de admisión. 
-                                En caso de obtener una vacante, me comprometo a cumplir con lo estipulado en el reglamento. 
+                                para acceder a la Ciudad Universitaria y realizar el examen de admisión.
+                                En caso de obtener una vacante, me comprometo a cumplir con lo estipulado en el reglamento.
                                 Como muestra de conformidad, firmo la presente constancia de inscripción.
                             </p>
                         </div>
                     </td>
                 </tr>
-                
+
             </table>
         </div>
 
@@ -132,11 +132,11 @@
                             <span style="font-weight:bold;">
                                 INSTRUCCIONES PARA EL DÍA DEL EXAMEN:
                             </span>
-    
+
                             <div style="margin-top: -8px; margin-left:-5px;">
                                 <ul>
                                     <li>Presentar Constancia de Inscripción y DNI (original).</li>
-                                    <li>No portar dispositivos electrónicos, ni objetos metálicos.</li>                                    
+                                    <li>No portar dispositivos electrónicos, ni objetos metálicos.</li>
                                     <li>Presentarse con cabello recogido o corto.</li>
                                     <li>El cuello y las orejas deben estar visibles.</li>
                                 </ul>
@@ -145,7 +145,7 @@
                         <div style="margin-top: -8px;">
                             <span style="font-weight:bold;">
                                 HORARIO DE INGRESO ( {{ $dia1 }} ):
-                            </span> 
+                            </span>
                             <div style="margin-top: -8px; margin-left:-5px;">
                                 <ul>
                                     <li>Ingreso: 06:30 a 09:30 horas</li>
@@ -170,35 +170,33 @@
                     <td valign="top">
                         <div style="font-size: 8pt;">
                             <div style=" width 80px; height: 101px; border:solid 1px black;">
-                                <img src="{{ $huellaDerecha }}" alt="foto" width="76"> 
+                                <img src="{{ $huellaDerecha }}" alt="foto" width="76">
                             </div>
                             <div style="text-align: center; margin-top:6px;"><span>Indice Derecho</span></div>
-                            <div style=" width 80px; height: 101px; margin-top:10px; overflow:hidden; border:solid 1px black;">
-                                <img src="{{ $huellaIzquierda }}" alt="foto" width="76"> 
+                            <div style=" width 80px; height: 101px; margin-top:10px; overflow:hidden;">
+
                             </div>
-                            <div style="text-align: center; margin-top:6px;">Indice Izquierdo</div>
                         </div>
-                        
+
                     </td>
 
                     <td valign="top">
-                        <div style="font-size: 8pt; margin-top:2px;">
-                            <div style="border:solid 1px black; width 85px; height: 101px; margin-top:-2px;">
+                        <div style="font-size: 8pt;">
+                            <div style=" width 80px; height: 101px; border:solid 1px black;">
+                                <img src="{{ $huellaDerecha }}" alt="foto" width="76">
                             </div>
-                            <div style="text-align: center; margin-top:6px;"  >Indice Derecho </div>
-                            <div style="border:solid 1px black; width 85px; height: 101px; margin-top:10px;">
-                            </div>
-                            <div style="text-align: center; margin-top:6px;" >Indice Izquierdo</div>
+                            <div style="text-align: center; margin-top:6px;"><span>Indice Derecho</span></div>
                         </div>
-                        
                     </td>
+
+
 
                 </tr>
 
             </table>
         </div>
 
- 
+
         <div style="margin-top:110px">
             <table style="font-size:10pt;  width:100%;">
                 <tr>
@@ -221,10 +219,10 @@
                                 <span>POSTULANTE</span>
                             </div>
                         </div>
-                    </td> 
+                    </td>
 
                     <td style="width: 190px">
-                        <div style="magin-rigth 0px; width:145px; margin-top:-100px;">
+                        <div style="magin-rigth 0px; width:145px; margin-top:-40px;">
                             <div style="text-align: left;">
                                 <span style="margin-right:14px; text-align:left"><?php echo DNS1D::getBarcodeHTML($data->dni ,'C128',2.5,50);?> </span>
                             </div>
@@ -240,7 +238,7 @@
                         </div>
                     </td>
                 </tr>
-       
+
             </table>
 
         </div>

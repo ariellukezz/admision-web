@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Exports\InscripcionExport;
 use Maatwebsite\Excel\Facades\Excel;
+use GuzzleHttp\Client;
 
 class InscripcionController extends Controller
 {
@@ -25,8 +26,8 @@ class InscripcionController extends Controller
     public function getPostulantes(Request $request)
     {
         $query_where = [];
-        $res = Postulante::select( 
-            'postulante.nro_doc as value', 
+        $res = Postulante::select(
+            'postulante.nro_doc as value',
             DB::raw("CONCAT( postulante.nombres,' ',postulante.primer_apellido, postulante.primer_apellido) as label")
         )
             ->where($query_where)
@@ -44,7 +45,7 @@ class InscripcionController extends Controller
     }
 
     public function getPostulanteByDni($dni){
-        
+
         $sancionados = DB::table('sancionados')
             ->where('dni', $dni)
             ->where('id_proceso', auth()->user()->id_proceso)
@@ -57,9 +58,9 @@ class InscripcionController extends Controller
         }
         else {
 
-            $res = DB::select("SELECT postulante.id as id_postulante, postulante.nro_doc AS dni, postulante.nombres, 
-            postulante.primer_apellido, postulante.segundo_apellido, postulante.sexo, postulante.fec_nacimiento, 
-            postulante.foto_url AS postulante_foto, postulante.revisado as postulante_revisado, 
+            $res = DB::select("SELECT postulante.id as id_postulante, postulante.nro_doc AS dni, postulante.nombres,
+            postulante.primer_apellido, postulante.segundo_apellido, postulante.sexo, postulante.fec_nacimiento,
+            postulante.foto_url AS postulante_foto, postulante.revisado as postulante_revisado,
             programa.id AS id_programa, programa.nombre as programa, programa.codigo as cod_programa,
             colegios.id AS id_colegio, concat(colegios.gestion,".'" - "'.", colegios.nombre) AS colegio,
             colegios.id_gestion as id_gestion,
@@ -70,7 +71,7 @@ class InscripcionController extends Controller
             JOIN postulante ON pre_inscripcion.id_postulante = postulante.id
             JOIN colegios ON postulante.id_colegio = colegios.id
             JOIN programa ON programa.id = pre_inscripcion.id_programa
-            JOIN modalidad ON modalidad.id = pre_inscripcion.id_modalidad   
+            JOIN modalidad ON modalidad.id = pre_inscripcion.id_modalidad
             JOIN procesos ON procesos.id = pre_inscripcion.id_proceso
             JOIN ubigeo ON postulante.ubigeo_residencia = ubigeo.ubigeo
             JOIN departamento ON ubigeo.id_departamento = departamento.id
@@ -155,13 +156,13 @@ class InscripcionController extends Controller
     }
 
     public function getApoderados($dni){
-        $res = DB::select('SELECT apoderado.nro_documento, apoderado.paterno, 
+        $res = DB::select('SELECT apoderado.nro_documento, apoderado.paterno,
         apoderado.materno, apoderado.nombres, tipo_apoderado.nombre AS parentesco
         FROM apoderado
         JOIN postulante ON postulante.id = apoderado.id_postulante
         JOIN tipo_apoderado ON tipo_apoderado.id = apoderado.tipo_apoderado
         WHERE postulante.nro_doc = ' . $dni);
-        
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
@@ -177,12 +178,12 @@ class InscripcionController extends Controller
     }
 
     public function getDocumentos($dni){
-        $res = DB::select('SELECT 
-        documento.id, documento.codigo, documento.nombre, 
-        documento.url, documento.estado, documento.verificado, 
-        tipo_documento.nombre  AS tipo  
+        $res = DB::select('SELECT
+        documento.id, documento.codigo, documento.nombre,
+        documento.url, documento.estado, documento.verificado,
+        tipo_documento.nombre  AS tipo
         FROM documento
-        left JOIN tipo_documento ON tipo_documento.id = documento.id_tipo_documento        
+        left JOIN tipo_documento ON tipo_documento.id = documento.id_tipo_documento
         JOIN postulante ON documento.id_postulante = postulante.id
         WHERE documento.id_tipo_documento IN (1,4)
         AND documento.codigo IS NOT null
@@ -194,66 +195,66 @@ class InscripcionController extends Controller
 
     public function getPreinscipciones($dni){
 
-        $res = DB::select("SELECT 
+        $res = DB::select("SELECT
         pre_inscripcion.estado AS estado,
-        programa.nombre AS programa, 
+        programa.nombre AS programa,
         procesos.nombre AS proceso,
         modalidad.nombre AS modalidad
         FROM pre_inscripcion
         JOIN programa ON programa.id = pre_inscripcion.id_programa
-        JOIN procesos ON procesos.id = pre_inscripcion.id_proceso AND procesos.id = ".auth()->user()->id_proceso ." 
+        JOIN procesos ON procesos.id = pre_inscripcion.id_proceso AND procesos.id = ".auth()->user()->id_proceso ."
         JOIN modalidad ON modalidad.id = pre_inscripcion.id_modalidad
-        JOIN postulante ON postulante.id = pre_inscripcion.id_postulante    
+        JOIN postulante ON postulante.id = pre_inscripcion.id_postulante
         WHERE postulante.nro_doc =  $dni AND pre_inscripcion.id_proceso = ". auth()->user()->id_proceso );
-        
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
     }
 
     public function getInscripciones($dni){
-        
-        $res = DB::select("SELECT 
+
+        $res = DB::select("SELECT
         inscripciones.estado AS estado,
         programa.codigo as cod_programa,
-        programa.nombre AS programa, 
+        programa.nombre AS programa,
         procesos.nombre AS proceso,
         modalidad.nombre AS modalidad
         FROM inscripciones
         JOIN programa ON programa.id = inscripciones.id_programa
         JOIN procesos ON procesos.id = inscripciones.id_proceso
         JOIN modalidad ON modalidad.id = inscripciones.id_modalidad
-        JOIN postulante ON postulante.id = inscripciones.id_postulante    
+        JOIN postulante ON postulante.id = inscripciones.id_postulante
         WHERE postulante.nro_doc = $dni AND inscripciones.id_proceso = ". auth()->user()->id_proceso);
-        
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
     }
 
     public function Inscribir(Request $request){
-        
+
         $proceso = Proceso::find(auth()->user()->id_proceso);
-        
+
         $prog = $request['postulante']['cod_programa'];
         $res = Inscripcion::where('codigo', 'like', $proceso->codigo_proceso.$prog.'%')
             ->max(\DB::raw('CAST(SUBSTRING(codigo, 7) AS UNSIGNED)')) + 1;
         $res = str_pad($res, 4, '0', STR_PAD_LEFT);
-    
+
         $dni = $request['postulante']['dni_temp'];
         $fotoPath = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/fotos/' . $dni . '.jpg');
         $huellaIzquierdaPath = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . '.jpg');
         $huellaDerechaPath = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . 'x.jpg');
-    
+
         $hasFoto = File::exists($fotoPath);
         $hasHuellaIzquierda = File::exists($huellaIzquierdaPath);
         $hasHuellaDerecha = File::exists($huellaDerechaPath);
         $missingFiles = [];
-  
+
         if (!$hasFoto) { $missingFiles[] = 'foto'; }
         if (!$hasHuellaIzquierda) { $missingFiles[] = 'huella izquierda'; }
         if (!$hasHuellaDerecha) { $missingFiles[] = 'huella derecha'; }
-    
+
         if (!empty($missingFiles)) {
             $this->response['estado'] = false;
             $this->response['mensaje'] = 'Faltan los siguientes archivos necesarios para completar la inscripción: ' . implode(', ', $missingFiles) . '.';
@@ -267,15 +268,15 @@ class InscripcionController extends Controller
             'id_programa' => $request['postulante']['id_programa'],
             'id_modalidad' => $request['postulante']['id_modalidad'],
             'estado' => 0,
-            'id_usuario' => auth()->id() 
+            'id_usuario' => auth()->id()
         ]);
-    
+
         $this->pdfInscripcion($dni);
-    
+
         $this->response['estado'] = true;
         $this->response['datos'] = $dni;
         return response()->json($this->response, 200);
-    
+
     }
 
 
@@ -337,18 +338,16 @@ class InscripcionController extends Controller
 
     public function pdfInscripcion($dni) {
         $proceso = Proceso::find(auth()->user()->id_proceso);
-        $dateString1 = $proceso->fec_1;
-        $dateString2 = $proceso->fec_2 ?? null;
-        $dia1 = $this->formatDate($dateString1);
-        $dia2 = $this->formatDate($dateString2);
-    
+        $dia1 = $this->formatDate($proceso->fec_1);
+        $dia2 = $this->formatDate($proceso->fec_2 ?? null);
+
         $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
-        WHERE dni_postulante = ?", [$dni]);
-    
-        $datos = DB::select("SELECT 
-            postulante.nro_doc AS dni, 
+            WHERE dni_postulante = ?", [$dni]);
+
+        $datos = DB::select("SELECT
+            postulante.nro_doc AS dni,
             inscripciones.codigo as codigo,
-            postulante.nombres AS nombre, 
+            postulante.nombres AS nombre,
             postulante.primer_apellido AS paterno,
             postulante.segundo_apellido AS materno,
             programa.nombre AS programa,
@@ -361,52 +360,133 @@ class InscripcionController extends Controller
         FROM inscripciones
         JOIN postulante ON inscripciones.id_postulante = postulante.id
         JOIN programa ON inscripciones.id_programa = programa.id
-        JOIN modalidad ON inscripciones.id_modalidad = modalidad.id 
+        JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
         JOIN procesos ON inscripciones.id_proceso = procesos.id
         JOIN users on inscripciones.id_usuario = users.id
         WHERE postulante.nro_doc = ? AND inscripciones.estado = 0 AND inscripciones.id_proceso = ?", [$dni, auth()->user()->id_proceso]);
-    
+
         $foto = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/fotos/' . $dni . '.jpg');
         $huellaIzquierda = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . '.jpg');
         $huellaDerecha = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . 'x.jpg');
-    
+
         $data = $datos[0];
+
+        // Generar PDF temporal
         $pdf = Pdf::loadView('inscripcion.inscripcion', compact('data', 'carreras_previas', 'foto', 'huellaIzquierda', 'huellaDerecha', 'dia1', 'dia2'));
         $pdf->setPaper('A4', 'portrait');
         $output = $pdf->output();
-    
+
+        $rutaTemp = storage_path('app/temp_' . $dni . '.pdf');
+        file_put_contents($rutaTemp, $output);
+
+        // Validar PDF
+        if (!File::exists($rutaTemp) || filesize($rutaTemp) === 0) {
+            abort(500, "El PDF temporal no se generó correctamente.");
+        }
+
+        $client = new Client();
+        $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
+            'multipart' => [
+                ['name' => 'dni', 'contents' => '70757838'],
+                ['name' => 'password_p12', 'contents' => 'ariellukezz'],
+                ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
+                ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
+                ['name' => 'x', 'contents' => '435'],
+                ['name' => 'y', 'contents' => '205'],
+                ['name' => 'width', 'contents' => '120'],
+                ['name' => 'height', 'contents' => '120'],
+            ]
+        ]);
+
+        // Guardar PDF firmado
+        $pdfFirmado = $response->getBody()->getContents();
         $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/');
         if (!File::exists($rutaCarpeta)) {
             File::makeDirectory($rutaCarpeta, 0755, true, true);
         }
-        file_put_contents($rutaCarpeta . $dni . '.pdf', $output);
-        return $pdf->stream();
+        $rutaFinal = $rutaCarpeta . $dni . '.pdf';
+        file_put_contents($rutaFinal, $pdfFirmado);
+
+        // Eliminar temporal
+        File::delete($rutaTemp);
+
+        return response()->file($rutaFinal);
     }
 
-    function getFileUrlWithHash($path) {
-        if (File::exists($path)) {
-            $hash = md5_file($path);
-            return $path . '?v=' . $hash;
-        }
-        return $path;
-    }
+
+
+    // public function pdfInscripcion($dni) {
+    //     $proceso = Proceso::find(auth()->user()->id_proceso);
+    //     $dateString1 = $proceso->fec_1;
+    //     $dateString2 = $proceso->fec_2 ?? null;
+    //     $dia1 = $this->formatDate($dateString1);
+    //     $dia2 = $this->formatDate($dateString2);
+
+    //     $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
+    //     WHERE dni_postulante = ?", [$dni]);
+
+    //     $datos = DB::select("SELECT
+    //         postulante.nro_doc AS dni,
+    //         inscripciones.codigo as codigo,
+    //         postulante.nombres AS nombre,
+    //         postulante.primer_apellido AS paterno,
+    //         postulante.segundo_apellido AS materno,
+    //         programa.nombre AS programa,
+    //         inscripciones.id_programa as id_programa,
+    //         modalidad.nombre AS modalidad,
+    //         procesos.nombre AS proceso,
+    //         LPAD(codigo_sunedu,3,'0') AS cod_sunedu,
+    //         inscripciones.created_at as fecha,
+    //         users.name, users.paterno as upaterno
+    //     FROM inscripciones
+    //     JOIN postulante ON inscripciones.id_postulante = postulante.id
+    //     JOIN programa ON inscripciones.id_programa = programa.id
+    //     JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+    //     JOIN procesos ON inscripciones.id_proceso = procesos.id
+    //     JOIN users on inscripciones.id_usuario = users.id
+    //     WHERE postulante.nro_doc = ? AND inscripciones.estado = 0 AND inscripciones.id_proceso = ?", [$dni, auth()->user()->id_proceso]);
+
+    //     $foto = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/fotos/' . $dni . '.jpg');
+    //     $huellaIzquierda = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . '.jpg');
+    //     $huellaDerecha = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . 'x.jpg');
+
+    //     $data = $datos[0];
+    //     $pdf = Pdf::loadView('inscripcion.inscripcion', compact('data', 'carreras_previas', 'foto', 'huellaIzquierda', 'huellaDerecha', 'dia1', 'dia2'));
+    //     $pdf->setPaper('A4', 'portrait');
+    //     $output = $pdf->output();
+
+    //     $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/');
+    //     if (!File::exists($rutaCarpeta)) {
+    //         File::makeDirectory($rutaCarpeta, 0755, true, true);
+    //     }
+    //     file_put_contents($rutaCarpeta . $dni . '.pdf', $output);
+    //     return $pdf->stream();
+    // }
+
+    // function getFileUrlWithHash($path) {
+    //     if (File::exists($path)) {
+    //         $hash = md5_file($path);
+    //         return $path . '?v=' . $hash;
+    //     }
+    //     return $path;
+    // }
 
 
     public function getInscripcionesAdmin(Request $request) {
 
         $query_where = [];
 
-        if ($request->programa) array_push($query_where,[DB::raw('inscripciones.id_programa'), '=', $request->programa]); 
+        if ($request->programa) array_push($query_where,[DB::raw('inscripciones.id_programa'), '=', $request->programa]);
         array_push($query_where,[DB::raw('inscripciones.id_proceso'), '=', auth()->user()->id_proceso]);
 
         $res = Inscripcion::select(
-            'inscripciones.id as id', 'procesos.id as id_proceso', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni', 'inscripciones.codigo as codigo', 'postulante.nombres AS nombres', 
+            'inscripciones.id as id', 'procesos.id as id_proceso', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni', 'inscripciones.codigo as codigo', 'postulante.nombres AS nombres',
             'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno', 'programa.nombre as programa', 'inscripciones.id_programa as id_programa',
             'modalidad.id as id_modalidad', 'modalidad.nombre as modalidad', 'procesos.nombre AS proceso', 'inscripciones.created_at as fecha', 'inscripciones.estado'
         )
         ->join('postulante','inscripciones.id_postulante', 'postulante.id')
         ->join('programa','inscripciones.id_programa', 'programa.id')
-        ->join('modalidad','inscripciones.id_modalidad', 'modalidad.id')        
+        ->join('modalidad','inscripciones.id_modalidad', 'modalidad.id')
         ->join('procesos','inscripciones.id_proceso', 'procesos.id')
         ->where($query_where)
         ->where(function ($query) use ($request) {
@@ -479,7 +559,7 @@ class InscripcionController extends Controller
     private function formatDate($dateString)
     {
         if (!$dateString) {
-            return null; 
+            return null;
         }
 
         try {
