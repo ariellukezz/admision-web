@@ -141,7 +141,7 @@
                                 <strong>SOLICITO la inscripción para postular en el EXAMEN
                                 {{ $data->proceso }}</strong>
                                 que se llevará a cabo el {{ $data->fecha_examen }}
-                                de enero de 2026. Asimismo, pongo a vuestro conocimiento que
+                                de 2026. Asimismo, pongo a vuestro conocimiento que
                                 postulo al programa de estudios de<span style="font-weight: bold;"> {{ $data->programa }}</span>
                                 bajo la modalidad  <span style="font-weight: bold;">{{ $data->modalidad }}</span>.
                             </div>
