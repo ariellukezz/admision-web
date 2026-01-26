@@ -14,6 +14,7 @@ use App\Http\Controllers\FilialController;
 use App\Http\Controllers\VerificacionFotosController;
 use App\Http\Controllers\ModalidadController;
 use App\Http\Controllers\AnioController;
+use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\ApoderadoController;
 use App\Http\Controllers\ProgramaController;
 use App\Http\Controllers\PostulanteController;
@@ -829,8 +830,12 @@ Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipa
 Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
 
 
+Route::get('/verificar/{codigo}', [FirmaController::class, 'verificarFirma']);
+Route::get( '/inscripcion/{codigo}/pdf', [FirmaController::class, 'verPdf']);
 
 
+Route::get('/verificacion/{codigo}', fn ($codigo) => Inertia::render('Publico/Firma/verificar', ['codigo' => $codigo]));
+Route::get('segundas-especialidades-2026-test/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
 
 
 require __DIR__.'/auth.php';
