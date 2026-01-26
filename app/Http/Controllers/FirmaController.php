@@ -110,6 +110,11 @@ private function mapearFirmas(array $firmas): array
             ?? $firma['certificado']['sujeto']
             ?? null;
 
+        $mensaje = $firma['mensaje'] ?? '';
+
+        // Normalizamos el mensaje: mayúsculas y quitamos acentos
+        $mensaje_normalizado = strtoupper($this->removeAccents($mensaje));
+
         return [
             'indice' => $firma['indice'] ?? null,
             'firmante' => $firmante,
@@ -117,8 +122,9 @@ private function mapearFirmas(array $firmas): array
             'algoritmo' => $firma['algoritmo'] ?? null,
             'fecha_firma' => $firma['fecha_firma'] ?? null,
             'estado_servicio' => $firma['estado'] ?? null,
-            'mensaje' => $firma['mensaje'] ?? null,
-            'valida_tecnica' => str_contains($firma['mensaje'] ?? '', 'Firma válida'),
+            'mensaje' => $mensaje,
+            // Detectamos firma válida sin importar mayúsculas o acentos
+            'valida_tecnica' => str_contains($mensaje_normalizado, 'FIRMA VALIDA'),
             'certificado' => [
                 'emisor' => $firma['certificado']['emisor'] ?? null,
                 'valido_desde' => $firma['certificado']['validez_desde'] ?? null,
@@ -129,6 +135,12 @@ private function mapearFirmas(array $firmas): array
     })->toArray();
 }
 
+
+private function removeAccents(string $str): string
+{
+    $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+    return $transliterator ? $transliterator->transliterate($str) : $str;
+}
 
 private function formatearTamano(int $bytes): string
 {
