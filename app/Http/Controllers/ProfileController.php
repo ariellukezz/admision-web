@@ -149,7 +149,6 @@ class ProfileController extends Controller
     public function crearCertificadoDigital(Request $request) {
 
       $request->validate([
-          'dni' => 'required|string',
           'usuario' => 'required|string',
           'departamento' => 'required|string',
           'email' => 'required|email',
