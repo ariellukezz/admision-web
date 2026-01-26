@@ -147,7 +147,7 @@ class UsuarioController extends Controller
             $user->celular = $request->celular;
             $user->password = Hash::make($request->password);
             $user->id_rol = $request->id_rol;
-            $user->estado = $request->estado;
+            $user->estado = $request->estado? 1 : 0;
             $user->id_proceso = $request->id_proceso;
             $user->id_usuario = auth()->id();
             $user->save();
@@ -163,7 +163,7 @@ class UsuarioController extends Controller
             $usuario->materno = $request->materno;
             $usuario->email = $request->email;
             $usuario->celular = $request->celular;
-            $usuario->estado = $request->estado;
+            $usuario->estado = $request->estado ? 1 : 0;
             $usuario->id_rol = $request->id_rol;
             $usuario->id_proceso = $request->id_proceso;
             if ($request->has('password') ) {
