@@ -396,7 +396,7 @@ class InscripcionController extends Controller
         $client = new Client();
         $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
             'multipart' => [
-                ['name' => 'dni', 'contents' => $data->user_dni],
+                ['name' => 'dni', 'contents' => auth()->user()->dni],
                 ['name' => 'password_p12', 'contents' => $certificado->password_p12],
                 ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
                 ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
