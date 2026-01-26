@@ -19,7 +19,7 @@ public function verificarFirma($codigo)
           ->select( 'inscripciones.*', 'postulante.nro_doc as postulante_dni')
           ->firstOrFail();
 
-        $rutaPdf = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/'.$inscripcion->postulante_dni.'.pdf');
+        $rutaPdf = public_path('/documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->postulante_dni.'.pdf');
 
         if (!file_exists($rutaPdf)) {
             throw new \Exception('El PDF no existe');
@@ -93,7 +93,9 @@ private function verificarFirmaPdf(string $rutaPdf): array
 
 private function mapearEstado(string $estado): string
 {
-    return match (strtoupper($estado)) {
+    $estado_normalizado = strtoupper($this->removeAccents($estado));
+
+    return match ($estado_normalizado) {
         'VALIDO', 'VALIDA', 'OK' => 'VÁLIDO',
         'INVALIDO', 'INVALIDA' => 'INVÁLIDO',
         default => 'INDETERMINADO',
@@ -173,23 +175,18 @@ public function verPdf($codigo)
             'postulante.id'
         )
         ->where('inscripciones.codigo', $codigo)
-        ->select('postulante.nro_doc as dni')
+        ->select('postulante.nro_doc as dni', 'inscripciones.id_proceso')
         ->firstOrFail();
 
     $rutaPdf = public_path(
-        'documentos/' .
-        auth()->user()->id_proceso .
-        '/inscripciones/constancias/' .
-        $inscripcion->dni .
-        '.pdf'
+        'documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->dni.'.pdf'
     );
 
     abort_unless(file_exists($rutaPdf), 404, 'PDF no encontrado');
 
-    // Retornamos el PDF como stream, sin forzar inline
     return response()->file($rutaPdf, [
         'Content-Type' => 'application/pdf',
-        'Accept-Ranges' => 'bytes', // esencial para pdf.js
+        'Accept-Ranges' => 'bytes',
     ]);
 }
 
