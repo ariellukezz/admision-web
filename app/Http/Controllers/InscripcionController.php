@@ -387,12 +387,14 @@ class InscripcionController extends Controller
             abort(500, "El PDF temporal no se generó correctamente.");
         }
 
-        $certificado = CertificadoFirma::where('id_usuario', Auth::id())->first();
+        $certificado = CertificadoFirma::where('users.id', Auth::id())
+        ->join('users', 'certificado_firma.id_usuario', 'users.id')
+        ->first();
 
         $client = new Client();
         $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
             'multipart' => [
-                ['name' => 'dni', 'contents' => $data->dni],
+                ['name' => 'dni', 'contents' => $certificado->dni],
                 ['name' => 'password_p12', 'contents' => $certificado->password_p12],
                 ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
                 ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
