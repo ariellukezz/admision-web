@@ -389,6 +389,9 @@ class InscripcionController extends Controller
         }
 
         $certificado = CertificadoFirma::where('id_usuario', Auth::id())->first();
+        if (!$certificado) {
+            abort(400, 'El usuario no tiene certificado de firma configurado');
+        }
 
         $client = new Client();
         $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
