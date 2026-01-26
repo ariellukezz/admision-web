@@ -75,6 +75,15 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified','revisor','admin'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/perfil', fn () => Inertia::render('Perfil/perfil'))->name('admin-perfil');
+    Route::get('/get-datos-perfil', [ProfileController::class, 'getDatosUsuario']);
+    Route::post('/actualizar-datos-perfil', [ProfileController::class, 'actualizarDatosUsuario']);
+    Route::post('/cambiar-contrasena-perfil', [ProfileController::class, 'cambiarContrasenaPerfil']);
+    Route::post('/actualizar-estado-firma-perfil', [ProfileController::class, 'actualizarEstadoFirma']);
+    Route::post('/crear-certificado-digital', [ProfileController::class, 'crearCertificadoDigital']);
+    Route::get('/get-activity-log', [ProfileController::class, 'getActivityLog']);
+    Route::get('/get-certificado-digital', [ProfileController::class, 'getCertificadoDigital']);
+
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -339,6 +348,10 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/pdf-biometrio/{dni}', [IngresoController::class, 'pdfbiometrico2']);
 
     Route::get('/certificados-firma', fn () => Inertia::render('Admin/CertificadosFirma/index'))->name('admin-certificados-firma');
+
+
+
+
     Route::prefix('certificados')->group(function () {
         Route::get('/', [CertificadoFirmaController::class, 'index']);
         Route::post('/', [CertificadoFirmaController::class, 'store']);

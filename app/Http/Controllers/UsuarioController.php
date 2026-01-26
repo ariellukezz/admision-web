@@ -35,7 +35,7 @@ class UsuarioController extends Controller
                 'password' => 'required|same:confirm-password',
                 'roles' => 'required'
             ]);
-    
+
             $input = $request->all();
             $input['password'] = Hash::make($input['password']);
 
@@ -50,7 +50,7 @@ class UsuarioController extends Controller
                 $usuario->password = Hash::make($request->password);
             }
             $usuario->materno = $request->materno;
-            $usuario->paterno = $request->paterno; 
+            $usuario->paterno = $request->paterno;
             $usuario->save();
         }
 
@@ -106,23 +106,22 @@ class UsuarioController extends Controller
         User::find($id)->delete();
         return redirect()->route('usuarios.index');
     }
-    
+
     public function getRoles()
     {
         $roles = DB::select('SELECT id, name AS value FROM roles;');
-        
+
         $this->response['datos'] = $roles;
         return response()->json($this->response, 200);
-    
+
     }
 
     public function getUsuarios(Request $request){
 
-        $res = User::select( 'users.id', 'users.name', 'users.paterno', 'users.materno', 'users.email', 
-        'roles.name AS role_name', 'users.id_rol', 'id_proceso', 'procesos.nombre AS proceso', 'users.estado')
+        $res = User::select( 'users.id', 'users.dni', 'users.name', 'users.paterno', 'users.materno', 'users.email', 'users.celular',
+        'roles.name AS rol', 'users.id_rol', 'id_proceso', 'procesos.nombre AS proceso', 'users.estado')
         ->join('roles','roles.id','users.id_rol')
         ->join('procesos','procesos.id','users.id_proceso')
-        ->where('roles.id','=',2)
         ->where(function ($query) use ($request) {
             return $query
                 ->orWhere('users.name', 'LIKE', '%' . $request->term . '%')
@@ -130,9 +129,9 @@ class UsuarioController extends Controller
                 ->orWhere('users.email', 'LIKE', '%' . $request->term . '%');
         })->orderBy('users.id', 'DESC')
         ->get();
-        
+
         $this->response['usuarios'] = $res;
-        return response()->json($this->response, 200); 
+        return response()->json($this->response, 200);
     }
 
 
@@ -140,12 +139,14 @@ class UsuarioController extends Controller
 
         if (!$request->id) {
             $user = new User();
+            $user->dni = $request->dni;
             $user->name = $request->name;
             $user->paterno = $request->paterno;
             $user->materno = $request->materno;
             $user->email = $request->email;
+            $user->celular = $request->celular;
             $user->password = Hash::make($request->password);
-            $user->id_rol = $request->rol;
+            $user->id_rol = $request->id_rol;
             $user->estado = $request->estado;
             $user->id_proceso = $request->id_proceso;
             $user->id_usuario = auth()->id();
@@ -156,18 +157,20 @@ class UsuarioController extends Controller
             if (!$usuario) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
+            $usuario->dni = $request->dni;
             $usuario->name = $request->name;
             $usuario->paterno = $request->paterno;
             $usuario->materno = $request->materno;
             $usuario->email = $request->email;
+            $usuario->celular = $request->celular;
             $usuario->estado = $request->estado;
-            $usuario->id_rol = $request->rol;
+            $usuario->id_rol = $request->id_rol;
             $usuario->id_proceso = $request->id_proceso;
             if ($request->has('password') ) {
                 $usuario->password = Hash::make($request->password);
             }
             $usuario->save();
-        }     
+        }
 
         return response()->json(['message' => 'Usuario guardado correctamente'], 200);
     }
@@ -177,7 +180,7 @@ class UsuarioController extends Controller
         FROM users
         JOIN roles ON users.id_rol = roles.id
         JOIN role_has_permissions ON role_has_permissions.role_id = roles.id
-        JOIN permissions ON role_has_permissions.permission_id = permissions.id 
+        JOIN permissions ON role_has_permissions.permission_id = permissions.id
         WHERE users.id = '. auth()->id());
         $this->response['permisos'] = $res;
         return response()->json($this->response, 200);
@@ -198,9 +201,6 @@ class UsuarioController extends Controller
         $this->response['datos'] = $usuario;
         return response()->json($this->response, 200);
     }
-
-
-
 
 
 }

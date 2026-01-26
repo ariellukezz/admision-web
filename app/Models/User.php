@@ -20,13 +20,19 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'dni',
         'name',
+        'paterno',
+        'materno',
         'email',
+        'cellular',
         'password',
         'rol_id',
         'id_usuario',
+        'programas',
         'estado',
-        'id_proceso'
+        'id_proceso',
+        'foto',
     ];
 
     /**
@@ -56,5 +62,5 @@ class User extends Authenticatable
         // Asigna el Observador Global al modelo
         static::observe(GlobalObserver::class);
     }
-    
+
 }

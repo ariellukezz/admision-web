@@ -384,11 +384,13 @@ class InscripcionController extends Controller
             abort(500, "El PDF temporal no se generó correctamente.");
         }
 
+        $certificado = CertificadoFirma::where('id_usuario', Auth::id())->first();
+
         $client = new Client();
         $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
             'multipart' => [
-                ['name' => 'dni', 'contents' => '70757838'],
-                ['name' => 'password_p12', 'contents' => 'ariellukezz'],
+                ['name' => 'dni', 'contents' => $data->dni],
+                ['name' => 'password_p12', 'contents' => $certificado->password_p12],
                 ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
                 ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
                 ['name' => 'x', 'contents' => '435'],
@@ -398,7 +400,6 @@ class InscripcionController extends Controller
             ]
         ]);
 
-        // Guardar PDF firmado
         $pdfFirmado = $response->getBody()->getContents();
         $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/');
         if (!File::exists($rutaCarpeta)) {
@@ -407,7 +408,6 @@ class InscripcionController extends Controller
         $rutaFinal = $rutaCarpeta . $dni . '.pdf';
         file_put_contents($rutaFinal, $pdfFirmado);
 
-        // Eliminar temporal
         File::delete($rutaTemp);
 
         return response()->file($rutaFinal);

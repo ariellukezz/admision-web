@@ -6,7 +6,7 @@
             <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
             </svg>
-          </button>          
+          </button>
         </div> -->
 
 
@@ -22,9 +22,8 @@
           </a>
           <template #overlay>
             <a-menu>
-              <a-menu-item key="0">
-                <button @click="dropdownOpen = ! dropdownOpen" class="relative block overflow-hidden"></button>   
-                    
+              <a-menu-item key="0"  @click="modalPerfil = true">
+                    Perfil
               </a-menu-item>
                 <a-menu-divider />
                 <dropdown-link class="w-full text-left" :href="route('logout')" method="post" as="button">
@@ -34,12 +33,25 @@
           </template>
         </a-dropdown>
       </div>
+
+          <a-modal
+            v-model:open="modalPerfil"
+            title="Perifil de Usuario"
+            width="1100px"
+          >
+      <Perfil/>
+    </a-modal>
+
+
     </header>
 </template>
 
 <script setup>
-import Dropdown from '@/Components/Dropdown.vue'
 import DropdownLink from '@/Components/DropdownLink.vue'
 import { DownOutlined } from '@ant-design/icons-vue';
+import { ref } from 'vue';
+import Perfil from '@/Pages/Perfil/perfil.vue';
+
+const modalPerfil = ref(false);
 const usuario = defineProps(['usuario'])
 </script>

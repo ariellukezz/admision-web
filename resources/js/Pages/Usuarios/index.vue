@@ -1,351 +1,437 @@
 <template>
-  <Head title="Usuarios"/>
+  <Head title="Usuarios" />
   <AuthenticatedLayout>
-  <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-    <div class="flex justify-between mb-2" >
-    <div class="mr-3">
-      <a-button class="mb-3" style="border-radius: 5px; border: none; background: #476175;"  type="primary" @click="showModalRol">Usuario nuevo</a-button>
-    </div>
-    <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="height: 36px; max-width: 300px; border-radius:6px; padding-left: 30px;"/>
-    <div class="mr-2" style="position: absolute; left: 10px; top: 6px; "><search-outlined /></div>
-    </div>
-  </div>
 
-  <a-table bordered  :data-source="users" :columns="columns" size="small" :pagination="paginationConfig">
-    <template #bodyCell="{ column, index, record }">
+    <a-card class="mac-card" :bordered="false">
 
-      <template v-if="column.dataIndex === 'name'">
-        <span style="text-transform: capitalize;" size="small">{{ (record.name).toLowerCase() }} {{ (record.paterno).toLowerCase() }}</span>
-       </template>
-    
-      <template v-if="column.dataIndex === 'role_name'">
-        <a-tag color="cyan" size="small">{{users[index].role_name }}</a-tag>
-       </template>
+      <div class="header">
+        <h2>Gestión de Usuarios</h2>
 
-       <template v-if="column.dataIndex === 'estado'">
-        <div v-if="record.estado == 1" style="text-align: center;">
-          <a-tag color="#476175" size="small"> activo </a-tag>
+        <div class="header-actions">
+          <a-input
+            v-model:value="buscar"
+            placeholder="Buscar usuario"
+            allow-clear
+            style="width:260px"
+          >
+            <template #prefix><SearchOutlined /></template>
+          </a-input>
+
+          <a-button type="primary" @click="nuevoUsuario">
+            Nuevo Usuario
+          </a-button>
         </div>
-        <div v-else style="text-align: center;">
-          <a-tag color="gray" size="small"> inactivo </a-tag>
-        </div>
-
-       </template>
-      
-      <template v-if="column.dataIndex === 'operation'">
-        <a-button class="mr-1" type="primary" @click="editar(record)" style="border-radius: 4px; background: none; border: 1px solid gray;  color:gray; width: 20px;" size="small">
-          <template #icon><LockOutlined/></template>
-        </a-button>
-        <a-button class="mr-1" type="primary" @click="editar(record)" style="border-radius: 4px; background: none; color:blue; width: 20px;" size="small">
-          <template #icon><form-outlined/></template>
-        </a-button>
-        <a-button type="danger" style="border-radius: 4px; background: none; color:red; border:red 1px solid; width: 20px;" size="small">
-          <template #icon><delete-outlined/></template>
-        </a-button>
-      </template>
-    </template>
-  </a-table>
-
-  </div>
-  
-  </AuthenticatedLayout>
-
-  <div>
-    <a-modal v-model:visible="visible" title="Nuevo Usuario" style="margin-top: -50px;" @ok="handleOk">
-      <div>
-
-        <a-form
-          ref="formRef"
-          name="custom-validation"
-          :model="formState"
-          :rules="rules"
-          v-bind="layout"
-          @finish="handleFinish"
-          @validate="handleValidate"
-          :validate-messages="validateMessages"
-          @finishFailed="handleFinishFailed"
-        >
-        <div>
-          <div class="flex justify-end">
-            <div class="mr-2">Estado</div>
-            <div style="margin-top: -2px;">
-              <a-switch  :style="formState.estado ? { backgroundColor: '#476175' } : { backgroundColor: 'grey' }" v-model:checked="formState.estado" />
-            </div>
-          </div>
-        </div>
-
-        <a-row :gutter="[16, 0]" class="form-row mb-0" >
-          <a-col :span="24" :md="24" :lg="12" :xl="24" :xxl="24">
-            <div>Nombres</div>
-            <a-form-item  has-feedback name="name">
-              <a-input v-model:value="formState.name" type="text" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Ap. paterno</div>
-            <a-form-item has-feedback name="paterno">
-              <a-input v-model:value="formState.paterno" type="text" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Ap. materno</div>
-            <a-form-item has-feedback name="materno">
-              <a-input v-model:value="formState.materno" type="text" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="24" :xxl="24">
-            <div>Correo</div>
-            <a-form-item has-feedback name="email" :rules="[{ type: 'email', required: true }]">
-              <a-input v-model:value="formState.email" type="text" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Contraseña</div>
-            <a-form-item has-feedback name="pass">
-              <a-input v-model:value="formState.pass" type="password" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Confirmar contraseña</div>
-            <a-form-item has-feedback name="checkPass">
-              <a-input v-model:value="formState.checkPass" type="password" autocomplete="off" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Rol</div>          
-              <a-form-item has-feedback>
-                <a-input value="Revisor" disabled/>
-              </a-form-item>
-          </a-col>
-          <a-col :span="24" :md="24" :lg="12" :xl="12" :xxl="12">
-            <div>Examen</div>
-            <a-form-item
-              name="proceso"
-              :rules="[{ required: true, message: 'Seleccine el rol', trigger: 'change' },]"
-              >
-                <a-select
-                  ref="select"
-                  v-model:value="formState.id_proceso"
-                  style="width: 100%"
-                  :options="procesos"
-                  @focus="focus"
-                  @change="handleChange"
-                ></a-select>
-              </a-form-item>
-          </a-col>
-        </a-row>
-        </a-form>
-  
       </div>
 
-      <template #footer>
-        <a-button style="border-radius: 5px;" @click="resetForm">Cancelar</a-button>
-        <a-button type="primary" @click="guardar()" style="border-radius: 5px; border: none; background: #476175;">Guardar</a-button>
-      </template>
+      <!-- TABLA -->
+      <a-table
+        :data-source="users"
+        :columns="columns"
+        row-key="id"
+        class="mac-table"
+      >
+        <template #bodyCell="{ column, record }">
+
+          <template v-if="column.dataIndex === 'usuario'">
+            <div class="user-cell">
+              <a-avatar :src="record.foto_url" size="large">
+                <template #icon><UserOutlined /></template>
+              </a-avatar>
+
+              <div class="user-info">
+                <div class="user-name">
+                  {{ record.name }} {{ record.paterno }} {{ record.materno }}
+                </div>
+                <div class="user-dni">
+                  DNI: {{ record.dni }}
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-if="column.dataIndex === 'email'">
+            {{ record.email }}
+          </template>
+
+          <template v-if="column.dataIndex === 'rol'">
+            <a-tag color="blue">{{ record.rol }}</a-tag>
+          </template>
+
+          <template v-if="column.dataIndex === 'proceso'">
+            <a-tag color="purple">{{ record.proceso }}</a-tag>
+          </template>
+
+          <template v-if="column.dataIndex === 'estado'">
+            <a-tag :color="record.estado ? 'green' : 'red'">
+              {{ record.estado ? 'Activo' : 'Inactivo' }}
+            </a-tag>
+          </template>
+
+          <template v-if="column.dataIndex === 'acciones'">
+             <div style="display: flex; gap: 2px;">
+                <a-button @click="modalCertificado = true" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
+                  <IdcardOutlined />
+                </a-button>
+                <a-button @click="editarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
+                  <form-outlined />
+                </a-button>
+                <a-button @click="eliminarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                  <delete-outlined />
+                </a-button>
+              </div>
+          </template>
+
+        </template>
+      </a-table>
+    </a-card>
+
+    <a-modal
+      v-model:open="modalVisible"
+      :title="form.id ? 'Editar Usuario' : 'Nuevo Usuario'"
+      width="780px"
+      :confirm-loading="saving"
+      @ok="guardarUsuario"
+    >
+      <a-form layout="vertical">
+
+        <!-- FOTO -->
+        <a-form-item label="Foto">
+          <div class="foto-box">
+            <a-avatar :size="96" :src="fotoPreview">
+              <template #icon><UserOutlined /></template>
+            </a-avatar>
+
+            <a-upload
+              :before-upload="() => false"
+              :show-upload-list="false"
+              @change="onChangeFoto"
+            >
+              <a-button size="small">Cambiar foto</a-button>
+            </a-upload>
+          </div>
+        </a-form-item>
+
+        <!-- GRID 3 COLUMNAS -->
+        <a-row :gutter="16">
+
+          <a-col :span="8">
+            <a-form-item label="DNI">
+              <a-input v-model:value="form.dni">
+                <template #prefix><IdcardOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="8">
+            <a-form-item label="Celular">
+              <a-input v-model:value="form.celular">
+                <template #prefix><PhoneOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="8">
+            <a-form-item label="Email">
+              <a-input v-model:value="form.email">
+                <template #prefix><MailOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="8">
+            <a-form-item label="Nombres">
+              <a-input v-model:value="form.name">
+                <template #prefix><UserOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="8">
+            <a-form-item label="Apellido Paterno">
+              <a-input v-model:value="form.paterno">
+                <template #prefix><UserOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="8">
+            <a-form-item label="Apellido Materno">
+              <a-input v-model:value="form.materno">
+                <template #prefix><UserOutlined /></template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+
+          <!-- ROL -->
+          <a-col :span="8">
+            <a-form-item label="Rol">
+              <a-select v-model:value="form.rol_id" :options="roles">
+                <template #prefix><TeamOutlined /></template>
+              </a-select>
+            </a-form-item>
+          </a-col>
+
+          <!-- PROCESO -->
+          <a-col :span="8">
+            <a-form-item label="Proceso">
+              <a-select v-model:value="form.id_proceso" :options="procesos">
+                <template #prefix><ApartmentOutlined /></template>
+              </a-select>
+            </a-form-item>
+          </a-col>
+
+          <!-- ESTADO -->
+          <a-col :span="8">
+            <a-form-item label="Estado">
+              <a-switch v-model:checked="form.estado" />
+            </a-form-item>
+          </a-col>
+
+        </a-row>
+      </a-form>
     </a-modal>
-  </div>
 
+     <a-modal
+      v-model:open="modalCertificado"
+      title="Certificado Digital"
+      width="480px"
+      @ok="crearCertificadoDigital"
+      ok-text="Crear certificado"
+      >
+      <a-form layout="vertical">
+        <a-form-item label="Contraseña para el archivo .p12">
+          <a-input-password
+            v-model:value="password_p12"
+            placeholder="Ingrese una contraseña segura"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
 
-  
+  </AuthenticatedLayout>
 </template>
-  
+
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { ref, reactive, watch } from 'vue'
+import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { watch, ref, reactive } from 'vue';
-import { FormOutlined, LockOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue'
+import {
+  SearchOutlined,
+  UserOutlined,
+  FormOutlined,
+  DeleteOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  ApartmentOutlined,
+  IdcardOutlined,
+  TeamOutlined
+} from '@ant-design/icons-vue'
+import Certificado from '../Publico/Resultados/components/certificado.vue'
 
-const buscar = ref("");
-const props = defineProps(['usuarios'])
-const roles = ref([]);
-const rol = ref("");
-const users = ref([]);
-const procesos = ref([]);
+const modalCertificado = ref(false)
+const buscar = ref('')
+const users = ref([])
+const procesos = ref([])
+const roles = ref([
+  { value: 1, label: 'Administrador' },
+  { value: 2, label: 'Revisor' },
+  { value: 3, label: 'Segundas Director' },
+  { value: 6, label: 'Simulacro' },
+  { value: 7, label: 'Calificador' }
+])
 
-let timeoutId;
-watch(buscar, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      getUsuarios(); 
-    }, 500);  
+const modalVisible = ref(false)
+const saving = ref(false)
+const fotoFile = ref(null)
+const fotoPreview = ref(null)
+
+const form = reactive({
+  id: null,
+  dni: '',
+  name: '',
+  paterno: '',
+  materno: '',
+  email: '',
+  celular: '',
+  rol_id: null,
+  rol: '',
+  id_proceso: null,
+  procesoso: '',
+  estado: true
 })
 
-
-const visible = ref(false)
-const showModalRol = () => { visible.value = true; };
-const handleOk = e => {
-  console.log(e)
-  visible.value = false
-};
-
-const editar = (item) => {
-  formState.id = item.id;
-  formState.name = item.name;
-  formState.paterno = item.paterno;
-  formState.materno = item.materno;
-  formState.email = item.email;
-  formState.rol = item.id_rol;
-  formState.id_proceso = item.id_proceso;
-  formState.proceso = item.proceso;
-  formState.estado = (item.estado == 1) ? true : false; 
-  rol.value = item.id_rol;
-  visible.value = true;
-}
-
-const formRef = ref();
-const formState = reactive({
-  id:null,
-  name:'',
-  paterno:'',
-  materno:'',
-  email:'',
-  pass: '',
-  checkPass: '',
-  rol: ref(null),
-  estado: true,
-  id_proceso:null,
-  proceso: 9
-});
-
-let validateCorreo = async (_rule, value) => {
-  if (value === '') {
-    return Promise.reject('Ingrese su correo electrónico');
-  } else {
-    return Promise.resolve();
-  }
-};
-
-let validateNombre = async (_rule, value) => {
-  if (value === '') {
-    return Promise.reject('Ingrese su nombre');
-  } else {
-    return Promise.resolve();
-  }
-};
-
-let validatePass = async (_rule, value) => {
-  if (value === '') {
-    return Promise.reject('Ingrese la contraseña');
-  } else {
-    if (formState.checkPass !== '') {
-      formRef.value.validateFields('checkPass');
-    }
-    return Promise.resolve();
-  }
-};
-
-let validatePass2 = async (_rule, value) => {
-  if (value === '') {
-    return Promise.reject('Ingrese la contraseña nuevamente');
-  } else if (value !== formState.pass) {
-    return Promise.reject("Las contraseñas no coenciden");
-  } else {
-    return Promise.resolve();
-  }
-};
-
-const paginationConfig = { pageSize: 20, }
-const handleFinish = values => {
-  console.log(values, formState);
-};
-const handleFinishFailed = errors => {
-  console.log(errors);
-};
-const resetForm = () => {
-  formRef.value.resetFields();
-};
-const handleValidate = (...args) => {
-  console.log(args);
-};
-
-const validateMessages = {
-  required: 'Ingrese ${label}',
-  types: {
-    email: '${label} no valido',
-  },
-};
-
-const getUsuarios = async () => {  
-  let res = await axios.post(`get-usuarios`, {term: buscar.value});
-  users.value = res.data.usuarios;
-}
-
-const getRoles = async () => {  
-  let res = await axios.get(`get-roles-u`);
-  roles.value = res.data.datos;
-}
-
-const getProcesos = async () => {  
-  let res = await axios.get(`get-select-procesos`);
-  procesos.value = res.data.datos;
-}
-
-
-getRoles();
-getUsuarios();
-getProcesos();
-
-const guardar = () => {
-    let post = {
-        id: formState.id,
-        name: formState.name,
-        paterno: formState.paterno,
-        materno: formState.materno,
-        email: formState.email,
-        estado: formState.estado,
-        rol: 2,
-        id_proceso: formState.id_proceso
-    };
-
-    if (formState.pass && formState.pass.trim() !== "") {
-        post.password = formState.pass;
-    }
-
-    axios.post("save-user", post).then((result) => {
-        console.log(result.data.user);
-        visible.value = false;
-        formState.id = null;
-        formState.name = '';
-        formState.paterno = '';
-        formState.materno = '';
-        formState.email = '';
-        formState.pass = '';
-        formState.checkPass = '';
-        formState.rol = ref(null);
-        formState.id_proceso = null;
-        formState.proceso = 9;
-        getUsuarios();
-        notificacion('success', 'Nuevo Usuario Agregado', result.data.user.name);
-    });
-};
-
-const notificacion = (type, titulo, mensaje) => {
-  notification[type]({
-    message: titulo,
-    description: mensaje,
-  });
-};
-
-
-const rules = {
-  pass: [{ required: true, validator: validatePass, trigger: 'change',}],
-  checkPass: [{ required: true, validator: validatePass2, trigger: 'change',}],
-  name: [{ required: true, validator: validateNombre, trigger: 'change', }],
-  email: [{ validator: validateCorreo, trigger: 'change', }],
-};
-
 const columns = [
-  { title: 'Nombre', dataIndex: 'name',}, 
-  { title: 'Correo', dataIndex: 'email',}, 
-  { title: 'Rol', dataIndex: 'role_name', align:"center"}, 
-  { title: 'Proceso', dataIndex: 'proceso', align:"center"}, 
-  { title: 'Estado', dataIndex: 'estado', align:"center" }, 
-  { title: 'operation', dataIndex: 'operation', }
-];
+  { title: 'Usuario', dataIndex: 'usuario' },
+  { title: 'Email', dataIndex: 'email' },
+  { title: 'Rol', dataIndex: 'rol' },
+  { title: 'Proceso', dataIndex: 'proceso' },
+  { title: 'Estado', dataIndex: 'estado', width: 90, align: 'center' },
+  { title: 'Acciones', dataIndex: 'acciones', width: 100, align: 'center' }
+]
 
+watch(buscar, getUsuarios)
 
+function onChangeFoto(info) {
+  fotoFile.value = info.file
+  fotoPreview.value = URL.createObjectURL(info.file)
+}
 
+function nuevoUsuario() {
+  Object.assign(form, {
+    id: null,
+    dni: '',
+    name: '',
+    paterno: '',
+    materno: '',
+    email: '',
+    celular: '',
+    rol_id: null,
+    id_proceso: null,
+    estado: true
+  })
+  fotoPreview.value = null
+  modalVisible.value = true
+}
+
+function editarUsuario(u) {
+  Object.assign(form, u)
+  fotoPreview.value = u.foto_url || null
+  modalVisible.value = true
+}
+
+async function guardarUsuario() {
+  saving.value = true
+  const data = new FormData()
+  Object.keys(form).forEach(k => data.append(k, form[k]))
+  if (fotoFile.value) data.append('foto', fotoFile.value)
+
+  await axios.post('save-user', data)
+  saving.value = false
+  modalVisible.value = false
+  message.success('Usuario guardado')
+  getUsuarios()
+}
+
+function eliminarUsuario(id) {
+  Modal.confirm({
+    title: 'Eliminar usuario',
+    content: 'Esta acción no se puede deshacer',
+    okType: 'danger',
+    onOk: async () => {
+      await axios.post('delete-user', { id })
+      getUsuarios()
+    }
+  })
+}
+
+async function getUsuarios() {
+  const { data } = await axios.post('get-usuarios', { term: buscar.value })
+  users.value = data.usuarios
+}
+
+async function getProcesos() {
+  const { data } = await axios.get('get-select-procesos')
+  procesos.value = data.datos
+}
+
+const password_p12 = ref('')
+
+const crearCertificadoDigital = async () => {
+    const response = await axios.post('/crear-certificado-digital', {
+      dni: form.dni,
+      email: form.email,
+      usuario: `${form.name} ${form.paterno} ${form.materno}`,
+      rol: form.rol,
+      departamento: 'Dirección de admisión',
+      password_p12: password_p12.value,
+      valid_days: 365
+    })
+
+    if (response.data.success) {
+      message.success(response.data.message || 'Certificado creado exitosamente')
+      signatureModalVisible.value = false
+    } else {
+      message.error(response.data.message || 'Error al crear certificado')
+    }
+}
+
+getUsuarios()
+getProcesos()
 </script>
+
+<style scoped>
+.mac-card {
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.08);
+}
+
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.header h2 {
+  font-size:18px;
+  font-weight:600;
+}
+
+.header-actions {
+  display:flex;
+  gap:8px;
+}
+
+.user-cell {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.user-info {
+  display:flex;
+  flex-direction:column;
+}
+
+.user-name {
+  font-weight:500;
+}
+
+.user-dni {
+  font-size:12px;
+  color:#6b7280;
+}
+
+.mac-table :deep(.ant-table-thead th) {
+  background:#f5f6f7;
+  font-size:12px;
+  text-transform:uppercase;
+  color:#6b7280;
+}
+
+.acciones {
+  display:flex;
+  gap:6px;
+  justify-content:center;
+}
+
+.btn {
+  border:1px solid #d9d9d9;
+  border-radius: 5px;
+  height: 28px;
+  padding-top: 0px;
+  background:white;
+}
+
+.btn.edit { color:#2563eb }
+.btn.delete { color:#dc2626 }
+
+.foto-box {
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+</style>

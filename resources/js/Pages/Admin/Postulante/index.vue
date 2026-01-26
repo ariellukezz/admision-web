@@ -1,7 +1,7 @@
 <template>
 <Head title="Postulantes"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">    
+<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
 <!-- {{ buscar }} -->
 <row class="flex justify-between mb-4" >
     <div class="mr-0 pt-2">
@@ -15,12 +15,12 @@
     </div>
 </row>
 
-<a-table 
-    :columns="columnsProgramas" 
+<a-table
+    :columns="columnsProgramas"
     :data-source="modalidades"
     :pagination="false"
     size="small"
-    > 
+    >
     <template #bodyCell="{ column, index, record}">
         <template v-if="column.dataIndex === 'ver_postulante'">
             <a-button @click="goPostulante(record.nro_doc)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #000080a0; display: flex; align-items: center;">
@@ -30,7 +30,7 @@
         <template v-if="column.dataIndex === 'nombres'">
             {{ record.nombres }} {{  record.primer_apellido }} {{ record.segundo_apellido }}
         </template>
-        
+
         <template v-if="column.dataIndex === 'acciones'">
 
         <div style="display: flex; gap: 2px;">
@@ -51,7 +51,7 @@
         </div>
         </template>
     </template>
-</a-table> 
+</a-table>
 <a-pagination v-model:current="pagina" :total="totalRegistros" show-less-items />
 
 </div>
@@ -78,7 +78,7 @@
                         <label>DNI</label>
                         <a-form-item :rules="[{ required: true, message: 'Por favor ingrese el número de documento' }]">
                         <a-input v-model:value="form.nro_doc">
-                            <template #prefix> <search- /> </template>  
+                            <template #prefix> <search- /> </template>
                         </a-input>
                         </a-form-item>
                     </a-col>
@@ -206,7 +206,7 @@
                     <a-row>
                     <a-col>
                         <div class="flex justify-end">
-                            <a-button @click="visible = false"> Cancelar </a-button>                          
+                            <a-button @click="visible = false"> Cancelar </a-button>
                             <a-button type="primary" @click="saveData">Guardar</a-button>
                         </div>
 
@@ -238,7 +238,7 @@ import axios from 'axios';
 
 const dni = ref("");
 
-const abrirEditar = (item) => {   
+const abrirEditar = (item) => {
     visible.value = true;
 
     form.id = item.id;
@@ -282,35 +282,35 @@ const form = reactive({
     observaciones: '',
     id_colegio: '',
 });
-                                    
+
 const fetchData = () => {
 
 };
 
 const saveData = async () => {
-    let res = await axios.post("save-postulante-admin",{  
+    let res = await axios.post("save-postulante-admin",{
       id: form.id,
       tipo_doc: form.tipo_doc,
       nro_doc: form.nro_doc,
-      primer_apellido: form.primer_apellido, 
-      segundo_apellido: form.segundo_apellido,  
+      primer_apellido: form.primer_apellido,
+      segundo_apellido: form.segundo_apellido,
       apellido_casada: form.apellido_casada,
-      nombres: form.nombres, 
+      nombres: form.nombres,
       sexo: form.sexo,
       fec_nacimiento: format(new Date(form.fec_nacimiento), 'yyyy-MM-dd'),
       ubigeo_nacimiento: form.ubigeo_nacimiento,
       ubigeo_residencia: form.ubigeo_residencia,
-      celular: form.celular, 
-      correo: form.email, 
-      estado_civil: form.estado_civil,  
-      direccion: form.direccion, 
+      celular: form.celular,
+      correo: form.email,
+      estado_civil: form.estado_civil,
+      direccion: form.direccion,
       egreso: form.anio_egreso,
       observaciones: form.observaciones,
       colegio:  form.id_colegio
     }
   );
   visible.value = false;
-  if(res.data.estado === true ){  
+  if(res.data.estado === true ){
     notificacion(res.data.tipo, res.data.titulo, res.data.mensaje)
   }
   getModalidades();
@@ -356,7 +356,7 @@ const getModalidades =  async ( ) => {
 }
 
 const columnsProgramas = [
-    { title: 'Ver', dataIndex: 'ver_postulante' },    
+    { title: 'Ver', dataIndex: 'ver_postulante' },
     { title: 'DNI', dataIndex: 'nro_doc' },
     { title: 'Nombre', dataIndex: 'nombres'},
     { title: 'Celular', dataIndex: 'celular'},
