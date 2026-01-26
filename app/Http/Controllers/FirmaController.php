@@ -138,8 +138,13 @@ private function mapearFirmas(array $firmas): array
 
 private function removeAccents(string $str): string
 {
-    $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
-    return $transliterator ? $transliterator->transliterate($str) : $str;
+    $unwanted_array = [
+        'Á'=>'A','É'=>'E','Í'=>'I','Ó'=>'O','Ú'=>'U',
+        'á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u',
+        'Ñ'=>'N','ñ'=>'n',
+        'Ü'=>'U','ü'=>'u'
+    ];
+    return strtr($str, $unwanted_array);
 }
 
 private function formatearTamano(int $bytes): string
