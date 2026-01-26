@@ -835,7 +835,7 @@ Route::get( '/inscripcion/{codigo}/pdf', [FirmaController::class, 'verPdf']);
 
 
 Route::get('/verificacion/{codigo}', fn ($codigo) => Inertia::render('Publico/Firma/verificar', ['codigo' => $codigo]));
-Route::get('segundas-especialidades-2026-test/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
+Route::get('/segundas-especialidades-2026-test/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
 
 
 require __DIR__.'/auth.php';
