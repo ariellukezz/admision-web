@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Postulante;
 use App\Models\Inscripcion;
+use App\Models\CertificadoFirma;
 use App\Models\Proceso;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+
 use Carbon\Carbon;
 use App\Exports\InscripcionExport;
 use Maatwebsite\Excel\Facades\Excel;
