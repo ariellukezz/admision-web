@@ -388,7 +388,7 @@ class InscripcionController extends Controller
         }
 
         $certificado = CertificadoFirma::where('users.id', Auth::id())
-        ->join('users', 'certificado_firma.id_usuario', 'users.id')
+        ->join('users', 'certificados_firma.id_usuario', 'users.id')
         ->first();
 
         $client = new Client();
