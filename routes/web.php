@@ -717,6 +717,8 @@ Route::post('/get-puntajes-examen', [ResultadosController::class, 'getPuntajes']
 Route::post('/get-pdf-resultados/{sim}', [ResultadosController::class, 'getResultadosPDF']);
 
 Route::get('/segundas-especialidades-2026-test/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
+Route::get('/segundas-especialidades-2026/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
+
 Route::get('{p}/preinscripcion', [ProcesoController::class, 'getFormulario']);
 Route::get('/get-participante-cepre/{dni}', [CepreController::class, 'getParticipanteCepre']);
 Route::get('/get-sancionado/{dni}/{pro}', [SancionadoController::class, 'getSancionado']);
