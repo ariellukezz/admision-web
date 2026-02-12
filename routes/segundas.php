@@ -6,8 +6,8 @@ use App\Http\Controllers\Segundas\PreinscripcionSegundasController;
 use App\Http\Controllers\Segundas\PostulanteSegundaController;
 use App\Http\Controllers\Segundas\VacantesSegundaController;
 use App\Http\Controllers\Segundas\ModalidadSegundaController;
-
 use App\Http\Controllers\Segundas\ObservadosSegundaController;
+use App\Http\Controllers\Segundas\IdentidadSegundaController;
 use App\Http\Controllers\Segundas\ResumenesSegundaController;
 
 
@@ -18,7 +18,7 @@ Route::get('/segundas', fn () => Inertia::render('Segundas/Admin/Preinscripcione
 
 Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
 
-    //PROGRAMAS 
+    //PROGRAMAS
     Route::post('select-programas-segundas', [ProgramaSegundaController::class, 'getSelectProgramas']);
     Route::post('select-programas-segundas-autorizados', [ProgramaSegundaController::class, 'getSelectProgramasAutorizados']);
 
@@ -27,12 +27,12 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     Route::post('get-postulantes-segundas', [PostulanteSegundaController::class, 'getPostulantes']);
     Route::get('postulante-perfil/{dni}', [PostulanteSegundaController::class, 'showPostulante']);
     Route::get('get-postulante-datos/{dni}', [PostulanteSegundaController::class, 'getDatosPostulante']);
-    
-    
-    
+
+
+
     Route::post('actualizar-preinscripciones-segundas', [PreinscripcionSegundasController::class, 'Actualizar']);
     Route::post('guardar-inscripcion-segundas', [PreinscripcionSegundasController::class, 'Inscribir']);
-    
+
 
     //POSTULANTES
     Route::get('/postulantes', fn () => Inertia::render('Segundas/Admin/Postulantes/index'))->name('segundas-postulantes-admin');
@@ -60,13 +60,22 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     Route::post('/get-detalle-preinscripcion-segundas', [ResumenesSegundaController::class, 'getPreinscripciones']);
 
 
-    
+
+
 
 });
 
 
+//IDENTIDAD
+Route::get('/get-condiciones-lengua-segundas', [IdentidadSegundaController::class, 'getCondicionesLengua']);
+Route::get('/get-pertenencia-cultural-segundas', [IdentidadSegundaController::class, 'getPertenenciaCultural']);
+Route::get('/get-lengua-segundas', [IdentidadSegundaController::class, 'getLenguaIndigena']);
+Route::get('/get-pueblos-indigenes-segundas', [IdentidadSegundaController::class, 'getPueblosIndigenas']);
+Route::get('/get-identidad-cultural/{id_postulante}/{id_proceso}', [IdentidadSegundaController::class, 'getIdentidadCulturalByPostulanteProceso']);
 
 
+
+Route::post('/save-postulante-adicional', [PostulanteSegundaController::class, 'saveDataAdicional']);
 
 
 

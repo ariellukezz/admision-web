@@ -16,14 +16,14 @@
         <form @submit.prevent="submit" class="login-form">
           <div class="form-group">
             <div class="input-wrapper">
-              <TextInput 
-                id="email" 
-                type="email" 
+              <TextInput
+                id="email"
+                type="email"
                 style="min-width: 320px;"
-                class="modern-input" 
-                v-model="form.email" 
-                required 
-                autofocus 
+                class="modern-input"
+                v-model="form.email"
+                required
+                autofocus
                 autocomplete="username"
                 placeholder=""
               />
@@ -35,12 +35,12 @@
 
           <div class="form-group">
             <div class="input-wrapper">
-              <TextInput 
-                id="password" 
-                :type="contra ? 'text' : 'password'" 
-                class="modern-input" 
-                v-model="form.password" 
-                required 
+              <TextInput
+                id="password"
+                :type="contra ? 'text' : 'password'"
+                class="modern-input"
+                v-model="form.password"
+                required
                 autocomplete="current-password"
                 placeholder="••••••••"
               />
@@ -98,8 +98,9 @@ const submit = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 5px;
   font-family: 'Inter', sans-serif;
+  border-radius: 20px;
 }
 
 .login-card {
@@ -172,7 +173,7 @@ const submit = () => {
   background: #fafafa;
   padding: 0 0.5rem;
   font-weight: 500;
- 
+
 }
 
 .modern-input:focus + .input-label,
@@ -211,11 +212,81 @@ const submit = () => {
 }
 
 @media (prefers-color-scheme: dark) {
-  .login-container { background: #0f172a; }
-  .login-card { background: #1f2937; border: 1px solid #374151; box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
-  .subtitle, .card-footer { color: #94a3b8; }
-  .modern-input { background: #111827; border-color: #374151; color: #f1f5f9; }
-  .input-label { background: #111827; color: #94a3b8; }
-  .password-toggle { color: #94a3b8; }
+  .login-container {
+    background: radial-gradient(circle at top, #0b1220, #060a13);
+  }
+
+  .login-card {
+    background: #0f172a;
+    border: 1px solid #1f2937;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+  }
+
+  .title {
+    color: #f8fafc;
+  }
+
+  .subtitle {
+    color: #94a3b8;
+  }
+
+  .card-footer {
+    color: #94a3b8;
+    border-top: 1px solid #1f2937;
+  }
+
+  .status-alert {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid #38bdf8;
+    color: #e0f2fe;
+  }
+
+  .modern-input {
+    background: #0b1220;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .modern-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    background: #0b1220;
+  }
+
+  .input-label {
+    background: #0f172a;
+    color: #94a3b8;
+  }
+
+  .modern-input:focus + .input-label,
+  .modern-input:not(:placeholder-shown) + .input-label {
+    color: #60a5fa;
+  }
+
+  .input-icon {
+    color: #94a3b8;
+  }
+
+  .checkbox-label {
+    color: #cbd5e1;
+  }
+
+  .forgot-link {
+    color: #60a5fa;
+  }
+
+  .forgot-link:hover {
+    color: #93c5fd;
+  }
+
+  .login-button {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.35);
+  }
+
+  .login-button:hover {
+    box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+  }
 }
+
 </style>

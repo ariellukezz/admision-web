@@ -12,7 +12,6 @@
   >
     <a-form ref="formRef" :model="localFormData" layout="vertical" size="middle">
       <a-tabs default-active-key="1">
-        <!-- Tab 1: Datos Personales -->
         <a-tab-pane key="1" tab="Datos Personales">
           <div class="space-y-4">
             <a-form-item label="DNI" name="dni">
@@ -45,12 +44,10 @@
           </div>
         </a-tab-pane>
 
-        <!-- Tab 2: Datos de Usuario -->
         <a-tab-pane key="2" tab="Datos de Usuario">
           <div class="grid grid-cols-12 gap-4">
-            <!-- Foto a la izquierda -->
             <div class="col-span-4 flex flex-col items-center">
-              <div 
+              <div
                 class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 transition-colors w-full"
                 @click="$refs.fileInput.click()"
               >
@@ -62,25 +59,24 @@
                 </div>
                 <img v-else :src="previewImage" class="rounded-lg w-full max-h-48 object-cover"/>
               </div>
-              
-              <input 
+
+              <input
                 ref="fileInput"
-                type="file" 
-                accept="image/*" 
-                @change="handleFileChange" 
+                type="file"
+                accept="image/*"
+                @change="handleFileChange"
                 class="hidden"
               />
-              
+
               <a-button v-if="previewImage" type="link" size="small" @click="removeFile" danger class="mt-2">
                 Eliminar foto
               </a-button>
-              
+
               <div v-if="selectedFile" class="text-xs text-gray-500 mt-1">
                 Archivo: {{ selectedFile.name }} ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
               </div>
             </div>
 
-            <!-- Credenciales y configuración -->
             <div class="col-span-8 space-y-4">
               <a-form-item label="Contraseña" name="password">
                 <a-input-password v-model:value="localFormData.password" placeholder="Ingresa contraseña" size="large"/>
@@ -95,7 +91,7 @@
                   v-model:value="localFormData.rol"
                   placeholder="Selecciona rol"
                   size="large"
-                  :options="[ 
+                  :options="[
                     { value: 1, label: '👑 Administrador' },
                     { value: 2, label: '📊 Calificador' },
                     { value: 3, label: '📢 Publicador' }
@@ -108,7 +104,7 @@
                   v-model:value="localFormData.estado"
                   placeholder="Selecciona estado"
                   size="large"
-                  :options="[ 
+                  :options="[
                     { value: 1, label: '🟢 Activo' },
                     { value: 0, label: '🔴 Inactivo' }
                   ]"
@@ -144,10 +140,10 @@ const localFormData = reactive({
 watch(() => props.formData, (newData) => {
   if (newData) {
     Object.assign(localFormData, newData)
-    
+
     if (newData.foto && typeof newData.foto === 'string') {
-      previewImage.value = newData.foto.startsWith('data:') 
-        ? newData.foto 
+      previewImage.value = newData.foto.startsWith('data:')
+        ? newData.foto
         : `${window.location.origin}/${newData.foto}`
       selectedFile.value = null
     }
@@ -162,7 +158,7 @@ const handleFileChange = (event) => {
     message.error('Solo se permiten imágenes')
     return
   }
-  
+
   if (file.size / 1024 / 1024 > 2) {
     message.error('La imagen debe ser menor a 2MB')
     return

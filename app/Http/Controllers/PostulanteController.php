@@ -16,57 +16,54 @@ use Inertia\Inertia;
 class PostulanteController extends Controller
 {
 
-  //PASO 1 - PRE INSCRIPCIÓN
-
   public function getPostulanteXDni(Request $request)
   {
-    $res = Postulante::select(
-      'postulante.id','postulante.primer_apellido', 'postulante.segundo_apellido', 'postulante.nombres',
-      'postulante.email AS correo', 'postulante.celular', 'postulante.fec_nacimiento',
-      'postulante.ubigeo_nacimiento as ubigeo', 'postulante.ubigeo_residencia', 'postulante.direccion',
-      'postulante.sexo', 'postulante.estado_civil',
-      'departamento.nombre as departamento', 'departamento.codigo as dep',
-      'provincia.nombre as provincia','provincia.codigo as prov',
-      'distritos.nombre as distrito', 'distritos.codigo as dist'
-    )
-    ->leftjoin('ubigeo','postulante.ubigeo_residencia','ubigeo.ubigeo')
-    ->leftjoin('departamento','ubigeo.id_departamento','departamento.id')
-    ->leftjoin('provincia','ubigeo.id_provincia','provincia.id')
-    ->leftjoin('distritos','distritos.id','ubigeo.id_distrito')
-    ->where('postulante.nro_doc','=',$request->nro_doc)
-    //->where('postulante.ubigeo_nacimiento','=',$request->ubigeo)
-    ->get();
+    $res = DB::table('postulante as p')
+      ->select('p.id','p.primer_apellido','p.segundo_apellido','p.nombres','p.email as correo','p.celular','p.fec_nacimiento',
+          'p.ubigeo_nacimiento as ubigeo','p.ubigeo_residencia','p.direccion','p.sexo','p.estado_civil',
+          DB::raw("CONCAT(p.ubigeo_nacimiento,'-',depN.nombre,'/',provN.nombre,'/',distN.nombre) AS nacimiento"),
+          DB::raw("CONCAT(p.ubigeo_residencia,'-',depR.nombre,'/',provR.nombre,'/',distR.nombre) AS residencia"))
+      ->leftJoin('ubigeo as un', 'p.ubigeo_nacimiento', '=', 'un.ubigeo')
+      ->leftJoin('departamento as depN', 'un.id_departamento', '=', 'depN.id')
+      ->leftJoin('provincia as provN', 'un.id_provincia', '=', 'provN.id')
+      ->leftJoin('distritos as distN', 'un.id_distrito', '=', 'distN.id')
+      ->leftJoin('ubigeo as ur', 'p.ubigeo_residencia', '=', 'ur.ubigeo')
+      ->leftJoin('departamento as depR', 'ur.id_departamento', '=', 'depR.id')
+      ->leftJoin('provincia as provR', 'ur.id_provincia', '=', 'provR.id')
+      ->leftJoin('distritos as distR', 'ur.id_distrito', '=', 'distR.id')
+      ->where('p.nro_doc', $request->nro_doc)
+      ->get();
 
-    if(count($res) > 0){
-      $this->response['estado'] = true;
-      $this->response['datos'] = $res;
-      return response()->json($this->response, 200);
-    }
-    else{
-      $this->response['estado'] = false;
-      return response()->json($this->response, 200);
-    }
+      if(count($res) > 0){
+        $this->response['estado'] = true;
+        $this->response['datos'] = $res;
+        return response()->json($this->response, 200);
+      }
+      else{
+        $this->response['estado'] = false;
+        return response()->json($this->response, 200);
+      }
 
   }
 
 
   public function getPostulanteXDni2(Request $request)
   {
-    $res = Postulante::select(
-      'postulante.id', 'postulante.tipo_doc','postulante.primer_apellido', 'postulante.segundo_apellido', 'postulante.nombres',
-      'postulante.email AS correo', 'postulante.celular', 'postulante.fec_nacimiento',
-      'postulante.ubigeo_nacimiento as ubigeo', 'postulante.ubigeo_residencia', 'postulante.direccion',
-      'postulante.sexo', 'postulante.estado_civil',
-      'departamento.nombre as departamento', 'departamento.codigo as dep',
-      'provincia.nombre as provincia','provincia.codigo as prov',
-      'distritos.nombre as distrito', 'distritos.codigo as dist', 'postulante.id_pais'
-    )
-    ->leftjoin('ubigeo','postulante.ubigeo_residencia','ubigeo.ubigeo')
-    ->leftjoin('departamento','ubigeo.id_departamento','departamento.id')
-    ->leftjoin('provincia','ubigeo.id_provincia','provincia.id')
-    ->leftjoin('distritos','distritos.id','ubigeo.id_distrito')
-    ->where('postulante.nro_doc','=',$request->nro_doc)
-    ->get();
+    $res = DB::table('postulante as p')
+        ->select('p.id','p.primer_apellido','p.segundo_apellido','p.nombres','p.email as correo','p.celular','p.fec_nacimiento',
+            'p.anio_egreso as egreso','p.ubigeo_nacimiento as ubigeo','p.ubigeo_residencia','p.direccion','p.sexo','p.estado_civil',
+            DB::raw("CONCAT(p.ubigeo_nacimiento,'-',depN.nombre,'/',provN.nombre,'/',distN.nombre) AS nacimiento"),
+            DB::raw("CONCAT(p.ubigeo_residencia,'-',depR.nombre,'/',provR.nombre,'/',distR.nombre) AS residencia"))
+        ->leftJoin('ubigeo as un', 'p.ubigeo_nacimiento', '=', 'un.ubigeo')
+        ->leftJoin('departamento as depN', 'un.id_departamento', '=', 'depN.id')
+        ->leftJoin('provincia as provN', 'un.id_provincia', '=', 'provN.id')
+        ->leftJoin('distritos as distN', 'un.id_distrito', '=', 'distN.id')
+        ->leftJoin('ubigeo as ur', 'p.ubigeo_residencia', '=', 'ur.ubigeo')
+        ->leftJoin('departamento as depR', 'ur.id_departamento', '=', 'depR.id')
+        ->leftJoin('provincia as provR', 'ur.id_provincia', '=', 'provR.id')
+        ->leftJoin('distritos as distR', 'ur.id_distrito', '=', 'distR.id')
+        ->where('p.nro_doc', $request->nro_doc)
+        ->get();
 
     $this->response['estado'] = true;
     $this->response['datos'] = $res;

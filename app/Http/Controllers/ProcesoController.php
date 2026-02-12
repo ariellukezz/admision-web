@@ -24,7 +24,7 @@ class ProcesoController extends Controller
       'procesos.url', 'procesos.fecha_examen', 'procesos.ciclo', 'procesos.slug',
       'procesos.nro_convocatoria as convocatoria', 'procesos.fec_inicio', 'procesos.fec_fin',
       'procesos.fecha_examen as fec_examen', 'procesos.observaciones as observacion',
-      'filial.id as id_sede', 'filial.nombre as sede',
+      'filial.id as id_sede', 'filial.nombre as sede','procesos.nivel',
       'tipo_proceso.id as id_tipo', 'tipo_proceso.nombre as tipo',
       'codigo_proceso','fec_1','fec_2','id_reglamento',
       'modalidad_proceso.id as id_modalidad', 'modalidad_proceso.nombre as modalidad'
@@ -33,7 +33,6 @@ class ProcesoController extends Controller
       ->join ('tipo_proceso', 'tipo_proceso.id', '=','procesos.id_tipo_proceso')
       ->join ('modalidad_proceso', 'modalidad_proceso.id', '=','procesos.id_modalidad_proceso')
       ->where($query_where)
-      ->where('nivel',1)
       ->where(function ($query) use ($request) {
           return $query
               ->orWhere('procesos.nombre', 'LIKE', '%' . $request->term . '%')
@@ -48,75 +47,76 @@ class ProcesoController extends Controller
     return response()->json($this->response, 200);
   }
 
-  public function saveProceso(Request $request ) {
-    $fec_inicio = null;
-    $fec_fin = null;
-    $dia1 = null;
-    $dia2 = null;
+  public function saveProceso(Request $request) {
 
-    if ($request->has('f_inicio')) { $fec_inicio = substr($request->f_inicio, 0, 10); }
-    if ($request->has('f_fin')) { $fec_fin = substr($request->f_fin, 0, 10); }
-    if ($request->has('dia_1')) { $dia1 = substr($request->dia_1, 0, 10); }
-    if ($request->has('dia_2')) { $dia2 = substr($request->dia_2, 0, 10); }
+      $fec_inicio = $request->filled('f_inicio') ? substr($request->f_inicio, 0, 10) : null;
+      $fec_fin    = $request->filled('f_fin')    ? substr($request->f_fin, 0, 10)    : null;
+      $dia1       = $request->filled('dia_1')    ? substr($request->dia_1, 0, 10)    : null;
+      $dia2       = $request->filled('dia_2')    ? substr($request->dia_2, 0, 10)    : null;
 
-    $proceso = null;
-    if (!$request->id) {
-        $proceso = Proceso::create([
-            'nombre' => $request->nombre,
-            'slug' => $request->slug,
-            'id_tipo_proceso' => $request->tipo,
-            'ciclo' => $request->ciclo,
-            'ciclo_oti' => str_pad($request->ciclo, 2, '0', STR_PAD_LEFT),
-            'id_modalidad_proceso' => $request->modalidad,
-            'anio' => $request->anio,
-            'estado' => $request->estado,
-            'fecha_examen' => $request->fec_examen,
-            'fec_inicio' => $fec_inicio,
-            'fec_fin' => $fec_fin,
-            'fec_1' => $dia1,
-            'fec_2' => $dia2,
-            'id_sede_filial' => $request->sede,
-            'nro_convocatoria' => $request->convocatoria,
-            'id_modalidad_estudio' => 1,
-            'observaciones' => $request->observacion,
-            'url' => $request->url,
-            'nivel' => 1,
-            'codigo_proceso' => $request->cod_proceso,
-            'id_reglamento' => $request->id_reglamento,
-            'id_usuario' => auth()->id()
-        ]);
-        $this->response['titulo'] = 'REGISTRO NUEVO';
-        $this->response['mensaje'] = 'Proceso '.$proceso->nombre.' creado con exito';
-        $this->response['estado'] = true;
-        $this->response['datos'] = $proceso;
-    } else {
+      if (!$request->id) {
+          $proceso = Proceso::create([
+              'nombre' => $request->nombre,
+              'slug' => $request->slug,
+              'id_tipo_proceso' => $request->tipo,
+              'ciclo' => $request->ciclo,
+              'ciclo_oti' => str_pad($request->ciclo, 2, '0', STR_PAD_LEFT),
+              'id_modalidad_proceso' => $request->modalidad,
+              'anio' => $request->anio,
+              'estado' => $request->estado,
+              'nivel' => $request->nivel,
+              'fecha_examen' => $request->fec_examen,
+              'fec_inicio' => $fec_inicio,
+              'fec_fin' => $fec_fin,
+              'fec_1' => $dia1,
+              'fec_2' => $dia2,
+              'id_sede_filial' => $request->sede,
+              'nro_convocatoria' => $request->convocatoria,
+              'id_modalidad_estudio' => 1,
+              'observaciones' => $request->observacion,
+              'url' => $request->url,
+              'codigo_proceso' => $request->cod_proceso,
+              'id_reglamento' => $request->id_reglamento,
+              'id_usuario' => auth()->id()
+          ]);
 
-        $proceso = Proceso::find($request->id);
-        $proceso->nombre = $request->nombre;
-        $proceso->slug = $request->slug;
-        $proceso->id_tipo_proceso = $request->tipo;
-        $proceso->ciclo = $request->ciclo;
-        $proceso->id_modalidad_proceso = $request->modalidad;
-        $proceso->anio = $request->anio;
-        $proceso->estado = $request->estado;
-        $proceso->fecha_examen = $request->fec_examen;
-        $proceso->fec_inicio = $fec_inicio;
-        $proceso->fec_fin = $fec_fin;
-        $proceso->id_sede_filial = $request->sede;
-        $proceso->nro_convocatoria = $request->convocatoria;
-        $proceso->observaciones = $request->observacion;
-        $proceso->id_reglamento = $request->id_reglamento;
-        $proceso->id_usuario = auth()->id();
-        $proceso->save();
+          return response()->json([
+              'titulo' => 'REGISTRO NUEVO',
+              'mensaje' => 'Proceso '.$proceso->nombre.' creado con éxito',
+              'estado' => true,
+              'datos' => $proceso
+          ], 200);
+      }
 
-        $this->response['titulo'] = '!REGISTRO MODIFICADO!';
-        $this->response['mensaje'] = 'Proceso '.$proceso->nombre.' modificado con exito';
-        $this->response['estado'] = true;
-        $this->response['datos'] = $proceso;
-    }
+      $proceso = Proceso::findOrFail($request->id);
+      $proceso->nombre = $request->nombre;
+      $proceso->slug = $request->slug;
+      $proceso->id_tipo_proceso = $request->tipo;
+      $proceso->ciclo = $request->ciclo;
+      $proceso->id_modalidad_proceso = $request->modalidad;
+      $proceso->anio = $request->anio;
+      $proceso->estado = $request->estado;
+      $proceso->fecha_examen = $request->fec_examen;
+      $proceso->fec_inicio = $fec_inicio;
+      $proceso->fec_fin = $fec_fin;
+      $proceso->fec_1 = $dia1;
+      $proceso->fec_2 = $dia2;
+      $proceso->nivel = $request->nivel;
+      $proceso->id_sede_filial = $request->sede;
+      $proceso->nro_convocatoria = $request->convocatoria;
+      $proceso->observaciones = $request->observacion;
+      $proceso->id_reglamento = $request->id_reglamento;
+      $proceso->id_usuario = auth()->id();
+      $proceso->save();
 
-    return response()->json($this->response, 200);
+      return response()->json([
+          'titulo' => '¡REGISTRO MODIFICADO!',
+          'mensaje' => 'Proceso '.$proceso->nombre.' modificado con éxito',
+          'estado' => true,
+          'datos' => $proceso
+      ], 200);
   }
+
 
   public function deleteProceso($id){
     $proceso = Proceso::find($id);

@@ -518,100 +518,128 @@ watch(proceso, (newVal, oldVal) => {
 
 <style>
 :root {
-  --sider-bg: #2d3748;
-  --primary-color: #1890ff;
-  --hover-bg: #4a5568;
-  --text-color: #cdcdcd;
+  --sider-bg: #0f172a;
+  --sider-bg-light: #111827;
+  --primary-color: #3b82f6;
+  --hover-bg: #1e293b;
+  --text-color: #cbd5e1;
+  --muted-text: #94a3b8;
+  --border-color: #1f2937;
 }
 
+/* Scroll invisible */
 .custom-scrollbar::-webkit-scrollbar {
   display: none;
-}sx
-
+}
 .custom-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
+/* SIDEBAR */
 .custom-sider {
-  background: var(--sider-bg);
-  border-right: 1px solid #0000000f;
+  background: linear-gradient(180deg, var(--sider-bg), #0b1220);
+  border-right: 1px solid var(--border-color);
 }
 
+/* Header dentro del sider */
 .sider-header {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 14px 12px;
 }
 
 .sider-logo {
-  height: 30px;
-  min-width: 30px;
+  height: 32px;
+  min-width: 32px;
 }
 
 .sider-title {
   margin-left: 10px;
-  color: var(--text-color);
-  font-size: 1.4rem;
-  font-weight: 500;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Usuario */
+.text-gray-400 {
+  color: var(--muted-text) !important;
+}
+
+/* MENU */
+.custom-menu {
+  background: transparent !important;
+  border-right: none !important;
 }
 
 .custom-menu .ant-menu-item,
 .custom-menu .ant-menu-submenu-title {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--text-color) !important;
+  margin: 4px 8px;
+  border-radius: 10px;
 }
 
-.custom-menu .menu-item-active {
-  background: linear-gradient(
-    90deg,
-    rgba(24, 144, 255, 0.3) 0%,
-    rgba(24, 144, 255, 0.1) 100%
-  ) !important;
-  border-left: 3px solid var(--primary-color) !important;
-  /* margin-left: 46px !important; */
+/* Hover */
+.custom-menu .ant-menu-item:hover,
+.custom-menu .ant-menu-submenu-title:hover {
+  background: var(--hover-bg) !important;
+  color: white !important;
+}
 
-  /* padding-left: 38px !important; */
+/* Activo */
+.custom-menu .menu-item-active {
+  background: linear-gradient(90deg, rgba(59,130,246,0.25), rgba(59,130,246,0.05)) !important;
+  border: 1px solid rgba(59,130,246,0.35);
 }
 
 .custom-menu .menu-item-active .menu-text,
 .custom-menu .menu-item-active .anticon {
-  color: white !important;
+  color: #ffffff !important;
   font-weight: 600;
 }
 
-.custom-menu .ant-menu-item:hover {
-  background: var(--hover-bg) !important;
+/* Iconos */
+.menu-icon,
+.child-icon {
+  font-size: 16px;
 }
 
+/* HEADER SUPERIOR */
 .main-header {
-  background:yellow;
+  background: #ffffff;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #d9d9d9;
+  border-bottom: 1px solid #e5e7eb;
 }
 
+/* Botón colapsar */
 .collapse-trigger {
   font-size: 1.3rem;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .collapse-trigger:hover {
   color: var(--primary-color);
+  transform: scale(1.05);
 }
 
 .header-content {
   margin-left: auto;
 }
 
+/* CONTENIDO */
 .main-content {
-  height: calc(100vh - 140px);
-  margin-top: 0px;
-  padding: 12px 0px;
-  overflow-y: scroll;
+  height: calc(100vh - 64px);
+  margin-top: 0;
+  padding: 12px 0;
+  overflow-y: auto;
+  background: #f8fafc;
 }
 
 .content-container {
-  padding: 0px 14px 14px 14px;
+  padding: 0 14px 14px 14px;
 }
+
 </style>

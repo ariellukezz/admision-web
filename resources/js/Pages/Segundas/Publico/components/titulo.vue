@@ -26,20 +26,20 @@
                         </div>
                     </div>
                 </a-col>
-            </a-row>            
+            </a-row>
         </div>
     </div>
 </div>
 
-    
+
 
 <div class="">
-    <a-modal v-model:visible="modaltitulo" width="800px" class="w-full md:w-3/4" title="Registro de título"  @ok="handleOk">
+    <a-modal v-model:open="modaltitulo" width="800px" class="w-full md:w-3/4" title="Registro de título"  @ok="handleOk">
         <a-form
             ref="formDatos"
             name="form"
-            :model="form" 
-            :rules="formRules"   
+            :model="form"
+            :rules="formRules"
         >
             <a-row :gutter="16">
 
@@ -112,7 +112,7 @@
     </a-modal>
 
 
-    <a-modal v-model:visible="modalPDF" title="Registro de título" style="min-width: 1000px;">
+    <a-modal v-model:open="modalPDF" title="Registro de título" style="min-width: 1000px;">
         <a-row :gutter="16">
             <a-col :xs="24" :sm="24" :md="24" :lg="24">
                 <div class="mt-2" v-if="pdfItem">
@@ -130,7 +130,7 @@
     </a-modal>
 </div>
 </template>
-    
+
 <script setup>
 import { ref, reactive } from 'vue';
 import { message, Upload, Button } from 'ant-design-vue';
@@ -168,7 +168,7 @@ const abriPDf = (pdf) => {
 }
 
 const formDatos = ref();
-const form = reactive({  
+const form = reactive({
     id: null,
     observacion: "",
     tipo: 7,
@@ -203,15 +203,15 @@ const beforeUpload = (file) => {
   };
   reader.readAsDataURL(file);
   form.fileList = [file];
-  return false; // Prevenir el comportamiento por defecto de subida
+  return false;
 };
 
 const getdnis = async () => {
     const response = await axios.post('/get-documentos-segundas-postulante-titulos', {dni: props.dni, id_proceso: props.id_proceso });
     if (response.data.estado == true){
         dnis.value = response.data.datos;
-    }else{ 
-        console.log("No se encontraron datos"); 
+    }else{
+        console.log("No se encontraron datos");
     }
 }
 
@@ -225,8 +225,8 @@ const save = async () => {
     const formData = new FormData();
     if(form.fileList[0]){ formData.append('file', form.fileList[0]); }
     if(form.id != null ){ formData.append('id', form.id)};
-    formData.append('id_proceso', props.id_proceso);    
-    formData.append('dni', props.dni);    
+    formData.append('id_proceso', props.id_proceso);
+    formData.append('dni', props.dni);
     formData.append('observacion', form.observacion);
     formData.append('tipo', form.tipo);
 
