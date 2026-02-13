@@ -112,6 +112,21 @@ Route::get('/get-pago-caja/{dni}/{secuencia}', function ($dni, $secuencia) {
 });
 
 
+Route::get('/get-pago-caja/{dni}', function ($dni) {
+    try {
+        $response = Http::get('http://tesoreria.unap.edu.pe/services/document/?w=' . $dni . '&d=2025-12-01');
+         if ($response->successful()) {
+            $datosCaja = $response->json(['data']);
+            return response()->json($datosCaja);
+        } else {
+            return response()->json(['error' => 'La solicitud no fue exitosa'], $response->status());
+        }
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Se produjo un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+});
+
+
 
 
 
