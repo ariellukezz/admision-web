@@ -179,11 +179,13 @@ class TestController extends Controller
             ->join('avance as av', 'ap.avance', '=', 'av.id')
             ->where('ap.dni_postulante', $dni)
             ->where('ap.id_proceso', $proceso)
-            ->select( 'ap.dni_postulante as dni', 'ap.id_proceso', 'ap.avance', 'av.descripcion as estado', 'ap.observacion')
-            ->get();
+            ->orderByDesc('ap.id')
+            ->select('ap.dni_postulante as dni','ap.id_proceso','ap.avance','av.descripcion as estado','ap.observacion')
+            ->first(); // solo uno
 
         $this->response['estado'] = true;
-        $this->response['datos'] = $res[0];
+        $this->response['datos'] = $resultado;
+
         return response()->json($this->response, 200);
     }
 
