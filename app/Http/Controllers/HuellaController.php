@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Str;
-
+use App\Models\AvancePostulante;
 use Illuminate\Http\Request;
 
 class HuellaController extends Controller
@@ -152,6 +152,19 @@ public function uploadFotos(Request $request) {
         $h_izquierda = $request->file('LFinger');
         $h_derecha = $request->file('RFinger');
 
+        if($etapa == 'inscripcion'){
+            $avance = AvancePostulante::firstOrCreate([
+                'dni_postulante'=> $dni, 
+                'id_proceso'=>$id_proceso, 
+                'avance' => 2,
+            ]);
+        } else {
+            $avance = AvancePostulante::firstOrCreate([
+                'dni_postulante'=>$dni, 
+                'id_proceso'=>$id_proceso, 
+                'avance' => 5,
+            ]);
+        }
         // Rutas de las carpetas
         $rutaCarpetaHuellas = public_path("documentos/$id_proceso/$etapa/huellas/");
         $rutaCarpetaFotos = public_path("documentos/$id_proceso/$etapa/fotos/");

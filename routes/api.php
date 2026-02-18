@@ -12,6 +12,7 @@ use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\PagoBancoController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\TestController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
@@ -126,7 +127,7 @@ Route::get('/get-pago-caja/{dni}', function ($dni) {
     }
 });
 
-
+Route::get('/get-avance-proceso-postulante/{proceso}/{dni}', [TestController::class, 'getAvancePostulanteProceso']);
 
 
 

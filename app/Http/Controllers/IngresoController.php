@@ -9,6 +9,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\RegistroEstudiante;
 use App\Models\Postulante;
+
+use App\Models\AvancePostulante;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -758,6 +760,12 @@ class IngresoController extends Controller {
         $pdf = Pdf::loadView('ingreso.datosbiometricos', compact('data','hinsI','hinsD','hexaI','hexaD','hbioI','hbioD','fins','fbio','date', 'fimp','fnac'));
         $pdf->setPaper('A4', 'portrait');
         $output = $pdf->output();
+
+        $avance = AvancePostulante::firstOrCreate([
+                'dni_postulante'=> $dni, 
+                'id_proceso'=>auth()->user()->id_proceso, 
+                'avance' => 6,
+            ]);
 
         $userIdProceso = auth()->user()->id_proceso;
         $documentoDir = public_path('/documentos/' . $userIdProceso . '/control_biometrico/constancias/');

@@ -173,6 +173,20 @@ class TestController extends Controller
     
     }
 
+    public function getAvancePostulanteProceso($proceso, $dni)
+    {
+        $resultado = DB::table('avance_postulante as ap')
+            ->join('avance as av', 'ap.avance', '=', 'av.id')
+            ->where('ap.dni_postulante', $dni)
+            ->where('ap.id_proceso', $proceso)
+            ->select( 'ap.dni_postulante as dni', 'ap.id_proceso', 'ap.avance', 'av.descripcion as estado', 'ap.observacion')
+            ->get();
+
+        $this->response['estado'] = true;
+        $this->response['datos'] = $res[0];
+        return response()->json($this->response, 200);
+    }
+
     
 
 

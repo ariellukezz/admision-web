@@ -8,6 +8,7 @@ use App\Models\Postulante;
 use App\Models\Inscripcion;
 use App\Models\CertificadoFirma;
 use App\Models\Proceso;
+use App\Models\AvancePostulante;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -272,6 +273,12 @@ class InscripcionController extends Controller
             'id_modalidad' => $request['postulante']['id_modalidad'],
             'estado' => 0,
             'id_usuario' => auth()->id()
+        ]);
+
+        $avance = AvancePostulante::firstOrCreate([
+            'dni_postulante'=>$request->dni, 
+            'id_proceso'=>$request->id_proceso, 
+            'avance' => 3,
         ]);
 
         $this->pdfInscripcion($dni);
