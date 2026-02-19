@@ -128,7 +128,4 @@ Route::get('/get-pago-caja/{dni}', function ($dni) {
 });
 
 Route::get('/get-avance-proceso-postulante/{proceso}/{dni}', [TestController::class, 'getAvancePostulanteProceso']);
-
-
-
-//id_proceso, id_etapa, foto
+Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevias']);

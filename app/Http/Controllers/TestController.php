@@ -181,7 +181,7 @@ class TestController extends Controller
             ->where('ap.id_proceso', $proceso)
             ->orderByDesc('ap.id')
             ->select('ap.dni_postulante as dni','ap.id_proceso','ap.avance','av.descripcion as estado','ap.observacion')
-            ->first(); // solo uno
+            ->first();
 
         $this->response['estado'] = true;
         $this->response['datos'] = $resultado;
