@@ -840,7 +840,6 @@ Route::get( '/inscripcion/{codigo}/pdf', [FirmaController::class, 'verPdf']);
 Route::get('/verificacion/{codigo}', fn ($codigo) => Inertia::render('Publico/Firma/verificar', ['codigo' => $codigo]));
 
 
-
 require __DIR__.'/auth.php';
 require __DIR__.'/segundas.php';
 require __DIR__.'/adminv2.php';

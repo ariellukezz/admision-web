@@ -266,5 +266,41 @@ class ApixController extends Controller {
     }
 
 
+    public function getIngresantePeriodoDniSeguimiento($periodo, $dni){
+
+        $result = DB::table('control_biometrico as cb')
+            ->join('procesos as proc', 'cb.id_proceso', '=', 'proc.id')
+            ->join('postulante as pos', 'pos.id', '=', 'cb.id_postulante')
+            ->join('inscripciones as ins', function($join) {
+                $join->on('ins.id_postulante', '=', 'pos.id')
+                    ->where('ins.estado', 0)
+                    ->on('ins.id_proceso', '=', 'cb.id_proceso');
+            })
+            ->join('programa as pro', 'pro.id', '=', 'ins.id_programa')
+            ->join('modalidad as mo', 'mo.id', '=', 'ins.id_modalidad')
+            ->select(
+                'cb.codigo_ingreso as codigo',
+                'pos.nro_doc',
+                'pos.nombres',
+                'pos.primer_apellido as paterno',
+                'pos.segundo_apellido as materno',
+                'pos.celular',
+                'pos.email',
+                'pro.nombre as programa',
+                'mo.nombre as modalidad',
+                'proc.nombre as procesos',
+                DB::raw("CONCAT(proc.anio,'-',proc.ciclo) as Periodo")
+            )
+            ->where('pos.nro_doc', $dni)
+            ->where(DB::raw("CONCAT(proc.anio,'-',proc.ciclo)"), $periodo)
+            ->get();
+
+        return response()->json([
+            'estado' => true,
+            'datos' => $result,
+        ]);
+
+    }
+
 
 }
