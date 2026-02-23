@@ -1881,7 +1881,6 @@ const getDatosPersonales2 = async () => {
   let res = await axios.post( "/get-postulante-datos-personales2", {nro_doc: formState.dni});
     if(res.data.datos.length > 0) {
       datospersonales.id = res.data.datos[0].id
-      datospersonales.tipo_doc = res.data.datos[0].tipo_doc
       datospersonales.primerapellido = res.data.datos[0].primer_apellido
       datospersonales.segundo_apellido = res.data.datos[0].segundo_apellido
       datospersonales.nombres = res.data.datos[0].nombres
@@ -2409,7 +2408,6 @@ const getParticipanteCepre =  async () => {
     let res = await axios.get("/get-participante-cepre/" + formState.dni);
       if (res.data.estado === true ) {
         datacepre.value = res.data.datos;
-        datospersonales.tipo_doc = 1;
         datospersonales.nombres = datacepre.value.nombres;
         datospersonales.primerapellido = datacepre.value.paterno;
         datospersonales.segundo_apellido = datacepre.value.materno;
