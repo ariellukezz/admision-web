@@ -3,13 +3,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ControlBiometrico;
-use App\Models\Estudiante;
+use App\Models\User;
 use App\Models\CarrerasPrevias;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\RegistroEstudiante;
 use App\Models\Postulante;
-
+use App\Models\CertificadoFirma;
 use App\Models\AvancePostulante;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
@@ -287,7 +287,8 @@ class IngresoController extends Controller {
 
             if (!$control) {
 
-                $prefijo = $re->id_programa == 38 ? '26' : '25';
+                // $prefijo = $re->id_programa == 38 ? '26' : '25';
+                $prefijo = $re->id_programa == 38 ? '26' : '26';
 
                 $registrado = collect(
                     DB::connection($database2)->select(
@@ -318,35 +319,35 @@ class IngresoController extends Controller {
                     throw new \Exception('Error al crear el registro en ControlBiometrico.');
                 }
 
-                if (!$registrado) {
-                    Estudiante::on($database2)->create([
-                        'num_mat' => $nuevoCodigo,
-                        'cod_car' => $re->programa_oti,
-                        'paterno' => $re->paterno,
-                        'materno' => $re->materno,
-                        'nombres' => $re->nombres,
-                        'tip_doc' => $re->tipo_doc_oti,
-                        'num_doc' => $re->dni,
-                        'num_car' => $request->n_carrera == 1 ? 2 : 1,
-                        'fch_nac' => $re->fec_nacimiento,
-                        'sexo' => $re->sexo,
-                        'ubigeo' => $re->ubigeo_residencia,
-                        'mod_ing' => $re->modalidad_oti,
-                        'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
-                        'fch_ing' => $re->fecha,
-                        'direc' => $re->direccion,
-                        'email' => $re->email,
-                        'emailins' => $control->correo_institucional,
-                        'con_est' => 5,
-                        'celular' => $re->celular,
-                        'cod_esp' => $re->cod_esp,
-                        'puntaje' => $re->puntaje,
-                        'puesto_escuela' => $re->puesto,
-                        'puesto_general' => $re->puesto_general,
-                        'ano_ing' => $re->anio,
-                        'per_ing' => $re->ciclo_oti
-                    ]);
-                }
+                // if (!$registrado) {
+                //     Estudiante::on($database2)->create([
+                //         'num_mat' => $nuevoCodigo,
+                //         'cod_car' => $re->programa_oti,
+                //         'paterno' => $re->paterno,
+                //         'materno' => $re->materno,
+                //         'nombres' => $re->nombres,
+                //         'tip_doc' => $re->tipo_doc_oti,
+                //         'num_doc' => $re->dni,
+                //         'num_car' => $request->n_carrera == 1 ? 2 : 1,
+                //         'fch_nac' => $re->fec_nacimiento,
+                //         'sexo' => $re->sexo,
+                //         'ubigeo' => $re->ubigeo_residencia,
+                //         'mod_ing' => $re->modalidad_oti,
+                //         'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
+                //         'fch_ing' => $re->fecha,
+                //         'direc' => $re->direccion,
+                //         'email' => $re->email,
+                //         'emailins' => $control->correo_institucional,
+                //         'con_est' => 5,
+                //         'celular' => $re->celular,
+                //         'cod_esp' => $re->cod_esp,
+                //         'puntaje' => $re->puntaje,
+                //         'puesto_escuela' => $re->puesto,
+                //         'puesto_general' => $re->puesto_general,
+                //         'ano_ing' => $re->anio,
+                //         'per_ing' => $re->ciclo_oti
+                //     ]);
+                // }
             } else {
                 $control->update(['estado' => 2]);
             }
@@ -712,73 +713,201 @@ class IngresoController extends Controller {
         return $pdf->stream();
     }
 
-    public function pdfbiometrico2($dni){
+    // public function pdfbiometrico2($dni){
 
-        $datos = DB::select(
-            "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
-            postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
-            postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
-            users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
-            resultados.fecha, resultados.puntaje, resultados.puesto,
-            resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
-            control_biometrico.correo_institucional AS correo_institucional,
-            control_biometrico.tiene_correo AS tiene_correo,
-            control_biometrico.segunda_carrera AS segunda_carrera,
-            programa.nombre AS programa
-            FROM resultados
-            JOIN postulante ON resultados.dni_postulante =  postulante.nro_doc
-            JOIN inscripciones ON inscripciones.id_postulante = postulante.id
-            JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
-            JOIN procesos ON resultados.id_proceso = procesos.id
-            join users on users.id = inscripciones.id_usuario
-            JOIN programa ON programa.id = inscripciones.id_programa
-            JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
-            LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
-            WHERE resultados.apto = 'SI' AND inscripciones.estado = 0 AND control_biometrico.id_proceso = "
-            . auth()->user()->id_proceso ." AND resultados.dni_postulante = " .$dni. " AND resultados.id_proceso =".
-            auth()->user()->id_proceso ." AND inscripciones.id_proceso = ". auth()->user()->id_proceso);
+    //     $datos = DB::select(
+    //         "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
+    //         postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
+    //         postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
+    //         users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
+    //         resultados.fecha, resultados.puntaje, resultados.puesto,
+    //         resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
+    //         control_biometrico.correo_institucional AS correo_institucional,
+    //         control_biometrico.tiene_correo AS tiene_correo,
+    //         control_biometrico.segunda_carrera AS segunda_carrera,
+    //         programa.nombre AS programa
+    //         FROM resultados
+    //         JOIN postulante ON resultados.dni_postulante =  postulante.nro_doc
+    //         JOIN inscripciones ON inscripciones.id_postulante = postulante.id
+    //         JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+    //         JOIN procesos ON resultados.id_proceso = procesos.id
+    //         join users on users.id = inscripciones.id_usuario
+    //         JOIN programa ON programa.id = inscripciones.id_programa
+    //         JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
+    //         LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
+    //         WHERE resultados.apto = 'SI' AND inscripciones.estado = 0 AND control_biometrico.id_proceso = "
+    //         . auth()->user()->id_proceso ." AND resultados.dni_postulante = " .$dni. " AND resultados.id_proceso =".
+    //         auth()->user()->id_proceso ." AND inscripciones.id_proceso = ". auth()->user()->id_proceso);
 
-        $data = $datos[0];
-        $hinsI = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/huellas/').$dni.'x.jpg';
-        $hinsD = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/huellas/').$dni.'.jpg';
-        $hexaI = public_path('documentos/'.auth()->user()->id_proceso.'/examen/huellas/').$dni.'.jpg';
-        $hexaD = public_path('documentos/'.auth()->user()->id_proceso.'/examen/huellas/').$dni.'x.jpg';
-        $hbioI = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/huellas/').$dni.'.jpg';
-        $hbioD = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/huellas/').$dni.'x.jpg';
-        $fins = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/fotos/').$dni.'.jpg';
-        $fbio = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/fotos/').$dni.'.jpg';
+    //     $data = $datos[0];
+    //     $hinsI = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/huellas/').$dni.'x.jpg';
+    //     $hinsD = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/huellas/').$dni.'.jpg';
+    //     $hexaI = public_path('documentos/'.auth()->user()->id_proceso.'/examen/huellas/').$dni.'.jpg';
+    //     $hexaD = public_path('documentos/'.auth()->user()->id_proceso.'/examen/huellas/').$dni.'x.jpg';
+    //     $hbioI = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/huellas/').$dni.'.jpg';
+    //     $hbioD = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/huellas/').$dni.'x.jpg';
+    //     $fins = public_path('documentos/'.auth()->user()->id_proceso.'/inscripciones/fotos/').$dni.'.jpg';
+    //     $fbio = public_path('documentos/'.auth()->user()->id_proceso.'/control_biometrico/fotos/').$dni.'.jpg';
 
-        setlocale(LC_TIME, 'es_ES.utf8');
-        $fecha = $data->fecha;
-        $date = \Carbon\Carbon::createFromFormat('Y-m-d', $fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+    //     setlocale(LC_TIME, 'es_ES.utf8');
+    //     $fecha = $data->fecha;
+    //     $date = \Carbon\Carbon::createFromFormat('Y-m-d', $fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
 
-        $fimp =  Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+    //     $fimp =  Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
 
-        $fec_nac = $datos[0]->fec_nacimiento;
-        $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $fec_nac)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+    //     $fec_nac = $datos[0]->fec_nacimiento;
+    //     $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $fec_nac)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
 
-        $pdf = Pdf::loadView('ingreso.datosbiometricos', compact('data','hinsI','hinsD','hexaI','hexaD','hbioI','hbioD','fins','fbio','date', 'fimp','fnac'));
-        $pdf->setPaper('A4', 'portrait');
-        $output = $pdf->output();
+    //     $pdf = Pdf::loadView('ingreso.datosbiometricos', compact('data','hinsI','hinsD','hexaI','hexaD','hbioI','hbioD','fins','fbio','date', 'fimp','fnac'));
+    //     $pdf->setPaper('A4', 'portrait');
+    //     $output = $pdf->output();
 
-        $avance = AvancePostulante::firstOrCreate([
-                'dni_postulante'=> $dni, 
-                'id_proceso'=>auth()->user()->id_proceso, 
-                'avance' => 6,
-            ]);
+    //     $avance = AvancePostulante::firstOrCreate([
+    //             'dni_postulante'=> $dni, 
+    //             'id_proceso'=>auth()->user()->id_proceso, 
+    //             'avance' => 6,
+    //         ]);
 
-        $userIdProceso = auth()->user()->id_proceso;
-        $documentoDir = public_path('/documentos/' . $userIdProceso . '/control_biometrico/constancias/');
-        $filePath = $documentoDir . $dni . '.pdf';
+    //     $userIdProceso = auth()->user()->id_proceso;
+    //     $documentoDir = public_path('/documentos/' . $userIdProceso . '/control_biometrico/constancias/');
+    //     $filePath = $documentoDir . $dni . '.pdf';
     
-        if (!file_exists($documentoDir)) {
-            mkdir($documentoDir, 0755, true);
-        }
+    //     if (!file_exists($documentoDir)) {
+    //         mkdir($documentoDir, 0755, true);
+    //     }
     
-        file_put_contents($filePath, $output);
-        return $pdf->stream();
+    //     file_put_contents($filePath, $output);
+    //     return $pdf->stream();
 
+    // }
+
+public function pdfbiometrico2($dni)
+{
+    $procesoId = auth()->user()->id_proceso;
+
+    $datos = DB::select(
+        "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
+        postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
+        postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
+        users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
+        resultados.fecha, resultados.puntaje, resultados.puesto,
+        resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
+        control_biometrico.correo_institucional AS correo_institucional,
+        control_biometrico.tiene_correo AS tiene_correo,
+        control_biometrico.segunda_carrera AS segunda_carrera,
+        programa.nombre AS programa
+        FROM resultados
+        JOIN postulante ON resultados.dni_postulante = postulante.nro_doc
+        JOIN inscripciones ON inscripciones.id_postulante = postulante.id
+        JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+        JOIN procesos ON resultados.id_proceso = procesos.id
+        JOIN users ON users.id = inscripciones.id_usuario
+        JOIN programa ON programa.id = inscripciones.id_programa
+        JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
+        LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
+        WHERE resultados.apto = 'SI'
+        AND inscripciones.estado = 0
+        AND control_biometrico.id_proceso = {$procesoId}
+        AND resultados.dni_postulante = {$dni}
+        AND resultados.id_proceso = {$procesoId}
+        AND inscripciones.id_proceso = {$procesoId}"
+    );
+
+    $data = $datos[0];
+    $hinsI = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}x.jpg");
+    $hinsD = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}.jpg");
+    $hexaI = public_path("documentos/{$procesoId}/examen/huellas/{$dni}.jpg");
+    $hexaD = public_path("documentos/{$procesoId}/examen/huellas/{$dni}x.jpg");
+    $hbioI = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}.jpg");
+    $hbioD = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}x.jpg");
+    $fins  = public_path("documentos/{$procesoId}/inscripciones/fotos/{$dni}.jpg");
+    $fbio  = public_path("documentos/{$procesoId}/control_biometrico/fotos/{$dni}.jpg");
+    $date = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+    $fimp = \Carbon\Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+    $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fec_nacimiento)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+
+    $pdf = Pdf::loadView('ingreso.datosbiometricos', compact(
+        'data','hinsI','hinsD','hexaI','hexaD',
+        'hbioI','hbioD','fins','fbio',
+        'date','fimp','fnac'
+    ))->setPaper('A4', 'portrait');
+
+    $pdfOriginal = $pdf->output();
+
+    $documentoDir = public_path("documentos/{$procesoId}/control_biometrico/constancias/");
+    if (!File::exists($documentoDir)) {
+        File::makeDirectory($documentoDir, 0755, true, true);
     }
+
+    $filePath = "{$documentoDir}{$dni}.pdf";
+    $relativePath = "documentos/{$procesoId}/control_biometrico/constancias/{$dni}.pdf";
+
+    // $urlQr = url($relativePath);
+    $urlQr = "http://admision.test/verificacion/CB-{$data->cod_ingreso}";
+
+    $client = new \GuzzleHttp\Client();
+
+    $certificado1 = CertificadoFirma::where('id_usuario', auth()->id())->first();
+    if (!$certificado1) abort(400, 'Usuario autenticado sin certificado');
+
+    $response1 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
+        'multipart' => [
+            ['name' => 'dni', 'contents' => auth()->user()->dni],
+            ['name' => 'password_p12', 'contents' => $certificado1->password_p12],
+            ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
+            ['name' => 'url', 'contents' => $urlQr],
+            ['name' => 'x', 'contents' => '445'],
+            ['name' => 'y', 'contents' => '200'],
+            ['name' => 'width', 'contents' => '90'],
+            ['name' => 'height', 'contents' => '90'],
+        ]
+    ]);
+    sleep(1);
+    $pdfFirmado1 = $response1->getBody()->getContents();
+
+    file_put_contents($filePath, $pdfFirmado1);
+
+    $usuario479 = User::find(479);
+    $certificado2 = CertificadoFirma::where('id_usuario', 479)->first();
+    if (!$usuario479 || !$certificado2) abort(400, 'Usuario 479 sin certificado');
+
+    $response2 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
+        'multipart' => [
+            ['name' => 'dni', 'contents' => $usuario479->dni],
+            ['name' => 'password_p12', 'contents' => $certificado2->password_p12],
+            ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => "{$dni}.pdf"],
+            ['name' => 'url', 'contents' => $urlQr],
+            ['name' => 'x', 'contents' => '445'],
+            ['name' => 'y', 'contents' => '200'],
+            ['name' => 'width', 'contents' => '90'],
+            ['name' => 'height', 'contents' => '90'],
+        ]
+    ]);
+
+    $pdfFirmadoFinal = $response2->getBody()->getContents();
+
+    file_put_contents($filePath, $pdfFirmadoFinal);
+
+    DB::table('control_biometrico')
+        ->where('id_proceso', $procesoId)
+        ->where('id_postulante', function($q) use ($dni) {
+            $q->select('id')->from('postulante')->where('nro_doc', $dni)->limit(1);
+        })
+        ->update(['url' => $relativePath]);
+
+    AvancePostulante::firstOrCreate(
+        [
+            'dni_postulante' => $dni,
+            'id_proceso' => $procesoId,
+        ],
+        [
+            'avance' => 6
+        ]
+    );
+    return response()->file($filePath);
+}
+
+
     
     public function getCodigo($dni){
         $res = DB::table('temporal')

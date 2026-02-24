@@ -87,7 +87,7 @@
 </AuthenticatedLayout>
 
 <div>
-    <a-modal v-model:visible="visible" :title="programa.id == null?'Nuevo Programa':'Editar Programa'" style="margin-top: -40px;">
+    <a-modal v-model:open="visible" :title="programa.id == null?'Nuevo Programa':'Editar Programa'" style="margin-top: -40px;">
         <a-form
             ref="formRef"
             name="custom-validation"

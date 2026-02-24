@@ -28,7 +28,7 @@ class UsuarioController extends Controller
 
     public function store(Request $request)
     {
-        if(!$request->id){
+        if (empty($request->id)) {
             $this->validate($request,[
                 'name'=>'required',
                 'email'=>'required|email|unique:users,email',

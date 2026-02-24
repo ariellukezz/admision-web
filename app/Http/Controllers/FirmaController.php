@@ -7,6 +7,8 @@ use Inertia\Inertia;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
 use App\Models\Inscripcion;
+use App\Models\ControlBiometrico;
+
 
 class FirmaController extends Controller
 {
@@ -14,12 +16,24 @@ class FirmaController extends Controller
 public function verificarFirma($codigo)
 {
     try {
-      $inscripcion = Inscripcion::join('postulante', 'inscripciones.id_postulante', '=', 'postulante.id')
-          ->where('inscripciones.codigo', $codigo)
-          ->select( 'inscripciones.*', 'postulante.nro_doc as postulante_dni')
-          ->firstOrFail();
+        if (str_starts_with($codigo, 'CB-')) {
+        $cod = substr($codigo, 3);
+        $resultado = ControlBiometrico::join('postulante', 'control_biometrico.id_postulante', '=', 'postulante.id')
+            ->where('control_biometrico.codigo_ingreso', $cod)
+            ->select('control_biometrico.*', 'postulante.nro_doc as postulante_dni')
+            ->first();
+         $rutaPdf = public_path('/documentos/'.$resultado->id_proceso.'/control_biometrico/constancias/'.$resultado->postulante_dni.'.pdf');
 
-        $rutaPdf = public_path('/documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->postulante_dni.'.pdf');
+        } else {
+
+        $inscripcion = Inscripcion::join('postulante', 'inscripciones.id_postulante', '=', 'postulante.id')
+            ->where('inscripciones.codigo', $codigo)
+            ->select( 'inscripciones.*', 'postulante.nro_doc as postulante_dni')
+            ->firstOrFail();
+
+            $rutaPdf = public_path('/documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->postulante_dni.'.pdf');
+
+        }
 
         if (!file_exists($rutaPdf)) {
             throw new \Exception('El PDF no existe');
@@ -34,6 +48,7 @@ public function verificarFirma($codigo)
         return response()->json([
             'success' => true,
             'codigo_inscripcion' => $codigo,
+            // 'url' => $rutaPdf,
             'estado' => $this->mapearEstado($resultado['estado_general'] ?? 'INDETERMINADO'),
             'total_firmas' => $resultado['total_firmas'] ?? 0,
             'firmas' => $this->mapearFirmas($resultado['firmas_validadas'] ?? []),
@@ -63,7 +78,7 @@ private function verificarFirmaPdf(string $rutaPdf): array
 {
     $client = new Client([
         'timeout' => 60,
-        'verify' => false, // si el SSL da problemas en test
+        'verify' => false,
     ]);
 
     $response = $client->post(
@@ -168,19 +183,26 @@ private function formatearTamano(int $bytes): string
 
 public function verPdf($codigo)
 {
-    $inscripcion = Inscripcion::join(
-            'postulante',
-            'inscripciones.id_postulante',
-            '=',
-            'postulante.id'
-        )
-        ->where('inscripciones.codigo', $codigo)
-        ->select('postulante.nro_doc as dni', 'inscripciones.id_proceso')
-        ->firstOrFail();
+    if (str_starts_with($codigo, 'CB-')) {
+        $cod = substr($codigo, 3);
+        $resultado = ControlBiometrico::join('postulante', 'control_biometrico.id_postulante', '=', 'postulante.id')
+            ->where('control_biometrico.codigo_ingreso', $cod)
+            ->select('control_biometrico.*', 'postulante.nro_doc as postulante_dni')
+            ->firstOrFail();
 
-    $rutaPdf = public_path(
-        'documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->dni.'.pdf'
-    );
+        $rutaPdf = public_path('/documentos/'.$resultado->id_proceso.'/control_biometrico/constancias/'.$resultado->postulante_dni.'.pdf');
+
+    } else {
+
+        $inscripcion = Inscripcion::join('postulante','inscripciones.id_postulante','=','postulante.id')
+            ->where('inscripciones.codigo', $codigo)
+            ->select('postulante.nro_doc as dni', 'inscripciones.id_proceso')
+            ->firstOrFail();
+
+        $rutaPdf = public_path(
+            'documentos/'.$inscripcion->id_proceso.'/inscripciones/constancias/'.$inscripcion->dni.'.pdf'
+        );
+    }
 
     abort_unless(file_exists($rutaPdf), 404, 'PDF no encontrado');
 

@@ -296,6 +296,7 @@ const cargarPdf = async () => {
   pdfError.value = false
   pdfErrorMessage.value = ''
   try {
+    
     pdfUrl.value = `/inscripcion/${props.codigo}/pdf`
     if (pdfFrame.value) pdfFrame.value.src = pdfUrl.value
   } catch (err) {

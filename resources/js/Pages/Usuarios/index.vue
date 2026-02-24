@@ -23,7 +23,6 @@
         </div>
       </div>
 
-      <!-- TABLA -->
       <a-table
         :data-source="users"
         :columns="columns"
@@ -34,7 +33,7 @@
 
           <template v-if="column.dataIndex === 'usuario'">
             <div class="user-cell">
-              <a-avatar :src="record.foto_url" size="large">
+              <a-avatar :src="record.foto_url" size="large" style="background: red; min-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center  ;">
                 <template #icon><UserOutlined /></template>
               </a-avatar>
 
@@ -68,17 +67,17 @@
           </template>
 
           <template v-if="column.dataIndex === 'acciones'">
-             <div style="display: flex; gap: 2px;">
-                <a-button @click="modalCertificado = true" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
-                  <IdcardOutlined />
-                </a-button>
-                <a-button @click="editarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
-                  <form-outlined />
-                </a-button>
-                <a-button @click="eliminarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
-                  <delete-outlined />
-                </a-button>
-              </div>
+            <div style="display: flex; gap: 2px;">
+              <a-button @click="modalCertificado = true" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
+                <IdcardOutlined />
+              </a-button>
+              <a-button @click="editarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
+                <FormOutlined />
+              </a-button>
+              <a-button @click="eliminarUsuario(record.id)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                <DeleteOutlined />
+              </a-button>
+            </div>
           </template>
 
         </template>
@@ -94,7 +93,6 @@
     >
       <a-form layout="vertical">
 
-        <!-- FOTO -->
         <a-form-item label="Foto">
           <div class="foto-box">
             <a-avatar :size="96" :src="fotoPreview">
@@ -111,7 +109,6 @@
           </div>
         </a-form-item>
 
-        <!-- GRID 3 COLUMNAS -->
         <a-row :gutter="16">
 
           <a-col :span="8">
@@ -162,28 +159,29 @@
             </a-form-item>
           </a-col>
 
-          <!-- ROL -->
           <a-col :span="8">
             <a-form-item label="Rol">
-              <a-select v-model:value="form.rol_id" :options="roles">
+              <a-select v-model:value="form.id_rol" :options="roles">
                 <template #prefix><TeamOutlined /></template>
               </a-select>
             </a-form-item>
           </a-col>
 
-          <!-- PROCESO -->
           <a-col :span="8">
             <a-form-item label="Proceso">
-              <a-select v-model:value="form.id_proceso" :options="procesos">
-                <template #prefix><ApartmentOutlined /></template>
-              </a-select>
+              <a-select v-model:value="form.id_proceso" :options="procesos" />
             </a-form-item>
           </a-col>
 
-          <!-- ESTADO -->
           <a-col :span="8">
             <a-form-item label="Estado">
               <a-switch v-model:checked="form.estado" />
+            </a-form-item>
+          </a-col>
+
+          <a-col :span="12">
+            <a-form-item label="Contraseña" v-if="!form.id">
+              <a-input-password v-model:value="form.password" />
             </a-form-item>
           </a-col>
 
@@ -191,13 +189,13 @@
       </a-form>
     </a-modal>
 
-     <a-modal
+    <a-modal
       v-model:open="modalCertificado"
       title="Certificado Digital"
       width="480px"
       @ok="crearCertificadoDigital"
       ok-text="Crear certificado"
-      >
+    >
       <a-form layout="vertical">
         <a-form-item label="Contraseña para el archivo .p12">
           <a-input-password
@@ -227,7 +225,6 @@ import {
   IdcardOutlined,
   TeamOutlined
 } from '@ant-design/icons-vue'
-import Certificado from '../Publico/Resultados/components/certificado.vue'
 
 const modalCertificado = ref(false)
 const buscar = ref('')
@@ -254,10 +251,9 @@ const form = reactive({
   materno: '',
   email: '',
   celular: '',
-  rol_id: null,
-  rol: '',
+  id_rol: null,
+  password: '',
   id_proceso: null,
-  procesoso: '',
   estado: true
 })
 
@@ -286,7 +282,8 @@ function nuevoUsuario() {
     materno: '',
     email: '',
     celular: '',
-    rol_id: null,
+    id_rol: null,
+    password: '',
     id_proceso: null,
     estado: true
   })
@@ -303,7 +300,7 @@ function editarUsuario(u) {
 async function guardarUsuario() {
   saving.value = true
   const data = new FormData()
-  Object.keys(form).forEach(k => data.append(k, form[k]))
+  Object.keys(form).forEach(k => data.append(k, form[k] ?? ''))
   if (fotoFile.value) data.append('foto', fotoFile.value)
 
   await axios.post('save-user', data)
@@ -338,22 +335,22 @@ async function getProcesos() {
 const password_p12 = ref('')
 
 const crearCertificadoDigital = async () => {
-    const response = await axios.post('/crear-certificado-digital', {
-      dni: form.dni,
-      email: form.email,
-      usuario: `${form.name} ${form.paterno} ${form.materno}`,
-      rol: form.rol,
-      departamento: 'Dirección de admisión',
-      password_p12: password_p12.value,
-      valid_days: 365
-    })
+  const response = await axios.post('/crear-certificado-digital', {
+    dni: form.dni,
+    email: form.email,
+    usuario: `${form.name} ${form.paterno} ${form.materno}`,
+    rol: form.id_rol,
+    departamento: 'Dirección de admisión',
+    password_p12: password_p12.value,
+    valid_days: 365
+  })
 
-    if (response.data.success) {
-      message.success(response.data.message || 'Certificado creado exitosamente')
-      signatureModalVisible.value = false
-    } else {
-      message.error(response.data.message || 'Error al crear certificado')
-    }
+  if (response.data.success) {
+    message.success(response.data.message || 'Certificado creado exitosamente')
+    modalCertificado.value = false
+  } else {
+    message.error(response.data.message || 'Error al crear certificado')
+  }
 }
 
 getUsuarios()
@@ -362,76 +359,175 @@ getProcesos()
 
 <style scoped>
 .mac-card {
-  background: rgba(255,255,255,.85);
-  backdrop-filter: blur(14px);
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.08);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.06);
+  padding: 18px;
+  transition: all .3s ease;
 }
 
 .header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .header h2 {
-  font-size:18px;
-  font-weight:600;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .header-actions {
-  display:flex;
-  gap:8px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.header-actions .ant-input {
+  border-radius: 10px;
+}
+
+.header-actions .ant-btn {
+  border-radius: 10px;
+  height: 38px;
 }
 
 .user-cell {
-  display:flex;
-  align-items:center;
-  gap:12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .user-info {
-  display:flex;
-  flex-direction:column;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-name {
-  font-weight:500;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .user-dni {
-  font-size:12px;
-  color:#6b7280;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.mac-table {
+  overflow-x: auto;
+}
+
+.mac-table :deep(.ant-table) {
+  min-width: 750px;
 }
 
 .mac-table :deep(.ant-table-thead th) {
-  background:#f5f6f7;
-  font-size:12px;
-  text-transform:uppercase;
-  color:#6b7280;
+  background: #f8fafc;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
 }
 
-.acciones {
-  display:flex;
-  gap:6px;
-  justify-content:center;
+.mac-table :deep(.ant-table-tbody tr:hover) {
+  background: #f1f5f9;
+  transition: .2s;
 }
-
-.btn {
-  border:1px solid #d9d9d9;
-  border-radius: 5px;
-  height: 28px;
-  padding-top: 0px;
-  background:white;
-}
-
-.btn.edit { color:#2563eb }
-.btn.delete { color:#dc2626 }
 
 .foto-box {
-  display:flex;
-  align-items:center;
-  gap:16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+:deep(.ant-modal) {
+  border-radius: 16px;
+}
+
+:deep(.ant-modal-content) {
+  border-radius: 16px;
+  padding: 10px;
+}
+
+:deep(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #334155;
+}
+
+:deep(.ant-input),
+:deep(.ant-select-selector),
+:deep(.ant-input-password) {
+  border-radius: 10px !important;
+}
+
+:deep(.ant-switch) {
+  background: #e2e8f0;
+}
+
+:deep(.ant-switch-checked) {
+  background: #2563eb;
+}
+
+@media (max-width: 1024px) {
+  .mac-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .ant-input {
+    width: 100% !important;
+  }
+
+  .header-actions .ant-btn {
+    width: 100%;
+  }
+
+  .user-cell {
+    gap: 8px;
+  }
+
+  .user-name {
+    font-size: 13px;
+  }
+
+  :deep(.ant-modal) {
+    width: 95% !important;
+    max-width: 95% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mac-card {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .header h2 {
+    font-size: 16px;
+  }
+
+  .user-name {
+    font-size: 12px;
+  }
+
+  .user-dni {
+    font-size: 11px;
+  }
 }
 </style>

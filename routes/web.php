@@ -835,7 +835,7 @@ Route::post('/participantes', [ResultadosController::class, 'guardarParticipante
 
 Route::get('/verificar/{codigo}', [FirmaController::class, 'verificarFirma']);
 Route::get( '/inscripcion/{codigo}/pdf', [FirmaController::class, 'verPdf']);
-
+Route::get( '/control-biometrico/{codigo}/pdf', [FirmaController::class, 'verPdf']);
 
 Route::get('/verificacion/{codigo}', fn ($codigo) => Inertia::render('Publico/Firma/verificar', ['codigo' => $codigo]));
 
