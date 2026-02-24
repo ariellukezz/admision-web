@@ -857,7 +857,7 @@ public function pdfbiometrico2($dni)
             ['name' => 'password_p12', 'contents' => $certificado1->password_p12],
             ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
             ['name' => 'url', 'contents' => $urlQr],
-            ['name' => 'x', 'contents' => '445'],
+            ['name' => 'x', 'contents' => '455'],
             ['name' => 'y', 'contents' => '240'],
             ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
             ['name' => 'firmante', 'contents' => '-'],
