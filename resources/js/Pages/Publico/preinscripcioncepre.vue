@@ -262,6 +262,7 @@
               <option :value='43'>TRABAJO SOCIAL</option>
               <option :value='44'>TURISMO</option>
               <option :value='45'>PSICOLOGÍA</option>
+              <option :value='93'>INGENIERÍA DE INTELIGENCIA ARTIFICIAL Y CIENCIA DE DATOS</option>
               <option :value='46'>INGENIERÍA ECONÓMICA - AZANGARO</option>
               <option :value='47'>INGENIERÍA DE MINAS - AZANGARO</option>
               <option :value='48'>INGENERÍA DE TELECOMUNICACIONES</option>
