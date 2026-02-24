@@ -858,12 +858,12 @@ public function pdfbiometrico2($dni)
             ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
             ['name' => 'url', 'contents' => $urlQr],
             ['name' => 'x', 'contents' => '445'],
-            ['name' => 'y', 'contents' => '200'],
+            ['name' => 'y', 'contents' => '250'],
             ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
             ['name' => 'firmante', 'contents' => '-'],
             ['name' => 'cargo', 'contents' => 'Revisor de admisión'],
-            ['name' => 'width', 'contents' => '90'],
-            ['name' => 'height', 'contents' => '90'],
+            ['name' => 'width', 'contents' => '80'],
+            ['name' => 'height', 'contents' => '80'],
         ]
     ]);
     sleep(1);
@@ -882,7 +882,7 @@ public function pdfbiometrico2($dni)
             ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => "{$dni}.pdf"],
             ['name' => 'url', 'contents' => null],
             ['name' => 'x', 'contents' => '80'],
-            ['name' => 'y', 'contents' => '100'],
+            ['name' => 'y', 'contents' => '130'],
             ['name' => 'width', 'contents' => '300'],
             ['name' => 'height', 'contents' => '70'],
             ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
