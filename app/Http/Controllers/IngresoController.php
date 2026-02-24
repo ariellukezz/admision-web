@@ -843,7 +843,7 @@ public function pdfbiometrico2($dni)
     $relativePath = "documentos/{$procesoId}/control_biometrico/constancias/{$dni}.pdf";
 
     // $urlQr = url($relativePath);
-    $urlQr = "http://admision.test/verificacion/CB-{$data->cod_ingreso}";
+    $urlQr = "https://inscripciones.admision.unap.edu.pe/verificacion/CB-{$data->cod_ingreso}";
 
     $client = new \GuzzleHttp\Client();
 
