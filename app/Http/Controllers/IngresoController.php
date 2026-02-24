@@ -858,6 +858,9 @@ public function pdfbiometrico2($dni)
             ['name' => 'url', 'contents' => $urlQr],
             ['name' => 'x', 'contents' => '445'],
             ['name' => 'y', 'contents' => '200'],
+            ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
+            ['name' => 'firmante', 'contents' => '-'],
+            ['name' => 'cargo', 'contents' => 'Revisor de admisión'],
             ['name' => 'width', 'contents' => '90'],
             ['name' => 'height', 'contents' => '90'],
         ]
@@ -876,11 +879,14 @@ public function pdfbiometrico2($dni)
             ['name' => 'dni', 'contents' => $usuario479->dni],
             ['name' => 'password_p12', 'contents' => $certificado2->password_p12],
             ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => "{$dni}.pdf"],
-            ['name' => 'url', 'contents' => $urlQr],
-            ['name' => 'x', 'contents' => '445'],
-            ['name' => 'y', 'contents' => '200'],
-            ['name' => 'width', 'contents' => '90'],
-            ['name' => 'height', 'contents' => '90'],
+            ['name' => 'url', 'contents' => null],
+            ['name' => 'x', 'contents' => '80'],
+            ['name' => 'y', 'contents' => '100'],
+            ['name' => 'width', 'contents' => '300'],
+            ['name' => 'height', 'contents' => '70'],
+            ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
+            ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
+            ['name' => 'cargo', 'contents' => 'Director de admisión']
         ]
     ]);
 
