@@ -887,7 +887,7 @@ public function pdfbiometrico2($dni)
             ['name' => 'height', 'contents' => '70'],
             ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
             ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
-            ['name' => 'cargo', 'contents' => 'Director de admisión']
+            ['name' => 'cargo', 'contents' => 'DIRECTOR DE ADMISION']
         ]
     ]);
 
