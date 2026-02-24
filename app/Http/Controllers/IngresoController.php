@@ -319,35 +319,35 @@ class IngresoController extends Controller {
                     throw new \Exception('Error al crear el registro en ControlBiometrico.');
                 }
 
-                // if (!$registrado) {
-                //     Estudiante::on($database2)->create([
-                //         'num_mat' => $nuevoCodigo,
-                //         'cod_car' => $re->programa_oti,
-                //         'paterno' => $re->paterno,
-                //         'materno' => $re->materno,
-                //         'nombres' => $re->nombres,
-                //         'tip_doc' => $re->tipo_doc_oti,
-                //         'num_doc' => $re->dni,
-                //         'num_car' => $request->n_carrera == 1 ? 2 : 1,
-                //         'fch_nac' => $re->fec_nacimiento,
-                //         'sexo' => $re->sexo,
-                //         'ubigeo' => $re->ubigeo_residencia,
-                //         'mod_ing' => $re->modalidad_oti,
-                //         'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
-                //         'fch_ing' => $re->fecha,
-                //         'direc' => $re->direccion,
-                //         'email' => $re->email,
-                //         'emailins' => $control->correo_institucional,
-                //         'con_est' => 5,
-                //         'celular' => $re->celular,
-                //         'cod_esp' => $re->cod_esp,
-                //         'puntaje' => $re->puntaje,
-                //         'puesto_escuela' => $re->puesto,
-                //         'puesto_general' => $re->puesto_general,
-                //         'ano_ing' => $re->anio,
-                //         'per_ing' => $re->ciclo_oti
-                //     ]);
-                // }
+                if (!$registrado) {
+                    Estudiante::on($database2)->create([
+                        'num_mat' => $nuevoCodigo,
+                        'cod_car' => $re->programa_oti,
+                        'paterno' => $re->paterno,
+                        'materno' => $re->materno,
+                        'nombres' => $re->nombres,
+                        'tip_doc' => $re->tipo_doc_oti,
+                        'num_doc' => $re->dni,
+                        'num_car' => $request->n_carrera == 1 ? 2 : 1,
+                        'fch_nac' => $re->fec_nacimiento,
+                        'sexo' => $re->sexo,
+                        'ubigeo' => $re->ubigeo_residencia,
+                        'mod_ing' => $re->modalidad_oti,
+                        'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
+                        'fch_ing' => $re->fecha,
+                        'direc' => $re->direccion,
+                        'email' => $re->email,
+                        'emailins' => $control->correo_institucional,
+                        'con_est' => 5,
+                        'celular' => $re->celular,
+                        'cod_esp' => $re->cod_esp,
+                        'puntaje' => $re->puntaje,
+                        'puesto_escuela' => $re->puesto,
+                        'puesto_general' => $re->puesto_general,
+                        'ano_ing' => $re->anio,
+                        'per_ing' => $re->ciclo_oti
+                    ]);
+                }
             } else {
                 $control->update(['estado' => 2]);
             }
