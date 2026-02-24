@@ -858,7 +858,7 @@ public function pdfbiometrico2($dni)
             ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
             ['name' => 'url', 'contents' => $urlQr],
             ['name' => 'x', 'contents' => '445'],
-            ['name' => 'y', 'contents' => '250'],
+            ['name' => 'y', 'contents' => '235'],
             ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
             ['name' => 'firmante', 'contents' => '-'],
             ['name' => 'cargo', 'contents' => 'Revisor de admisión'],
