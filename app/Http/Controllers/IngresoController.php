@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use App\Models\RegistroEstudiante;
 use App\Models\Postulante;
+use App\Models\Estudiante;
 use App\Models\CertificadoFirma;
 use App\Models\AvancePostulante;
 use Carbon\Carbon;
