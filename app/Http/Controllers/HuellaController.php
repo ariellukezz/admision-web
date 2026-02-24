@@ -153,17 +153,25 @@ public function uploadFotos(Request $request) {
         $h_derecha = $request->file('RFinger');
 
         if($etapa == 'inscripcion'){
-            $avance = AvancePostulante::firstOrCreate([
-                'dni_postulante'=> $dni, 
-                'id_proceso'=>$id_proceso, 
-                'avance' => 2,
-            ]);
+            $avance = AvancePostulante::updateOrCreate(
+                [
+                    'dni_postulante' => $dni,
+                    'id_proceso'     => $id_proceso,
+                ],
+                [
+                    'avance' => 2
+                ]
+            );
         } else {
-            $avance = AvancePostulante::firstOrCreate([
-                'dni_postulante'=>$dni, 
-                'id_proceso'=>$id_proceso, 
-                'avance' => 5,
-            ]);
+            $avance = AvancePostulante::updateOrCreate(
+                [
+                    'dni_postulante' => $dni,
+                    'id_proceso'     => $id_proceso,
+                ],
+                [
+                    'avance' => 5
+                ]
+            );
         }
         // Rutas de las carpetas
         $rutaCarpetaHuellas = public_path("documentos/$id_proceso/$etapa/huellas/");
