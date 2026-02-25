@@ -290,14 +290,14 @@
                           </div>
                           
                          </a-card-title>
-                          <div class="mt-4 mb-6"  v-if="correo_anteriores.length == 0">
+                          <div class="mt-4 mb-6">
                             <div>
                               <div  v-if="ingresante.correo_institucional != null"> <i> {{ ingresante.correo_institucional }} </i> </div>
                               <div v-else > <i> El ingresante aún no tiene correo institucional </i> </div>
                             </div>
                           </div>
 
-                          <div class="mt-3" v-else>
+                          <div class="mt-3">
                             <div>
                               <span><strong>Otros correos registrados</strong></span>
                             </div>
