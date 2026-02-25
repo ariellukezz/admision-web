@@ -552,7 +552,7 @@ const changePassword = async () => {
 
   changingPassword.value = true
   try {
-    const { data } = await axios.post('(/cambiar-contrasena-perfil', {
+    const { data } = await axios.post('/cambiar-contrasena-perfil', {
       password_actual: passwordForm.currentPassword,
       password_nueva: passwordForm.newPassword,
     })
