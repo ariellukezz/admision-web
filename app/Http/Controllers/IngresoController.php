@@ -988,6 +988,26 @@ public function pdfbiometrico2($dni)
             'X-Signature' => $signature,
             'Content-Type' => 'application/json'
         ])->post($url, $data);
+
+        $cb = ControlBiometrico::where('id_postulante', $request->id)
+            ->where('id_proceso', auth()->user()->id_proceso)
+            ->first();
+
+         if ($response->successful() && isset($response['users'][0]['email'])) {
+            $cb->update([
+                'tiene_correo' => 1,
+                'correo_institucional' => $response['users'][0]['email']
+            ]);
+        } else {
+            return response()->json(['error' => 'Error al crear el correo: ' . $response->body()], 500);
+        }
+
+        $responseJson = $response->json();
+        if (isset($responseJson['users'][0]['email'])) {
+            $postulante->correo_institucional = $responseJson['users'][0]['email'];
+            $postulante->save();
+        }
+
         return response()->json($response->json(), $response->status());
 
     }
