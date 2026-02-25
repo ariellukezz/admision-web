@@ -324,9 +324,9 @@ class IngresoController extends Controller {
                     Estudiante::on($database2)->create([
                         'num_mat' => $nuevoCodigo,
                         'cod_car' => $re->programa_oti,
-                        'paterno' => $re->paterno,
-                        'materno' => $re->materno,
-                        'nombres' => $re->nombres,
+                        'paterno' => mb_strtoupper($re->paterno, 'UTF-8'),
+                        'materno' => mb_strtoupper($re->materno, 'UTF-8'),
+                        'nombres' => mb_strtoupper($re->nombres, 'UTF-8'),
                         'tip_doc' => $re->tipo_doc_oti,
                         'num_doc' => $re->dni,
                         'num_car' => $request->n_carrera == 1 ? 2 : 1,
