@@ -968,6 +968,7 @@ public function pdfbiometrico2($dni)
 
     public function crearCorreo(Request $request)
     {
+        $postulante = Postulante::find($request->id);
         $url = "https://service6.unap.edu.pe/api/crear-correo";
         $secretKey = "unap@2025";
         $data = [
@@ -975,8 +976,8 @@ public function pdfbiometrico2($dni)
             "apellido_materno" => $request->apellido_materno,
             "nombres" => $request->nombres,
             "dni" => $request->dni,
-            "celular" => $request->celular,
-            "correo_secundario" => $request->correo_secundario,
+            "celular" => $postulante->email,
+            "correo_secundario" => $postulante->email,
             "facultad" => $request->facultad,
             "escuela" => $request->escuela,
             "numero_ingresos" => $request->numero_ingresos
