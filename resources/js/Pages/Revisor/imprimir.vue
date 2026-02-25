@@ -606,19 +606,25 @@ const ingresante = ref({
 
                          
 const crearCorreo = async () => {
-  let res = await axios.post('crear_correo_institucional',{
-    id: ingresante.value.id,
-    apellido_paterno: ingresante.value.primer_apellido,
-    apellido_materno: ingresante.value.segundo_apellido,
-    nombres: ingresante.value.nombres,
-    dni: ingresante.value.nro_doc,
-    celular: ingresante.value.celular,
-    correo_secundario: ingresante.value.email,
-    facultad: ingresante.value.facultad_correo,
-    escuela: ingresante.value.programa_correo,
-    numero_ingresos: 1,
-  });
-}
+  try {
+    await axios.post('crear_correo_institucional', {
+      id: ingresante.value.id,
+      apellido_paterno: ingresante.value.primer_apellido,
+      apellido_materno: ingresante.value.segundo_apellido,
+      nombres: ingresante.value.nombres,
+      dni: ingresante.value.nro_doc,
+      celular: ingresante.value.celular,
+      correo_secundario: ingresante.value.email,
+      facultad: ingresante.value.facultad_correo,
+      escuela: ingresante.value.programa_correo,
+      numero_ingresos: 1,
+    });
+  } catch (error) {
+    console.error('Error al crear correo:', error);
+  } finally {
+    await getCorreos();
+  }
+};
 
 
 
@@ -662,6 +668,7 @@ const getIngresante =  async ( ) => {
   if(res.data.datos){
     modal.value = true;
   }
+  getCorreos();   
 
  }
 
@@ -694,13 +701,13 @@ watch(buscar, ( newValue, oldValue ) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
         getPostulantesBiometrico();
-        getCorreos();
     }, 500);
 })
 
 watch(dniseleccionado, (newValue, oldValue ) => {
     if(newValue.length >= 8){
       getIngresante();
+
     }
 })
 
@@ -764,8 +771,7 @@ const getCorreos = async () => {
     escuela: ingresante.value.programa_correo,
     numero_ingresos: 0,
   }); 
-  correo_anteriores.value = res.data;
-  
+  correo_anteriores.value = res.data.users; 
 
 }
 
