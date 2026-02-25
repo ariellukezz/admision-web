@@ -970,37 +970,25 @@ public function pdfbiometrico2($dni)
     {
         $url = "https://service6.unap.edu.pe/api/crear-correo";
         $secretKey = "unap@2025";
-        $baseData = [
+        $data = [
             "apellido_paterno" => $request->apellido_paterno,
             "apellido_materno" => $request->apellido_materno,
-            "nombres"          => $request->nombres,
-            "dni"              => $request->dni,
-            "celular"          => $request->celular,
+            "nombres" => $request->nombres,
+            "dni" => $request->dni,
+            "celular" => $request->celular,
             "correo_secundario" => $request->correo_secundario,
-            "facultad"         => $request->facultad,
-            "escuela"          => $request->escuela,
+            "facultad" => $request->facultad,
+            "escuela" => $request->escuela,
+            "numero_ingresos" => $request->numero_ingresos
         ];
+        $jsonData = json_encode($data);
+        $signature = hash_hmac('sha256', $jsonData, $secretKey);
+        $response = Http::withHeaders([
+            'X-Signature' => $signature,
+            'Content-Type' => 'application/json'
+        ])->post($url, $data);
+        return response()->json($response->json(), $response->status());
 
-        $responses = [];
-
-        foreach ([0, 1] as $numero) {
-            $data = array_merge($baseData, ['numero_ingresos' => $numero]);
-
-            $jsonData = json_encode($data);
-            $signature = hash_hmac('sha256', $jsonData, $secretKey);
-            $response = Http::withHeaders([
-                'X-Signature' => $signature,
-                'Content-Type' => 'application/json'
-            ])->post($url, $jsonData); 
-
-            $responses[] = [
-                'numero_ingresos' => $numero,
-                'status' => $response->status(),
-                'body' => $response->json()
-            ];
-        }
-
-        return response()->json($responses);
     }
 
 
