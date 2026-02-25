@@ -616,7 +616,7 @@ const crearCorreo = async () => {
     correo_secundario: ingresante.value.email,
     facultad: ingresante.value.facultad_correo,
     escuela: ingresante.value.programa_correo,
-    numero_ingresos: anteriores.value.length + 1,
+    numero_ingresos: 1,
   });
 }
 
@@ -694,7 +694,7 @@ watch(buscar, ( newValue, oldValue ) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
         getPostulantesBiometrico();
-        crear_correo
+        getCorreos();
     }, 500);
 })
 
@@ -750,8 +750,25 @@ const getCarrerasPrevias = async() => {
   }
 };
 
-const value = ref([]);
-const codigos =ref([]);
+
+const getCorreos = async () => {
+  let res = await axios.post('crear_correo_institucional',{
+    id: ingresante.value.id,
+    apellido_paterno: ingresante.value.primer_apellido,
+    apellido_materno: ingresante.value.segundo_apellido,
+    nombres: ingresante.value.nombres,
+    dni: ingresante.value.nro_doc,
+    celular: ingresante.value.celular,
+    correo_secundario: ingresante.value.email,
+    facultad: ingresante.value.facultad_correo,
+    escuela: ingresante.value.programa_correo,
+    numero_ingresos: 0,
+  }); 
+  correo_anteriores.value = res.data;
+  
+
+}
+
 
 const handleChange = (newValue) => {
   console.log('Valor seleccionado:', newValue);
