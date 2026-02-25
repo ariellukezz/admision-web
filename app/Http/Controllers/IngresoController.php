@@ -105,7 +105,7 @@ class IngresoController extends Controller {
             "correo_secundario" => 'admision@test.com',
             "facultad" => $datos->facultad_correo,
             "escuela" => $datos->programa_correo,
-            "numero_ingresos" => false,
+            "numero_ingresos" => 0,
         ];
 
         $jsonData = json_encode($data);
