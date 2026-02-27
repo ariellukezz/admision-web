@@ -14,7 +14,7 @@
     </style>
 
 </head>
-<body style="font-family: 'Roboto Condensed'; font-weigth:200; margin-top:105px; font-size:12pt; ">
+<body style="font-family: 'Roboto Condensed'; font-weigth:200; margin-top:85px; font-size:12pt; ">
     <div>
         {{-- <div style="display:block"> <h1>Hora actual: {{ date('H:i:s') }}</h1></div> --}}
         <div>
