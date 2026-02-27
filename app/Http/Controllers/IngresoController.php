@@ -782,137 +782,137 @@ class IngresoController extends Controller {
 
     // }
 
-public function pdfbiometrico2($dni)
-{
-    $procesoId = auth()->user()->id_proceso;
+    public function pdfbiometrico2($dni)
+    {
+        $procesoId = auth()->user()->id_proceso;
 
-    $datos = DB::select(
-        "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
-        postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
-        postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
-        users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
-        resultados.fecha, resultados.puntaje, resultados.puesto,
-        resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
-        control_biometrico.correo_institucional AS correo_institucional,
-        control_biometrico.tiene_correo AS tiene_correo,
-        control_biometrico.segunda_carrera AS segunda_carrera,
-        programa.nombre AS programa
-        FROM resultados
-        JOIN postulante ON resultados.dni_postulante = postulante.nro_doc
-        JOIN inscripciones ON inscripciones.id_postulante = postulante.id
-        JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
-        JOIN procesos ON resultados.id_proceso = procesos.id
-        JOIN users ON users.id = inscripciones.id_usuario
-        JOIN programa ON programa.id = inscripciones.id_programa
-        JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
-        LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
-        WHERE resultados.apto = 'SI'
-        AND inscripciones.estado = 0
-        AND control_biometrico.id_proceso = {$procesoId}
-        AND resultados.dni_postulante = {$dni}
-        AND resultados.id_proceso = {$procesoId}
-        AND inscripciones.id_proceso = {$procesoId}"
-    );
+        $datos = DB::select(
+            "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
+            postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
+            postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
+            users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
+            resultados.fecha, resultados.puntaje, resultados.puesto,
+            resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
+            control_biometrico.correo_institucional AS correo_institucional,
+            control_biometrico.tiene_correo AS tiene_correo,
+            control_biometrico.segunda_carrera AS segunda_carrera,
+            programa.nombre AS programa
+            FROM resultados
+            JOIN postulante ON resultados.dni_postulante = postulante.nro_doc
+            JOIN inscripciones ON inscripciones.id_postulante = postulante.id
+            JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+            JOIN procesos ON resultados.id_proceso = procesos.id
+            JOIN users ON users.id = inscripciones.id_usuario
+            JOIN programa ON programa.id = inscripciones.id_programa
+            JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
+            LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
+            WHERE resultados.apto = 'SI'
+            AND inscripciones.estado = 0
+            AND control_biometrico.id_proceso = {$procesoId}
+            AND resultados.dni_postulante = {$dni}
+            AND resultados.id_proceso = {$procesoId}
+            AND inscripciones.id_proceso = {$procesoId}"
+        );
 
-    $data = $datos[0];
-    $hinsI = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}x.jpg");
-    $hinsD = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}.jpg");
-    $hexaI = public_path("documentos/{$procesoId}/examen/huellas/{$dni}.jpg");
-    $hexaD = public_path("documentos/{$procesoId}/examen/huellas/{$dni}x.jpg");
-    $hbioI = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}.jpg");
-    $hbioD = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}x.jpg");
-    $fins  = public_path("documentos/{$procesoId}/inscripciones/fotos/{$dni}.jpg");
-    $fbio  = public_path("documentos/{$procesoId}/control_biometrico/fotos/{$dni}.jpg");
-    $date = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
-    $fimp = \Carbon\Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
-    $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fec_nacimiento)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+        $data = $datos[0];
+        $hinsI = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}x.jpg");
+        $hinsD = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}.jpg");
+        $hexaI = public_path("documentos/{$procesoId}/examen/huellas/{$dni}.jpg");
+        $hexaD = public_path("documentos/{$procesoId}/examen/huellas/{$dni}x.jpg");
+        $hbioI = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}.jpg");
+        $hbioD = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}x.jpg");
+        $fins  = public_path("documentos/{$procesoId}/inscripciones/fotos/{$dni}.jpg");
+        $fbio  = public_path("documentos/{$procesoId}/control_biometrico/fotos/{$dni}.jpg");
+        $date = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+        $fimp = \Carbon\Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+        $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fec_nacimiento)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
 
-    $pdf = Pdf::loadView('ingreso.datosbiometricos', compact(
-        'data','hinsI','hinsD','hexaI','hexaD',
-        'hbioI','hbioD','fins','fbio',
-        'date','fimp','fnac'
-    ))->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('ingreso.datosbiometricos', compact(
+            'data','hinsI','hinsD','hexaI','hexaD',
+            'hbioI','hbioD','fins','fbio',
+            'date','fimp','fnac'
+        ))->setPaper('A4', 'portrait');
 
-    $pdfOriginal = $pdf->output();
+        $pdfOriginal = $pdf->output();
 
-    $documentoDir = public_path("documentos/{$procesoId}/control_biometrico/constancias/");
-    if (!File::exists($documentoDir)) {
-        File::makeDirectory($documentoDir, 0755, true, true);
+        $documentoDir = public_path("documentos/{$procesoId}/control_biometrico/constancias/");
+        if (!File::exists($documentoDir)) {
+            File::makeDirectory($documentoDir, 0755, true, true);
+        }
+
+        $filePath = "{$documentoDir}{$dni}.pdf";
+        $relativePath = "documentos/{$procesoId}/control_biometrico/constancias/{$dni}.pdf";
+
+        // $urlQr = url($relativePath);
+        $urlQr = "https://inscripciones.admision.unap.edu.pe/verificacion/CB-{$data->cod_ingreso}";
+
+        $client = new \GuzzleHttp\Client();
+
+        $certificado1 = CertificadoFirma::where('id_usuario', auth()->id())->first();
+        if (!$certificado1) abort(400, 'Usuario autenticado sin certificado');
+
+        $response1 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
+            'multipart' => [
+                ['name' => 'dni', 'contents' => auth()->user()->dni],
+                ['name' => 'password_p12', 'contents' => $certificado1->password_p12],
+                ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
+                ['name' => 'url', 'contents' => $urlQr],
+                ['name' => 'x', 'contents' => '455'],
+                ['name' => 'y', 'contents' => '225'],
+                ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
+                ['name' => 'firmante', 'contents' => '-'],
+                ['name' => 'cargo', 'contents' => 'Revisor de admisión'],
+                ['name' => 'width', 'contents' => '60'],
+                ['name' => 'height', 'contents' => '60'],
+            ]
+        ]);
+        sleep(1);
+        $pdfFirmado1 = $response1->getBody()->getContents();
+
+        file_put_contents($filePath, $pdfFirmado1);
+
+        $usuario479 = User::find(479);
+        $certificado2 = CertificadoFirma::where('id_usuario', 479)->first();
+        if (!$usuario479 || !$certificado2) abort(400, 'Usuario 479 sin certificado');
+
+        $response2 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
+            'multipart' => [
+                ['name' => 'dni', 'contents' => $usuario479->dni],
+                ['name' => 'password_p12', 'contents' => $certificado2->password_p12],
+                ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => "{$dni}.pdf"],
+                ['name' => 'url', 'contents' => null],
+                ['name' => 'x', 'contents' => '80'],
+                ['name' => 'y', 'contents' => '125'],
+                ['name' => 'width', 'contents' => '300'],
+                ['name' => 'height', 'contents' => '70'],
+                ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
+                ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
+                ['name' => 'cargo', 'contents' => 'DIRECTOR DE ADMISION']
+            ]
+        ]);
+
+        $pdfFirmadoFinal = $response2->getBody()->getContents();
+
+        file_put_contents($filePath, $pdfFirmadoFinal);
+
+        DB::table('control_biometrico')
+            ->where('id_proceso', $procesoId)
+            ->where('id_postulante', function($q) use ($dni) {
+                $q->select('id')->from('postulante')->where('nro_doc', $dni)->limit(1);
+            })
+            ->update(['url' => $relativePath]);
+
+        AvancePostulante::firstOrCreate(
+            [
+                'dni_postulante' => $dni,
+                'id_proceso' => $procesoId,
+            ],
+            [
+                'avance' => 6
+            ]
+        );
+        return response()->file($filePath);
     }
-
-    $filePath = "{$documentoDir}{$dni}.pdf";
-    $relativePath = "documentos/{$procesoId}/control_biometrico/constancias/{$dni}.pdf";
-
-    // $urlQr = url($relativePath);
-    $urlQr = "https://inscripciones.admision.unap.edu.pe/verificacion/CB-{$data->cod_ingreso}";
-
-    $client = new \GuzzleHttp\Client();
-
-    $certificado1 = CertificadoFirma::where('id_usuario', auth()->id())->first();
-    if (!$certificado1) abort(400, 'Usuario autenticado sin certificado');
-
-    $response1 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
-        'multipart' => [
-            ['name' => 'dni', 'contents' => auth()->user()->dni],
-            ['name' => 'password_p12', 'contents' => $certificado1->password_p12],
-            ['name' => 'documento', 'contents' => $pdfOriginal, 'filename' => "{$dni}.pdf"],
-            ['name' => 'url', 'contents' => $urlQr],
-            ['name' => 'x', 'contents' => '455'],
-            ['name' => 'y', 'contents' => '225'],
-            ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
-            ['name' => 'firmante', 'contents' => '-'],
-            ['name' => 'cargo', 'contents' => 'Revisor de admisión'],
-            ['name' => 'width', 'contents' => '60'],
-            ['name' => 'height', 'contents' => '60'],
-        ]
-    ]);
-    sleep(1);
-    $pdfFirmado1 = $response1->getBody()->getContents();
-
-    file_put_contents($filePath, $pdfFirmado1);
-
-    $usuario479 = User::find(479);
-    $certificado2 = CertificadoFirma::where('id_usuario', 479)->first();
-    if (!$usuario479 || !$certificado2) abort(400, 'Usuario 479 sin certificado');
-
-    $response2 = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
-        'multipart' => [
-            ['name' => 'dni', 'contents' => $usuario479->dni],
-            ['name' => 'password_p12', 'contents' => $certificado2->password_p12],
-            ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => "{$dni}.pdf"],
-            ['name' => 'url', 'contents' => null],
-            ['name' => 'x', 'contents' => '80'],
-            ['name' => 'y', 'contents' => '125'],
-            ['name' => 'width', 'contents' => '300'],
-            ['name' => 'height', 'contents' => '70'],
-            ['name' => 'logo_path', 'contents' => '/app/imagenes/logo.png'],
-            ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
-            ['name' => 'cargo', 'contents' => 'DIRECTOR DE ADMISION']
-        ]
-    ]);
-
-    $pdfFirmadoFinal = $response2->getBody()->getContents();
-
-    file_put_contents($filePath, $pdfFirmadoFinal);
-
-    DB::table('control_biometrico')
-        ->where('id_proceso', $procesoId)
-        ->where('id_postulante', function($q) use ($dni) {
-            $q->select('id')->from('postulante')->where('nro_doc', $dni)->limit(1);
-        })
-        ->update(['url' => $relativePath]);
-
-    AvancePostulante::firstOrCreate(
-        [
-            'dni_postulante' => $dni,
-            'id_proceso' => $procesoId,
-        ],
-        [
-            'avance' => 6
-        ]
-    );
-    return response()->file($filePath);
-}
 
 
     

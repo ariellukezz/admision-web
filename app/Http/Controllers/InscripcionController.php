@@ -9,6 +9,7 @@ use App\Models\Inscripcion;
 use App\Models\CertificadoFirma;
 use App\Models\Proceso;
 use App\Models\AvancePostulante;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -346,12 +347,14 @@ class InscripcionController extends Controller
 
 
 
-    public function pdfInscripcion($dni) {
+    public function pdfInscripcion($dni)
+    {
         $proceso = Proceso::find(auth()->user()->id_proceso);
         $dia1 = $this->formatDate($proceso->fec_1);
         $dia2 = $this->formatDate($proceso->fec_2 ?? null);
 
-        $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion FROM carreras_previas
+        $carreras_previas = DB::select("SELECT codigo, cod_car, nombre, condicion 
+            FROM carreras_previas
             WHERE dni_postulante = ?", [$dni]);
 
         $datos = DB::select("SELECT
@@ -374,7 +377,14 @@ class InscripcionController extends Controller
         JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
         JOIN procesos ON inscripciones.id_proceso = procesos.id
         JOIN users on inscripciones.id_usuario = users.id
-        WHERE postulante.nro_doc = ? AND inscripciones.estado = 0 AND inscripciones.id_proceso = ?", [$dni, auth()->user()->id_proceso]);
+        WHERE postulante.nro_doc = ? 
+        AND inscripciones.estado = 0 
+        AND inscripciones.id_proceso = ?", 
+        [$dni, auth()->user()->id_proceso]);
+
+        if (empty($datos)) {
+            abort(404, "No se encontraron datos para el DNI {$dni}");
+        }
 
         $foto = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/fotos/' . $dni . '.jpg');
         $huellaIzquierda = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . '.jpg');
@@ -382,49 +392,84 @@ class InscripcionController extends Controller
 
         $data = $datos[0];
 
-        // Generar PDF temporal
-        $pdf = Pdf::loadView('inscripcion.inscripcion', compact('data', 'carreras_previas', 'foto', 'huellaIzquierda', 'huellaDerecha', 'dia1', 'dia2'));
-        $pdf->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('inscripcion.inscripcion', 
+            compact('data', 'carreras_previas', 'foto', 'huellaIzquierda', 'huellaDerecha', 'dia1', 'dia2')
+        )->setPaper('A4', 'portrait');
+
         $output = $pdf->output();
 
         $rutaTemp = storage_path('app/temp_' . $dni . '.pdf');
         file_put_contents($rutaTemp, $output);
 
-        // Validar PDF
         if (!File::exists($rutaTemp) || filesize($rutaTemp) === 0) {
             abort(500, "El PDF temporal no se generó correctamente.");
         }
 
-        $certificado = CertificadoFirma::where('id_usuario', Auth::id())->first();
-        if (!$certificado) {
+        $client = new Client();
+
+        $certificado1 = CertificadoFirma::where('id_usuario', Auth::id())->first();
+        if (!$certificado1) {
             abort(400, 'El usuario no tiene certificado de firma configurado');
         }
 
-        $client = new Client();
-        $response = $client->post('https://test-admision.unap.edu.pe/service_firma/firmar-dni/', [
-            'multipart' => [
-                ['name' => 'dni', 'contents' => auth()->user()->dni],
-                ['name' => 'password_p12', 'contents' => $certificado->password_p12],
-                ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
-                ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
-                ['name' => 'x', 'contents' => '435'],
-                ['name' => 'y', 'contents' => '205'],
-                ['name' => 'width', 'contents' => '120'],
-                ['name' => 'height', 'contents' => '120'],
+        $response1 = $client->post(
+            'https://test-admision.unap.edu.pe/service_firma/firmar-dni/',
+            [
+                'multipart' => [
+                    ['name' => 'dni', 'contents' => auth()->user()->dni],
+                    ['name' => 'password_p12', 'contents' => $certificado1->password_p12],
+                    ['name' => 'documento', 'contents' => fopen($rutaTemp, 'r'), 'filename' => $dni.'.pdf'],
+                    ['name' => 'url', 'contents' => 'https://inscripciones.admision.unap.edu.pe/verificacion/'.$data->codigo],
+                    ['name' => 'x', 'contents' => '435'],
+                    ['name' => 'y', 'contents' => '205'],
+                    ['name' => 'width', 'contents' => '120'],
+                    ['name' => 'height', 'contents' => '120'],
+                    ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
+                    ['name' => 'cargo', 'contents' => 'DIRECTOR DE ADMISION']
+                ]
             ]
-        ]);
+        );
 
-        $pdfFirmado = $response->getBody()->getContents();
+        $pdfFirmado1 = $response1->getBody()->getContents();
+
+        $usuario479 = User::find(479);
+        $certificado2 = CertificadoFirma::where('id_usuario', 479)->first();
+
+        if (!$usuario479 || !$certificado2) {
+            abort(400, 'Usuario 479 sin certificado configurado');
+        }
+
+        $response2 = $client->post(
+            'https://test-admision.unap.edu.pe/service_firma/firmar-dni/',
+            [
+                'multipart' => [
+                    ['name' => 'dni', 'contents' => $usuario479->dni],
+                    ['name' => 'password_p12', 'contents' => $certificado2->password_p12],
+                    ['name' => 'documento', 'contents' => $pdfFirmado1, 'filename' => $dni.'.pdf'],
+                    ['name' => 'url', 'contents' => null],
+                    ['name' => 'x', 'contents' => '30'],
+                    ['name' => 'y', 'contents' => '155'],
+                    ['name' => 'width', 'contents' => '300'],
+                    ['name' => 'height', 'contents' => '70'],
+                    ['name' => 'firmante', 'contents' => 'MSc. Juan Carlos Benavides Huanca'],
+                    ['name' => 'cargo', 'contents' => 'DIRECTOR DE ADMISION']
+                ]
+            ]
+        );
+
+        $pdfFirmadoFinal = $response2->getBody()->getContents();
+
         $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/');
         if (!File::exists($rutaCarpeta)) {
             File::makeDirectory($rutaCarpeta, 0755, true, true);
         }
+
         $rutaFinal = $rutaCarpeta . $dni . '.pdf';
-        file_put_contents($rutaFinal, $pdfFirmado);
+        file_put_contents($rutaFinal, $pdfFirmadoFinal);
 
         File::delete($rutaTemp);
-
         return response()->file($rutaFinal);
+        
     }
 
 
