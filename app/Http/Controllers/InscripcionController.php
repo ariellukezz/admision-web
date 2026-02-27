@@ -458,7 +458,7 @@ class InscripcionController extends Controller
         );
 
         $pdfFirmadoFinal = $response2->getBody()->getContents();
-
+        sleep(1);
         $rutaCarpeta = public_path('/documentos/'.auth()->user()->id_proceso.'/inscripciones/constancias/');
         if (!File::exists($rutaCarpeta)) {
             File::makeDirectory($rutaCarpeta, 0755, true, true);
