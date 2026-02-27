@@ -639,41 +639,41 @@ class IngresoController extends Controller {
                 return response()->json(['error' => 'No se encontró el postulante o no cumple los requisitos.'], 404);
             }
     
-            // DB::transaction(function () use ($postulante) {
-            //     $estadoCivilMap = [
-            //         1 => 2,
-            //         2 => 1,
-            //         3 => 3,
-            //         4 => 6
-            //     ];
+            DB::transaction(function () use ($postulante) {
+                $estadoCivilMap = [
+                    1 => 2,
+                    2 => 1,
+                    3 => 3,
+                    4 => 6
+                ];
     
-            //     $estudiante = Estudiante::on('mysql_secondary')->create([
-            //         'num_mat' => $postulante->codigo,
-            //         'cod_car' => $postulante->programa_oti,
-            //         'paterno' => $postulante->paterno,
-            //         'materno' => $postulante->materno,
-            //         'nombres' => $postulante->nombres,
-            //         'tip_doc' => $postulante->tipo_doc_oti,
-            //         'num_doc' => $postulante->dni,
-            //         'num_car' => 1, // Ingreso
-            //         'fch_nac' => $postulante->fec_nacimiento,
-            //         'sexo' => $postulante->sexo,
-            //         'ubigeo' => $postulante->ubigeo_residencia,
-            //         'mod_ing' => $postulante->modalidad_oti,
-            //         'est_civ' => $estadoCivilMap[$postulante->estado_civil] ?? $postulante->estado_civil,
-            //         'fch_ing' => $postulante->fecha,
-            //         'direc' => $postulante->direccion,
-            //         'email' => $postulante->email,
-            //         'con_est' => 5,
-            //         'celular' => $postulante->celular,
-            //         'cod_esp' => $postulante->cod_esp,
-            //         'puntaje' => $postulante->puntaje,
-            //         'puesto_escuela' => $postulante->puesto,
-            //         'puesto_general' => $postulante->puesto_general,
-            //         'ano_ing' => $postulante->anio,
-            //         'per_ing' => $postulante->ciclo_oti
-            //     ]);
-            // });
+                $estudiante = Estudiante::on('mysql_secondary')->create([
+                    'num_mat' => $postulante->codigo,
+                    'cod_car' => $postulante->programa_oti,
+                    'paterno' => $postulante->paterno,
+                    'materno' => $postulante->materno,
+                    'nombres' => $postulante->nombres,
+                    'tip_doc' => $postulante->tipo_doc_oti,
+                    'num_doc' => $postulante->dni,
+                    'num_car' => 1,
+                    'fch_nac' => $postulante->fec_nacimiento,
+                    'sexo' => $postulante->sexo,
+                    'ubigeo' => $postulante->ubigeo_residencia,
+                    'mod_ing' => $postulante->modalidad_oti,
+                    'est_civ' => $estadoCivilMap[$postulante->estado_civil] ?? $postulante->estado_civil,
+                    'fch_ing' => $postulante->fecha,
+                    'direc' => $postulante->direccion,
+                    'email' => $postulante->email,
+                    'con_est' => 5,
+                    'celular' => $postulante->celular,
+                    'cod_esp' => $postulante->cod_esp,
+                    'puntaje' => $postulante->puntaje,
+                    'puesto_escuela' => $postulante->puesto,
+                    'puesto_general' => $postulante->puesto_general,
+                    'ano_ing' => $postulante->anio,
+                    'per_ing' => $postulante->ciclo_oti
+                ]);
+            });
     
             return response()->json(['mensaje' => 'Registro biométrico realizado con éxito'], 200);
     
