@@ -167,7 +167,7 @@ const getStageLabel = (index) => {
 };
 
 const startPreinscription = () => {
-  window.location.href = '/preinscripcion-segundas-2026-formulario';
+  window.location.href = '/preinscripcion-segundas-2026-formulario/preinscripcion';
   showPreinscriptionModal.value = false;
 };
 </script>
