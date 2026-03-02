@@ -12,7 +12,7 @@ class IdentidadSegundaController extends Controller
 
     public function getCondicionesLengua()
     {
-        $response = Http::get('http://localhost:8080/api/v1/condicion-lengua/select');
+        $response = Http::get('https://test-admision.unap.edu.pe/service_identidad/api/v1/condicion-lengua/select');
 
         if ($response->successful()) {
             return response()->json($response->json());
@@ -25,7 +25,7 @@ class IdentidadSegundaController extends Controller
 
     public function getPertenenciaCultural()
     {
-        $response = Http::get('http://localhost:8080/api/v1/pertenencia-cultural/select');
+        $response = Http::get('https://test-admision.unap.edu.pe/service_identidad/api/v1/pertenencia-cultural/select');
 
         if ($response->successful()) {
             return response()->json($response->json());
@@ -38,7 +38,7 @@ class IdentidadSegundaController extends Controller
 
     public function getLenguaIndigena()
     {
-        $response = Http::get('http://localhost:8080/api/v1/lengua-indigena/select');
+        $response = Http::get('https://test-admision.unap.edu.pe/service_identidad/api/v1/lengua-indigena/select');
 
         if ($response->successful()) {
             return response()->json($response->json());
@@ -51,7 +51,7 @@ class IdentidadSegundaController extends Controller
 
     public function getPueblosIndigenas()
     {
-        $response = Http::get('http://localhost:8080/api/v1/pueblo-indigena/select');
+        $response = Http::get('https://test-admision.unap.edu.pe/service_identidad/api/v1/pueblo-indigena/select');
 
         if ($response->successful()) {
             return response()->json($response->json());
@@ -71,7 +71,7 @@ class IdentidadSegundaController extends Controller
             ], 404);
         }
 
-        $response = Http::get("http://localhost:8080/api/v1/identidad-cultural/{$id_postulante}/{$id_proceso}");
+        $response = Http::get("https://test-admision.unap.edu.pe/service_identidad/api/v1/identidad-cultural/{$id_postulante}/{$id_proceso}");
         $data = [];
 
         $data['discapacidad'] = $postulante->discapacidad;
