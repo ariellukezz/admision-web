@@ -482,6 +482,14 @@ const validateDocuments = async () => {
     }
   }
 
+    // when a user enters a dni we need to know whether they are
+    // sancionado or if they already have a pre‑inscription.  this
+    // method is invoked from `getPasoRegistrado` when there is no paso
+    // record (the new design stopped saving pasos so `estado == false`
+    // will be the norm).  if the applicant is sancionado we show a
+    // modal, otherwise we delegate to `consultaInscripcion` which will
+    // either redirect them to the success page or enable the buttons.
+    const sancionado = ref(null)
     const getSancionado = async () => {
       participa.value = 0
 
@@ -490,7 +498,23 @@ const validateDocuments = async () => {
           '/get-sancionado/' + formState.dni + '/' + props.procceso_seleccionado.id
         )
 
-        return false
+        sancionado.value = res.data.datos
+        if (sancionado.value != null) {
+          // user is blocked – stop the spinner and show whatever UI the
+          // page has for sancionados (not handled here).
+          loading.value = false
+          modalcarrerasprevias.value = false
+          // the caller may open its own modal if needed
+          return false
+        } else {
+          // not sancionado – check for existing preinscription as a
+          // second guard.  after the check hide the loading indicator so
+          // the visitor can interact with the form.
+          await consultaInscripcion()
+          modalcarrerasprevias.value = false
+          loading.value = false
+          return true
+        }
       } catch (error) {
         console.error('Error al obtener datos de sancionado', error)
         return null
@@ -518,29 +542,45 @@ const validateDocuments = async () => {
   }
 
   const getPasoRegistrado = async () => {
-    let res = await axios.get(
-      '/get-paso-registrado/' + props.procceso_seleccionado.id + '/' + formState.dni
-    )
-    if (res.data.estado == true) {
-      getDatosPersonales()
-      if (res.data.datos.nro == 3) {
-        // consultaInscripcion2()
+    // first guard: if the applicant is already in the preinscription
+    // table we should send them to the success page immediately.  this
+    // covers the case where no `paso` record exists (new flow stopped
+    // creating them) as well as the old scenario where the last step
+    // was saved.
+    await consultaInscripcion()
+    if (postulante_inscrito.value === 1) {
+      // consultaInscripcion already set pagina_pre and hid the modal
+      return
+    }
+
+    // the previous implementation relied on the `paso` table to resume
+    // the form.  keep that behaviour for people who have a record, but
+    // it is now optional.
+    try {
+      let res = await axios.get(
+        '/get-paso-registrado/' + props.procceso_seleccionado.id + '/' + formState.dni
+      )
+
+      if (res.data.estado == true) {
+        getDatosPersonales()
+        const nro = res.data.datos.nro
+        // backend always uses `6` for the final preinscription step
+        if (nro === 6) {
+          // they've already reached the end of the wizard; double check
+          // the preinscription status in case the paso record is stale
+          await consultaInscripcion()
+        } else {
+          pagina_pre.value = nro + 1
+        }
       } else {
-        pagina_pre.value = res.data.datos.nro + 1
+        // no paso record; show the "checking" modal and query sancionado
+        modalcarrerasprevias.value = true
+        loading.value = true
+        await getSancionado()
+        // getSancionado will call consultaInscripcion when appropriate
       }
-    } else {
-      modalcarrerasprevias.value = true
-      loading.value = true
-      
-      // Temporalmente: cerrar el modal después de 1 segundo
-      setTimeout(() => {
-        modalcarrerasprevias.value = false
-        loading.value = false
-        // Establecer participa en 1 para habilitar el botón
-        participa.value = 1
-      }, 1000)
-      
-      // getSancionado() // Comentado temporalmente
+    } catch (error) {
+      console.error('Error al consultar el paso registrado', error)
     }
   }
 
