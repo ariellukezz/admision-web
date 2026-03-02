@@ -2336,7 +2336,7 @@ const irDiagnostico = async () => {
 
   try {
     const response = await axios.get(
-      "https://admision.unap.edu.pe/login-postulante",
+      "https://admision.unap.edu.pe/login-postulante?dni=",
       {
         params: { dni: formState.dni },
         headers: { 'Accept': 'application/json' }
@@ -2353,7 +2353,7 @@ const irDiagnostico = async () => {
 
   } catch (error) {
     console.error("Error:", error);
-    const fallbackUrl = `https://admision.unap.edu.pe/codigo-acceso?dni=${formState.dni}`;
+    const fallbackUrl = `https://admision.unap.edu.pe/login-postulante?dni=${formState.dni}`;
     window.open(fallbackUrl, "_blank");
   }
 }
