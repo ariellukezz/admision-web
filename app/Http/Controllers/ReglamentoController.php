@@ -53,10 +53,10 @@ class ReglamentoController extends Controller
               $reglamento = new Reglamento();
               $reglamento->nombre = $request->nombre;
               $reglamento->version = 1;
-              $reglamento->url = url('documentos/reglamentos/' . $filename);
+              $reglamento->url = '/documentos/reglamentos/' . $filename;
               $reglamento->estado = $request->estado;
               $reglamento->inicio_vigencia = $request->inicio_vigencia;
-              $reglamento->fin_vigencia = $request->inicio_vigencia;
+              $reglamento->fin_vigencia = $request->fin_vigencia;
               $reglamento->id_usuario = auth()->id();
               $reglamento->save();
           }else {
@@ -72,7 +72,7 @@ class ReglamentoController extends Controller
 
             $reglamento->nombre = $request->nombre;
             $reglamento->version = 1;
-            $reglamento->url = url('documentos/reglamentos/' . $filename);
+            $reglamento->url = '/documentos/reglamentos/' . $filename;
             $reglamento->estado = $request->estado;
             $reglamento->inicio_vigencia = $request->inicio_vigencia;
             $reglamento->fin_vigencia = $request->fin_vigencia;

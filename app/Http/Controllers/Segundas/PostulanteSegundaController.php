@@ -249,8 +249,8 @@ class PostulanteSegundaController extends Controller
   }
 
 
-  public function saveDataAdicional(Request $request)
-  {
+ public function saveDataAdicional(Request $request)
+{
     $postulante = Postulante::find($request->id_postulante );
     $postulante->discapacidad = $request->discapacidad;
     $postulante->tipo_discapacidad = $request->tipo_discapacidad;
@@ -271,7 +271,7 @@ class PostulanteSegundaController extends Controller
     ];
 
     try {
-        $response = Http::post('http://localhost:8080/api/v1/identidad-cultural', $payload);
+        $response = Http::post('https://test-admision.unap.edu.pe/service_identidad/api/v1/identidad-cultural/', $payload);
 
         if ($response->successful()) {
             return response()->json([
@@ -281,20 +281,27 @@ class PostulanteSegundaController extends Controller
             ]);
         }
 
+        // 🔴 VER AQUÍ: Mostrar el error completo del servidor externo
         return response()->json([
             'estado' => false,
             'mensaje' => 'Error en el servicio externo',
-            'data' => $response->json()
+            'error_status' => $response->status(),
+            'error_body' => $response->body(), // <-- Esto te mostrará el error real
+            'error_json' => $response->json(), // <-- Si devuelve JSON
+            'payload_enviado' => $payload // <-- Para ver qué se envió
         ], 500);
+
     } catch (\Exception $e) {
+        // 🔴 VER AQUÍ: Mostrar la excepción completa
         return response()->json([
             'estado' => false,
-            'mensaje' => 'No se pudo conectar con el servicio externo: ' . $e->getMessage()
+            'mensaje' => 'No se pudo conectar con el servicio externo',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(), // <-- Stack trace completo
+            'payload_enviado' => $payload
         ], 500);
     }
-
-  }
-
+}
 
 
 

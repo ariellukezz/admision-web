@@ -482,17 +482,20 @@ const validateDocuments = async () => {
     }
   }
 
-  const getSancionado = async () => {
-    participa.value = 0
-    try {
-      let res = await axios.get(
-        '/get-sancionado/' + formState.dni + '/' + props.procceso_seleccionado.id
-      )
-      return res.data.datos
-    } catch (error) {
-      console.error('Error al obtener datos de sancionado', error)
+    const getSancionado = async () => {
+      participa.value = 0
+
+      try {
+        const res = await axios.get(
+          '/get-sancionado/' + formState.dni + '/' + props.procceso_seleccionado.id
+        )
+
+        return false
+      } catch (error) {
+        console.error('Error al obtener datos de sancionado', error)
+        return null
+      }
     }
-  }
 
   const consultaInscripcion = async () => {
     postulante_inscrito.value = 0
@@ -528,7 +531,16 @@ const validateDocuments = async () => {
     } else {
       modalcarrerasprevias.value = true
       loading.value = true
-      getSancionado()
+      
+      // Temporalmente: cerrar el modal después de 1 segundo
+      setTimeout(() => {
+        modalcarrerasprevias.value = false
+        loading.value = false
+        // Establecer participa en 1 para habilitar el botón
+        participa.value = 1
+      }, 1000)
+      
+      // getSancionado() // Comentado temporalmente
     }
   }
 

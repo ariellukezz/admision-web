@@ -2336,7 +2336,7 @@ const irDiagnostico = async () => {
 
   try {
     const response = await axios.get(
-      "https://admision.unap.edu.pe/codigo-acceso",
+      "https://admision.unap.edu.pe/login-postulante",
       {
         params: { dni: formState.dni },
         headers: { 'Accept': 'application/json' }

@@ -157,7 +157,7 @@ class ProcesoController extends Controller
       }else{
         if( $proceso->nivel == 2 ){
           return Inertia::render('Segundas/Publico/preinscripcion', ['procceso_seleccionado' => $proceso]);
-        }
+        } 
       }
 
     } else {

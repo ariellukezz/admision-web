@@ -1,12 +1,24 @@
 <template>
   <div class="admission-schedule">
-    <!-- Encabezado -->
     <div class="schedule-header">
-      <h2>📅 CRONOGRAMA DE ADMISIÓN 2026</h2>
-      <p class="subtitle">Segunda Especialidad - UNA-P</p>
+      <div class="header-content">
+        <div>
+          <h2>CRONOGRAMA DE ADMISIÓN 2026</h2>
+          <p class="subtitle">Segunda Especialidad - UNA-P</p>
+        </div>
+        <a-button 
+          type="primary" 
+          class="preinscription-btn"
+          @click="showPreinscriptionModal = true"
+        >
+          <template #icon>
+            <FormOutlined />
+          </template>
+          INICIAR PREINSCRIPCIÓN
+        </a-button>
+      </div>
     </div>
 
-    <!-- Cuadro de Etapas -->
     <div class="stages-grid">
       <div v-for="(stage, i) in stages" :key="i" class="stage-card" :class="{ 'active': i === activeStage }">
         <div class="stage-number">ETAPA {{ i + 1 }}</div>
@@ -14,7 +26,6 @@
       </div>
     </div>
 
-    <!-- Tabla de Cronograma -->
     <div class="schedule-table-container">
       <table class="schedule-table">
         <thead>
@@ -42,7 +53,6 @@
       </table>
     </div>
 
-    <!-- Resumen en Cuadros -->
     <div class="summary-grid">
       <div class="summary-card">
         <div class="summary-number">{{ timelineData.length }}</div>
@@ -62,15 +72,54 @@
       </div>
     </div>
 
-    <!-- Nota -->
     <div class="note-box">
       <strong>Nota:</strong> Cronograma sujeto a modificaciones según disposiciones oficiales de la UNA-P.
     </div>
+
+    <!-- Modal de Preinscripción Automático -->
+    <a-modal
+      v-model:open="showPreinscriptionModal"
+      title="INICIAR PREINSCRIPCIÓN"
+      :footer="null"
+      centered
+      width="500px"
+      class="preinscription-modal"
+    >
+      <div class="modal-content">
+        <div class="modal-icon">
+          <FormOutlined />
+        </div>
+        
+        <h3>¿Deseas iniciar tu preinscripción?</h3>
+        <p class="modal-description">Serás redirigido al formulario de preinscripción para completar tus datos</p>
+
+        <div class="modal-actions">
+          <a-button @click="showPreinscriptionModal = false">
+            Cancelar
+          </a-button>
+          <a-button 
+            type="primary" 
+            @click="startPreinscription"
+            class="action-btn"
+          >
+            Iniciar ahora
+          </a-button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { FormOutlined } from '@ant-design/icons-vue';
+
+const showPreinscriptionModal = ref(false);
+
+// Abrir modal automáticamente al cargar la página
+onMounted(() => {
+  showPreinscriptionModal.value = true;
+});
 
 const stages = [
   'CONVOCATORIA Y PREINSCRIPCIÓN',
@@ -116,6 +165,11 @@ const getStageLabel = (index) => {
   if (index < 6) return 'ETAPA 3';
   return 'ETAPA 4';
 };
+
+const startPreinscription = () => {
+  window.location.href = '/preinscripcion-segundas-2026-formulario';
+  showPreinscriptionModal.value = false;
+};
 </script>
 
 <style scoped>
@@ -125,14 +179,20 @@ const getStageLabel = (index) => {
   padding: 32px;
   margin: 20px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .schedule-header {
-  text-align: center;
   margin-bottom: 32px;
   border-bottom: 2px solid #1890ff;
   padding-bottom: 16px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .schedule-header h2 {
@@ -148,7 +208,23 @@ const getStageLabel = (index) => {
   font-size: 14px;
 }
 
-/* Etapas */
+.preinscription-btn {
+  height: 48px;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #1890ff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(24,144,255,0.3);
+  transition: all 0.3s;
+}
+
+.preinscription-btn:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24,144,255,0.4);
+}
+
 .stages-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -163,7 +239,6 @@ const getStageLabel = (index) => {
   padding: 16px;
   text-align: center;
   transition: all 0.3s;
-  cursor: default;
 }
 
 .stage-card.active {
@@ -185,7 +260,6 @@ const getStageLabel = (index) => {
   line-height: 1.4;
 }
 
-/* Tabla */
 .schedule-table-container {
   overflow-x: auto;
   margin-bottom: 32px;
@@ -218,13 +292,11 @@ const getStageLabel = (index) => {
   background: #fafafa;
 }
 
-/* Filas coloreadas */
 .row-stage1:nth-child(odd) { background: #f0f8ff; }
 .row-stage2:nth-child(odd) { background: #f6ffed; }
 .row-stage3:nth-child(odd) { background: #fff7e6; }
 .row-stage4:nth-child(odd) { background: #f9f0ff; }
 
-/* Celdas */
 .cell-number {
   font-weight: bold;
   color: #1890ff;
@@ -245,7 +317,6 @@ const getStageLabel = (index) => {
   letter-spacing: 0.5px;
 }
 
-/* Resumen */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -275,7 +346,6 @@ const getStageLabel = (index) => {
   letter-spacing: 0.5px;
 }
 
-/* Nota */
 .note-box {
   background: #fff7e6;
   border: 1px solid #ffd591;
@@ -285,7 +355,58 @@ const getStageLabel = (index) => {
   color: #1c1c1e;
 }
 
-/* Responsive */
+.modal-content {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  background: #e6f7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 32px;
+  color: #1890ff;
+}
+
+.modal-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1c1c1e;
+  margin-bottom: 8px;
+}
+
+.modal-description {
+  color: #595959;
+  margin-bottom: 32px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.modal-actions :deep(.ant-btn) {
+  min-width: 120px;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.action-btn {
+  background: #1890ff;
+  border: none;
+}
+
+.action-btn:hover {
+  background: #40a9ff !important;
+}
+
 @media (max-width: 1200px) {
   .stages-grid,
   .summary-grid { grid-template-columns: repeat(2, 1fr); }
@@ -297,5 +418,9 @@ const getStageLabel = (index) => {
   .summary-grid { grid-template-columns: 1fr; }
   .schedule-table th,
   .schedule-table td { padding: 12px 8px; font-size: 12px; }
+  .header-content { flex-direction: column; text-align: center; }
+  .preinscription-btn { width: 100%; }
+  .modal-actions { flex-direction: column; }
+  .modal-actions :deep(.ant-btn) { width: 100%; }
 }
 </style>
