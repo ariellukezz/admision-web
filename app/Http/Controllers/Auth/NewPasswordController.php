@@ -46,6 +46,12 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
+                if (!$user) {
+                    throw ValidationException::withMessages([
+                        'email' => ['Usuario no encontrado o enlace inválido.']
+                    ]);
+                }
+
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
