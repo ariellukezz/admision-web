@@ -28,7 +28,7 @@ class GlobalObserver
             'model' => get_class($model),
             'tabla' => $model->getTable(),
             'model_id' => $model->id,
-            'user_id' => auth()->user()->id, 
+            'user_id' => auth()->id() ?? null,
             'direccion' => $clientIp,
             'fecha' => now()
         ]);
@@ -41,7 +41,7 @@ class GlobalObserver
             'model' => get_class($model),
             'tabla' => $model->getTable(),
             'model_id' => $model->id,
-            'user_id' => auth()->user()->id, 
+            'user_id' => auth()->id() ?? null,
             'direccion' => $clientIp,
             'fecha' => now()
         ]);
