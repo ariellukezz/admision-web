@@ -404,7 +404,7 @@
         
         </div>
 
-        <div style="width: 100%; text-align:center; margin-top:140px;">_______________________________________</div>
+        <div style="width: 100%; text-align:center; margin-top:100px;">_______________________________________</div>
         <div style="width: 100%; text-align:center; margin-top:20px;">Nombres Y Apellidos: ...........................</div>
         <div style="width: 100%; text-align:center; margin-top:5px;">DNI N°: ..........................</div>
 
