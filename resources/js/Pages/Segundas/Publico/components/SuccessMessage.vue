@@ -29,15 +29,28 @@
         </div>
 
         <!-- Botón de descarga -->
-        <a-button
-          type="primary"
-          size="large"
-          @click="emit('download')"
-          class="h-12 font-medium"
-        >
-          <download-outlined/>
-          Descargar Anexos
-        </a-button>
+         <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 30px;">
+                  <a-button
+            type="primary"
+            size="large"
+            @click="emit('download')"
+            class="h-12 font-medium"
+          >
+            <download-outlined/>
+            Descargar Anexos
+          </a-button>
+
+          <a-button
+            type="primary"
+            size="large"
+            @click="emit('downloadGenerados')"
+            class="h-12 font-medium"
+          >
+            <download-outlined/>
+            Descargar Anexos Generados
+          </a-button>
+         </div>
+
       </div>
     </div>
   </div>
@@ -46,7 +59,7 @@
 <script setup>
 import { DownloadOutlined } from '@ant-design/icons-vue';
 
-const emit = defineEmits(['download'])
+const emit = defineEmits(['download', 'downloadGenerados'])
 </script>
 
 <style scoped>

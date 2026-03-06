@@ -73,7 +73,7 @@ Route::get('/get-lengua-segundas', [IdentidadSegundaController::class, 'getLengu
 Route::get('/get-pueblos-indigenes-segundas', [IdentidadSegundaController::class, 'getPueblosIndigenas']);
 Route::get('/get-identidad-cultural/{id_postulante}/{id_proceso}', [IdentidadSegundaController::class, 'getIdentidadCulturalByPostulanteProceso']);
 
-
+Route::get('/pdf-preinscripcion/{id_proceso}/{dni}', [PreinscripcionSegundasController::class, 'pdfPreinscripcion']);
 
 Route::post('/save-postulante-adicional', [PostulanteSegundaController::class, 'saveDataAdicional']);
 

@@ -83,6 +83,7 @@
     <SuccessMessage
       v-if="pagina_pre === 7 || postulante_inscrito === 1"
       @download="descargaReglamento"
+      @downloadGenerados="descargaAnexosGenerados"
     />
 
     <NavigationButtons
@@ -186,6 +187,7 @@ const {
   getProgramas,
   validateDocuments,
   descargaReglamento,
+  descargaAnexosGenerados,
   onSelectNacimiento,
   onSelectResidencias,
   setFormRef,

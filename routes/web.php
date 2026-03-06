@@ -305,10 +305,10 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     //ESTUDIOS ANTERIORES
     Route::get('/carreras-previas', fn () => Inertia::render('Admin/Estudios/carreras_previas'))->name('admin-carreras-previas');
-    Route::post('/get-carreras-previas-registrado', [CarrerasPreviascontroller::class, 'getCarrerasPrevias']);
-    Route::post('/save-carrera-previa', [CarrerasPreviascontroller::class, 'save']);
+    Route::post('/get-carreras-previas-registrado', [CarrerasPreviasController::class, 'getCarrerasPrevias']);
+    Route::post('/save-carrera-previa', [CarrerasPreviasController::class, 'save']);
     //Route::post('/programas/get-programas', [ProgramaController::class, 'getProgramas']);
-    Route::get('/eliminar-carrera-previa/{id}', [CarrerasPreviascontroller::class, 'delete']);
+    Route::get('/eliminar-carrera-previa/{id}', [CarrerasPreviasController::class, 'delete']);
 
 
     Route::get('/get-select-programas-proceso-admin',[ProgramaProcesoController::class, 'getSelectProgramasProcesoAdmin']);

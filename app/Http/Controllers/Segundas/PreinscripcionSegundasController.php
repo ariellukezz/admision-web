@@ -3,9 +3,11 @@ namespace App\Http\Controllers\Segundas;
 use App\Http\Controllers\Controller;
 use App\Models\Preinscripcion;
 use App\Models\Proceso;
-
+use Mpdf\Mpdf;
 use App\Models\Inscripcion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class PreinscripcionSegundasController extends Controller
 {
@@ -121,6 +123,127 @@ class PreinscripcionSegundasController extends Controller
 
     }
 
+
+    public function pdfPreinscripcion($id_proceso, $dni)
+    {
+        try {
+
+        $datos = DB::table('pre_inscripcion as pre')
+            ->join('procesos as proc','proc.id','=','pre.id_proceso')
+            ->join('postulante as pos','pos.id','=','pre.id_postulante')
+            ->join('ubigeo as ub','ub.ubigeo','=','pos.ubigeo_residencia')
+            ->join('departamento as dep','dep.id','=','ub.id_departamento')
+            ->join('provincia as prov','prov.id','=','ub.id_provincia')
+            ->join('distritos as dist','dist.id','=','ub.id_distrito')
+            ->join('paises as pais','pais.id','=','pos.id_pais')
+            ->join('programa as pro','pro.id','=','pre.id_programa')
+            ->join('facultad as fac','fac.id','=','pro.id_facultad')
+            ->join('modalidad as mo','mo.id','=','pre.id_modalidad')
+
+            ->selectRaw(" pos.tipo_doc, pos.nro_doc, 
+            CONCAT(
+                UPPER(LEFT(LOWER(pos.nombres),1)),
+                SUBSTRING(LOWER(pos.nombres),2, LOCATE(' ', CONCAT(pos.nombres, ' ')) - 1),
+                IF(LOCATE(' ', pos.nombres) > 0,
+                    CONCAT(
+                        ' ',
+                        UPPER(SUBSTRING(LOWER(pos.nombres), LOCATE(' ', pos.nombres) + 1, 1)),
+                        SUBSTRING(LOWER(pos.nombres), LOCATE(' ', pos.nombres) + 2)
+                    ),
+                    ''
+                )
+            ) as nombres,
+            CONCAT(UPPER(LEFT(LOWER(pos.primer_apellido),1)),SUBSTRING(LOWER(pos.primer_apellido),2)) as paterno,
+            CONCAT(UPPER(LEFT(LOWER(pos.segundo_apellido),1)),SUBSTRING(LOWER(pos.segundo_apellido),2)) as materno,
+            pos.direccion, pos.sexo, pais.codigo, dep.nombre as departamento, prov.nombre as provincia, dist.nombre as distrito, 
+            pro.nombre as programa, pos.celular, pos.email,
+            DATE_FORMAT(pos.fec_nacimiento,'%d/%m/%Y') as fec_nacimiento,
+
+            CONCAT(
+            DAY(pos.fec_nacimiento),' de ',
+            ELT(MONTH(pos.fec_nacimiento),
+            'enero','febrero','marzo','abril','mayo','junio',
+            'julio','agosto','septiembre','octubre','noviembre','diciembre'
+            ),
+            ' de ',
+            YEAR(pos.fec_nacimiento)
+            ) as fecha_nacimiento_texto,
+            fac.facultad AS facultad,
+            pos.ubigeo_nacimiento
+            ")
+
+            ->where('pre.id_proceso',$id_proceso)
+            ->where('pos.nro_doc',$dni)
+            ->first();
+
+        // return $datos;
+
+            if (!$datos || !isset($dni)) {
+                throw new \Exception('Datos inválidos para generar el PDF');
+            }
+            
+            if (!preg_match('/^[0-9]{8}$/', $dni)) {
+                return response()->json(['error' => 'Formato de DNI inválido'], 400);
+            }
+            
+            $data = [
+                'dni' => $dni,
+                'fecha_generacion' => now()->format('d/m/Y H:i:s'),
+                'usuario' => auth()->user()->name ?? 'Sistema'
+            ];
+            
+            $html = view('Segundas.Preinscripcion.anexos', $data, compact('datos'))->render();
+            
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'orientation' => 'P',
+                'default_font_size' => 12,
+                'default_font' => 'sans-serif',
+                'margin_left' => 15,
+                'margin_right' => 15,
+                'margin_top' => 16,
+                'margin_bottom' => 16,
+                'margin_header' => 9,
+                'margin_footer' => 9
+            ]);
+            
+            $mpdf->SetDisplayMode('fullpage');
+            $mpdf->list_indent_first_level = 0;
+            
+            $mpdf->WriteHTML($html);
+            
+            $output = $mpdf->Output('', 'S');
+            
+            $idProceso = auth()->user()->id_proceso ?? 'sin_proceso';
+            $basePath = "documentos/{$idProceso}/preinscripcion/constancias";
+            $rutaCarpeta = public_path($basePath);
+            
+            if (!File::exists($rutaCarpeta)) {
+                File::makeDirectory($rutaCarpeta, 0755, true);
+            }
+            
+            $nombreArchivo = "preinscripcion_{$dni}_" . date('Ymd_His') . ".pdf";
+            $rutaCompleta = $rutaCarpeta . '/' . $nombreArchivo;
+            
+            // file_put_contents($rutaCompleta, $output);
+            
+            return response()->stream(function() use ($output) {
+                echo $output;
+            }, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="preinscripcion_' . $dni . '.pdf"',
+                'Content-Length' => strlen($output),
+                'Cache-Control' => 'public, must-revalidate, max-age=0',
+                'Pragma' => 'public'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al generar el PDF: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
 

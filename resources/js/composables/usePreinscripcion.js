@@ -454,6 +454,33 @@ const validateDocuments = async () => {
     }
   }
 
+  const descargaAnexosGenerados = async () => {
+    try {
+
+      const response = await axios.get(
+        '/pdf-preinscripcion/' + props.procceso_seleccionado.id + "/" + formState.dni,
+        {
+          responseType: 'blob'
+        }
+      )
+
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'preinscripcion.pdf') // ← AQUÍ estaba el error
+      document.body.appendChild(link)
+
+      link.click()
+
+      link.remove()
+      window.URL.revokeObjectURL(url)
+
+    } catch (error) {
+      console.error('Error al descargar el PDF', error)
+    }
+  }
+
   const getCondicionesLengua = async () => {
     const response = await axios.get('/get-condiciones-lengua-segundas')
     if (response.data) {
@@ -482,13 +509,6 @@ const validateDocuments = async () => {
     }
   }
 
-    // when a user enters a dni we need to know whether they are
-    // sancionado or if they already have a pre‑inscription.  this
-    // method is invoked from `getPasoRegistrado` when there is no paso
-    // record (the new design stopped saving pasos so `estado == false`
-    // will be the norm).  if the applicant is sancionado we show a
-    // modal, otherwise we delegate to `consultaInscripcion` which will
-    // either redirect them to the success page or enable the buttons.
     const sancionado = ref(null)
     const getSancionado = async () => {
       participa.value = 0
@@ -500,16 +520,12 @@ const validateDocuments = async () => {
 
         sancionado.value = res.data.datos
         if (sancionado.value != null) {
-          // user is blocked – stop the spinner and show whatever UI the
-          // page has for sancionados (not handled here).
+
           loading.value = false
           modalcarrerasprevias.value = false
-          // the caller may open its own modal if needed
           return false
         } else {
-          // not sancionado – check for existing preinscription as a
-          // second guard.  after the check hide the loading indicator so
-          // the visitor can interact with the form.
+
           await consultaInscripcion()
           modalcarrerasprevias.value = false
           loading.value = false
@@ -542,20 +558,13 @@ const validateDocuments = async () => {
   }
 
   const getPasoRegistrado = async () => {
-    // first guard: if the applicant is already in the preinscription
-    // table we should send them to the success page immediately.  this
-    // covers the case where no `paso` record exists (new flow stopped
-    // creating them) as well as the old scenario where the last step
-    // was saved.
+
     await consultaInscripcion()
     if (postulante_inscrito.value === 1) {
-      // consultaInscripcion already set pagina_pre and hid the modal
+
       return
     }
 
-    // the previous implementation relied on the `paso` table to resume
-    // the form.  keep that behaviour for people who have a record, but
-    // it is now optional.
     try {
       let res = await axios.get(
         '/get-paso-registrado/' + props.procceso_seleccionado.id + '/' + formState.dni
@@ -564,20 +573,16 @@ const validateDocuments = async () => {
       if (res.data.estado == true) {
         getDatosPersonales()
         const nro = res.data.datos.nro
-        // backend always uses `6` for the final preinscription step
         if (nro === 6) {
-          // they've already reached the end of the wizard; double check
-          // the preinscription status in case the paso record is stale
           await consultaInscripcion()
         } else {
           pagina_pre.value = nro + 1
         }
       } else {
-        // no paso record; show the "checking" modal and query sancionado
         modalcarrerasprevias.value = true
         loading.value = true
         await getSancionado()
-        // getSancionado will call consultaInscripcion when appropriate
+
       }
     } catch (error) {
       console.error('Error al consultar el paso registrado', error)
@@ -726,6 +731,7 @@ const validateDocuments = async () => {
     setFormRef,
     setFormPreinscripcion,
     setFormDatosTransversales,
+    descargaAnexosGenerados,
     consultaInscripcion,
     getPasoRegistrado,
     getDataPrisma,
