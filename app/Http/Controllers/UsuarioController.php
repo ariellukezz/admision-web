@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Arr;
 
-
 class UsuarioController extends Controller
 {
 
@@ -23,12 +22,13 @@ class UsuarioController extends Controller
     public function create()
     {
         $roles = Role::pluck('name','name')->all();
-        return Inertia::render('Usuarios/crear', ['usuarios' => $usuarios]);
+        return Inertia::render('Usuarios/crear', ['roles' => $roles]);
     }
 
     public function store(Request $request)
     {
         if (empty($request->id)) {
+
             $this->validate($request,[
                 'name'=>'required',
                 'email'=>'required|email|unique:users,email',
@@ -43,19 +43,21 @@ class UsuarioController extends Controller
             $user->assignRole($request->roles);
 
         }else{
+
             $usuario = User::find($request->id);
             $usuario->name = $request->name;
             $usuario->id_proceso = $request->id_proceso;
-            if(isset($request->password)){
+
+            if(!empty($request->password)){
                 $usuario->password = Hash::make($request->password);
             }
+
             $usuario->materno = $request->materno;
             $usuario->paterno = $request->paterno;
             $usuario->save();
         }
 
         return redirect()->route('usuarios.index');
-
     }
 
     public function show(string $id)
@@ -78,27 +80,29 @@ class UsuarioController extends Controller
 
     public function update(Request $request, string $id)
     {
+
         $this->validate($request,[
             'name'=>'required',
-            'email'=>'required|email|unique:users,email'.$id,
-            'password'=>'same:confirm-password',
+            'email'=>'required|email|unique:users,email,'.$id,
+            'password'=>'nullable|same:confirm-password',
             'roles'=>'required'
         ]);
 
         $input = $request->all();
+
         if(!empty($input['password'])){
             $input['password'] = Hash::make($input['password']);
         }else{
-            $input = Arr::excep($input, array('password'));
+            $input = Arr::except($input, ['password']);
         }
 
         $user = User::find($id);
         $user->update($input);
+
         DB::table('model_has_roles')->where('model_id', $id)->delete();
-
         $user->assignRole($request->roles);
-        return redirect()->route('usuarios.index');
 
+        return redirect()->route('usuarios.index');
     }
 
     public function destroy(string $id)
@@ -109,35 +113,48 @@ class UsuarioController extends Controller
 
     public function getRoles()
     {
-        $roles = DB::select('SELECT id, name AS value FROM roles;');
+        $roles = DB::select('SELECT id, name AS value FROM roles');
 
-        $this->response['datos'] = $roles;
-        return response()->json($this->response, 200);
-
+        return response()->json(['datos' => $roles], 200);
     }
 
-    public function getUsuarios(Request $request){
+    public function getUsuarios(Request $request)
+    {
 
-        $res = User::select( 'users.id', 'users.dni', 'users.name', 'users.paterno', 'users.materno', 'users.email', 'users.celular',
-        'roles.name AS rol', 'users.id_rol', 'id_proceso', 'procesos.nombre AS proceso', 'users.estado')
+        $res = User::select(
+            'users.id',
+            'users.dni',
+            'users.name',
+            'users.paterno',
+            'users.materno',
+            'users.email',
+            'users.celular',
+            'roles.name AS rol',
+            'users.id_rol',
+            'users.id_proceso',
+            'procesos.nombre AS proceso',
+            'users.estado'
+        )
         ->join('roles','roles.id','users.id_rol')
         ->join('procesos','procesos.id','users.id_proceso')
         ->where(function ($query) use ($request) {
-            return $query
-                ->orWhere('users.name', 'LIKE', '%' . $request->term . '%')
-                ->orWhere(DB::raw("CONCAT(users.name,' ',users.paterno,' ',users.materno)"),'LIKE', '%' . $request->term . '%')
-                ->orWhere('users.email', 'LIKE', '%' . $request->term . '%');
-        })->orderBy('users.id', 'DESC')
+
+            $query->orWhere('users.name','LIKE','%'.$request->term.'%')
+            ->orWhere(DB::raw("CONCAT(users.name,' ',users.paterno,' ',users.materno)"),'LIKE','%'.$request->term.'%')
+            ->orWhere('users.email','LIKE','%'.$request->term.'%');
+
+        })
+        ->orderBy('users.id','DESC')
         ->get();
 
-        $this->response['usuarios'] = $res;
-        return response()->json($this->response, 200);
+        return response()->json(['usuarios' => $res], 200);
     }
 
-
-    public function saveUsuario(Request $request) {
+    public function saveUsuario(Request $request)
+    {
 
         if (!$request->id) {
+
             $user = new User();
             $user->dni = $request->dni;
             $user->name = $request->name;
@@ -147,16 +164,19 @@ class UsuarioController extends Controller
             $user->celular = $request->celular;
             $user->password = Hash::make($request->password);
             $user->id_rol = $request->id_rol;
-            $user->estado = $request->estado? 1 : 0;
+            $user->estado = $request->estado ? 1 : 0;
             $user->id_proceso = $request->id_proceso;
             $user->id_usuario = auth()->id();
             $user->save();
+
         } else {
 
             $usuario = User::find($request->id);
+
             if (!$usuario) {
                 return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
+
             $usuario->dni = $request->dni;
             $usuario->name = $request->name;
             $usuario->paterno = $request->paterno;
@@ -166,41 +186,47 @@ class UsuarioController extends Controller
             $usuario->estado = $request->estado ? 1 : 0;
             $usuario->id_rol = $request->id_rol;
             $usuario->id_proceso = $request->id_proceso;
-            if ($request->has('password') ) {
+
+            if (!empty($request->password)) {
                 $usuario->password = Hash::make($request->password);
             }
+
             $usuario->save();
         }
 
         return response()->json(['message' => 'Usuario guardado correctamente'], 200);
     }
 
-    public function getPermisos(){
-        $res = DB::select('SELECT permissions.id, permissions.name, pa
+    public function getPermisos()
+    {
+
+        $res = DB::select("
+        SELECT permissions.id, permissions.name
         FROM users
         JOIN roles ON users.id_rol = roles.id
         JOIN role_has_permissions ON role_has_permissions.role_id = roles.id
         JOIN permissions ON role_has_permissions.permission_id = permissions.id
-        WHERE users.id = '. auth()->id());
-        $this->response['permisos'] = $res;
-        return response()->json($this->response, 200);
+        WHERE users.id = ".auth()->id());
+
+        return response()->json(['permisos'=>$res],200);
     }
 
-    public function cambiarContra(Request $request){
+    public function cambiarContra(Request $request)
+    {
 
         $usuario = User::find(auth()->id());
 
         if (!Hash::check($request->oldPassword, $usuario->password)) {
-            return response()->json(['mensaje' => 'La contraseña actual no es correcta.'], 400);
+            return response()->json(['mensaje' => 'La contraseña actual no es correcta'], 400);
         }
 
         $usuario->password = Hash::make($request->newPassword);
         $usuario->save();
 
-        $this->response['estado'] = true;
-        $this->response['datos'] = $usuario;
-        return response()->json($this->response, 200);
+        return response()->json([
+            'estado'=>true,
+            'datos'=>$usuario
+        ],200);
     }
-
 
 }
