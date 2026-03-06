@@ -338,7 +338,7 @@
                     Yo, <span style="border-bottom: 2px dotted #000;">{{ $datos->nombres ?? '.....................' }} {{ $datos->paterno ?? '.....................' }} {{ $datos->materno ?? '.....................' }}</span>; 
                     identificado con DNI Nº <span style="border-bottom: 2px dotted #000;">{{ $datos->nro_doc ?? '.....................' }}</span>,
                     Postulante a la convocatoria de Admisión 2026 del Programa de 
-                    Especialidad en <span style="border-bottom: 2px dotted #000;">{{ $datos->programa ?? '.....................' }}</span>,
+                    <span style="border-bottom: 2px dotted #000;">{{ $datos->programa ?? '.....................' }}</span>,
                      de la Facultad de <span style="border-bottom: 2px dotted #000;">{{ $datos->facultad ?? '.....................'  }}</span>               
                 </p>
             </div>
