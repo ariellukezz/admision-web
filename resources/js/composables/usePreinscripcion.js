@@ -79,7 +79,8 @@ export const usePreinscripcion = (props) => {
 
   const dniInput = (event) => { formState.dni = event.target.value.replace(/\D/g, '')}
   const nombresInput = (event) => { datospersonales.nombres = event.target.value.replace(/[^A-Za-z\s]/g, '')}
-  const pimerapellidoInput = (event) => { datospersonales.primerapellido = event.target.value.replace(/[^A-Za-z]/g, '') }
+  const primerapellidoInput = (event) => { datospersonales.primerapellido = event.target.value.replace(/[^A-Za-z]/g, '') }
+  const segundoapellidoInput = (event) => { datospersonales.segundo_apellido = event.target.value.replace(/[^A-Za-z]/g, '') }
   const celularInput = (event) => { datospersonales.celular = event.target.value.replace(/\D/g, '') }
   const correoInput = (event) => { datospersonales.correo = event.target.value}
 
@@ -705,7 +706,8 @@ const validateDocuments = async () => {
 
     dniInput,
     nombresInput,
-    pimerapellidoInput,
+    primerapellidoInput,
+    segundoapellidoInput,
     celularInput,
     correoInput,
     validateFechaNacimiento,

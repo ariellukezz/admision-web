@@ -27,7 +27,8 @@
       :residencias="residencias"
       :buscarNacimiento="buscarNacimiento"
       :buscarResidencia="buscarResidencia"
-      :pimerapellidoInput="pimerapellidoInput"
+      :primerapellidoInput="primerapellidoInput"
+      :segundoapellidoInput="segundoapellidoInput"
       :nombresInput="nombresInput"
       :validateFechaNacimiento="validateFechaNacimiento"
       :validateCelular="validateCelular"
@@ -174,7 +175,8 @@ const {
   sexos,
   dniInput,
   nombresInput,
-  pimerapellidoInput,
+  primerapellidoInput,
+  segundoapellidoInput,
   celularInput,
   correoInput,
   validateFechaNacimiento,

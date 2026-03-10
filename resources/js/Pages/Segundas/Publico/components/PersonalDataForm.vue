@@ -56,7 +56,7 @@
                   >
                     <a-input
                       :value="datospersonales.primerapellido"
-                      @input="(e) => { pimerapellidoInput(e); $emit('update:primerapellido', e.target.value) }"
+                      @input="(e) => { primerapellidoInput(e); $emit('update:primerapellido', e.target.value) }"
                       placeholder="Primer apellido"
                       class="w-full"
                     />
@@ -70,7 +70,7 @@
                   >
                     <a-input
                       :value="datospersonales.segundo_apellido"
-                      @input="(e) => { pimerapellidoInput(e); $emit('update:segundo_apellido', e.target.value) }"
+                      @input="(e) => { segundoapellidoInput(e); $emit('update:segundo_apellido', e.target.value) }"
                       placeholder="Segundo apellido"
                       class="w-full"
                     />
@@ -327,7 +327,8 @@ const props = defineProps({
   residencias: Array,
   buscarNacimiento: Object,
   buscarResidencia: Object,
-  pimerapellidoInput: Function,
+  primerapellidoInput: Function,
+  segundoapellidoInput: Function,
   nombresInput: Function,
   validateFechaNacimiento: Function,
   validateCelular: Function,
