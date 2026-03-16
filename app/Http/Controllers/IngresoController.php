@@ -1058,8 +1058,10 @@ class IngresoController extends Controller {
     public function crearCorreo(Request $request)
     {
         $postulante = Postulante::find($request->id);
+
         $url = "https://service6.unap.edu.pe/api/crear-correo";
         $secretKey = "unap@2025";
+
         $data = [
             "apellido_paterno" => $request->apellido_paterno,
             "apellido_materno" => $request->apellido_materno,
@@ -1071,38 +1073,47 @@ class IngresoController extends Controller {
             "escuela" => $request->escuela,
             "numero_ingresos" => $request->numero_ingresos
         ];
+
         $jsonData = json_encode($data);
         $signature = hash_hmac('sha256', $jsonData, $secretKey);
+
         $response = Http::withHeaders([
             'X-Signature' => $signature,
             'Content-Type' => 'application/json'
         ])->post($url, $data);
 
-        $postulante->correo_institucional = $response['users'][0]['email'];
-        $postulante->save();  
+        if (!$response->successful()) {
+            return response()->json([
+                'error' => 'Error al crear el correo',
+                'detalle' => $response->body()
+            ], 500);
+        }
 
+        $correo = $response->json('users.0.email');
+
+        if (!$correo) {
+            return response()->json([
+                'error' => 'La API no devolvió correo'
+            ], 500);
+        }
+
+        // guardar en postulante
+        $postulante->correo_institucional = $correo;
+        $postulante->save();
+
+        // actualizar biometrico
         $cb = ControlBiometrico::where('id_postulante', $request->id)
             ->where('id_proceso', auth()->user()->id_proceso)
             ->first();
 
-         if ($response->successful() && isset($response['users'][0]['email'])) {
+        if ($cb) {
             $cb->update([
                 'tiene_correo' => 1,
-                'correo_institucional' => $response['users'][0]['email']
+                'correo_institucional' => $correo
             ]);
-
-        } else {
-            return response()->json(['error' => 'Error al crear el correo: ' . $response->body()], 500);
-        }
-
-        $responseJson = $response->json();
-        if (isset($responseJson['users'][0]['email'])) {
-            $postulante->correo_institucional = $responseJson['users'][0]['email'];
-            $postulante->save();
         }
 
         return response()->json($response->json(), $response->status());
-
     }
 
 
