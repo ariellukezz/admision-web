@@ -193,11 +193,11 @@
     </div>
     <div style="text-align: justify; margin-top: -15px;">
         <p style="line-height: 1.5rem;">
-            @if ($data->correo_institucional == null)
-                Use el correo institucional que ya tiene asignado<br>
+            @if ($data->correo_institucional_postulante == null)
+                El correo institucional será asignado en OTI<br>
                 Fecha de nacimiento: <span style="font-weight: bold"> {{$fnac}} </span><br>
             @else
-                Correo institucional: <span style="font-weight: bold"> {{$data->correo_institucional}} </span><br> 
+                Correo institucional: <span style="font-weight: bold"> {{$data->correo_institucional_postulante}} </span><br> 
                 Contraseña de primer ingreso: <span style="font-weight: bold"> {{$data->dni}} </span><br>
                 Fecha de nacimiento: <span style="font-weight: bold"> {{$fnac}} </span><br>
 

@@ -619,6 +619,7 @@ const crearCorreo = async () => {
       escuela: ingresante.value.programa_correo,
       numero_ingresos: 1,
     });
+    getCorreos();
   } catch (error) {
     console.error('Error al crear correo:', error);
   } finally {

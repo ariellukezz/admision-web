@@ -790,6 +790,7 @@ class IngresoController extends Controller {
             "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
             postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
             postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
+            postulante.correo_institucional AS correo_institucional_postulante,
             users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
             resultados.fecha, resultados.puntaje, resultados.puesto,
             resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
@@ -815,6 +816,7 @@ class IngresoController extends Controller {
         );
 
         $data = $datos[0];
+
         $hinsI = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}x.jpg");
         $hinsD = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}.jpg");
         $hexaI = public_path("documentos/{$procesoId}/examen/huellas/{$dni}.jpg");
