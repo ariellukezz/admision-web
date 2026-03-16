@@ -89,7 +89,8 @@ class ReniecController extends Controller {
                     'primer_apellido' => $data['ap_paterno'],
                     'segundo_apellido' => $data['ap_materno'],
                     'direccion' => $data['direccion']
-                ]);
+            ]);
+            sleep(0.2);
         }
 
         return true;
