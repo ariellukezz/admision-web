@@ -92,6 +92,8 @@ class ReniecController extends Controller {
                     'segundo_apellido' => $data['ap_materno'],
                     'direccion' => $data['direccion']
                 ]);
+
+            sleep(0.3);
         }
 
         return response()->json([
