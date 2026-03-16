@@ -1079,8 +1079,8 @@ class IngresoController extends Controller {
         ])->post($url, $data);
 
         $postulante->correo_institucional = $response['users'][0]['email'];
-        $postulante->save();
-        
+        $postulante->save();  
+
         $cb = ControlBiometrico::where('id_postulante', $request->id)
             ->where('id_proceso', auth()->user()->id_proceso)
             ->first();
