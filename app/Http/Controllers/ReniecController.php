@@ -95,7 +95,7 @@ class ReniecController extends Controller {
                     'revisado' => 1
                 ]);
 
-            sleep(1);
+            sleep(2);
         }
 
         return response()->json([
