@@ -303,7 +303,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //RENIEC
     Route::get('/consulta-reniec', fn () => Inertia::render('Admin/Reniec/index'))->name('admin-consulta-reniec');
     Route::get('/get-datos-reniec/{dni}', [ReniecController::class, 'consultarReniecPorDni']);
-    Route::post('/actualizar-lista-reniec', [ReniecController::class, 'actualizarListaReniec']);
+    Route::post('/actualizar-lista-reniec', [ReniecController::class, 'consultarLista']);
 
     //ESTUDIOS ANTERIORES
     Route::get('/carreras-previas', fn () => Inertia::render('Admin/Estudios/carreras_previas'))->name('admin-carreras-previas');

@@ -132,4 +132,4 @@ Route::get('/get-pago-caja/{dni}', function ($dni) {
 Route::get('/get-avance-proceso-postulante/{proceso}/{dni}', [TestController::class, 'getAvancePostulanteProceso']);
 Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevias']);
 
-Route::post('/actualizar-lista-reniec', [ReniecController::class, 'actualizarListaReniec']);
+Route::post('/actualizar-lista-reniec', [ReniecController::class, 'consultarLista']);
