@@ -40,7 +40,8 @@
             Reglamento General de Admisión 2026, <label style="font-weight:bold;">HACE CONSTAR </label> 
             que <label style="font-weight:bold;">{{$data->paterno}} {{$data->materno}} {{$data->nombres}}</label>, identificado (a) con 
             DNI N° <label style="font-weight:bold;">{{$data->dni}}</label>, es 
-            <label style="font-weight:bold;">INGRESANTE APTO</label> al programa de estudios de <label style="font-weight:bold;">{{$data->programa}}</label>, 
+            <label style="font-weight:bold;">INGRESANTE APTO</label> al programa de estudios de <label style="font-weight:bold;">{{$data->programa}}</label>,
+            con duracion total de <label style="font-weight:bold;">{{$data->duracion_programa}}</label>, 
             bajo la modalidad <label style="font-weight:bold;">{{$data->modalidad}}</label>, El ingresante está en el puesto <label style="font-weight:bold;">{{ $data->puesto }}</label> y obtuvo el puntaje de
             <label style="font-weight:bold;">{{ $data->puntaje }} </label>puntos el {{ $date }}. El (la) estudiante en mención,
             queda expedito(a) con código <label style="font-weight:bold;"> {{$data->cod_ingreso}} </label> para matricularse en el referido programa de estudios semestre 2026-I, siendo la modalidad de estudio PRESENCIAL.

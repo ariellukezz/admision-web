@@ -99,6 +99,7 @@ Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.up
 
 Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
+
     Route::get('/', fn () => Inertia::render('Admin/Dashboard/Index'));
     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard/Index'))->name('admin-dashboard');
     Route::get('get-preinscritos', [DashboardController::class, 'preinscritos']);
@@ -360,6 +361,8 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
         Route::put('/{id}', [CertificadoFirmaController::class, 'update']);
         Route::delete('/{id}', [CertificadoFirmaController::class, 'destroy']);
     });
+
+    Route::get('/pdf-biometrio-manual/{dni}', [IngresoController::class, 'pdfbiometricoManual']);
 
 
 });

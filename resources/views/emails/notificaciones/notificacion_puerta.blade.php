@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOTIFICACIÓN PUERTA DE INGRESO - EXAMEN EXTRAORDINARIO 2026</title>
+  <title>NOTIFICACIÓN PUERTA DE INGRESO - EXAMEN GENERAL 2026-I</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
   </style>
@@ -27,7 +27,7 @@
         <div style="flex: 0 0 auto;">
           <div style="color: white"> Fecha</div> 
           <div style="color: white"> de envío:</div>
-          <div style="color: white"> 29/01/26</div>
+          <div style="color: white"> 13/03/26</div>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
       <!-- Título -->
       <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px;">
         <h2 style="color: #1a365d; font-size: 24px; margin: 0 0 5px; font-weight: 600;">NOTIFICACIÓN DE PUERTA DE ENTRADA</h2>
-        <p style="color: #4a5568; font-size: 16px; margin: 0; font-weight: 500;">EXAMEN DE ADMISIÓN EXTRAORDINARIO 2026</p>
+        <p style="color: #4a5568; font-size: 16px; margin: 0; font-weight: 500;">EXAMEN DE ADMISIÓN GENERAL 2026-I</p>
       </div>
 
       <!-- Saludo personalizado -->
@@ -60,11 +60,11 @@
         <div style="display: flex; margin-bottom: 15px;">
           <div style="flex: 1; padding-right: 15px;">
             <p style="margin: 0 0 5px; font-weight: 500;">📅 <strong>Fecha del examen:</strong></p>
-            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">Viernes, 30 de enero de 2026</p>
+            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">Sábado, 14 de marzo de 2026</p>
           </div>
           <div style="flex: 1;">
             <p style="margin: 0 0 5px; font-weight: 500;">⏰ <strong>Horario de ingreso:</strong></p>
-            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">08:00 a.m. - 9:30 a.m.</p>
+            <p style="margin: 0; color: #2b6cb0; font-weight: 600;">06:30 a.m. - 9:30 a.m.</p>
           </div>
         </div>      
         {{-- <p style="margin: 0 0 15px;"><strong>📍 Ubicación:</strong> Campus Universitario - Puno (INGRESO POR LA PUERTA PRINCIAL)</p> --}}

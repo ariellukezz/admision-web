@@ -796,7 +796,7 @@ class IngresoController extends Controller {
             control_biometrico.correo_institucional AS correo_institucional,
             control_biometrico.tiene_correo AS tiene_correo,
             control_biometrico.segunda_carrera AS segunda_carrera,
-            programa.nombre AS programa
+            programa.nombre AS programa, programa.duracion as duracion_programa
             FROM resultados
             JOIN postulante ON resultados.dni_postulante = postulante.nro_doc
             JOIN inscripciones ON inscripciones.id_postulante = postulante.id
@@ -911,6 +911,93 @@ class IngresoController extends Controller {
                 'avance' => 6
             ]
         );
+        return response()->file($filePath);
+    }
+
+
+    public function pdfbiometricoManual($dni)
+    {
+        $procesoId = auth()->user()->id_proceso;
+
+        $datos = DB::select(
+            "SELECT procesos.nombre as proceso, postulante.primer_apellido AS paterno,
+            postulante.segundo_apellido AS materno, postulante.nombres, tipo_documento_identidad.nombre,
+            postulante.nro_doc AS dni, postulante.fec_nacimiento AS fec_nacimiento,
+            users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
+            resultados.fecha, resultados.puntaje, resultados.puesto,
+            resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
+            control_biometrico.correo_institucional AS correo_institucional,
+            control_biometrico.tiene_correo AS tiene_correo,
+            control_biometrico.segunda_carrera AS segunda_carrera,
+            programa.nombre AS programa, programa.duracion as duracion_programa
+            FROM resultados
+            JOIN postulante ON resultados.dni_postulante = postulante.nro_doc
+            JOIN inscripciones ON inscripciones.id_postulante = postulante.id
+            JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+            JOIN procesos ON resultados.id_proceso = procesos.id
+            JOIN users ON users.id = inscripciones.id_usuario
+            JOIN programa ON programa.id = inscripciones.id_programa
+            JOIN control_biometrico ON control_biometrico.id_postulante = postulante.id
+            LEFT JOIN tipo_documento_identidad ON postulante.tipo_doc = tipo_documento_identidad.id
+            WHERE resultados.apto = 'SI'
+            AND inscripciones.estado = 0
+            AND control_biometrico.id_proceso = {$procesoId}
+            AND resultados.dni_postulante = {$dni}
+            AND resultados.id_proceso = {$procesoId}
+            AND inscripciones.id_proceso = {$procesoId}"
+        );
+
+        $data = $datos[0];
+
+        $hinsI = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}x.jpg");
+        $hinsD = public_path("documentos/{$procesoId}/inscripciones/huellas/{$dni}.jpg");
+        $hexaI = public_path("documentos/{$procesoId}/examen/huellas/{$dni}.jpg");
+        $hexaD = public_path("documentos/{$procesoId}/examen/huellas/{$dni}x.jpg");
+        $hbioI = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}.jpg");
+        $hbioD = public_path("documentos/{$procesoId}/control_biometrico/huellas/{$dni}x.jpg");
+        $fins  = public_path("documentos/{$procesoId}/inscripciones/fotos/{$dni}.jpg");
+        $fbio  = public_path("documentos/{$procesoId}/control_biometrico/fotos/{$dni}.jpg");
+
+        $date = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fecha)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+        $fimp = \Carbon\Carbon::now()->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+        $fnac = \Carbon\Carbon::createFromFormat('Y-m-d', $data->fec_nacimiento)->locale('es')->isoFormat('DD [de] MMMM [del] YYYY');
+
+        $pdf = Pdf::loadView('ingreso.datosbiometricos', compact(
+            'data','hinsI','hinsD','hexaI','hexaD',
+            'hbioI','hbioD','fins','fbio',
+            'date','fimp','fnac'
+        ))->setPaper('A4', 'portrait');
+
+        $documentoDir = public_path("documentos/{$procesoId}/control_biometrico/constancias_manual/");
+
+        if (!File::exists($documentoDir)) {
+            File::makeDirectory($documentoDir, 0755, true, true);
+        }
+
+        $filePath = "{$documentoDir}{$dni}.pdf";
+        $relativePath = "documentos/{$procesoId}/control_biometrico/constancias_manual/{$dni}.pdf";
+
+        // guardar pdf
+        file_put_contents($filePath, $pdf->output());
+
+        // actualizar url
+        DB::table('control_biometrico')
+            ->where('id_proceso', $procesoId)
+            ->where('id_postulante', function($q) use ($dni) {
+                $q->select('id')->from('postulante')->where('nro_doc', $dni)->limit(1);
+            })
+            ->update(['url' => $relativePath]);
+
+        AvancePostulante::firstOrCreate(
+            [
+                'dni_postulante' => $dni,
+                'id_proceso' => $procesoId,
+            ],
+            [
+                'avance' => 6
+            ]
+        );
+
         return response()->file($filePath);
     }
 

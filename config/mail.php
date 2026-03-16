@@ -42,8 +42,120 @@ return [
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
+            'auth_mode' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
+
+        'smtp1' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'dgadmision@unap.edu.pe',
+            'password' => 'ghsp ydhg ezya rbtx',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp2' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica@unap.edu.pe',
+            'password' => 'yxrv jiji ervw wunc',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp3' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica1@unap.edu.pe',
+            'password' => 'ephi ltcs espu rafx',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp4' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica2@unap.edu.pe',
+            'password' => 'jldj fyoc ajxd ynpl',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp5' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica3@unap.edu.pe',
+            'password' => 'aeob ywpk zbry bxtg',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp6' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica4@unap.edu.pe',
+            'password' => 'gctv sewy hgmq qevm',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp7' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.informatica5@unap.edu.pe',
+            'password' => 'nmkf wecy vvsz vrvm',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp8' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.oti6@unap.edu.pe',
+            'password' => 'rpai nphi ngbu zvoi',
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
+        'smtp9' => [
+            'transport' => 'smtp',
+            'host' => 'smtp.gmail.com',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' => 'admision.oti@unap.edu.pe',
+            'password' => 'uhry kipi mvlk egon',
+            'timeout' => null,
+            'auth_mode' => null,
+],
+
+'smtp10' => [
+    'transport' => 'smtp',
+    'host' => 'smtp.gmail.com',
+    'port' => 465,
+    'encryption' => 'ssl',
+    'username' => 'admision.oti7@unap.edu.pe',
+    'password' => 'vuxc lcdp dxfi orpn',
+    'timeout' => null,
+    'auth_mode' => null,
+],
+
 
         'ses' => [
             'transport' => 'ses',

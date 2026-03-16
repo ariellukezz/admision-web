@@ -20,6 +20,8 @@ class Programa extends Model
         'efi',
         'id_facultad',
         'area',
+        'nivel',
+        'duracion',
         'id_usuario'
     ];
 }

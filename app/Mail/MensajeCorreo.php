@@ -25,7 +25,6 @@ class MensajeCorreo extends Mailable
         $this->correo = $correo;
         $this->programa = $programa;
         $this->puerta = $puerta;
-        
     }
 
     public function build()
@@ -36,7 +35,8 @@ class MensajeCorreo extends Mailable
             'programa' => $this->programa,
             'puerta' => $this->puerta,
         ])
-        ->subject('Notificación puerta de ingreso');
+        ->subject('Notificación puerta de ingreso')
+        ->attach(public_path('imagenes/puerta1.jpg'));;
     }
 
 
