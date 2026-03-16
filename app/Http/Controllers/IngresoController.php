@@ -1085,6 +1085,8 @@ class IngresoController extends Controller {
                 'tiene_correo' => 1,
                 'correo_institucional' => $response['users'][0]['email']
             ]);
+            $postulante->correo_institucional = $response['users'][0]['email'];
+            $postulante->save();
         } else {
             return response()->json(['error' => 'Error al crear el correo: ' . $response->body()], 500);
         }
