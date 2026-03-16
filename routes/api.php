@@ -13,6 +13,7 @@ use App\Http\Controllers\PagoBancoController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\ReniecController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
@@ -130,3 +131,5 @@ Route::get('/get-pago-caja/{dni}', function ($dni) {
 
 Route::get('/get-avance-proceso-postulante/{proceso}/{dni}', [TestController::class, 'getAvancePostulanteProceso']);
 Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevias']);
+
+Route::post('/actualizar-lista-reniec', [ReniecController::class, 'actualizarListaReniec']);
