@@ -72,8 +72,10 @@ class ReniecController extends Controller {
     }
 
 
-    public function actualizarListaReniec(array $dnis)
+    public function consultarLista(Request $request)
     {
+        $dnis = $request->dnis;
+
         foreach ($dnis as $dni) {
 
             $data = $this->consultarReniecPorDni($dni);
@@ -89,11 +91,12 @@ class ReniecController extends Controller {
                     'primer_apellido' => $data['ap_paterno'],
                     'segundo_apellido' => $data['ap_materno'],
                     'direccion' => $data['direccion']
-            ]);
-            sleep(0.2);
+                ]);
         }
 
-        return true;
+        return response()->json([
+            'procesados' => count($dnis)
+        ]);
     }
 
 
