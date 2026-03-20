@@ -87,12 +87,12 @@ class PublicarResultadosJob implements ShouldQueue
 
                     if ($item['apto'] === 'SI') {
 
-                        $registrado = DB::connection($database2)
-                            ->table('unapnet.estudiante')
-                            ->where('num_doc', $re->dni)
-                            ->where('cod_car', $re->programa_oti)
-                            ->where('ano_ing', $re->anio)
-                            ->first();
+                        $registrado = DB::connection('third')
+                        ->table('estudiante')
+                        ->where('num_doc', $re->dni)
+                        ->where('cod_car', $re->programa_oti)
+                        ->where('ano_ing', $re->anio)
+                        ->first();
 
                         if ($registrado) {
 
