@@ -11,10 +11,20 @@ use App\Models\Postulante;
 use App\Models\Apoderado;
 use App\Models\Paso;
 use App\Models\Cambio;
-use Inertia\Inertia;
 
 class PostulanteController extends Controller
 {
+
+  /**
+   * Convierte texto a mayúsculas de forma segura
+   */
+  private function safeUpper($value, $encoding = 'UTF-8')
+  {
+      if (is_null($value) || $value === '') {
+          return $value;
+      }
+      return mb_strtoupper($value, $encoding);
+  }
 
   public function getPostulanteXDni(Request $request)
   {
@@ -77,9 +87,9 @@ class PostulanteController extends Controller
         'tipo_doc' => $request->tipo_doc,
         'nro_doc' => $request->nro_doc,
         'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
-        'primer_apellido' => $request->paterno,
-        'segundo_apellido' => $request->materno,
-        'nombres' => $request->nombres,
+        'primer_apellido' => $this->safeUpper($request->paterno),
+        'segundo_apellido' => $this->safeUpper($request->materno),
+        'nombres' => $this->safeUpper($request->nombres),
         'ubigeo_residencia' => $request->ubigeo_nacimiento
       ]);
       $this->response['tipo'] = 'success';
@@ -105,10 +115,10 @@ class PostulanteController extends Controller
             'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
             'sexo' => $request->sexo,
             'estado_civil' => $request->estado_civil,
-            'primer_apellido' => $request->primer_apellido,
-            'segundo_apellido' => $request->segundo_apellido,
+            'primer_apellido' => $this->safeUpper($request->primer_apellido),
+            'segundo_apellido' => $this->safeUpper($request->segundo_apellido),
             'solo_un_apellido' => $solo_unapellido,
-            'nombres' => $request->nombres,
+            'nombres' => $this->safeUpper($request->nombres),
             'email' => $request->correo,
             'celular' => $request->celular,
             'fec_nacimiento' => $request->fec_nacimiento,
@@ -126,10 +136,10 @@ class PostulanteController extends Controller
         $postulante->ubigeo_nacimiento = $request->ubigeo_nacimiento;
         $postulante->sexo = $request->sexo;
         $postulante->estado_civil = $request->estado_civil;
-        $postulante->primer_apellido = $request->primer_apellido;
-        $postulante->segundo_apellido = $request->segundo_apellido;
+        $postulante->primer_apellido = $this->safeUpper($request->primer_apellido);
+        $postulante->segundo_apellido = $this->safeUpper($request->segundo_apellido);
         $postulante->solo_un_apellido = $solo_unapellido;
-        $postulante->nombres = $request->nombres;
+        $postulante->nombres = $this->safeUpper($request->nombres);
         $postulante->email = $request->correo;
         $postulante->celular = $request->celular;
         $postulante->fec_nacimiento = $request->fec_nacimiento;
@@ -145,7 +155,7 @@ class PostulanteController extends Controller
           $this->response['mensaje'] = 'Datos del '.$postulante->nombres.' actualizados';
           $this->response['estado'] = true;
           $this->response['datos'] = $postulante;
-        }
+        } 
 
       }
 
@@ -153,11 +163,6 @@ class PostulanteController extends Controller
     }
 
     public function saveResidencia(Request $request ) {
-
-      // $validator = $request->validate([
-      //   'ubigeo_residencia' => 'required',
-      //   'direccion' => 'required',
-      // ]);
 
       $postulante = Postulante::find($request->id);
       $temp = $postulante;
@@ -240,18 +245,6 @@ class PostulanteController extends Controller
 
   public function getPostulantesBiometrico(Request $request)
   {
-    // SELECT
-    //   pos.primer_apellido, pos.segundo_apellido,
-    //   pos.nombres, pro.nombre AS programa,
-    //   pro.area AS areas, mo.nombre AS modalidad
-    // FROM resultados res
-    // JOIN postulante pos ON pos.nro_doc = res.dni_postulante
-    // JOIN inscripciones ins ON ins.id_postulante = pos.id
-    // AND ins.id_proceso = res.id_proceso AND ins.estado = 0
-    // JOIN modalidad mo ON ins.id_modalidad = mo.id
-    // JOIN programa pro ON ins.id_programa = pro.id
-    // WHERE res.id_proceso = 7
-    // ORDER BY pro.area, pro.nombre
 
       $query_where = [];
       $res = Ingresante::select(
@@ -323,9 +316,9 @@ class PostulanteController extends Controller
   public function actualizarDatosIngresante(Request $request) {
 
     $registroActual = Postulante::find($request->id);
-    $registroActual->nombres = $request->nombres;
-    $registroActual->primer_apellido = $request->paterno;
-    $registroActual->segundo_apellido = $request->materno;
+    $registroActual->nombres = $this->safeUpper($request->nombres);
+    $registroActual->primer_apellido = $this->safeUpper($request->paterno);
+    $registroActual->segundo_apellido = $this->safeUpper($request->materno);
     $registroActual->sexo = $request->sexo;
     $registroActual->tipo_doc = $request->tipo_doc;
     $registroActual->fec_nacimiento = $request->fec_nacimiento;
@@ -382,10 +375,10 @@ class PostulanteController extends Controller
         $modalidad = null;
         if (!$request->id) {
           $postulante = Postulante::create([
-            'primer_apellido' => $request->primer_apellido,
-            'segundo_apellido' => $request->segundo_apellido,
-            'apellido_casada' => $request->apellido_casada,
-            'nombres' => $request->nombres,
+            'primer_apellido' => $this->safeUpper($request->primer_apellido),
+            'segundo_apellido' => $this->safeUpper($request->segundo_apellido),
+            'apellido_casada' => $this->safeUpper($request->apellido_casada),
+            'nombres' => $this->safeUpper($request->nombres),
             'sexo' => $request->sexo,
             'fec_nacimiento' => $request->fec_nacimiento,
             'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
@@ -409,10 +402,10 @@ class PostulanteController extends Controller
           $temp = Postulante::find($request->id);
           $postulante = Postulante::find($request->id);
           $postulante->tipo_doc = $request->tipo_doc;
-          $postulante->primer_apellido = $request->primer_apellido;
-          $postulante->segundo_apellido = $request->segundo_apellido;
-          $postulante->apellido_casada = $request->apellido_casada;
-          $postulante->nombres = $request->nombres;
+          $postulante->primer_apellido = $this->safeUpper($request->primer_apellido);
+          $postulante->segundo_apellido = $this->safeUpper($request->segundo_apellido);
+          $postulante->apellido_casada = $this->safeUpper($request->apellido_casada);
+          $postulante->nombres = $this->safeUpper($request->nombres);
           $postulante->sexo = $request->sexo;
           $postulante->fec_nacimiento = $request->fec_nacimiento;
           $postulante->ubigeo_nacimiento = $request->ubigeo_nacimiento;
@@ -534,12 +527,6 @@ class PostulanteController extends Controller
       ->where('pos.nro_doc', $request->dni)
       ->count();
 
-      // if($cantidad >= 1){
-      //   return response()->json(['estado' => true]);
-      // }else {
-      //   return response()->json(['estado' => false]);
-      // }
-
       return true;
 
   }
@@ -638,12 +625,12 @@ class PostulanteController extends Controller
                     'ubigeo_residencia' => $request->ubigeo_residencia,
                     'sexo' => $request->sexo,
                     'estado_civil' => $request->estado_civil,
-                    'primer_apellido' => $request->primer_apellido,
-                    'segundo_apellido' => $request->segundo_apellido,
+                    'primer_apellido' => $this->safeUpper($request->primer_apellido),
+                    'segundo_apellido' => $this->safeUpper($request->segundo_apellido),
                     'solo_un_apellido' => $solo_unapellido,
                     'direccion'=> $request->direccion,
                     'anio_egreso'=> $request->egreso,
-                    'nombres' => $request->nombres,
+                    'nombres' => $this->safeUpper($request->nombres),
                     'email' => $request->correo,
                     'celular' => $request->celular,
                     'fec_nacimiento' => $request->fec_nacimiento,
@@ -674,10 +661,10 @@ class PostulanteController extends Controller
                     'sexo' => $request->sexo,
                     'estado_civil' => $request->estado_civil,
                     'anio_egreso' => $request->egreso,
-                    'primer_apellido' => $request->primer_apellido,
-                    'segundo_apellido' => $request->segundo_apellido,
+                    'primer_apellido' => $this->safeUpper($request->primer_apellido),
+                    'segundo_apellido' => $this->safeUpper($request->segundo_apellido),
                     'solo_un_apellido' => $solo_unapellido,
-                    'nombres' => $request->nombres,
+                    'nombres' => $this->safeUpper($request->nombres),
                     'email' => $request->correo,
                     'direccion' => $request->direccion,
                     'celular' => $request->celular,

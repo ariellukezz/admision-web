@@ -185,10 +185,10 @@ class PostulanteSegundaController extends Controller
             $modalidad = null;
             if (!$request->id) {
             $postulante = Postulante::create([
-                'primer_apellido' => $request->primer_apellido,
-                'segundo_apellido' => $request->segundo_apellido,
-                'apellido_casada' => $request->apellido_casada,
-                'nombres' => $request->nombres,
+                'primer_apellido' => upper($request->primer_apellido),
+                'segundo_apellido' => upper($request->segundo_apellido),
+                'apellido_casada' => upper($request->apellido_casada),
+                'nombres' => upper($request->nombres),
                 'sexo' => $request->sexo,
                 'fec_nacimiento' => $request->fec_nacimiento,
                 'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
@@ -212,10 +212,10 @@ class PostulanteSegundaController extends Controller
             $temp = Postulante::find($request->id);
             $postulante = Postulante::find($request->id);
             $postulante->tipo_doc = $request->tipo_doc;
-            $postulante->primer_apellido = $request->primer_apellido;
-            $postulante->segundo_apellido = $request->segundo_apellido;
-            $postulante->apellido_casada = $request->apellido_casada;
-            $postulante->nombres = $request->nombres;
+            $postulante->primer_apellido = upper($request->primer_apellido);
+            $postulante->segundo_apellido = upper($request->segundo_apellido);
+            $postulante->apellido_casada = upper($request->apellido_casada);
+            $postulante->nombres = upper($request->nombres);
             $postulante->sexo = $request->sexo;
             $postulante->fec_nacimiento = $request->fec_nacimiento;
             $postulante->ubigeo_nacimiento = $request->ubigeo_nacimiento;
@@ -281,23 +281,21 @@ class PostulanteSegundaController extends Controller
             ]);
         }
 
-        // 🔴 VER AQUÍ: Mostrar el error completo del servidor externo
         return response()->json([
             'estado' => false,
             'mensaje' => 'Error en el servicio externo',
             'error_status' => $response->status(),
-            'error_body' => $response->body(), // <-- Esto te mostrará el error real
-            'error_json' => $response->json(), // <-- Si devuelve JSON
-            'payload_enviado' => $payload // <-- Para ver qué se envió
+            'error_body' => $response->body(), 
+            'error_json' => $response->json(),
+            'payload_enviado' => $payload 
         ], 500);
 
     } catch (\Exception $e) {
-        // 🔴 VER AQUÍ: Mostrar la excepción completa
         return response()->json([
             'estado' => false,
             'mensaje' => 'No se pudo conectar con el servicio externo',
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(), // <-- Stack trace completo
+            'trace' => $e->getTraceAsString(),
             'payload_enviado' => $payload
         ], 500);
     }
