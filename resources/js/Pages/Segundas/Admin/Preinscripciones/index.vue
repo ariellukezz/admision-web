@@ -73,7 +73,21 @@
                         <a-button type="true" @click="abrirEditar(record)" size="small" style="background:#f3f3f3; height: 30px; border: solid 1px #d9d9d9; color:blue; display: flex; align-items: center;"> <form-outlined/> </a-button>
                     </div>
                     <div class="">
-                        <a-button type="true" @click="eliminar(record)" size="small" style="background:#f3f3f3; height: 30px; color:crimson; border: solid 1px #d9d9d9; display: flex; align-items: center;"> <delete-outlined/></a-button>
+                        <a-popconfirm
+                        title="¿Estás seguro de eliminar este registro?"
+                        ok-text="Sí"
+                        cancel-text="No"
+                        @confirm="eliminarPreinscripcion(record)"
+                        >
+                        <a-button 
+                            type="text" 
+                            danger 
+                            size="small"
+                            style="height: 30px; display: flex; align-items: center; gap: 4px;">
+                            <delete-outlined />
+                            Eliminar
+                        </a-button>
+                        </a-popconfirm>
                     </div>
                 </div>
 
@@ -292,6 +306,13 @@ const abrirEditar = (item) => {
     postulante.value.id = item.id_postulante;
     postulante.value.dni = item.dni;
     postulante.value.nombre = item.dni+" - "+item.nombres +" "+ item.paterno +" "+ item.materno;
+}
+
+const eliminarPreinscripcion = (item) => {
+    axios.delete("/segundas/delete-preinscripcion-segundas/"+item.id).then((result) => {
+        getInscripciones()
+        notificacion('warning',result.data.titulo, result.data.mensaje);
+    });
 }
 
 

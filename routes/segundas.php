@@ -29,6 +29,8 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     Route::get('postulante-perfil/{dni}', [PostulanteSegundaController::class, 'showPostulante']);
     Route::get('get-postulante-datos/{dni}', [PostulanteSegundaController::class, 'getDatosPostulante']);
 
+    Route::delete('delete-preinscripcion-segundas/{id}',[PreinscripcionSegundasController::class, 'eliminar']);
+
 
 
     Route::post('actualizar-preinscripciones-segundas', [PreinscripcionSegundasController::class, 'Actualizar']);
@@ -67,6 +69,7 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     Route::post('/get-vacante-programa-segundas', [ResultadosSegundaController::class, 'getVacantePrograma']);
 
     Route::get('/get-select-programas-asignados', [ResultadosSegundaController::class, 'getSelectProgramasAsignados']);
+    
     Route::post('/publicar-resultados-segundas', [ResultadosSegundaController::class, 'publicar']);
     
     Route::get('/queue/retry-publicar', function () {

@@ -245,6 +245,22 @@ class PreinscripcionSegundasController extends Controller
         }
     }
 
+    public function eliminar($id){
+        $pre = Preinscripcion::find($id);
+        if($pre){
+            $pre->delete();
+            return response()->json([
+                'estado' => true,
+                'mensaje' => 'Preinscripción eliminada'
+            ]);
+        } else {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Preinscripción no encontrada'
+             ], 404);
+         }
+    }
+
 
 
 
