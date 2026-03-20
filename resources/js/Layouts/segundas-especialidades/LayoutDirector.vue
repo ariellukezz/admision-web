@@ -175,10 +175,10 @@ const menuItems = [
         route: 'admin-inscripciones'
       },
       {
-        key: 'resultados',
+        key: 'puntajes',
         icon: SettingFilled,
         label: 'Puntajes',
-        route: 'segundas-preinscripciones-admin'
+        route: 'segundas-puntajes-admin'
       },
     ]
   },

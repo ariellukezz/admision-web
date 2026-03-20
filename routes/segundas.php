@@ -9,6 +9,7 @@ use App\Http\Controllers\Segundas\ModalidadSegundaController;
 use App\Http\Controllers\Segundas\ObservadosSegundaController;
 use App\Http\Controllers\Segundas\IdentidadSegundaController;
 use App\Http\Controllers\Segundas\ResumenesSegundaController;
+use App\Http\Controllers\Segundas\ResultadosSegundaController;
 
 
 Route::get('/segundas', fn () => Inertia::render('Segundas/Admin/Preinscripciones/index'))->name('segundas-index');
@@ -60,8 +61,56 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     Route::post('/get-detalle-preinscripcion-segundas', [ResumenesSegundaController::class, 'getPreinscripciones']);
 
 
+    Route::post('/get-resultados-segundas', [ResultadosSegundaController::class, 'getResultados']);
+    Route::get('/puntajes', fn () => Inertia::render('Segundas/Admin/Puntajes/index'))->name('segundas-puntajes-admin');
+    Route::post('/guardar-puntaje', [ResultadosSegundaController::class, 'guardarPuntaje']);
+    Route::post('/get-vacante-programa-segundas', [ResultadosSegundaController::class, 'getVacantePrograma']);
 
+    Route::get('/get-select-programas-asignados', [ResultadosSegundaController::class, 'getSelectProgramasAsignados']);
+    Route::post('/publicar-resultados-segundas', [ResultadosSegundaController::class, 'publicar']);
+    
+    Route::get('/queue/retry-publicar', function () {
 
+        $jobs = DB::table('failed_jobs')
+            ->where('payload', 'like', '%PublicarResultadosJob%')
+            ->pluck('id');
+
+        foreach ($jobs as $id) {
+            \Artisan::call('queue:retry', ['id' => $id]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Solo jobs de PublicarResultadosJob reintentados',
+            'ids' => $jobs
+        ]);
+    });
+
+    Route::get('/queue/failed-publicar', function () {
+
+        return DB::table('failed_jobs')
+            ->where('payload', 'like', '%PublicarResultadosJob%')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($job) {
+
+                return [
+                    'id' => $job->id,
+                    'fecha' => $job->failed_at,
+                    'error' => explode("\n", $job->exception)[0], // solo mensaje corto
+                    'detalle' => $job->exception, // completo
+                ];
+            });
+    });
+
+    Route::get('/queue/failed/{id}', function ($id) {
+
+        $job = DB::table('failed_jobs')->where('id', $id)->first();
+
+        return response()->json([
+            'error' => $job->exception,
+            'payload' => json_decode($job->payload, true),
+        ]);
+    });
 
 });
 
