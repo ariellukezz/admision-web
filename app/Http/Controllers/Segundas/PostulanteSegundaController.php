@@ -13,6 +13,17 @@ use DB;
 
 class PostulanteSegundaController extends Controller
 {
+  /**
+   * Convierte texto a mayúsculas de forma segura
+   */
+  private function safeUpper($value, $encoding = 'UTF-8')
+  {
+      if (is_null($value) || $value === '') {
+          return $value;
+      }
+      return mb_strtoupper($value, $encoding);
+  }
+
   public function getPostulantes(Request $request)
   {
       $query_where = [];
@@ -185,10 +196,10 @@ class PostulanteSegundaController extends Controller
             $modalidad = null;
             if (!$request->id) {
             $postulante = Postulante::create([
-                'primer_apellido' => upper($request->primer_apellido),
-                'segundo_apellido' => upper($request->segundo_apellido),
-                'apellido_casada' => upper($request->apellido_casada),
-                'nombres' => upper($request->nombres),
+                'primer_apellido' => $this->safeUpper($request->primer_apellido),
+                'segundo_apellido' => $this->safeUpper($request->segundo_apellido),
+                'apellido_casada' => $this->safeUpper($request->apellido_casada),
+                'nombres' => $this->safeUpper($request->nombres),
                 'sexo' => $request->sexo,
                 'fec_nacimiento' => $request->fec_nacimiento,
                 'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
@@ -212,10 +223,10 @@ class PostulanteSegundaController extends Controller
             $temp = Postulante::find($request->id);
             $postulante = Postulante::find($request->id);
             $postulante->tipo_doc = $request->tipo_doc;
-            $postulante->primer_apellido = upper($request->primer_apellido);
-            $postulante->segundo_apellido = upper($request->segundo_apellido);
-            $postulante->apellido_casada = upper($request->apellido_casada);
-            $postulante->nombres = upper($request->nombres);
+            $postulante->primer_apellido = $this->safeUpper($request->primer_apellido);
+            $postulante->segundo_apellido = $this->safeUpper($request->segundo_apellido);
+            $postulante->apellido_casada = $this->safeUpper($request->apellido_casada);
+            $postulante->nombres = $this->safeUpper($request->nombres);
             $postulante->sexo = $request->sexo;
             $postulante->fec_nacimiento = $request->fec_nacimiento;
             $postulante->ubigeo_nacimiento = $request->ubigeo_nacimiento;
@@ -300,14 +311,5 @@ class PostulanteSegundaController extends Controller
         ], 500);
     }
 }
-
-
-
-
-
-
-
-
-
 
 }
