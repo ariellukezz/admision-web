@@ -55,7 +55,7 @@ class PublicarResultadosJob implements ShouldQueue
                             'pos.primer_apellido as paterno',
                             'pos.segundo_apellido as materno',
                             'pos.nombres',
-                            'pos.tipo_doc as tipo_doc_oti',
+                            'td.documento_oti as tipo_doc_oti',
                             'pos.nro_doc as dni',
                             'pos.fec_nacimiento',
                             'pos.sexo',
@@ -76,6 +76,7 @@ class PublicarResultadosJob implements ShouldQueue
                         ->join('postulante as pos', 'pos.id', '=', 'pre.id_postulante')
                         ->join('modalidad as mo', 'mo.id', '=', 'pre.id_modalidad')
                         ->join('procesos as p', 'p.id', '=', 'pre.id_proceso')
+                        ->join('tipo_documento_identidad as td', 'td.id', '=', 'pos.tipo_doc') 
                         ->where('pre.id', $item['id_pre_inscripcion'])
                         ->where('pre.id_proceso', $this->data['id_proceso'])
                         ->where('pre.estado', 1)
