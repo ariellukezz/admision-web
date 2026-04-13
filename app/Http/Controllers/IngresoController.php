@@ -897,7 +897,7 @@ class IngresoController extends Controller {
             users.name, users.paterno as upaterno, modalidad.nombre as modalidad,
             resultados.fecha, resultados.puntaje, resultados.puesto,
             resultados.puesto_general, control_biometrico.codigo_ingreso AS cod_ingreso,
-            control_biometrico.correo_institucional AS correo_institucional,
+            postulante.correo_institucional AS correo_institucional_postulante,
             control_biometrico.tiene_correo AS tiene_correo,
             control_biometrico.segunda_carrera AS segunda_carrera,
             programa.nombre AS programa, programa.duracion as duracion_programa
