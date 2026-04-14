@@ -77,7 +77,7 @@ class PublicarResultadosJob implements ShouldQueue
                             'p.anio',
                             'p.ciclo_oti'
                         )
-                        ->join('resultados_segundas as re', 're.id_pre_inscripcion', '=', 'pre.id')
+                        ->leftJoin('resultados_segundas as re', 're.id_pre_inscripcion', '=', 'pre.id')
                         ->join('programa as pro', 'pro.id', '=', 'pre.id_programa')
                         ->join('postulante as pos', 'pos.id', '=', 'pre.id_postulante')
                         ->join('modalidad as mo', 'mo.id', '=', 'pre.id_modalidad')
@@ -91,17 +91,22 @@ class PublicarResultadosJob implements ShouldQueue
                     // 🎯 SOLO SI ES APTO
                     if ($re && strtoupper($item['apto']) === 'SI') {
 
-                        // 🔍 VERIFICAR SI YA EXISTE
-                        $existe = DB::connection($database2)
+                        // 🔍 BUSCAR EN 2DA BD
+                        $estudiante = DB::connection($database2)
                             ->table('unapnet.estudiante')
                             ->where('num_doc', $re->dni)
                             ->where('cod_car', $re->programa_oti)
                             ->where('ano_ing', $re->anio)
-                            ->exists();
+                            ->first();
 
-                        if (!$existe) {
+                        if ($estudiante) {
 
-                            // 🔢 GENERAR CÓDIGO
+                            // ✅ YA EXISTE
+                            $nuevoCodigo = $estudiante->num_mat;
+
+                        } else {
+
+                            // 🔢 GENERAR CODIGO
                             $max = DB::connection($database2)
                                 ->table('unapnet.estudiante as e')
                                 ->whereRaw("LEFT(e.num_mat, 2) = ?", [$prefijo])
@@ -110,7 +115,12 @@ class PublicarResultadosJob implements ShouldQueue
                             $nuevoNumero = ($max ?? 0) + 1;
                             $nuevoCodigo = $prefijo . str_pad($nuevoNumero, 4, '0', STR_PAD_LEFT);
 
-                            // 💾 INSERT EN 2DA BD
+                            Log::info('GENERANDO CODIGO', [
+                                'dni' => $re->dni,
+                                'codigo' => $nuevoCodigo
+                            ]);
+
+                            // 💾 INSERTAR EN 2DA BD
                             DB::connection($database2)
                                 ->table('unapnet.estudiante')
                                 ->insert([
@@ -150,14 +160,14 @@ class PublicarResultadosJob implements ShouldQueue
                     ]);
                 }
 
-                // ✅ SIEMPRE ACTUALIZA RESULTADOS
+                // ✅ ACTUALIZAR SIEMPRE (SIN PISAR CON NULL)
                 DB::table('resultados_segundas')
                     ->where('id_pre_inscripcion', $item['id_pre_inscripcion'])
                     ->update([
                         'puntaje' => $item['puntaje'] ?? null,
                         'puesto' => $item['puesto'] ?? null,
                         'apto' => strtoupper($item['apto']) ?? null,
-                        'codigo_ingreso' => $nuevoCodigo,
+                        'codigo_ingreso' => $nuevoCodigo ?? DB::raw('codigo_ingreso'),
                         'updated_at' => now(),
                     ]);
             }
