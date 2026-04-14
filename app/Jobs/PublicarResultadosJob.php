@@ -70,6 +70,7 @@ class PublicarResultadosJob implements ShouldQueue
                             're.puesto_general',
                             'p.anio',
                             'p.ciclo_oti'
+                            
                         )
                         ->join('resultados_segundas as re', 're.id_pre_inscripcion', '=', 'pre.id')
                         ->join('programa as pro', 'pro.id', '=', 'pre.id_programa')
@@ -96,7 +97,6 @@ class PublicarResultadosJob implements ShouldQueue
                         ->first();
 
                         if ($registrado) {
-
                             $nuevoCodigo = $registrado->num_mat;
 
                         } else {
@@ -152,6 +152,16 @@ class PublicarResultadosJob implements ShouldQueue
                     );
 
                 } catch (Exception $eItem) {
+
+                    DB::table('errores_proceso')->insert([
+                        'id_pre_inscripcion' => $item['id_pre_inscripcion'],
+                        'dni' => $re->dni ?? null,
+                        'puesto' => $item['puesto'] ?? null,
+                        'puntaje' => $item['puntaje'] ?? null,
+                        'error' => $eItem->getMessage(),
+                        'data' => json_encode($item),
+                        'created_at' => now()
+                    ]);
 
                     Log::error('ERROR ITEM', [
                         'item' => $item,

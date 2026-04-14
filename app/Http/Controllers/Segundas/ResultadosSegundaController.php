@@ -132,7 +132,48 @@ class ResultadosSegundaController extends Controller
     }
 
 
+    public function publicarIndividual(Request $request)
+    {
+        try {
 
+            $request->validate([
+                'id_programa' => 'required',
+                'vacantes' => 'required|integer|min:1',
+                'id_pre_inscripcion' => 'required|integer',
+                'puntaje' => 'required|numeric',
+                'puesto' => 'required|integer',
+                'apto' => 'required|in:SI,NO',
+            ]);
+
+            $data = [
+                'id_proceso' => auth()->user()->id_proceso,
+                'id_programa' => $request->id_programa,
+                'vacantes' => $request->vacantes,
+                'lista' => [
+                    [
+                        'id_pre_inscripcion' => $request->id_pre_inscripcion,
+                        'puntaje' => $request->puntaje,
+                        'puesto' => $request->puesto,
+                        'apto' => $request->apto,
+                    ]
+                ]
+            ];
+
+            (new \App\Jobs\PublicarResultadosJob($data))->handle();
+
+            return response()->json([
+                'estado' => true,
+                'mensaje' => 'Procesado correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'estado' => false,
+                'mensaje' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     public function getVacantePrograma(Request $request)
@@ -163,4 +204,58 @@ class ResultadosSegundaController extends Controller
             ])
         ]);
     }
+
+   
+    public function getResultadosPDF(Request $request)
+    {
+        $query = Preinscripcion::select(
+            'postulante.id',
+            'postulante.nro_doc',
+            'postulante.primer_apellido',
+            'postulante.segundo_apellido',
+            'postulante.nombres',
+            'pre_inscripcion.id AS id_pre_inscripcion',
+            'resultados.id AS id_resultado',
+            'resultados.puntaje',
+            'resultados.puesto',
+            'resultados.apto',
+            'programa.nombre AS programa'
+        )
+        ->join('postulante', 'postulante.id', 'pre_inscripcion.id_postulante')
+        ->join('programa', 'programa.id', 'pre_inscripcion.id_programa')
+        ->leftJoin('resultados_segundas as resultados', 'resultados.id_pre_inscripcion', 'pre_inscripcion.id')
+        ->where('pre_inscripcion.id_proceso', auth()->user()->id_proceso);
+
+        if ($request->filled('id_programa')) {
+            $query->where('pre_inscripcion.id_programa', $request->id_programa);
+        }
+
+        if ($request->filled('term')) {
+            $term = '%' . $request->term . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('postulante.nro_doc', 'LIKE', $term)
+                ->orWhere(DB::raw("CONCAT_WS(' ', postulante.nombres, postulante.primer_apellido, postulante.segundo_apellido)"), 'LIKE', $term);
+            });
+        }
+
+        $data = $query
+            ->orderBy('resultados.puntaje', 'desc')
+            ->orderBy('resultados.puesto', 'asc')
+            ->get();
+
+        $programa = $data->first()->programa ?? 'SIN PROGRAMA';
+
+        $logo = public_path('imagenes/logotiny.png');
+
+        $html = view('Segundas.Resultados.puntajes', compact('data', 'programa', 'logo'))->render();
+
+        $pdf = \PDF::loadHTML($html);
+        $mpdf = $pdf->getMpdf();
+
+        return $pdf->stream('resultados.pdf');
+
+    }
+    
+
+
 }
