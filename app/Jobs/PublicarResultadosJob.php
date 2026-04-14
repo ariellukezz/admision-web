@@ -127,7 +127,6 @@ class PublicarResultadosJob implements ShouldQueue
                                     'fch_ing' => now(),
                                     'direc' => $re->direccion,
                                     'email' => $re->email,
-                                    'emailins' => null,
                                     'con_est' => 5,
                                     'celular' => $re->celular,
                                     'cod_esp' => $re->cod_esp,
