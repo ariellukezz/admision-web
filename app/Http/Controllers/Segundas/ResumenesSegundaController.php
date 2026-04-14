@@ -27,7 +27,7 @@ class ResumenesSegundaController extends Controller
                     $query->whereIn($condition[0], $condition[1]);
                 }
             })
-            ->where('pre_inscripcion.id_proceso', 16)
+            ->where('pre_inscripcion.id_proceso', auth()->user()->id_proceso)
             ->groupBy('programa.nombre','programa.id')
             ->orderByDesc('cant')
             ->get();
