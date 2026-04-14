@@ -132,7 +132,7 @@ public function handle()
                                 'fch_ing' => now(),
                                 'direc' => $re->direccion,
                                 'email' => $re->email,
-                                'con_est' => 5,
+                                'con_est' => 1,
                                 'celular' => $re->celular,
                                 'cod_esp' => $re->cod_esp,
                                 'puntaje' => $re->puntaje,
