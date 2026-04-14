@@ -105,7 +105,7 @@ class ResultadosSegundaController extends Controller
                 'vacantes' => 'required|integer|min:1',
                 'lista' => 'required|array',
                 'lista.*.id_pre_inscripcion' => 'required|integer',
-                'lista.*.puntaje' => 'required|numeric',
+                'lista.*.puntaje' => 'nullable|numeric',
                 'lista.*.puesto' => 'required|integer',
                 'lista.*.apto' => 'required|in:SI,NO',
             ]);

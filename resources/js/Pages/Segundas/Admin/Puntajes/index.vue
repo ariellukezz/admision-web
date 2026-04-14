@@ -36,7 +36,18 @@
                 Publicar
             </a-button>
         </div>
+    </div>
 
+    <div style="display: flex; justify-content: end; margin-bottom:16px;">
+        <div>
+            <a-button 
+                type="default" 
+                style="background:crimson; color:#fff"
+                @click="getResultadosPDF()"
+            >
+                Descargar ResultadosPDF
+            </a-button>
+        </div>
     </div>
 
     <a-table 
@@ -61,7 +72,6 @@
 
             <template v-if="column.dataIndex === 'puntaje'">
 
-                <!-- 🔒 INPUT SOLO SI NO ESTA PUBLICADO -->
                 <div v-if="editando === record.id_preinscripcion && publicado !== 1">
                     <a-input-number
                         v-model:value="record.puntaje"
@@ -193,6 +203,44 @@ const getPuntajes = async () => {
 
     puntajes.value = res.data.datos.data;
     totalRegistros.value = res.data.datos.total;
+};
+
+
+const getResultadosPDF = async () => {
+  try {
+    if (!id_programa.value) return;
+
+    const response = await axios.post(
+      '/segundas/pdf-resultados-segundas',
+      {
+        id_programa: id_programa.value
+      },
+      {
+        responseType: 'blob'
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+
+    const link = document.createElement('a');
+    link.href = url;
+
+    const fecha = new Date();
+    const formatoFecha = `${fecha.getDate().toString().padStart(2, '0')}-${(fecha.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${fecha.getFullYear()}`;
+
+    link.setAttribute('download', `resultados_${formatoFecha}.pdf`);
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+  } catch (error) {
+    console.error('Error al descargar PDF:', error);
+  }
 };
 
 watch([buscar, pagina, id_programa], getPuntajes);

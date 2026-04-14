@@ -86,12 +86,12 @@
                     VICERRECTORADO ACADÉMICO
                 </div>
                 <div style="font-size:11pt;">
-                    DIRECCIÓN DE ADMISIÓN
+                    PRORGAMA DE SEGUNDAS ESPECIALIDADES
                 </div>
             </td>
 
             <td style="border:none; text-align:right;" width="80">
-                <img src="{{ public_path('imagenes/logoDAD.jpg') }}" width="70">
+                {{-- <img src="{{ public_path('imagenes/logoDAD.jpg') }}" width="70"> --}}
             </td>
         </tr>
     </table>
@@ -104,9 +104,9 @@
 </div>
 
 <div class="titulo">
-    <h2>LISTA DE INGRESANTES</h2>
+    <h2>Resultados</h2>
     <h3>{{ $programa }}</h3>
-    <div>{{ date('d/m/Y') }}</div>
+    <div>Fecha y hora: {{ date('d/m/Y H:i:s') }}</div>
 </div>
 
 <table>
@@ -116,7 +116,7 @@
             <th class="center">DNI</th>
             <th>APELLIDOS Y NOMBRES</th>
             <th class="center">PUNTAJE</th>
-            <th class="center">PUESTO</th>
+            <th class="center">APTO</th>
         </tr>
     </thead>
 
@@ -131,7 +131,15 @@
                 {{ $item->nombres }}
             </td>
             <td class="center">{{ $item->puntaje }}</td>
-            <td class="center">{{ $item->puesto }}</td>
+            @if ($item->puntaje !== null)
+                <td class="center">
+                    @if ($item->apto == 'SI' )
+                        SI
+                    @else
+                        NO
+                    @endif
+                </td>
+            @endif
         </tr>
         @endforeach
     </tbody>

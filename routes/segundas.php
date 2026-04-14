@@ -72,6 +72,9 @@ Route::prefix('segundas')->middleware('segundas','auth')->group(function () {
     
     Route::post('/publicar-resultados-segundas', [ResultadosSegundaController::class, 'publicar']);
     
+    Route::post('/pdf-resultados-segundas', [ResultadosSegundaController::class, 'getResultadosPDF']);
+
+
     Route::get('/queue/retry-publicar', function () {
 
         $jobs = DB::table('failed_jobs')
