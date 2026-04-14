@@ -109,9 +109,8 @@ public function handle()
                         $nuevoNumero = ($max ?? 0) + 1;
                         $nuevoCodigo = $prefijo . str_pad($nuevoNumero, 4, '0', STR_PAD_LEFT);
 
-                        // 🔥 FIXES IMPORTANTES
-                        $tipoDoc = str_pad((string)$re->tipo_doc_oti, 2, '0', STR_PAD_LEFT); // fuerza "01"
-                        $ubigeo = $re->ubigeo_residencia ?? '000000'; // evita null
+                        $tipoDoc = str_pad((string)$re->tipo_doc_oti, 2, '0', STR_PAD_LEFT);
+                        $ubigeo = $re->ubigeo_residencia ?? '000000'; 
 
                         DB::connection($database2)
                             ->table('unapnet.estudiante')

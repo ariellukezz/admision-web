@@ -41,7 +41,6 @@ class ResultadosController extends Controller
 
     $now = now();
 
-    // COLUMNAS REALES DE LA TABLA participantes
     $columnas = [
         'dni',
         'paterno',
@@ -59,7 +58,6 @@ class ResultadosController extends Controller
 
     foreach ($data as $row) {
 
-        // Normalizar cada fila
         $fila = [];
 
         foreach ($columnas as $col) {

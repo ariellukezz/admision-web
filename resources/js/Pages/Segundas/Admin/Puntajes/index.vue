@@ -63,7 +63,7 @@
         <template #bodyCell="{ column, record, index }">
 
             <template v-if="column.dataIndex === 'nombres'">
-                {{ record.nombres }} {{ record.primer_apellido }} {{ record.segundo_apellido }}
+                {{ record.primer_apellido }} {{ record.segundo_apellido }} {{ record.nombres }}
             </template>
 
             <template v-if="column.dataIndex === 'puesto'">
@@ -145,8 +145,7 @@
             }"
         >
             <div>
-                {{ p.puntaje !== null ? (index+1) : '-' }} - 
-                {{ p.nombres }} {{ p.primer_apellido }} {{ p.segundo_apellido }} 
+                {{ p.puntaje !== null ? (index+1) : '-' }} - {{ p.primer_apellido }} {{ p.segundo_apellido }} {{ p.nombres }}
                 ({{ p.puntaje !== null ? Number(p.puntaje).toFixed(2) : '-' }})
             </div>
 
