@@ -23,6 +23,9 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->only('email', 'password');
+
+        session(['auth_method' => 'email']);
+
         if (!Auth::attempt($credentials)) {
             return back()->withErrors([
                 'email' => 'Credenciales incorrectas.',
@@ -42,8 +45,9 @@ class AuthenticatedSessionController extends Controller
         if ($user->id_rol == 7) { return redirect('/calificacion'); }
         if ($user->id_rol == 6) { return redirect('/simulacro'); }
         if ($user->id_rol == 1) { return redirect('/admin/dashboard'); } 
-        if ($user->id_rol == 2) { return redirect('/revisor'); }       
-        if ($user->id_rol == 3) { return redirect('/segundas'); }        
+        if ($user->id_rol == 2) { return redirect('/revisor'); }
+        if ($user->id_rol == 3) { return redirect('/segundas'); }
+        if ($user->id_rol == 8) { return redirect('/postulante/dashboard?seleccionar_proceso=1'); }
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
