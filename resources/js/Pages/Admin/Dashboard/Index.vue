@@ -1,339 +1,212 @@
 <template>
 <Head title="Dashboard" />
-<AuthenticatedLayout> 
+<AuthenticatedLayout>
 
-<div style="background: #f3f3f3;">
-    <a-row :gutter="[16, 8]">
-      <a-col :xs="24" :sm="12" :md="6" :lg="6">
-        <div class="p-4" style="background: white; border-radius: 12px;" >
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Preinscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div v-if="preinscritos"> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ preinscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div>
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimopreinscrito.count }} preinscritos <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span>
-              <!-- <span style="color: #00af00;"> preinscritos  {{ (ultimopreinscrito.count / preinscritos ).toFixed(2) }}% <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span> -->
-            </div>
-          </div>
+<div class="dashboard-container">
 
-        </div>
-      </a-col>
-
-      <a-col :xs="24" :sm="12" :md="6" :lg="6">        
-        <div class="p-4" style="background: white; border-radius: 12px;">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Inscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ inscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div> 
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimoinscrito.count }} inscritos <span style="color: gray;">el {{ ultimoinscrito.date }}</span> </span>
-            </div>
-          </div>
-
-        </div>
-      </a-col>
-
-      <a-col :xs="24" :sm="12" :md="6" :lg="6">
-
-        <div class="p-4" style="background: white; border-radius: 12px;">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Preinscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div v-if="preinscritos"> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ preinscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div>
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimopreinscrito.count }} preinscritos <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span>
-              <!-- <span style="color: #00af00;"> preinscritos  {{ (ultimopreinscrito.count / preinscritos ).toFixed(2) }}% <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span> -->
-            </div>
-          </div>
-
-        </div>
-        
-      </a-col>
-
-      <a-col :xs="24" :sm="12" :md="6" :lg="6">
-        <div class="p-4" style="background: white; border-radius: 12px;">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Preinscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div v-if="preinscritos"> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ preinscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div>
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimopreinscrito.count }} preinscritos <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span>
-              <!-- <span style="color: #00af00;"> preinscritos  {{ (ultimopreinscrito.count / preinscritos ).toFixed(2) }}% <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span> -->
-            </div>
-          </div>
-
-        </div>
-      </a-col>
-    </a-row>
-</div>
-
-<div style="height: 16px; background: #f3f3f3;"></div>
-
-<div style="background: #f3f3f3;">
-  <a-row :gutter="[16, 8]" style="background: #f3f3f3;">
-      <a-col style="" :xs="24" :sm="12" :md="16" :lg="18">
-        <div class="p-4" style="width: 100%; min-height: 260px; margin-bottom:16px; transition: all 1s ease-in-out; border-radius: 9px;">
-          <div style="">
-            <Reportes/>
-          </div>
-        </div>
-
-        <div class="pl-4 pr-4" style="width: 100%; min-height: 260px; transition: all 1s ease-in-out; border-radius: 9px;">
-          <div style="">
-            <Reportes2/>
-          </div>
-        </div>
-      </a-col>
-
-      <a-col :xs="24" :sm="12" :md="8" :lg="6">
-        <div class="p-4" style="background:white; border-radius: 9px; height: 560px;">
-          <div class="mb-5">
-            <div class="mb-3 flex justify-between">  
-              <h1 style="font-weight: bold;">Mejores inscriptores</h1>
-              <div style="margin-top: -5px;"> <span style="color: var(--primary-color);"><eye-outlined/></span></div>
-            </div>
-
-            <div v-if="minscriptores != null">
-              <div v-for="(inscriptor,index) in minscriptores" :key="inscriptor.id" class="flex mb-2" style="height: 38px; width: 100%;">
-                <div style="border-radius: 50%; height: 38px; overflow: hidden;">
-                    <div v-if="inscriptor.url">
-                      <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-                        width="38" height="38"> 
-                    </div>             
-
-                    <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]"> 
-                      <!-- {{ colores[index] }} -->
-                      <div class="flex justify-center pt-0">
-                        <span style="color: white; font-size: 1.7rem;">
-                          {{ inscriptor.paterno[0].toUpperCase() }} 
-                        </span> 
-                        <!-- <span style="color: white; font-weight: bold; font-size:1.5rem;">
-                          {{ inscriptor.paterno[0].toUpperCase() }} 
-                        </span>  -->
-                      </div>
-                    </div>
-
-
-                </div>
-                  <div class="ml-2">
-                    <div style="margin-top: 2px;"><span style="font-size:0.9rem; font-weight: bold;">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
-                    <div style="margin-top: -7px;"><span style="color: gray; font-size: .8rem;">{{ inscriptor.cant }} Inscritos</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div class="mb-3">  
-                <h1 style="font-weight: bold;">Ultimos Cinco (5)</h1>
-              </div>
-
-              <div v-if="minscriptoresD != null"  >
-                <div v-for="(inscriptor,index) in minscriptoresD" :key="inscriptor.id" class="flex mb-2" style="height: 38px; width: 100%;">
-                  <div style="border-radius: 50%; height: 38px; overflow: hidden;">
-                      <div v-if="inscriptor.url">
-                        <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-                          width="38" height="38"> 
-                      </div>             
-
-                      <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]"> 
-                        <!-- {{ colores[index] }} -->
-                        <div class="flex justify-center pt-0">
-                          <span style="color: white; font-size: 1.7rem;">
-                            {{ inscriptor.paterno[0].toUpperCase() }} 
-                          </span> 
-                        </div>
-                      </div>
-
-
-                  </div>
-                  <div class="ml-2">
-                    <div style="margin-top: 2px;"><span style=" font-size: .9rem; font-weight: bold;">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
-                    <div style="margin-top: -7px;"><span style="color: gray; font-size: .7rem;">{{ inscriptor.cant }} Inscritos</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-
-      </a-col>
-    </a-row>
-</div>
-
-
-
-<div class="flex" style="background: #f3f3f3;">
-  <div style="width: calc(100% - 300px);">
-    
-    <!-- CARDS-->
-    <!-- <div class="flex justify-between">
-        <div class="p-4 card-dash" >
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Preinscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div v-if="preinscritos"> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ preinscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div>
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimopreinscrito.count }} preinscritos <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span>
-             </div>
-          </div>
-
-        </div>
-
-        <div class="p-4 card-dash">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                1369
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div> 
-              <span style="color: #00af00;"> icon  16% <span style="color: gray;">Since las week</span> </span>
-            </div>
-          </div>
-
-        </div>
-        <div class="p-4 card-dash" style="background: white; border-radius: 9px; height: 160px;">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Inscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 50px;">
-            <div> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
-                {{ inscritos }}
-              </span>
-            </div>
-          </div>
-          <div class="flex justify-start">
-            <div> 
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimoinscrito.count }} inscritos <span style="color: gray;">el {{ ultimoinscrito.date }}</span> </span>
-            </div>
-          </div>
-
-        </div>
-    </div> -->
-    <!-- END CARD -->
-
-    <!-- <div style="height: 16px;" ></div>
-    <div class="p-4" style="width: 100%; min-height: 260px; transition: all 1s ease-in-out; border-radius: 9px; background: white;">
-      <div style="">
-        <Reportes/>
+  <!-- KPI CARDS -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #dbeafe;">
+        <UserAddOutlined style="color: #3b82f6;" />
       </div>
-    </div> -->
+      <div class="kpi-info">
+        <span class="kpi-label">Preinscritos</span>
+        <span class="kpi-value">{{ resumen.preinscritos }}</span>
+        <span class="kpi-sub">
+          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
+          <span style="color: #22c55e; font-weight: 600;">{{ resumen.preinscritos_hoy }}</span>
+          <span style="color: #94a3b8;">hoy</span>
+        </span>
+      </div>
+    </div>
 
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #dcfce7;">
+        <SolutionOutlined style="color: #22c55e;" />
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Inscritos</span>
+        <span class="kpi-value">{{ resumen.inscritos }}</span>
+        <span class="kpi-sub">
+          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
+          <span style="color: #22c55e; font-weight: 600;">{{ resumen.inscritos_hoy }}</span>
+          <span style="color: #94a3b8;">hoy</span>
+        </span>
+      </div>
+    </div>
 
-    <div style="height: 16px;" ></div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #fef3c7;">
+        <SafetyOutlined style="color: #f59e0b;" />
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Ctrl. Biométrico</span>
+        <span class="kpi-value">{{ biometrico.con_biometrico }}</span>
+        <span class="kpi-sub">
+          <span style="color: #3b82f6; font-weight: 600;">{{ biometrico.porcentaje }}%</span>
+          <span style="color: #94a3b8;">del total</span>
+        </span>
+      </div>
+    </div>
 
-    <!-- <div class="flex justify-between">
-        <div class="p-4 card-dash" style="background: white; width: 49%; height: 240px;">
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
-              <div style="margin-top: -5px;">
-                <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
-              </div>
-            </div>
-          </div>
-          <div style="margin-top: 0px;">
-            <Bar
-              id="my-chart-id"
-              :options="barrasOpciones"
-              :data="barras"
-            />
-          </div>
-        </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #f3e8ff;">
+        <TeamOutlined style="color: #a855f7;" />
+      </div>
+      <div class="kpi-info">
+        <span class="kpi-label">Ingresantes Total</span>
+        <span class="kpi-value">{{ biometrico.total_ingresantes }}</span>
+        <span class="kpi-sub" v-if="biometrico.fechas_ingreso?.length">
+          <span style="color: #64748b;">{{ fechasIngresoCortas }}</span>
+        </span>
+      </div>
+    </div>
+  </div>
 
-        <div class="p-4 card-dash" style="background: white; width: 49%; height: 240px;"  >
-          <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
-            </div>
-          <div style="margin-top: 0px;">
-            <ChartComponent/>
-          </div>
-        </div>
-    </div> -->
-
-    <div class="flex" style="height: 16px;"></div>
-    <!-- <div class="p-4" style="width: 100%; border-radius: 9px; background: white;">
+  <!-- PROGRESS BAR BIOMETRICO -->
+  <div class="bio-progress-card" v-if="biometrico.total_ingresantes > 0">
+    <div class="bio-header">
       <div>
-        <Reportes/>
-      </div> 
-    </div> -->
+        <h3 class="bio-title">Control Biométrico</h3>
+        <p class="bio-subtitle">
+          {{ biometrico.con_biometrico }} de {{ biometrico.total_ingresantes }} ingresantes registrados
+        </p>
+      </div>
+      <div class="bio-badge">
+        <SafetyOutlined />
+        {{ biometrico.porcentaje }}%
+      </div>
+    </div>
+    <a-progress
+      :percent="biometrico.porcentaje"
+      :stroke-color="{ '0%': '#3b82f6', '100%': '#8b5cf6' }"
+      :show-info="false"
+      stroke-linecap="round"
+      size="large"
+    />
+    <div class="bio-stats">
+      <div class="bio-stat">
+        <CheckCircleOutlined style="color: #22c55e;" />
+        <span>Registrados: <strong>{{ biometrico.con_biometrico }}</strong></span>
+      </div>
+      <div class="bio-stat">
+        <CloseCircleOutlined style="color: #ef4444;" />
+        <span>Pendientes: <strong>{{ biometrico.sin_biometrico }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-card" v-if="resumen.inscritos === 0 && resumen.preinscritos === 0">
+    <div class="empty-icon">
+      <InboxOutlined style="font-size: 48px; color: #cbd5e1;" />
+    </div>
+    <h3>Sin datos para el proceso actual</h3>
+    <p>Los gráficos se mostrarán cuando existan preinscripciones o inscripciones para este proceso.</p>
+  </div>
+
+  <!-- ROW: TIMELINE + GENERO POR AREA -->
+  <div class="charts-row" v-if="resumen.inscritos > 0">
+    <div class="chart-card chart-card-lg">
+      <div class="chart-header">
+        <h3>Inscripciones por fecha</h3>
+      </div>
+      <div class="chart-body">
+        <Line v-if="timeline.length > 0" :data="timelineData" :options="timelineOpts" />
+        <div v-else class="chart-empty">Sin inscripciones en el periodo del proceso</div>
+      </div>
+    </div>
+
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Inscripciones por Género y Área</h3>
+      </div>
+      <div class="chart-body">
+        <Bar v-if="generoArea.length > 0" :data="generoAreaData" :options="barOpts" />
+        <div v-else class="chart-empty">Sin datos de género</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW: POSTULANTES POR AREA + MODALIDAD -->
+  <div class="charts-row" v-if="resumen.inscritos > 0">
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Postulantes por Área</h3>
+      </div>
+      <div class="chart-body">
+        <Doughnut v-if="areas.length > 0" :data="areaData" :options="doughnutOpts" />
+        <div v-else class="chart-empty">Sin datos de áreas</div>
+      </div>
+    </div>
+
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Distribución por Modalidad</h3>
+      </div>
+      <div class="chart-body">
+        <Doughnut v-if="modalidades.length > 0" :data="modalidadData" :options="doughnutOpts" />
+        <div v-else class="chart-empty">Sin datos de modalidades</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW: TOP PROGRAMAS + TIPO COLEGIO -->
+  <div class="charts-row" v-if="resumen.inscritos > 0">
+    <div class="chart-card chart-card-lg">
+      <div class="chart-header">
+        <h3>Top Programas con más Inscritos</h3>
+      </div>
+      <div class="chart-body" style="height: 360px;">
+        <Bar v-if="programas.length > 0" :data="programaData" :options="programaBarOpts" />
+        <div v-else class="chart-empty">Sin datos de programas</div>
+      </div>
+    </div>
+
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Tipo de Colegio</h3>
+      </div>
+      <div class="chart-body">
+        <Pie v-if="tipoColegio.length > 0" :data="tipoColegioData" :options="pieOpts" />
+        <div v-else class="chart-empty">Sin datos de colegios</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW: BIOMETRICO POR AREA + MEJORES INSCRIPTORES -->
+  <div class="charts-row" v-if="resumen.inscritos > 0">
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Biométrico por Área</h3>
+      </div>
+      <div class="chart-body">
+        <Bar v-if="biometrico.por_area && biometrico.por_area.length > 0" :data="biometricoAreaData" :options="barOpts" />
+        <div v-else class="chart-empty">Sin datos biométricos</div>
+      </div>
+    </div>
+
+    <div class="chart-card chart-card-md">
+      <div class="chart-header">
+        <h3>Mejores Inscriptores</h3>
+      </div>
+      <div class="inscriptores-list">
+        <div v-for="(ins, index) in inscriptores" :key="index" class="inscriptor-item">
+          <div class="inscriptor-avatar" :style="{ background: avatarColors[index % avatarColors.length] }">
+            {{ ins.paterno ? ins.paterno[0].toUpperCase() : '?' }}
+          </div>
+          <div class="inscriptor-info">
+            <span class="inscriptor-name">{{ ins.name }} {{ ins.paterno }}</span>
+            <span class="inscriptor-count">{{ ins.cant }} inscritos</span>
+          </div>
+          <div class="inscriptor-bar-bg">
+            <div class="inscriptor-bar-fill" :style="{ width: (ins.cant / maxInscriptores * 100) + '%' }"></div>
+          </div>
+        </div>
+        <div v-if="inscriptores.length === 0" class="chart-empty">Sin datos</div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -343,124 +216,273 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head } from '@inertiajs/vue3';
-import { TeamOutlined, EyeOutlined } from '@ant-design/icons-vue';
-import { Bar } from 'vue-chartjs'
-import ChartComponent from '../../Dashboard/components/ChartComponent.vue';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
-import { ref } from 'vue';
-import Reportes from './components/reportes.vue';
-import Reportes2 from './components/reportes2.vue';
-import { toFixed } from 'ant-design-vue/lib/input-number/src/utils/MiniDecimal';
+import { Head } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
+import {
+  UserAddOutlined, SolutionOutlined, TeamOutlined, SafetyOutlined,
+  ArrowUpOutlined, CheckCircleOutlined, CloseCircleOutlined,
+  InboxOutlined
+} from '@ant-design/icons-vue'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale, Title, LinearScale, PointElement, LineElement, Filler } from 'chart.js'
+import { Pie, Bar, Line, Doughnut } from 'vue-chartjs'
+import axios from 'axios'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ArcElement, Tooltip, Legend, PointElement, LineElement, Filler)
 
-const barras = {
-    labels: [ 'Lun', 'Mar', 'Mie', 'Jue', 'Vie' ],
-    datasets: [ 
-      { 
-        label: 'Data 1',
-        backgroundColor: '#00aae4',
-        borderColor: '#00aae4',
-        borderWidth: 2,
-        fill: false,
-        data: [20, 39, 50, 60, 70, 89],
-        tension: 0.5,
-        pointRadius: false,
-      },
-      { 
-        label: 'Data 1',
-        backgroundColor: 'blue',
-        borderColor: 'blue',
-        borderWidth: 2,
-        fill: false,
-        data: [70, 89, 10, 90, 35, 89],
-        tension: 0.5,
-        pointRadius: false,
-      }, 
+const COLORS = {
+  blue: '#3b82f6', green: '#22c55e', amber: '#f59e0b', purple: '#a855f7',
+  red: '#ef4444', cyan: '#06b6d4', pink: '#ec4899', indigo: '#6366f1',
+  orange: '#f97316', teal: '#14b8a6'
+}
+const PALETTE = [COLORS.blue, COLORS.green, COLORS.amber, COLORS.purple, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.indigo, COLORS.orange, COLORS.teal]
+const avatarColors = ['#dbeafe', '#dcfce7', '#fef3c7', '#f3e8ff', '#ffe4e6', '#e0f2fe', '#fce7f3', '#ede9fe']
+
+const datalabelPlugin = {
+  id: 'customDatalabel',
+  afterDatasetDraw(chart) {
+    const { ctx } = chart
+    const total = chart.data.datasets.reduce((sum, ds) => sum + ds.data.reduce((a, b) => a + (b || 0), 0), 0)
+    const meta = chart.getDatasetMeta(chart._drawDatasetIndex ?? 0)
+    const dataset = chart.data.datasets[meta.index ?? 0]
+    if (!dataset || meta.hidden) return
+    meta.data.forEach((element, index) => {
+      const value = dataset.data[index]
+      if (value == null) return
+      ctx.save()
+      ctx.font = 'bold 11px Inter, sans-serif'
+      ctx.fillStyle = '#475569'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      const chartType = chart.config.type
+      if (chartType === 'bar') {
+        if (chart.options.indexAxis === 'y') {
+          ctx.textAlign = 'left'
+          ctx.textBaseline = 'middle'
+          ctx.fillText(value, element.x + 6, element.y)
+        } else {
+          ctx.fillText(value, element.x, element.y - 4)
+        }
+      } else if (chartType === 'line') {
+        ctx.fillText(value, element.x, element.y - 8)
+      } else if (chartType === 'doughnut' || chartType === 'pie') {
+        const meta2 = element.getProps(['startAngle', 'endAngle', 'innerRadius', 'outerRadius', 'x', 'y'])
+        const midAngle = (meta2.startAngle + meta2.endAngle) / 2
+        const radius = (meta2.innerRadius + meta2.outerRadius) / 2
+        const x = meta2.x + Math.cos(midAngle) * radius
+        const y = meta2.y + Math.sin(midAngle) * radius
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = '#ffffff'
+        ctx.font = 'bold 12px Inter, sans-serif'
+        const pct = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : value
+        ctx.fillText(pct, x, y)
+      }
+      ctx.restore()
+    })
+  }
+}
+
+ChartJS.register(datalabelPlugin)
+
+const resumen = ref({ preinscritos: 0, inscritos: 0, biometricos: 0, postulantes: 0, preinscritos_hoy: 0, inscritos_hoy: 0, biometricos_hoy: 0 })
+const biometrico = ref({ total_ingresantes: 0, con_biometrico: 0, sin_biometrico: 0, porcentaje: 0, por_area: [], fechas_ingreso: [] })
+const generoArea = ref([])
+const areas = ref([])
+const programas = ref([])
+const timeline = ref([])
+const modalidades = ref([])
+const tipoColegio = ref([])
+const inscriptores = ref([])
+
+const maxInscriptores = computed(() => {
+  if (inscriptores.value.length === 0) return 1
+  return Math.max(...inscriptores.value.map(i => i.cant))
+})
+
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+
+const fechasIngresoCortas = computed(() => {
+  const fechas = biometrico.value.fechas_ingreso || []
+  if (!fechas.length) return '—'
+  const parse = f => { const p = f.split('-'); return { d: +p[2], m: +p[1], y: p[0] } }
+  const parsed = fechas.map(parse)
+  const meses = [...new Set(parsed.map(f => f.m))]
+  const years = [...new Set(parsed.map(f => f.y))]
+  if (meses.length > 1) {
+    const first = parsed[0]
+    return `${first.d} ${MESES[first.m - 1]} ${first.y} y más...`
+  }
+  const dias = parsed.map(f => f.d)
+  let txt = dias.slice(0, 3).join(', ')
+  if (dias.length > 3) txt += '...'
+  txt += ` ${MESES[meses[0] - 1]} ${years[0]}`
+  return txt
+})
+
+// ─── DATA COMPUTED ────────────────────────────────────────────────
+const areaData = computed(() => ({
+  labels: areas.value.map(d => d.area || 'Sin área'),
+  datasets: [{ data: areas.value.map(d => d.cant), backgroundColor: PALETTE.slice(0, areas.value.length), borderWidth: 0 }]
+}))
+
+const generoAreaData = computed(() => {
+  const areaLabels = [...new Set(generoArea.value.map(d => d.area || 'Sin área'))].sort()
+  const hombres = areaLabels.map(a => generoArea.value.find(d => (d.area || 'Sin área') === a && d.sexo == 1)?.cant || 0)
+  const mujeres = areaLabels.map(a => generoArea.value.find(d => (d.area || 'Sin área') === a && d.sexo == 2)?.cant || 0)
+  return {
+    labels: areaLabels,
+    datasets: [
+      { label: 'Varones', data: hombres, backgroundColor: COLORS.blue, borderRadius: 6 },
+      { label: 'Mujeres', data: mujeres, backgroundColor: COLORS.pink, borderRadius: 6 },
     ]
   }
-const barrasOpciones = { responsive: true }
+})
 
-const preinscritos = ref(0);
-const ultimopreinscrito = ref({ count:0, date:'0000-00-00' });
-const inscritos = ref(0);
-const ultimoinscrito = ref({ count:0, date:'0000-00-00' });
-const minscriptores = ref(null);
-const minscriptoresD = ref(null);
+const programaData = computed(() => ({
+  labels: programas.value.map(d => d.nombre?.length > 30 ? d.nombre.substring(0, 30) + '…' : d.nombre),
+  datasets: [{
+    data: programas.value.map(d => d.cant),
+    backgroundColor: programas.value.map(d => d.area === 'INGENIERÍAS' ? COLORS.blue : d.area === 'BIOMÉDICAS' ? COLORS.green : COLORS.purple),
+    borderRadius: 6,
+  }]
+}))
 
+const timelineData = computed(() => ({
+  labels: timeline.value.map(d => {
+    if (!d.fecha) return ''
+    const parts = d.fecha.split('-')
+    return `${parts[2]}/${parts[1]}`
+  }),
+  datasets: [{
+    label: 'Inscritos',
+    data: timeline.value.map(d => d.cant),
+    borderColor: COLORS.blue,
+    backgroundColor: 'rgba(59,130,246,0.1)',
+    fill: true,
+    tension: 0.4,
+    pointRadius: 3,
+    pointBackgroundColor: COLORS.blue,
+  }]
+}))
 
-const getPreinscritos = async () => {
-  try {
-    const response = await axios.get("/admin/get-preinscritos", { dni: "dni" });
-    preinscritos.value = response.data.preinscritos;
-    ultimopreinscrito.value = response.data.fecha;
-  } catch (error) {
-    console.error("Error al obtener datos de preinscritos:", error);
-    return null;
+const modalidadData = computed(() => ({
+  labels: modalidades.value.map(d => d.nombre || 'Sin modalidad'),
+  datasets: [{ data: modalidades.value.map(d => d.cant), backgroundColor: PALETTE.slice(0, modalidades.value.length), borderWidth: 0 }]
+}))
+
+const tipoColegioData = computed(() => ({
+  labels: tipoColegio.value.map(d => d.tipo || 'Sin tipo'),
+  datasets: [{
+    data: tipoColegio.value.map(d => d.cant),
+    backgroundColor: [COLORS.blue, COLORS.amber, COLORS.green, COLORS.purple],
+    borderWidth: 0
+  }]
+}))
+
+const biometricoAreaData = computed(() => {
+  const areas = (biometrico.value.por_area || [])
+  return {
+    labels: areas.map(d => d.area || 'Sin área'),
+    datasets: [
+      { label: 'Total Ingresantes', data: areas.map(d => d.ingresantes), backgroundColor: COLORS.amber, borderRadius: 6 },
+      { label: 'Con Biométrico', data: areas.map(d => d.biometrico), backgroundColor: COLORS.blue, borderRadius: 6 },
+      { label: 'Sin Biométrico', data: areas.map(d => d.ingresantes - d.biometrico), backgroundColor: COLORS.red, borderRadius: 6 },
+    ]
   }
-};
+})
 
-const getInscritos = async () => {
+// ─── CHART OPTIONS ────────────────────────────────────────────────
+const baseScales = {
+  y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+  x: { grid: { display: false } }
+}
+
+const barOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { padding: 12, usePointStyle: true, boxWidth: 8 } } }, scales: { ...baseScales } }
+const programaBarOpts = { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, grid: { color: '#f1f5f9' } }, y: { grid: { display: false } } } }
+const doughnutOpts = { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } } }
+const pieOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } } }
+const timelineOpts = computed(() => {
+  const maxVal = timeline.value.length ? Math.max(...timeline.value.map(d => d.cant)) : 0
+  const padding = maxVal < 500 ? 50 : Math.ceil(maxVal * 0.08 / 500) * 500
+  return { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: maxVal + padding, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+})
+
+// ─── FETCH DATA ───────────────────────────────────────────────────
+const fetchAll = async () => {
   try {
-    const response = await axios.get("/admin/get-inscritos", { dni: "dni" });
-    inscritos.value = response.data.inscritos;
-    ultimoinscrito.value = response.data.fecha;
-  } catch (error) {
-    console.error("Error al obtener datos de los inscritos:", error);
-    return null;
+    const promises = [
+      axios.get('/admin/dashboard/resumen-general').catch(() => null),
+      axios.get('/admin/dashboard/biometrico-resumen').catch(() => null),
+      axios.get('/admin/dashboard/postulantes-por-area').catch(() => null),
+      axios.get('/admin/dashboard/genero-por-area').catch(() => null),
+      axios.get('/admin/dashboard/inscritos-por-programa').catch(() => null),
+      axios.get('/admin/dashboard/timeline-inscripciones').catch(() => null),
+      axios.get('/admin/dashboard/modalidad-distribucion').catch(() => null),
+      axios.get('/admin/dashboard/tipo-colegio-distribucion').catch(() => null),
+      axios.get('/admin/get-mejores-inscriptores').catch(() => null),
+    ]
+
+    const [r1, r2, r3, r4, r5, r6, r7, r8, r9] = await Promise.all(promises)
+
+    if (r1?.data?.success) resumen.value = r1.data.datos
+    if (r2?.data?.success) biometrico.value = r2.data.datos
+    if (r3?.data?.success) areas.value = r3.data.datos
+    if (r4?.data?.success) generoArea.value = r4.data.datos
+    if (r5?.data?.success) programas.value = r5.data.datos
+    if (r6?.data?.success) timeline.value = r6.data.datos
+    if (r7?.data?.success) modalidades.value = r7.data.datos
+    if (r8?.data?.success) tipoColegio.value = r8.data.datos
+    if (r9?.data?.estado) inscriptores.value = r9.data.inscriptores || []
+  } catch (e) {
+    console.error('Error cargando dashboard:', e)
   }
-};
+}
 
-const getMinscriptores = async () => {
-  try {
-    const response = await axios.get("/admin/get-mejores-inscriptores", { dni: "dni" });
-    minscriptores.value = response.data.inscriptores;
-  } catch (error) {
-    console.error("Error al obtener datos de los inscritos:", error);
-    return null;
-  }
-};
-
-const getMinscriptoresDia = async () => {
-  try {
-    const response = await axios.post("/admin/get-mejores-inscriptores-dia", { fecha: "2023-08-04" });
-    minscriptoresD.value = response.data.inscriptores;
-  } catch (error) {
-    console.error("Error al obtener datos de los inscritos:", error);
-    return null;
-  }
-};
-
-
-
-getPreinscritos();
-getInscritos();
-getMinscriptores();
-getMinscriptoresDia();
-
-
-const colores = [
-  "#f3b4c8", "#f9cb9c", "#f4d5ae", "#d6e4a3", "#92c7a3",
-  "#a3cedc", "#d7aefb", "#f7aef8", "#f8a1d1", "#f0bad6",
-  "#f9d6ac", "#fed6a3", "#f6b89d", "#fcc5ae", "#fee1a3",
-  "#c9e8a3", "#a3e2c7", "#a3e1e0", "#a3cce1", "#c3a3e1",
-  "#e8a3d0", "#e2a3a3", "#f29b82", "#efc085", "#ebd47f",
-  "#d1d17a", "#87c289", "#87c2bd", "#8bb4cc", "#a48bcc",
-  "#b58bcc", "#cb8bcc", "#cc8bb1", "#cf8b8b", "#d0a18b",
-  "#d5a18b", "#d9a18b", "#dba88c", "#ddb593", "#deb6a6",
-  "#95b0ac", "#9aaca7", "#a19e98", "#bba895", "#d2c0a7",
-  "#d5c6a3", "#d6cfad", "#d9cfad", "#dbd4b2", "#ddd8b6"
-];
-
+onMounted(() => { fetchAll() })
 </script>
 
 <style scoped>
-.card-dash{
-  background: white;  
-  border-radius: 9px; 
-  height: 160px;
-  width: 260px;
-}
+.dashboard-container { padding: 4px 8px 24px; }
 
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+.kpi-card { background: white; border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 16px; transition: box-shadow 0.2s; }
+.kpi-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.kpi-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.kpi-info { display: flex; flex-direction: column; }
+.kpi-label { font-size: 13px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
+.kpi-sub { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+
+.bio-progress-card { background: white; border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; margin-bottom: 16px; }
+.bio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.bio-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0; }
+.bio-subtitle { font-size: 13px; color: #94a3b8; margin: 4px 0 0; }
+.bio-badge { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+.bio-stats { display: flex; gap: 24px; margin-top: 12px; }
+.bio-stat { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; }
+
+.empty-card { background: white; border-radius: 16px; padding: 48px 24px; border: 1px solid #f1f5f9; text-align: center; margin-bottom: 16px; }
+.empty-card h3 { color: #64748b; font-size: 18px; font-weight: 600; margin: 16px 0 8px; }
+.empty-card p { color: #94a3b8; font-size: 14px; }
+
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.chart-card { background: white; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; }
+.chart-header { padding: 16px 20px 0; }
+.chart-header h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
+.chart-body { padding: 12px 16px 16px; height: 280px; }
+
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 13px; text-align: center; }
+
+.inscriptores-list { padding: 12px 20px 16px; }
+.inscriptor-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.inscriptor-avatar { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #475569; flex-shrink: 0; }
+.inscriptor-info { display: flex; flex-direction: column; min-width: 100px; }
+.inscriptor-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+.inscriptor-count { font-size: 11px; color: #94a3b8; }
+.inscriptor-bar-bg { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+.inscriptor-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 3px; transition: width 0.6s ease; }
+
+@media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .kpi-row { grid-template-columns: 1fr; } }
+
+:deep(.ant-progress-bg) { border-radius: 10px !important; }
 </style>
