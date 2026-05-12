@@ -27,8 +27,10 @@ class RedireccionarARol
                 return redirect('/admin/dashboard');
             } elseif ($userRole == 2) {
                 return redirect('/revisor');
-            }elseif ($userRole == 3) {
+            } elseif ($userRole == 3) {
                 return redirect('/segundas');
+            } elseif ($userRole == 8) {
+                return redirect('/postulante/dashboard?seleccionar_proceso=1');
             }
         }
 

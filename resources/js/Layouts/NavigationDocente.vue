@@ -10,7 +10,7 @@
                 <!-- <div style="width: 1px; background-color: gray; margin: 0px 10px; height: 30px; margin-top: 8px;"></div> -->
                 <div style="margin: 0px 0px; color: #476175;">
                     <!-- <div style="display: flex; justify-content: center; margin-top: 5px;"><span style="font-size:.60rem; letter-spacing: .15rem; font-weight: 500;">DIRECCIÓN DE</span></div> -->
-                    <div class="ml-2" style="display: flex; justify-content: left; margin-top: 8px;"><span style="font-family: Arial, Helvetica, sans-serif; font-size: 1.7rem; letter-spacing:.09rem; font-weight: 600;">ADMISIÓN</span></div>
+                    <div class="ml-2" style="display: flex; justify-content: left; margin-top: 8px;"><span style="font-family: Arial, Helvetica, sans-serif; font-size: 1.7rem; letter-spacing:.09rem; font-weight: 500;">DIRECCIÓN DE ADMISIÓN</span></div>
                 </div>
                 <!-- <div style="padding-top: 5px;">
                     <img src="../../assets/imagenes/logoDAD.png" width="30"/>

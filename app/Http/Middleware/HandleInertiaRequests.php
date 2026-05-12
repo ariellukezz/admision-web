@@ -33,16 +33,38 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request)
     {
+        $user = $request->user();
+        $procesoActual = null;
+
+        if ($user && $user->id_proceso) {
+            $proceso = \App\Models\Proceso::find($user->id_proceso);
+            if ($proceso) {
+                $procesoActual = [
+                    'id' => $proceso->id,
+                    'nombre' => $proceso->nombre,
+                    'anio' => $proceso->anio,
+                ];
+            }
+        }
+
+        $notificacionesNoLeidas = 0;
+
+        if ($user && $user->id_rol == 2) {
+            $notificacionesNoLeidas = $user->unreadNotifications()->count();
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
+            'proceso_actual' => $procesoActual,
             'flash' => function () use ($request) {
                 return [
                     'success' => $request->session()->get('success'),
                 ];
             },
             'showingMobileMenu' => false,
+            'notificacionesNoLeidas' => $notificacionesNoLeidas,
         ]);
     }
 }
