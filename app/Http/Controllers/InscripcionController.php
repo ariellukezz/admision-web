@@ -66,6 +66,7 @@ class InscripcionController extends Controller
             $res = DB::select("SELECT postulante.id as id_postulante, postulante.nro_doc AS dni, postulante.nombres,
             postulante.primer_apellido, postulante.segundo_apellido, postulante.sexo, postulante.fec_nacimiento,
             postulante.foto_url AS postulante_foto, postulante.revisado as postulante_revisado,
+            postulante.tiene_revision_activa,
             programa.id AS id_programa, programa.nombre as programa, programa.codigo as cod_programa,
             colegios.id AS id_colegio, concat(colegios.gestion,".'" - "'.", colegios.nombre) AS colegio,
             colegios.id_gestion as id_gestion,
@@ -183,16 +184,17 @@ class InscripcionController extends Controller
     }
 
     public function getDocumentos($dni){
-        $res = DB::select('SELECT
+        $res = DB::select("SELECT
         documento.id, documento.codigo, documento.nombre,
         documento.url, documento.estado, documento.verificado,
-        tipo_documento.nombre  AS tipo
+        documento.id_tipo_documento,
+        tipo_documento.nombre AS tipo
         FROM documento
-        left JOIN tipo_documento ON tipo_documento.id = documento.id_tipo_documento
+        LEFT JOIN tipo_documento ON tipo_documento.id = documento.id_tipo_documento
         JOIN postulante ON documento.id_postulante = postulante.id
-        WHERE documento.id_tipo_documento IN (1,4)
-        AND documento.codigo IS NOT null
-        AND postulante.nro_doc  = ' . $dni);
+        WHERE documento.is_deleted = 0
+        AND documento.estado = 1
+        AND postulante.nro_doc = ?", [$dni]);
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);

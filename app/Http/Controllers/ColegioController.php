@@ -59,7 +59,7 @@ class ColegioController extends Controller
 
     public function getUbigeoColegio(Request $request)
     {
-      $res = Colegio::select('colegios.id as value', 'colegios.nombre as label', 'colegios.direccion', 
+      $res = Colegio::select('colegios.id as value', 'colegios.nombre as label', 'colegios.direccion', 'colegios.ubigeo as ubigeo',
         'postulante.anio_egreso as egreso',
         'departamento.nombre as departamento', 'departamento.codigo as dep',
         'provincia.nombre as provincia', 'provincia.codigo as prov', 
@@ -82,7 +82,8 @@ class ColegioController extends Controller
 
     public function getColegiosDistrito(Request $request) {
 
-      $res = Colegio::select( 'colegios.id as value', 'colegios.nombre as label' )
+      $res = Colegio::select( 'colegios.id as value', 'colegios.direccion',
+        DB::raw('CONCAT(colegios.nombre, " (", colegios.gestion, ")", IF(colegios.direccion IS NOT NULL AND colegios.direccion != "", CONCAT(" - ", colegios.direccion), "")) as label') )
         ->where('colegios.ubigeo','=',$request->ubigeo_cole)
         ->orderBy('colegios.nombre', 'ASC')->get();
   

@@ -21,4 +21,19 @@ class Inscripcion extends Model
         'id_examen_vocacional',
         'estado',
     ];
+
+    public function postulante()
+    {
+        return $this->belongsTo(Postulante::class, 'id_postulante');
+    }
+
+    public function programa()
+    {
+        return $this->belongsTo(Programa::class, 'id_programa');
+    }
+
+    public function modalidad()
+    {
+        return $this->belongsTo(Modalidad::class, 'id_modalidad');
+    }
 }
