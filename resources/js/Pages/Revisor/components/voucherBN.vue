@@ -1,85 +1,63 @@
 <template>
-<div>
-    <a-row :gutter="16" class="mb-3">
-      <div class="flex pr-6" style="width: 100%; justify-content: end; margin-top: -30px; margin-bottom: 16px;"> 
-        <a-button @click="modalPagos = true" style="background: #133466; border:none; color: white;">Agregar Pagos</a-button>
-      </div>
-        <a-table :dataSource="pagos" :columns="colcomprobantes" :pagination="false" size="small" style="width: 100%;" > 
-            <template #bodyCell="{ column, record }">
-                <template v-if="column.dataIndex === 'proceso'">
-                    <a-tag v-if="record.id_modalidad_proceso === 3" color="pink">{{ record.proceso }}</a-tag>
-                    <a-tag v-if="record.id_modalidad_proceso === 2" color="orange">{{ record.proceso }}</a-tag>
-                    <a-tag v-if="record.id_modalidad_proceso === 1" color="blue">{{ record.proceso }}</a-tag>
-                </template>
-            </template> 
-        </a-table> 
+<div class="vch-wrap">
+  <div class="vch-header">
+    <a-button class="vch-btn-add" @click="modalPagos = true">+ Agregar Pagos</a-button>
+  </div>
 
-        <div v-if="pagos">
-          <div>{{   }}</div>
-        </div>
+  <a-table :dataSource="pagos" :columns="colcomprobantes" :pagination="false" size="small" class="vch-table">
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.dataIndex === 'proceso'">
+        <a-tag v-if="record.id_modalidad_proceso === 3" color="red">{{ record.proceso }}</a-tag>
+        <a-tag v-if="record.id_modalidad_proceso === 2" color="orange">{{ record.proceso }}</a-tag>
+        <a-tag v-if="record.id_modalidad_proceso === 1" color="blue">{{ record.proceso }}</a-tag>
+      </template>
+    </template>
+  </a-table>
 
-        <a-modal v-model:visible="modalPagos" width="900px">
-            <div>
-                <a-table :dataSource="comprobantesBN" :columns="colVouchers" :pagination="false" size="small" style="width: 100%;" > 
-                  <template #bodyCell="{ column, record }">
-                      <template v-if="column.dataIndex === 'opcion'">
-                        <template v-if="column.dataIndex === 'opcion'">
-                          <div v-if="record.status">
-
-                            <div v-if="record.status === 0"> 
-                                <a-button @click="verificarBN(record)" style="background: #133466; border:none; color: white;"> seleccionar </a-button> 
-                            </div>
-                            <div v-if="record.status === 1"> 
-                                <a-button @click="verificarBN(record)" style="background: crimson; border-radius: 5px; border:none; color:white;"> seleccionado </a-button> 
-                            </div>
-                          </div>
-                          <div v-else>
-                            <div> 
-                                <a-button @click="verificarBN(record)" style="background: #133466; border:none; color: white;"> seleccionar </a-button> 
-                            </div>
-                          </div>
-                      </template>
-
-                      </template>
-                  </template> 
-              </a-table> 
+  <a-modal v-model:visible="modalPagos" width="900px" title="Agregar Pagos" class="vch-modal">
+    <div class="vch-modal-section">
+      <h4 class="vch-modal-title">Banco de la Nación</h4>
+      <a-table :dataSource="comprobantesBN" :columns="colVouchers" :pagination="false" size="small" class="vch-table">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'opcion'">
+            <div v-if="record.status">
+              <a-button v-if="record.status === 0" class="vch-btn-select" @click="verificarBN(record)">Seleccionar</a-button>
+              <a-button v-if="record.status === 1" class="vch-btn-selected" @click="verificarBN(record)">Seleccionado</a-button>
             </div>
-
-          <div class="pt-5" style="width: 100%;">     
-            <a-table :dataSource="comprobantesCaja" :columns="colVoucherCaja" :pagination="false" size="small" style="width: 100%;" > 
-                <template #bodyCell="{ column, record }">
-                    <template v-if="column.dataIndex === 'paymentAmount'">
-                      <div><strong>S/ {{ record.paymentAmount }} </strong></div>
-                    </template>
-                    <template v-if="column.dataIndex === 'opcion'">
-                        <div v-if="record.estado">
-                          <div v-if="record.estado === 0"> 
-                              <a-button @click="verificarCaja(record)" style="background: #133466; border:none; color: white;"> seleccionar </a-button> 
-                          </div>
-                          <div v-if="record.estado === 1"> 
-                              <a-button @click="verificarCaja(record)" style="background: crimson; border-radius: 5px; border:none; color:white;"> seleccionado </a-button> 
-                          </div>
-                        </div>
-                        <div v-else>
-                          <div> 
-                              <a-button @click="verificarCaja(record)" style="background: #133466; border:none; color: white;"> seleccionar </a-button> 
-                          </div>
-                        </div>
-                    </template>
-                </template> 
-            </a-table> 
-          </div>
-          <template #footer>
-            <div>
-              <a-button style="background: #133466; color:white; border: none;" @click="modalPagos = false">Aceptar</a-button>
+            <div v-else>
+              <a-button class="vch-btn-select" @click="verificarBN(record)">Seleccionar</a-button>
             </div>
           </template>
-        </a-modal>
+        </template>
+      </a-table>
+    </div>
 
+    <div class="vch-modal-section">
+      <h4 class="vch-modal-title">Caja</h4>
+      <a-table :dataSource="comprobantesCaja" :columns="colVoucherCaja" :pagination="false" size="small" class="vch-table">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'paymentAmount'">
+            <strong>S/ {{ record.paymentAmount }}</strong>
+          </template>
+          <template v-if="column.dataIndex === 'opcion'">
+            <div v-if="record.estado">
+              <a-button v-if="record.estado === 0" class="vch-btn-select" @click="verificarCaja(record)">Seleccionar</a-button>
+              <a-button v-if="record.estado === 1" class="vch-btn-selected" @click="verificarCaja(record)">Seleccionado</a-button>
+            </div>
+            <div v-else>
+              <a-button class="vch-btn-select" @click="verificarCaja(record)">Seleccionar</a-button>
+            </div>
+          </template>
+        </template>
+      </a-table>
+    </div>
 
-    </a-row>
+    <template #footer>
+      <a-button class="vch-btn-primary" @click="modalPagos = false">Aceptar</a-button>
+    </template>
+  </a-modal>
 </div>
-</template> 
+</template>
 
 <script setup>
 import { ref, defineProps, watch } from 'vue';
@@ -221,8 +199,20 @@ const temp = ref([
 const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
 </script>
 
-
 <style scoped>
-.rojo{ color: #525252; background: white;}
-.verde { background: #e3e3e3;}
+.vch-wrap { width: 100%; }
+.vch-header { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.vch-btn-add { background: #3b82f6 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 8px; }
+.vch-btn-add:hover { background: #2563eb !important; }
+
+.vch-modal-section { margin-bottom: 1.25rem; }
+.vch-modal-title { font-size: .875rem; font-weight: 700; color: #1e293b; margin: 0 0 .625rem; padding-bottom: .5rem; border-bottom: 1px solid #f1f5f9; }
+
+.vch-btn-select { background: #eff6ff !important; border: 1px solid #3b82f6 !important; color: #3b82f6 !important; font-weight: 600; border-radius: 6px; font-size: .75rem; }
+.vch-btn-select:hover { background: #dbeafe !important; }
+.vch-btn-selected { background: #ef4444 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 6px; font-size: .75rem; }
+.vch-btn-selected:hover { background: #dc2626 !important; }
+
+.vch-btn-primary { background: #3b82f6 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 8px; }
+.vch-btn-primary:hover { background: #2563eb !important; }
 </style>
