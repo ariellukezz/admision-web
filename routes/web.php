@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SimulacroController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\VacantesController;
 use App\Http\Controllers\InscripcionController;
@@ -60,7 +61,6 @@ use App\Http\Controllers\ResumenInscripcionesController;
 use App\Http\Controllers\DescargarArchivosController;
 use App\Http\Controllers\SyncController;
 use Inertia\Inertia;
-
 
 Route::middleware('auth')->get('/', function () {
     return Inertia::render('Welcome', [
@@ -445,6 +445,14 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
             return response()->json(['error' => 'Error en la solicitud'], 500);
         }
     });
+
+    Route::get('/fotos-admision', fn () => Inertia::render('Revisor/fotos'))->name('revisor-fotos-admision');
+    
+    Route::get('/get-codigo-conexion', [FotoController::class, 'getCodigoConexion']);
+    Route::post('/cambiar_proceso', [ProcesoController::class, 'cambiarProceso']);
+    Route::post('/guardar-huella', [HuellaController::class, 'guardar']);
+
+    
 
 });
 Route::get('/pdf-datos-biometrico/{dni}', [IngresoController::class, 'pdfbiometrico2'])->middleware('auth','revisor');

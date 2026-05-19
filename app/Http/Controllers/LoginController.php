@@ -40,6 +40,22 @@ class LoginController extends Controller {
 
     }
 
+    public function getCodigoConexion($codigoConexion){
+
+        // $user = User::where('token_conexion', $codigoConexion)->first();
+        // if (!$user) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'errors' => ['Invalid connection code']
+        //     ], 404);
+        // }
+
+        return response()->json([
+            'status' => true,
+            'codigo_conexion' => '8hIcptrxisoqUtpvU1YZa9eYaZgViuS0LqI0pq6RfmT3O1QJnyAqzwKQNjzr'
+        ], 200);
+    }
+
     public function logout(){
         auth()->user()->tokens()->delete();
         return response()->json([

@@ -56,4 +56,12 @@ class FotoController extends Controller {
         return response()->json(['error' => 'No se proporcionó ninguna foto recortada'], 400);
     }
 
+    public function getCodigoConexion()
+    {
+        return response()->json([
+            'status' => true,
+            'codigo_conexion' => '8hIcptrxisoqUtpvU1YZa9eYaZgViuS0LqI0pq6RfmT3O1QJnyAqzwKQNjzr'
+        ], 200);
+    }
+
 }

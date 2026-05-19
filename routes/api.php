@@ -13,7 +13,9 @@ use App\Http\Controllers\PagoBancoController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReniecController;
+use App\Http\Controllers\GoogleController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
@@ -31,6 +33,7 @@ Route::get('/verificar-ingreso/{periodo}/{dni}', [ApixController::class, 'esIngr
 Route::get('/biometrico/seguimiento/{periodo}/{dni}', [ApixController::class, 'getIngresantePeriodoDniSeguimiento']);
 
 Route::post('/login', [LoginController::class, 'login']);
+Route::get('/get-codigo-conexion/{codigoConexion}', [LoginController::class, 'getCodigoConexion']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -133,3 +136,12 @@ Route::get('/get-avance-proceso-postulante/{proceso}/{dni}', [TestController::cl
 Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevias']);
 
 Route::post('/actualizar-lista-reniec', [ReniecController::class, 'consultarLista']);
+
+
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+Route::post('/registro', [UserController::class, 'registro']);
+Route::post('/login-app', [UserController::class, 'loginApp']);
+Route::post('/recuperar-password', [UserController::class, 'recuperarPassword']);
+Route::post('/restablecer-password', [UserController::class, 'restablecerPassword']);

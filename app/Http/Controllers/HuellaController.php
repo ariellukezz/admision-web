@@ -4,9 +4,107 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use App\Models\AvancePostulante;
 use Illuminate\Http\Request;
+use App\Models\Huella;
+use App\Models\Postulante;
+use Illuminate\Support\Facades\Redis;
 
 class HuellaController extends Controller
 {    
+
+    public function guardar(Request $request)
+    {
+        $request->validate([
+            'dni_postulante' => 'required',
+            'dedo'           => 'required|string',
+            'template'       => 'required',
+            'imagen'         => 'nullable',
+            'calidad'        => 'nullable|integer'
+        ]);
+
+        try {
+
+            $postulante = Postulante::where(
+                'nro_doc',
+                $request->dni_postulante
+            )->firstOrFail();
+
+            $rutaImagen = null;
+
+            if ($request->imagen) {
+
+                $base64 = preg_replace(
+                    '#^data:image/\w+;base64,#i',
+                    '',
+                    $request->imagen
+                );
+
+                $carpeta = public_path('documentos/huellas');
+
+                if (!file_exists($carpeta)) {
+                    mkdir($carpeta, 0777, true);
+                }
+
+                $nombreArchivo =$postulante->id . '_' .$request->dedo . '_' .uniqid() . '.png';
+
+                file_put_contents(
+                    $carpeta . '/' . $nombreArchivo,
+                    base64_decode($base64)
+                );
+
+                $rutaImagen = 'documentos/huellas/' . $nombreArchivo;
+            }
+
+            $templateBinario = ctype_xdigit($request->template)
+                ? hex2bin($request->template)
+                : base64_decode($request->template);
+
+            if (!$templateBinario) {
+                throw new \Exception('Template inválido');
+            }
+
+            $hash = hash('sha256', $templateBinario);
+
+            $huella = Huella::create([
+                'id_postulante' => $postulante->id,
+                'dedo'          => $request->dedo,
+                'template'      => $templateBinario,
+                'imagen'        => $rutaImagen,
+                'calidad'       => $request->calidad,
+                'hash_template' => $hash,
+                'activo'        => 1
+            ]);
+
+            Redis::set(
+                'huella:' .
+                $postulante->id . ':' .
+                $request->dedo . ':' .
+                $huella->id,
+                base64_encode($templateBinario)
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Huella guardada',
+                'data' => [
+                    'id'            => $huella->id,
+                    'dedo'          => $huella->dedo,
+                    'imagen'        => $huella->imagen,
+                    'calidad'       => $huella->calidad,
+                    'hash_template' => $huella->hash_template
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
     public function upload(Request $request) {
         try {
             $dni = $request->input('dni');
