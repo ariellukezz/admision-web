@@ -17,8 +17,12 @@ class GoogleController extends Controller
     {
         try {
 
-            $googleUser = Socialite::driver('google')->stateless()->user();
-            $user = User::where('email', $googleUser->email)->first();
+            $googleUser = Socialite::driver('google')
+                ->stateless()
+                ->user();
+
+            $user = User::where('email', $googleUser->email)
+                ->first();
 
             if (!$user) {
 
@@ -30,6 +34,7 @@ class GoogleController extends Controller
                     'password' => bcrypt(Str::random(24)),
                     'id_rol' => 8,
                 ]);
+
             } else {
 
                 $user->update([
@@ -38,26 +43,33 @@ class GoogleController extends Controller
                 ]);
             }
 
-            $token = $user->createToken('auth')->plainTextToken;
+            $token = $user->createToken('auth')
+                ->plainTextToken;
 
-            return response()->json([
+            $url = 'unapadmisionapp://oauth/google?' . http_build_query([
                 'success' => true,
                 'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'nombre' => $user->name,
-                    'email' => $user->email,
-                    'id_rol' => $user->id_rol,
-                    'foto' => $user->foto,
-                ]
+                'id' => $user->id,
+                'nombre' => $user->name,
+                'email' => $user->email,
+                'foto' => $user->foto,
+                'id_rol' => $user->id_rol,
             ]);
+
+            return redirect($url);
 
         } catch (\Exception $e) {
 
-            return response()->json([
+            $url = 'unapadmisionapp://oauth/google-error?' . http_build_query([
+
                 'success' => false,
+
                 'error' => $e->getMessage()
-            ], 500);
+            ]);
+
+            return redirect($url);
         }
     }
+
+
 }
