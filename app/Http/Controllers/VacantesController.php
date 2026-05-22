@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Programa;
 use App\Models\Proceso;
 use App\Models\Vacante;
+use App\Services\AuditService;
 use DB;
 
 class VacantesController extends Controller

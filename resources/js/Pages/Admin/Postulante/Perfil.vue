@@ -42,6 +42,19 @@
                                         }} - {{ info.provincia }} - {{ info.distrito }}</span>
                                     </div>
 
+                                    <!-- Vinculación de usuario -->
+                                    <div style="margin-top:8px; padding:6px 10px; border-radius:8px; border:1px solid #d9d9d9; background:#fafafa;">
+                                        <div style="font-size:.75rem; color:#8c8c8c; margin-bottom:4px;">Cuenta vinculada</div>
+                                        <div v-if="usuarioVinculado" style="display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:.875rem; font-weight:600; color:#389e0d;">✓ {{ usuarioVinculado.name }} (DNI: {{ usuarioVinculado.dni }})</span>
+                                            <span style="font-size:.75rem; color:#8c8c8c;">{{ usuarioVinculado.email }}</span>
+                                        </div>
+                                        <div v-else style="display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:.8125rem; color:#cf1322;">✗ Sin cuenta vinculada</span>
+                                            <a-button size="small" type="primary" @click="mostrarVincular = true">Vincular</a-button>
+                                        </div>
+                                    </div>
+
                                     <div class="flex" style="margin-top:5px;">
                                         <div class="mr-3" style="display:flex; align-items:center;">
                                             <FormOutlined /> {{ preinscripciones }}
@@ -252,6 +265,30 @@
 
         </a-modal>
 
+        <!-- Modal Vincular Usuario -->
+        <a-modal v-model:visible="mostrarVincular" title="Vincular Postulante con Usuario" @ok="vincularUsuario" :confirmLoading="vinculando" okText="Vincular" cancelText="Cancelar">
+            <div style="margin-bottom:12px;">
+                <p style="font-size:.8125rem; color:#595959;">Para vincular, busca un usuario por DNI. Se asignará el DNI del postulante a la cuenta del usuario, permitiéndole ver sus datos.</p>
+            </div>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <a-input v-model:value="dniBuscar" placeholder="Ingresar DNI del usuario" style="flex:1" @pressEnter="buscarUsuario" />
+                <a-button type="primary" @click="buscarUsuario" :loading="buscandoUsuario">Buscar</a-button>
+            </div>
+            <div v-if="usuarioEncontrado" style="padding:12px; border:1px solid #d9d9d9; border-radius:8px; background:#f6ffed;">
+                <div style="font-weight:600;">{{ usuarioEncontrado.nombre }}</div>
+                <div style="font-size:.8125rem; color:#595959;">DNI: {{ usuarioEncontrado.dni }} | Email: {{ usuarioEncontrado.email }}</div>
+                <div v-if="usuarioEncontrado.ya_vinculado" style="font-size:.75rem; color:#d48806; margin-top:4px;">
+                    ⚠ Este usuario ya tiene un postulante vinculado (ID: {{ usuarioEncontrado.ya_vinculado }}). Vincularlo reasignará la conexión.
+                </div>
+                <div v-else style="font-size:.75rem; color:#389e0d; margin-top:4px;">
+                    ✓ Disponible para vincular
+                </div>
+            </div>
+            <div v-if="errorBusqueda" style="padding:12px; border:1px solid #ffa39e; border-radius:8px; background:#fff2f0;">
+                <span style="color:#cf1322; font-size:.8125rem;">{{ errorBusqueda }}</span>
+            </div>
+        </a-modal>
+
 
         <a-modal v-model:visible="open" title="Modal">
             sdfasdf
@@ -272,6 +309,12 @@ import axios from 'axios';
 import Grafico from './components/grafico.vue';
 
 const open = ref(false);
+const mostrarVincular = ref(false);
+const dniBuscar = ref('');
+const usuarioEncontrado = ref(null);
+const errorBusqueda = ref('');
+const buscandoUsuario = ref(false);
+const vinculando = ref(false);
 
 const abrir = () => {
     open.value = true;
@@ -285,10 +328,52 @@ const props = defineProps({
     preinscripciones: Number,
     inscripciones: Number,
     control_biometrico: Number,
-    pro: Array
+    pro: Array,
+    usuarioVinculado: Object,
 })
 
 const seleccionado = ref(null);
+
+const buscarUsuario = async () => {
+    if (!dniBuscar.value) return;
+    buscandoUsuario.value = true;
+    errorBusqueda.value = '';
+    usuarioEncontrado.value = null;
+    try {
+        const res = await axios.post('/admin/buscar-usuario-dni', { dni: dniBuscar.value });
+        if (res.data.estado) {
+            usuarioEncontrado.value = res.data.datos;
+        } else {
+            errorBusqueda.value = res.data.mensaje;
+        }
+    } catch (e) {
+        errorBusqueda.value = 'Error al buscar usuario';
+    } finally {
+        buscandoUsuario.value = false;
+    }
+};
+
+const vincularUsuario = async () => {
+    if (!usuarioEncontrado.value || !props.info?.id_postulante) return;
+    vinculando.value = true;
+    try {
+        const res = await axios.post('/admin/vincular-postulante-usuario', {
+            postulante_id: props.info.id_postulante,
+            user_id: usuarioEncontrado.value.id,
+        });
+        if (res.data.estado) {
+            notification.success({ message: res.data.mensaje });
+            mostrarVincular.value = false;
+            window.location.reload();
+        } else {
+            notification.error({ message: res.data.mensaje });
+        }
+    } catch (e) {
+        notification.error({ message: 'Error al vincular' });
+    } finally {
+        vinculando.value = false;
+    }
+};
 
 
 const dataSource = ref([

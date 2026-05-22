@@ -50,10 +50,10 @@
 
             <template v-if="column.dataIndex === 'estado'">
                 <div class="flex" style="justify-content: center;">
-                    <div v-if="1 == record.estado">
+                    <div v-if="record.estado == 1">
                         <a-tag color="blue">Activo</a-tag>
                     </div>
-                    <div v-if="record.estado == 0">
+                    <div v-else-if="record.estado == 0">
                         <a-tag color="red">Inactivo</a-tag>
                     </div>
                     <div v-else>
