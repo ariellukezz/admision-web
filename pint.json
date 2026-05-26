@@ -1,0 +1,10 @@
+{
+    "preset": "laravel",
+    "exclude": [
+        "vendor",
+        "node_modules",
+        "build",
+        ".codely-cli",
+        "_temp_documentos_service"
+    ]
+}

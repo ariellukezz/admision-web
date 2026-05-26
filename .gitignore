@@ -21,3 +21,7 @@ yarn-error.log
 /.idea
 /.vscode
 storage/app/reporte_Educ. Sec.
+storage/app/firebase-credentials.json
+/build
+/.codely-cli
+_temp_documentos_service

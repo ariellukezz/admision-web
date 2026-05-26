@@ -30,6 +30,7 @@
         "cropperjs": "^1.6.2",
         "date-fns": "^2.30.0",
         "dayjs": "^1.11.7",
+        "firebase": "^12.14.0",
         "json-as-xlsx": "^2.5.3",
         "msgpackr": "^2.0.1",
         "pdfjs-dist": "^5.4.530",
