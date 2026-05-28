@@ -447,14 +447,15 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
     });
 
     Route::get('/fotos-admision', fn () => Inertia::render('Revisor/fotos'))->name('revisor-fotos-admision');
-    
+
     Route::get('/get-codigo-conexion', [FotoController::class, 'getCodigoConexion']);
     Route::post('/cambiar_proceso', [ProcesoController::class, 'cambiarProceso']);
     Route::post('/guardar-huella', [HuellaController::class, 'guardar']);
-
-    
+    Route::post('/verificar-huella-1-1', [HuellaController::class, 'verificar1a1']);
+    Route::post('/verificar-huella-1-n', [HuellaController::class, 'verificar1aN']);
 
 });
+
 Route::get('/pdf-datos-biometrico/{dni}', [IngresoController::class, 'pdfbiometrico2'])->middleware('auth','revisor');
 
 Route::get('/examen-vocacional2', fn () => Inertia::render('Publico/exvocacional2'))->name('ex-vocacional2');

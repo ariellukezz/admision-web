@@ -16,6 +16,8 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReniecController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\App\AuthController;
+use App\Http\Controllers\App\RegistroController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
@@ -145,3 +147,41 @@ Route::post('/registro', [UserController::class, 'registro']);
 Route::post('/login-app', [UserController::class, 'loginApp']);
 Route::post('/recuperar-password', [UserController::class, 'recuperarPassword']);
 Route::post('/restablecer-password', [UserController::class, 'restablecerPassword']);
+
+// ─── API APP MOBILE (SANCTUM) ────────────────────────────────────
+Route::prefix('app')->group(function () {
+
+    // Auth público (sin middleware)
+    Route::post('/registro', [AuthController::class, 'registro']);
+    Route::post('/login', [AuthController::class, 'login']);
+
+    // Rutas protegidas con Sanctum
+    Route::middleware('auth:sanctum')->group(function () {
+
+        // Auth
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+
+        // PASO 1: Datos personales
+        Route::get('/validar-dni/{dni}', [RegistroController::class, 'validarDni']);
+        Route::get('/consultar-reniec/{dni}', [RegistroController::class, 'consultarReniec']);
+        Route::post('/registro-datos-personales', [RegistroController::class, 'registroDatosPersonales']);
+
+        // PASO 2: Datos de contacto
+        Route::post('/validar-correo', [RegistroController::class, 'validarCorreo']);
+        Route::post('/validar-celular', [RegistroController::class, 'validarCelular']);
+        Route::post('/registro-datos-contacto', [RegistroController::class, 'registroDatosContacto']);
+
+        // PASO 3: Datos del colegio
+        Route::get('/ubigeo/departamentos', [RegistroController::class, 'getDepartamentos']);
+        Route::get('/ubigeo/provincias/{departamento}', [RegistroController::class, 'getProvincias']);
+        Route::get('/ubigeo/distritos/{departamento}/{provincia}', [RegistroController::class, 'getDistritos']);
+        Route::get('/colegios/{ubigeo}', [RegistroController::class, 'getColegiosPorUbigeo']);
+        Route::post('/registro-datos-colegio', [RegistroController::class, 'registroDatosColegio']);
+
+        // PASO 4: Datos del apoderado
+        Route::get('/consultar-apoderado-reniec/{dni}', [RegistroController::class, 'consultarApoderadoReniec']);
+        Route::post('/registro-datos-apoderado', [RegistroController::class, 'registroDatosApoderado']);
+        Route::get('/apoderados/{idPostulante}', [RegistroController::class, 'getApoderados']);
+    });
+});

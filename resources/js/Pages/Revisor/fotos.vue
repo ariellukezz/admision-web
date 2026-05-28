@@ -102,7 +102,7 @@ import { IdcardOutlined, SaveOutlined, ReloadOutlined } from '@ant-design/icons-
 // Estado compartido
 const dniCompartido = ref('')
 const fotoActual = ref(null)
-const huellasActuales = ref({ right: false, left: false, data: null })
+const huellasActuales = ref({ any: false, data: null })
 const guardandoTodo = ref(false)
 
 // Refs a componentes hijos
@@ -114,7 +114,7 @@ const ultimosAtendidos = ref([])
 
 // Computed
 const puedeGuardarTodo = computed(() => {
-  return fotoActual.value && huellasActuales.value.right && huellasActuales.value.left && dniCompartido.value
+  return fotoActual.value && huellasActuales.value.any && dniCompartido.value
 })
 
 // Manejadores de eventos de componentes hijos
@@ -207,14 +207,23 @@ onMounted(() => {
 
 <style scoped>
 .compact-card {
-  padding: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.04);
 }
 
 .compact-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .header-left h3 {

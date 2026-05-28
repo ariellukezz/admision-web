@@ -1,11 +1,25 @@
 <template>
   <div class="fotos-component">
     <a-card :bordered="false" class="compact-card" :body-style="{ padding: '12px' }">
-      <div class="card-header">
-        <span class="card-title">📷 Tomar Foto</span>
+          <div class="card-header">
+        <div>
+          <span class="card-title">📷 Tomar Foto</span>
+          <div class="card-subtitle">Captura rápida para registro biométrico</div>
+        </div>
         <a-tag :color="isActive ? 'green' : 'default'" size="small">
           {{ isActive ? 'Cámara activa' : 'Inactiva' }}
         </a-tag>
+      </div>
+
+      <div class="camera-top-bar">
+        <div class="camera-meta">
+          <span>DNI</span>
+          <strong>{{ dni || 'No ingresado' }}</strong>
+        </div>
+        <div class="camera-status">
+          <span class="status-dot" :class="{ active: isActive }"></span>
+          <span>{{ isActive ? 'Listo para capturar' : 'Encienda la cámara' }}</span>
+        </div>
       </div>
 
       <!-- Controles de cámara compactos -->
@@ -56,6 +70,13 @@
         <CameraOutlined />
         Capturar Foto
       </a-button>
+      <div class="photo-summary">
+        <span>Estado:</span>
+        <a-tag :color="currentPhoto ? 'blue' : 'default'" size="small">
+          {{ currentPhoto ? 'Foto lista' : 'Sin foto' }}
+        </a-tag>
+        <span v-if="fotoGuardada" class="saved-indicator">Guardada</span>
+      </div>
 
       <!-- Preview de foto capturada -->
       <div v-if="currentPhoto" class="photo-preview">
@@ -298,6 +319,54 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
+.card-subtitle {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+.camera-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 12px;
+}
+
+.camera-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #595959;
+}
+
+.camera-meta strong {
+  color: #141414;
+  font-weight: 700;
+}
+
+.camera-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #595959;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d9d9d9;
+}
+
+.status-dot.active {
+  background: #52c41a;
+}
+
 .camera-controls {
   display: flex;
   gap: 8px;
@@ -335,6 +404,24 @@ onUnmounted(() => {
 
 .capture-btn {
   margin-bottom: 10px;
+}
+
+.photo-summary {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #595959;
+}
+
+.saved-indicator {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f6ffed;
+  color: #389e0d;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .photo-preview {
