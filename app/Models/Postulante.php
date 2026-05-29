@@ -11,6 +11,10 @@ class Postulante extends Model
 
     protected $table = 'postulante';
 
+    protected $casts = [
+        'tiene_revision_activa' => 'boolean',
+    ];
+
     protected $fillable = [
         'tipo_doc',
         'nro_doc',
@@ -35,9 +39,36 @@ class Postulante extends Model
         'id_colegio',
         'foto_url',
         'revisado',
+        'tiene_revision_activa',
         'id_usuario',
         'carreras_previas'
     ];
- 
-    
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'nro_doc', 'dni');
+    }
+
+    public function preinscripciones()
+    {
+        return $this->hasMany(Preinscripcion::class, 'id_postulante');
+    }
+
+    public function inscripciones()
+    {
+        return $this->hasMany(Inscripcion::class, 'id_postulante');
+    }
+
+    public function revisionSolicitudes()
+    {
+        return $this->hasMany(RevisionSolicitud::class, 'id_postulante');
+    }
+
+    public function revisionActiva()
+    {
+        return $this->hasOne(RevisionSolicitud::class, 'id_postulante')
+            ->where('estado', '!=', 'completada')
+            ->latest('id');
+    }
+
 }

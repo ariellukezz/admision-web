@@ -24,4 +24,10 @@ class Programa extends Model
         'duracion',
         'id_usuario'
     ];
+
+    public function requisitosDocumento()
+    {
+        return $this->belongsToMany(RequisitoDocumento::class, 'requisito_programa', 'id_programa', 'id_requisito_documento')
+            ->withTimestamps();
+    }
 }

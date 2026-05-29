@@ -35,4 +35,14 @@ class Proceso extends Model
         'url',
         'nivel'
     ];
+
+    public function procesoRequisitos()
+    {
+        return $this->hasMany(ProcesoRequisito::class, 'id_proceso');
+    }
+
+    public function requisitosActivos()
+    {
+        return $this->hasMany(ProcesoRequisito::class, 'id_proceso')->where('activo', true);
+    }
 }

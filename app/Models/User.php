@@ -98,5 +98,20 @@ class User extends Authenticatable
     {
         return $this->id_rol == $rolId;
     }
+
+    public function postulante()
+    {
+        return $this->hasOne(Postulante::class, 'nro_doc', 'dni');
+    }
+
+    public function procesoActual()
+    {
+        return $this->belongsTo(Proceso::class, 'id_proceso');
+    }
+
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class);
+    }
     
 }
