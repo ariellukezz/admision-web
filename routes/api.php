@@ -183,5 +183,8 @@ Route::prefix('app')->group(function () {
         Route::get('/consultar-apoderado-reniec/{dni}', [RegistroController::class, 'consultarApoderadoReniec']);
         Route::post('/registro-datos-apoderado', [RegistroController::class, 'registroDatosApoderado']);
         Route::get('/apoderados/{idPostulante}', [RegistroController::class, 'getApoderados']);
+
+        // CONSULTAR DATOS REGISTRADOS
+        Route::get('/consultar-datos/{dni}', [RegistroController::class, 'consultarDatos']);
     });
 });

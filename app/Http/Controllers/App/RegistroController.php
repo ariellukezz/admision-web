@@ -554,6 +554,125 @@ class RegistroController extends Controller
         ]);
     }
 
+    // ─── CONSULTAR DATOS REGISTRADOS ─────────────────────────────────
+
+    /**
+     * Obtener todos los datos del postulante registrado
+     * para verificar que se guardaron correctamente.
+     */
+    public function consultarDatos($dni)
+    {
+        $user = request()->user();
+
+        $postulante = Postulante::where('nro_doc', $dni)->first();
+
+        if (!$postulante) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'Postulante no encontrado',
+            ], 404);
+        }
+
+        if ($postulante->id_usuario != $user->id) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'No autorizado para ver estos datos',
+            ], 403);
+        }
+
+        // Paso 1: Datos personales
+        $datosPersonales = [
+            'id'                => $postulante->id,
+            'tipo_doc'          => $postulante->tipo_doc,
+            'nro_doc'           => $postulante->nro_doc,
+            'primer_apellido'   => $postulante->primer_apellido,
+            'segundo_apellido'  => $postulante->segundo_apellido,
+            'nombres'           => $postulante->nombres,
+            'fec_nacimiento'    => $postulante->fec_nacimiento,
+            'sexo'              => $postulante->sexo,
+            'estado_civil'      => $postulante->estado_civil,
+            'ubigeo_nacimiento' => $postulante->ubigeo_nacimiento,
+        ];
+
+        // Nacimiento con ubigeo legible
+        $nacimiento = DB::table('postulante as p')
+            ->select(DB::raw("CONCAT(dep.nombre, '/', prov.nombre, '/', dist.nombre) AS nacimiento_texto"))
+            ->leftJoin('ubigeo as un', 'p.ubigeo_nacimiento', '=', 'un.ubigeo')
+            ->leftJoin('departamento as dep', 'un.id_departamento', '=', 'dep.id')
+            ->leftJoin('provincia as prov', 'un.id_provincia', '=', 'prov.id')
+            ->leftJoin('distritos as dist', 'un.id_distrito', '=', 'dist.id')
+            ->where('p.id', $postulante->id)
+            ->value('nacimiento_texto');
+
+        $datosPersonales['nacimiento_texto'] = $nacimiento;
+
+        // Paso 2: Datos de contacto
+        $datosContacto = [
+            'email'             => $postulante->email,
+            'celular'           => $postulante->celular,
+            'direccion'         => $postulante->direccion,
+            'ubigeo_residencia' => $postulante->ubigeo_residencia,
+        ];
+
+        $residencia = DB::table('postulante as p')
+            ->select(DB::raw("CONCAT(dep.nombre, '/', prov.nombre, '/', dist.nombre) AS residencia_texto"))
+            ->leftJoin('ubigeo as ur', 'p.ubigeo_residencia', '=', 'ur.ubigeo')
+            ->leftJoin('departamento as dep', 'ur.id_departamento', '=', 'dep.id')
+            ->leftJoin('provincia as prov', 'ur.id_provincia', '=', 'prov.id')
+            ->leftJoin('distritos as dist', 'ur.id_distrito', '=', 'dist.id')
+            ->where('p.id', $postulante->id)
+            ->value('residencia_texto');
+
+        $datosContacto['residencia_texto'] = $residencia;
+
+        // Paso 3: Datos del colegio
+        $datosColegio = null;
+        if ($postulante->id_colegio) {
+            $colegio = Colegio::find($postulante->id_colegio);
+            if ($colegio) {
+                $datosColegio = [
+                    'id_colegio'   => $colegio->id,
+                    'nombre'       => $colegio->nombre,
+                    'cod_modular'  => $colegio->cod_modular,
+                    'gestion'      => $colegio->gestion,
+                    'ubigeo'       => $colegio->ubigeo,
+                    'direccion'    => $colegio->direccion,
+                ];
+            }
+        }
+        $anioEgreso = $postulante->anio_egreso;
+
+        // Paso 4: Apoderados
+        $apoderados = Apoderado::select('id', 'tipo_doc', 'nro_documento', 'paterno', 'materno', 'nombres', 'tipo_apoderado')
+            ->where('id_postulante', $postulante->id)
+            ->get()
+            ->map(function ($apo) {
+                $tipos = [1 => 'Padre', 2 => 'Madre', 3 => 'Apoderado'];
+                $apo->tipo_apoderado_texto = $tipos[$apo->tipo_apoderado] ?? 'Desconocido';
+                return $apo;
+            });
+
+        // Avances registrados
+        $avances = Paso::select('nombre', 'nro', 'avance', 'proceso')
+            ->where('postulante', $postulante->id)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'datos'   => [
+                'paso1_datos_personales' => $datosPersonales,
+                'paso2_datos_contacto'   => $datosContacto,
+                'paso3_datos_colegio'    => [
+                    'colegio'      => $datosColegio,
+                    'anio_egreso'  => $anioEgreso,
+                ],
+                'paso4_apoderados'       => $apoderados,
+                'avances'                => $avances,
+            ],
+        ]);
+    }
+
     // ─── MÉTODOS PRIVADOS ────────────────────────────────────────────
 
     /**
