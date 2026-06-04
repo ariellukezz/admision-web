@@ -84,12 +84,25 @@
       :loading="loading"
       :modalCargarDatos="modalCargarDatos"
       :datosPrevios="datosPrevios"
+      :enviandoCodigo="enviandoCodigo"
+      :verificandoCodigo="verificandoCodigo"
+      :codigoVerificacion="codigoVerificacion"
+      :codigoEnviado="codigoEnviado"
+      :codigoExpirado="codigoExpirado"
+      :codigoError="codigoError"
+      :emailMasked="emailMasked"
+      :countdownSegundos="countdownSegundos"
       :setFormRef="setFormRef"
       :dniInput="dniInput"
       :getCodigoAleatorio="getCodigoAleatorio"
       :validateCodigoSecreto="validateCodigoSecreto"
       :aceptarCargarDatos="aceptarCargarDatos"
       :rechazarCargarDatos="rechazarCargarDatos"
+      :solicitarCodigoVerificacion="solicitarCodigoVerificacion"
+      :verificarCodigoYCargar="verificarCodigoYCargar"
+      :resetCodigoVerificacion="resetCodigoVerificacion"
+      :setCodigoVerificacion="setCodigoVerificacion"
+      :setCodigoError="setCodigoError"
       @proceed="iniciarPostulacion"
     />
 
@@ -368,6 +381,21 @@ const {
   rechazarCargarDatos,
   verificarDatosExistentes,
   iniciarPostulacion,
+
+  // Code verification
+  enviandoCodigo,
+  verificandoCodigo,
+  codigoVerificacion,
+  codigoEnviado,
+  codigoExpirado,
+  codigoError,
+  emailMasked,
+  countdownSegundos,
+  solicitarCodigoVerificacion,
+  verificarCodigoYCargar,
+  resetCodigoVerificacion,
+  setCodigoVerificacion,
+  setCodigoError,
 
   // Carreras previas
   toggleSelection,

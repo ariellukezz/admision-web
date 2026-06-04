@@ -99,7 +99,7 @@ export const usePreinscripcionPregrado = (props) => {
   const open = ref(false)
   const checkbox1 = ref(false)
   const activeKey = ref('1')
-  const loading = ref(true)
+  const loading = ref(false)
   const modalcarrerasprevias = ref(false)
   const modalSancionado = ref(false)
   const modalcepreaviso = ref(false)
@@ -111,6 +111,15 @@ export const usePreinscripcionPregrado = (props) => {
   const postulante_inscrito = ref(0)
   const modalCargarDatos = ref(false)
   const datosPrevios = ref(null)
+  const enviandoCodigo = ref(false)
+  const verificandoCodigo = ref(false)
+  const codigoVerificacion = ref('')
+  const codigoEnviado = ref(false)
+  const codigoExpirado = ref(false)
+  const codigoError = ref('')
+  const emailMasked = ref('')
+  const countdownSegundos = ref(0)
+  let countdownInterval = null
   const sancionado = ref(null)
   const postcepre = ref(null)
   const confirmacion = ref(null)
@@ -323,14 +332,19 @@ export const usePreinscripcionPregrado = (props) => {
     ultimopaso.value = null
     pendingStep.value = null
     loading.value = true
-    let res = await axios.get('/get-paso-registrado/' + PROCESO() + '/' + formState.dni)
-    if (res.data.estado == true) {
-      ultimopaso.value = res.data.datos
-      await getDatosPersonales2()
+    try {
+      let res = await axios.get('/get-paso-registrado/' + PROCESO() + '/' + formState.dni)
+      if (res.data.estado == true) {
+        ultimopaso.value = res.data.datos
+        await getDatosPersonales2()
+        loading.value = false
+      } else {
+        modalcarrerasprevias.value = true
+        getSancionado()
+      }
+    } catch (error) {
+      console.error('Error al obtener paso registrado:', error)
       loading.value = false
-    } else {
-      modalcarrerasprevias.value = true
-      getSancionado()
     }
   }
 
@@ -339,6 +353,12 @@ export const usePreinscripcionPregrado = (props) => {
       let res = await axios.post('/get-postulante-datos-personales2', { nro_doc: formState.dni })
       if (res.data.datos && res.data.datos.length > 0) {
         datosPrevios.value = res.data.datos[0]
+        // If email verification is disabled, load data and navigate directly
+        if (res.data.requires_email_verification === false) {
+          modalCargarDatos.value = false
+          await cargarDatosYNavegar()
+          return true
+        }
         modalCargarDatos.value = true
         return true
       }
@@ -347,6 +367,77 @@ export const usePreinscripcionPregrado = (props) => {
     }
     return false
   }
+
+  const iniciarCountdown = () => {
+    if (countdownInterval) clearInterval(countdownInterval)
+    countdownSegundos.value = 180
+    codigoExpirado.value = false
+    countdownInterval = setInterval(() => {
+      countdownSegundos.value--
+      if (countdownSegundos.value <= 0) {
+        clearInterval(countdownInterval)
+        countdownInterval = null
+        codigoExpirado.value = true
+      }
+    }, 1000)
+  }
+
+  const solicitarCodigoVerificacion = async () => {
+    enviandoCodigo.value = true
+    codigoError.value = ''
+    try {
+      const res = await axios.post('/enviar-codigo-verificacion-datos', { nro_doc: formState.dni })
+      if (res.data.estado) {
+        emailMasked.value = res.data.email
+        codigoEnviado.value = true
+        codigoExpirado.value = false
+        codigoVerificacion.value = ''
+        iniciarCountdown()
+      } else {
+        codigoError.value = res.data.mensaje || 'No se pudo enviar el código'
+      }
+    } catch (e) {
+      codigoError.value = e.response?.data?.mensaje || 'No se pudo enviar el código'
+    } finally {
+      enviandoCodigo.value = false
+    }
+  }
+
+  const verificarCodigoYCargar = async () => {
+    verificandoCodigo.value = true
+    codigoError.value = ''
+    try {
+      const res = await axios.post('/verificar-codigo-datos', {
+        nro_doc: formState.dni,
+        codigo: codigoVerificacion.value,
+      })
+      if (res.data.estado) {
+        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null }
+        modalCargarDatos.value = false
+        resetCodigoVerificacion()
+        await cargarDatosYNavegar()
+      } else {
+        codigoError.value = res.data.mensaje || 'Código incorrecto'
+      }
+    } catch (e) {
+      codigoError.value = e.response?.data?.mensaje || 'No se pudo verificar el código'
+    } finally {
+      verificandoCodigo.value = false
+    }
+  }
+
+  const resetCodigoVerificacion = () => {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null }
+    codigoEnviado.value = false
+    codigoExpirado.value = false
+    codigoVerificacion.value = ''
+    codigoError.value = ''
+    emailMasked.value = ''
+    countdownSegundos.value = 0
+  }
+
+  const setCodigoVerificacion = (val) => { codigoVerificacion.value = val }
+  const setCodigoError = (val) => { codigoError.value = val }
 
   const aceptarCargarDatos = async () => {
     if (datosPrevios.value) {
@@ -389,6 +480,7 @@ export const usePreinscripcionPregrado = (props) => {
   }
 
   const rechazarCargarDatos = () => {
+    resetCodigoVerificacion()
     datospersonales.id = null
     datospersonales.primerapellido = ''
     datospersonales.segundo_apellido = ''
@@ -411,34 +503,70 @@ export const usePreinscripcionPregrado = (props) => {
     pagina_pre.value = 1
   }
 
+  // Navigate to the correct step based on ultimopaso
+  const navegarSegunPaso = async () => {
+    if (!ultimopaso.value) return
+    if (ultimopaso.value.nro == 6) {
+      try {
+        let res = await axios.get('/participa-proceso/' + PROCESO() + '/' + formState.dni)
+        if (res.data.estado === true) {
+          postulante_inscrito.value = 1
+          pagina_pre.value = 7
+        } else {
+          pagina_pre.value = 6
+        }
+      } catch (error) {
+        console.error('Error al verificar inscripción:', error)
+        pagina_pre.value = 6
+      }
+    } else {
+      pagina_pre.value = ultimopaso.value.nro
+    }
+  }
+
+  // Load postulante data and navigate to last registered step
+  const cargarDatosYNavegar = async () => {
+    loading.value = true
+    try {
+      await getDatosPersonales2()
+      let res = await axios.get('/get-paso-registrado/' + PROCESO() + '/' + formState.dni)
+      if (res.data.estado == true) {
+        ultimopaso.value = res.data.datos
+        await navegarSegunPaso()
+      } else {
+        pagina_pre.value = 1
+      }
+    } catch (error) {
+      console.error('Error al cargar datos y navegar:', error)
+      pagina_pre.value = 1
+    } finally {
+      loading.value = false
+    }
+  }
+
   // ── Start postulation (called when user clicks "Iniciar Postulación") ──
   const iniciarPostulacion = async () => {
     loading.value = true
-    await getPasoRegistrado()
-
-    // If registered step found, advance to it
-    if (ultimopaso.value) {
-      if (ultimopaso.value.nro == 6) {
-        try {
-          let res = await axios.get('/participa-proceso/' + PROCESO() + '/' + formState.dni)
-          if (res.data.estado === true) {
-            postulante_inscrito.value = 1
-            pagina_pre.value = 7
-          } else {
-            pagina_pre.value = 6
-          }
-        } catch (error) {
-          console.error('Error al verificar inscripción:', error)
-          pagina_pre.value = 6
-        }
-      } else {
-        pagina_pre.value = ultimopaso.value.nro
+    try {
+      // Always check for existing data — verification required to protect postulante data
+      const tieneDatos = await verificarDatosExistentes()
+      if (tieneDatos) {
+        loading.value = false
+        return // Modal is showing, wait for user to verify code
       }
+      // No existing data — proceed with normal registration flow
+      await getPasoRegistrado()
+      if (ultimopaso.value) {
+        await navegarSegunPaso()
+        loading.value = false
+        return
+      }
+      // If not registered, CarrerasPreviasModal is showing (started by getSancionado)
+      // getSancionado() manages loading through its own flow
+    } catch (error) {
+      console.error('Error en iniciarPostulacion:', error)
       loading.value = false
-      return
     }
-    // If not registered, CarrerasPreviasModal is showing (started by getSancionado)
-    // Flow continues when user closes the modal → handleCerrarVerificacion
   }
 
   // ── Data loading: personal ─────────────────────────────────
@@ -1091,7 +1219,7 @@ export const usePreinscripcionPregrado = (props) => {
         anteriores.value = []
         return
       } else {
-        consultaInscripcion()
+        await consultaInscripcion()
       }
     } catch (error) {
       console.error('Error al obtener datos de sancionado', error)
@@ -1121,6 +1249,7 @@ export const usePreinscripcionPregrado = (props) => {
       }
     } catch (error) {
       console.error('Error al obtener datos del participante', error)
+      loading.value = false
     }
   }
 
@@ -1138,13 +1267,14 @@ export const usePreinscripcionPregrado = (props) => {
           await getParticipanteCepre()
           participa.value = 1
         } else {
-          getDataPrisma()
+          await getDataPrisma()
           getDatosPersonales2()
           participa.value = 1
         }
       }
     } catch (error) {
       console.error('Error al obtener datos del participante', error)
+      loading.value = false
     }
   }
 
@@ -1165,9 +1295,13 @@ export const usePreinscripcionPregrado = (props) => {
   // ── Carreras previas ──────────────────────────────────────
   const getDataPrisma = async () => {
     participante.value = null
-    const response = await axios.get('/get-data-prisma/' + formState.dni)
-    if (response.data.estado === true) {
-      participante.value = response.data.datos
+    try {
+      const response = await axios.get('/get-data-prisma/' + formState.dni)
+      if (response.data.estado === true) {
+        participante.value = response.data.datos
+      }
+    } catch (error) {
+      console.error('Error al obtener datos de PRISMA:', error)
     }
     getCarrerasPrevias()
   }
@@ -1612,6 +1746,21 @@ export const usePreinscripcionPregrado = (props) => {
     aceptarCargarDatos,
     rechazarCargarDatos,
     iniciarPostulacion,
+
+    // Code verification
+    enviandoCodigo,
+    verificandoCodigo,
+    codigoVerificacion,
+    codigoEnviado,
+    codigoExpirado,
+    codigoError,
+    emailMasked,
+    countdownSegundos,
+    solicitarCodigoVerificacion,
+    verificarCodigoYCargar,
+    resetCodigoVerificacion,
+    setCodigoVerificacion,
+    setCodigoError,
 
     // External API
     getDatosApi,
