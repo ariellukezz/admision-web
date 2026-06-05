@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\Proceso;
 use App\Models\CarrerasPrevias;
@@ -11,6 +13,10 @@ use App\Models\Postulante;
 use App\Models\Apoderado;
 use App\Models\Paso;
 use App\Models\Cambio;
+use App\Mail\CodigoVerificacionDatos;
+use App\Models\Setting;
+use App\Models\SmtpAccount;
+use Illuminate\Support\Facades\Config;
 
 class PostulanteController extends Controller
 {
@@ -77,8 +83,77 @@ class PostulanteController extends Controller
 
     $this->response['estado'] = true;
     $this->response['datos'] = $res;
+    $this->response['requires_email_verification'] = Setting::get('preinscripcion_email_verification', '1') === '1';
     return response()->json($this->response, 200);
+  }
 
+  public function enviarCodigoVerificacionDatos(Request $request)
+  {
+      $request->validate(['nro_doc' => 'required|string']);
+
+      $postulante = DB::table('postulante')->where('nro_doc', $request->nro_doc)->first();
+      if (!$postulante || !$postulante->email) {
+          return response()->json(['estado' => false, 'mensaje' => 'No se encontró un correo asociado a su documento'], 422);
+      }
+
+      $codigo = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+      $cacheKey = 'codigo_verif_datos_' . $request->nro_doc;
+      Cache::put($cacheKey, $codigo, now()->addMinutes(3));
+
+      // Use a random active SMTP account, or fall back to default config
+      $smtp = SmtpAccount::where('is_active', true)->inRandomOrder()->first();
+      if ($smtp) {
+          Config::set('mail.mailers.smtp_dynamic', [
+              'transport'  => $smtp->mailer,
+              'host'       => $smtp->host,
+              'port'       => $smtp->port,
+              'encryption' => $smtp->encryption,
+              'username'   => $smtp->username,
+              'password'   => $smtp->password,
+          ]);
+          Config::set('mail.from.address', $smtp->from_address);
+          Config::set('mail.from.name', $smtp->from_name);
+
+          Mail::mailer('smtp_dynamic')->to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+      } else {
+          Mail::to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+      }
+
+      $email = $postulante->email;
+      $atPos = strpos($email, '@');
+      $masked = $atPos !== false
+          ? substr($email, 0, min(3, $atPos)) . '***' . substr($email, $atPos)
+          : '***';
+
+      $this->response['estado'] = true;
+      $this->response['mensaje'] = 'Código enviado';
+      $this->response['email'] = $masked;
+      return response()->json($this->response, 200);
+  }
+
+  public function verificarCodigoDatos(Request $request)
+  {
+      $request->validate([
+          'nro_doc' => 'required|string',
+          'codigo'  => 'required|string|size:6',
+      ]);
+
+      $cacheKey = 'codigo_verif_datos_' . $request->nro_doc;
+      $cached = Cache::get($cacheKey);
+
+      if (!$cached) {
+          return response()->json(['estado' => false, 'mensaje' => 'El código expiró o no fue solicitado'], 422);
+      }
+
+      if ($cached !== $request->codigo) {
+          return response()->json(['estado' => false, 'mensaje' => 'Código incorrecto'], 422);
+      }
+
+      Cache::forget($cacheKey);
+
+      $this->response['estado'] = true;
+      $this->response['mensaje'] = 'Código verificado';
+      return response()->json($this->response, 200);
   }
 
   public function saveDniPostulante(Request $request) {
