@@ -230,7 +230,6 @@ class PreinscripcionController extends Controller
               'nombre' => $request->nombre,
               'nro' => $request->nro,
               'avance' => $request->avance,
-              'anvance_general' => $request->avance_general,
               'postulante' => $request->postulante,
               'proceso' => $request->proceso,
           ]);
@@ -246,7 +245,6 @@ class PreinscripcionController extends Controller
             $pasos->nombre = $request->nombre;
             $pasos->nro = $request->nro;
             $pasos->avance = $request->avance;
-            $pasos->avance_general = $request->avance_general;
             $pasos->postulante = $request->postulante;
             $pasos->proceso = $request->proceso;
             $pasos->save();
