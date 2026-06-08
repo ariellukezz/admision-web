@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
 use App\Observers\GlobalObserver;
+use App\Observers\AuditObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,13 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
         foreach (config('global_observers.models') as $model) {
             $model::observe(GlobalObserver::class);
+        }
+
+        // Audit observers — se registran solo si la auditoría está activada
+        if (config('audit.enabled', false)) {
+            foreach (config('audit.watched_models', []) as $model) {
+                $model::observe(AuditObserver::class);
+            }
         }
     }
 }
