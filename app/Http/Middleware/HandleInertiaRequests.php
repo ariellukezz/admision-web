@@ -53,9 +53,25 @@ class HandleInertiaRequests extends Middleware
             $notificacionesNoLeidas = $user->unreadNotifications()->count();
         }
 
+        $permisos = [];
+
+        if ($user) {
+            $permisos = $user->getAllPermissions()->toArray();
+        }
+
+        $userData = null;
+        if ($user) {
+            $userData = $user->toArray();
+            // Asegurar que la foto tenga una ruta absoluta
+            if (!empty($userData['foto']) && !str_starts_with($userData['foto'], 'http') && !str_starts_with($userData['foto'], '/')) {
+                $userData['foto'] = '/' . $userData['foto'];
+            }
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $user,
+                'user' => $userData,
+                'permissions' => $permisos,
             ],
             'proceso_actual' => $procesoActual,
             'flash' => function () use ($request) {

@@ -2,9 +2,20 @@
   <div class="profile-container">
     <!-- Header del perfil -->
     <div class="profile-header">
-      <a-avatar :size="96" :src="userData.foto" class="profile-avatar">
-        <UserOutlined />
-      </a-avatar>
+      <div class="avatar-wrapper">
+        <a-avatar :size="96" :src="userData.foto || undefined" class="profile-avatar">
+          <template #icon><UserOutlined /></template>
+        </a-avatar>
+        <a-upload
+          :show-upload-list="false"
+          :before-upload="subirFoto"
+          accept="image/jpeg,image/png,image/webp"
+        >
+          <a-button size="small" shape="circle" class="upload-btn" :loading="subiendoFoto">
+            <template #icon><CameraOutlined /></template>
+          </a-button>
+        </a-upload>
+      </div>
       <div class="header-info">
         <h1>{{ fullName }}</h1>
         <p class="email">{{ userData.rol }}</p>
@@ -294,7 +305,8 @@ import {
   UserOutlined,
   EditOutlined,
   LockOutlined,
-  SafetyCertificateOutlined
+  SafetyCertificateOutlined,
+  CameraOutlined
 } from '@ant-design/icons-vue'
 
 // Estado reactivo
@@ -306,6 +318,7 @@ const signatureActive = ref(true)
 const loading = ref(false)
 const updatingProfile = ref(false)
 const changingPassword = ref(false)
+const subiendoFoto = ref(false)
 const certificado = ref(null)
 
 // Datos del usuario
@@ -321,17 +334,17 @@ const userData = reactive({
   rol: '',
   proceso: '',
   estado: null,
-  foto: 'https://i.pinimg.com/originals/2b/93/d8/2b93d8b64d3350b1151ac2ef05e89702.jpg'
+  foto: null
 })
 
 // Formularios
-const editForm = computed(() => ({
-  name: userData.name,
-  paterno: userData.paterno,
-  materno: userData.materno,
-  email: userData.email,
-  celular: userData.celular
-}))
+const editForm = reactive({
+  name: '',
+  paterno: '',
+  materno: '',
+  email: '',
+  celular: ''
+})
 
 const signatureForm = reactive({
   dni: userData.dni,
@@ -421,7 +434,14 @@ const formatDate = (dateString) => {
 
 // Funciones de UI
 const showSignatureModal = () => signatureModalVisible.value = true
-const showEditModal = () => editModalVisible.value = true
+const showEditModal = () => {
+  editForm.name = userData.name
+  editForm.paterno = userData.paterno
+  editForm.materno = userData.materno
+  editForm.email = userData.email
+  editForm.celular = userData.celular
+  editModalVisible.value = true
+}
 const showPasswordModal = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''
@@ -482,7 +502,7 @@ const getCertificado = async () => {
 const actualizarDatos = async () => {
   updatingProfile.value = true
   try {
-    const { data } = await axios.post('/actualizar-datos-perfil', editForm.value)
+    const { data } = await axios.post('/actualizar-datos-perfil', editForm)
     if (data.success) {
       message.success('Perfil actualizado correctamente')
       editModalVisible.value = false
@@ -491,10 +511,35 @@ const actualizarDatos = async () => {
       message.error(data.message || 'Error al actualizar perfil')
     }
   } catch (error) {
-    message.error('Error al actualizar perfil')
+    const msg = error.response?.data?.message
+      || error.response?.data?.errors
+        ? Object.values(error.response.data.errors).flat().join(', ')
+        : 'Error al actualizar perfil'
+    message.error(msg)
   } finally {
     updatingProfile.value = false
   }
+}
+
+const subirFoto = async (file) => {
+  subiendoFoto.value = true
+  const formData = new FormData()
+  formData.append('foto', file)
+  try {
+    const { data } = await axios.post('/subir-foto-perfil', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    if (data.success) {
+      userData.foto = data.data.foto
+      message.success('Foto actualizada correctamente')
+    }
+  } catch (error) {
+    const msg = error.response?.data?.message || 'Error al subir la foto'
+    message.error(msg)
+  } finally {
+    subiendoFoto.value = false
+  }
+  return false
 }
 
 const actualizarEstado = async () => {
@@ -570,7 +615,8 @@ const changePassword = async () => {
       message.error(data.message || 'Error al cambiar contraseña')
     }
   } catch (error) {
-    message.error('Error al cambiar contraseña')
+    const msg = error.response?.data?.message || 'Error al cambiar contraseña'
+    message.error(msg)
   } finally {
     changingPassword.value = false
   }
@@ -649,6 +695,28 @@ getCertificado()
 .profile-avatar {
   flex-shrink: 0;
   border: 4px solid #f0f0f0;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.upload-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: #2563eb !important;
+  color: white !important;
+  border: 2px solid white !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.upload-btn:hover {
+  background: #1d4ed8 !important;
 }
 
 .header-info {

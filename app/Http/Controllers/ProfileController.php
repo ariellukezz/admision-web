@@ -79,14 +79,15 @@ class ProfileController extends Controller
                 'users.materno',
                 'users.email',
                 'users.celular',
+                'users.foto',
                 'roles.id as id_rol',
                 'roles.name as rol',
                 'procesos.id as id_proceso',
                 'procesos.nombre as proceso',
                 'users.estado',
             ])
-            ->join('roles', 'roles.id', '=', 'users.id_rol')
-            ->join('procesos', 'procesos.id', '=', 'users.id_proceso')
+            ->leftJoin('roles', 'roles.id', '=', 'users.id_rol')
+            ->leftJoin('procesos', 'procesos.id', '=', 'users.id_proceso')
             ->where('users.id', Auth::id())
             ->first();
 
@@ -97,18 +98,48 @@ class ProfileController extends Controller
     }
 
 
-    public function actualizarDatosUsuario(){
-      $user = User::find(Auth::id());
+    public function actualizarDatosUsuario(Request $request)
+    {
+        $request->validate([
+            'name'    => 'required|string|max:255',
+            'paterno' => 'required|string|max:255',
+            'materno' => 'nullable|string|max:255',
+            'email'   => 'required|email|max:255',
+            'celular' => 'nullable|string|max:20',
+        ]);
 
-      $user->name = request()->name;
-      $user->paterno = request()->paterno;
-      $user->materno = request()->materno;
-      $user->celular = request()->celular;
-      $user->email = request()->email;
-      $user->save();
+        $user = User::find(Auth::id());
 
-      return response()->json([ 'success' => true, 'data' => $user ]);
+        $user->name    = $request->name;
+        $user->paterno = $request->paterno;
+        $user->materno = $request->materno;
+        $user->celular = $request->celular;
+        $user->email   = $request->email;
+        $user->save();
 
+        return response()->json(['success' => true, 'data' => $user]);
+    }
+
+    public function subirFotoPerfil(Request $request)
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $user = User::find(Auth::id());
+
+        $file = $request->file('foto');
+        $fileName = 'usuario_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('fotos_usuario'), $fileName);
+
+        $user->foto = 'fotos_usuario/' . $fileName;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto actualizada correctamente',
+            'data' => ['foto' => '/fotos_usuario/' . $fileName],
+        ]);
     }
 
     public function cambiarContrasenaPerfil(Request $request)
