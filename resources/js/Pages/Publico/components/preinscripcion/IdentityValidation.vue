@@ -153,7 +153,8 @@
       :maskClosable="false"
       :closable="false"
       centered
-      width="420px"
+      width="440px"
+      @cancel="rechazarCargarDatos"
     >
       <div class="text-center" style="padding: 16px 0;">
         <div class="mb-4" style="display: flex; justify-content: center;">
@@ -163,19 +164,70 @@
             </svg>
           </div>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Datos encontrados</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">En buena hora</h3>
         <p class="text-gray-600 mb-1" v-if="datosPrevios">
-          Se encontraron registros para <strong>{{ datosPrevios.nombres }} {{ datosPrevios.primer_apellido }} {{ datosPrevios.segundo_apellido }}</strong>
+          <strong>{{ datosPrevios.nombres }} </strong>, tenemos tus datos registrados
         </p>
-        <p class="text-gray-500 text-sm mb-6">¿Desea cargar los datos registrados?</p>
-        <div class="flex gap-3 justify-center">
-          <a-button size="large" @click="rechazarCargarDatos" style="min-width: 120px;">
-            No, llenar manualmente
-          </a-button>
-          <a-button type="primary" size="large" @click="aceptarCargarDatos" style="min-width: 120px;">
-            Sí, cargar datos
-          </a-button>
-        </div>
+
+        <!-- Estado 1: Inicial (antes de enviar código) -->
+        <template v-if="!codigoEnviado && !codigoExpirado">
+          <p class="text-gray-500 text-sm mb-6">
+            Para continuar y cargar tus datos, enviaremos un código de verificación a tu correo electrónico<span v-if="emailMasked">: <strong>{{ emailMasked }}</strong></span>.
+          </p>
+          <div class="flex gap-3 justify-center">
+            <a-button size="large" @click="rechazarCargarDatos" style="min-width: 130px;">
+              No, llenar manualmente
+            </a-button>
+            <a-button type="primary" size="large" :loading="enviandoCodigo" @click="solicitarCodigoVerificacion" style="min-width: 130px;">
+              {{ enviandoCodigo ? 'Enviando...' : 'Sí, continuar' }}
+            </a-button>
+          </div>
+        </template>
+
+        <!-- Estado 2: Esperando código (countdown activo) -->
+        <template v-if="codigoEnviado && !codigoExpirado">
+          <p class="text-gray-500 text-sm mb-4">
+            Ingresa el código enviado a <strong>{{ emailMasked }}</strong>
+          </p>
+          <div class="mb-3">
+            <a-input
+              :value="codigoVerificacion"
+              @input="(e) => { setCodigoVerificacion(e.target.value); setCodigoError('') }"
+              :maxlength="6"
+              placeholder="Código de 6 dígitos"
+              style="height: 48px; font-size: 22px; text-align: center; letter-spacing: 0.5rem; font-family: 'Courier New', monospace;"
+            />
+          </div>
+          <div class="mb-4" style="font-size: 14px; color: #6b7280;">
+            <span v-if="countdownSegundos > 0" style="font-weight: 600; color: #2563eb;">
+              ⏱ {{ Math.floor(countdownSegundos / 60) }}:{{ String(countdownSegundos % 60).padStart(2, '0') }}
+            </span>
+            <a-alert v-if="codigoError" :message="codigoError" type="error" show-icon style="margin-top: 8px; text-align: left;" />
+          </div>
+          <div class="flex gap-3 justify-center">
+            <a-button size="large" @click="rechazarCargarDatos" style="min-width: 130px;">
+              No, llenar manualmente
+            </a-button>
+            <a-button type="primary" size="large" :loading="verificandoCodigo" :disabled="codigoVerificacion.length < 6" @click="verificarCodigoYCargar" style="min-width: 160px;">
+              {{ verificandoCodigo ? 'Verificando...' : 'Verificar y cargar' }}
+            </a-button>
+          </div>
+        </template>
+
+        <!-- Estado 3: Código expirado -->
+        <template v-if="codigoExpirado">
+          <p class="text-red-500 text-sm mb-6" style="font-weight: 600;">
+            ⏱ El código ha expirado
+          </p>
+          <div class="flex gap-3 justify-center">
+            <a-button size="large" @click="rechazarCargarDatos" style="min-width: 130px;">
+              No, llenar manualmente
+            </a-button>
+            <a-button type="primary" size="large" :loading="enviandoCodigo" @click="solicitarCodigoVerificacion" style="min-width: 130px;">
+              Reenviar código
+            </a-button>
+          </div>
+        </template>
       </div>
     </a-modal>
   </div>
@@ -191,12 +243,25 @@ const props = defineProps({
   loading: Boolean,
   modalCargarDatos: Boolean,
   datosPrevios: [Object, null],
+  enviandoCodigo: Boolean,
+  verificandoCodigo: Boolean,
+  codigoVerificacion: [String, null],
+  codigoEnviado: Boolean,
+  codigoExpirado: Boolean,
+  codigoError: [String, null],
+  emailMasked: [String, null],
+  countdownSegundos: Number,
   setFormRef: Function,
   dniInput: Function,
   validateCodigoSecreto: Function,
   getCodigoAleatorio: Function,
   aceptarCargarDatos: Function,
   rechazarCargarDatos: Function,
+  solicitarCodigoVerificacion: Function,
+  verificarCodigoYCargar: Function,
+  resetCodigoVerificacion: Function,
+  setCodigoVerificacion: Function,
+  setCodigoError: Function,
 })
 
 const emit = defineEmits(['proceed'])
