@@ -1,0 +1,271 @@
+.rbac-page {
+  --rbac-primary: #4f46e5;
+  --rbac-primary-hover: #4338ca;
+  --rbac-primary-light: #eef2ff;
+  --rbac-border: #e2e8f0;
+  --rbac-bg: #f8fafc;
+  --rbac-text: #1e293b;
+  --rbac-text-muted: #64748b;
+  --rbac-radius: 10px;
+  --rbac-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --rbac-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+  height: calc(100vh - 105px);
+  overflow-y: auto;
+  background: var(--rbac-bg);
+  border-radius: 12px;
+}
+
+/* ── Header ─────────────────────────────────────── */
+.rbac-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--rbac-border);
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+}
+
+.rbac-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rbac-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--rbac-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rbac-title-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--rbac-primary-light);
+  color: var(--rbac-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.rbac-subtitle {
+  font-size: 13px;
+  color: var(--rbac-text-muted);
+}
+
+/* ── Stats ──────────────────────────────────────── */
+.rbac-stats {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--rbac-border);
+}
+
+.rbac-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 16px 8px 0;
+  border-right: 1px solid var(--rbac-border);
+}
+
+.rbac-stat:last-child {
+  border-right: none;
+}
+
+.rbac-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--rbac-primary);
+  line-height: 1.2;
+}
+
+.rbac-stat-label {
+  font-size: 11px;
+  color: var(--rbac-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Tabs override ─────────────────────────────── */
+.rbac-tabs {
+  padding: 0 24px 20px;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+}
+
+/* ── Toolbar ───────────────────────────────────── */
+.rbac-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rbac-toolbar-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Button override ────────────────────────────── */
+.rbac-btn-primary {
+  background: var(--rbac-primary) !important;
+  border-color: var(--rbac-primary) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.15) !important;
+  transition: all 0.18s ease !important;
+}
+
+.rbac-btn-primary:hover {
+  background: var(--rbac-primary-hover) !important;
+  border-color: var(--rbac-primary-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2) !important;
+}
+
+/* ── Table override ─────────────────────────────── */
+.rbac-table :deep(.ant-table) {
+  border-radius: 8px;
+  border: 1px solid var(--rbac-border);
+}
+
+.rbac-table :deep(.ant-table-thead > tr > th) {
+  background: var(--rbac-bg) !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--rbac-text-muted) !important;
+  border-bottom: 1px solid var(--rbac-border) !important;
+}
+
+.rbac-table :deep(.ant-table-tbody > tr > td) {
+  font-size: 13px !important;
+}
+
+.rbac-table :deep(.ant-table-tbody > tr:hover > td) {
+  background: var(--rbac-primary-light) !important;
+}
+
+/* ── Code tag ──────────────────────────────────── */
+.rbac-code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  background: var(--rbac-primary-light);
+  color: var(--rbac-primary);
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: 500;
+}
+
+/* ── Badge override ─────────────────────────────── */
+.rbac-badge-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rbac-badge-active.on {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.rbac-badge-active.off {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ── Section header ─────────────────────────────── */
+.rbac-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rbac-text);
+}
+
+.rbac-section-header .anticon {
+  color: var(--rbac-primary);
+}
+
+/* ── Modal override ────────────────────────────── */
+.rbac-modal :deep(.ant-modal-content) {
+  border-radius: 12px !important;
+  padding: 24px !important;
+}
+
+.rbac-modal :deep(.ant-modal-header) {
+  border-bottom: 1px solid var(--rbac-border);
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.rbac-modal :deep(.ant-modal-title) {
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  color: var(--rbac-text) !important;
+}
+
+.rbac-modal :deep(.ant-form-item-label > label) {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--rbac-text) !important;
+}
+
+.rbac-modal :deep(.ant-select-selector),
+.rbac-modal :deep(.ant-input) {
+  border-radius: 8px !important;
+}
+
+.rbac-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rbac-border);
+  margin-top: 8px;
+}
+
+/* ── Pagination override ───────────────────────── */
+:deep(.ant-pagination .ant-pagination-item-active) {
+  border-color: var(--rbac-primary) !important;
+}
+
+:deep(.ant-pagination .ant-pagination-item-active a) {
+  color: var(--rbac-primary) !important;
+}
+
+:deep(.ant-tabs .ant-tabs-ink-bar) {
+  background: var(--rbac-primary) !important;
+}
+
+:deep(.ant-tabs .ant-tabs-item-active) {
+  color: var(--rbac-primary) !important;
+}
+
+:deep(.ant-tabs .ant-tabs-item:hover) {
+  color: var(--rbac-primary) !important;
+}
+
+/* ── Switch override ───────────────────────────── */
+:deep(.ant-switch-checked) {
+  background: var(--rbac-primary) !important;
+}
