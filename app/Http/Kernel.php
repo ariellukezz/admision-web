@@ -78,6 +78,7 @@ class Kernel extends HttpKernel
         'audit' => \App\Http\Middleware\AuditMiddleware::class,
 
         'cepre' => \App\Http\Middleware\Cepre::class,
+        'rbac' => \App\Http\Middleware\CheckPermission::class,
     ];
 
 

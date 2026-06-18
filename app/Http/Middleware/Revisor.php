@@ -13,7 +13,10 @@ class Revisor
             return redirect('/login');
         }
 
-        if (auth()->user()->id_rol == 2) {
+        $user = auth()->user();
+
+        // RBAC: verificar permiso revisor.access
+        if ($user->hasPermission('revisor.access')) {
             return $next($request);
         }
 
