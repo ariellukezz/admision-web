@@ -61,83 +61,148 @@
     </div>
 
     <div class="finger-selection">
-      <a-select
-        v-model:value="selectedFinger"
-        :options="fingerOptions"
-        size="middle"
-        style="width: 100%; margin-bottom: 10px"
-      />
-      <div class="finger-status">
-        <span>Seleccionado:</span>
-        <a-tag :color="fingerprints[selectedFinger].registered ? 'green' : 'default'" size="small">
-          {{ fingerprints[selectedFinger].registered ? '✓ Capturada' : '○ Pendiente' }}
-        </a-tag>
-        <span class="finger-count">{{ capturedCount }} huella(s) capturada(s)</span>
-      </div>
+      <!-- Vista de grilla: 2 dedos lado a lado -->
+      <template v-if="showFingerGrid">
+        <div class="finger-grid">
+          <div
+            v-for="option in fingerOptions"
+            :key="option.value"
+            class="huella-card"
+            :class="{ 'huella-selected': selectedFinger === option.value }"
+            @click="selectedFinger = option.value"
+          >
+            <div class="huella-header">
+              <div>
+                <span>{{ option.label }}</span>
+                <div class="finger-status-line">
+                  <a-tag :color="fingerprintBadgeColor(option.value)" size="small">
+                    {{ fingerprints[option.value].registered ? 'Registrada' : 'No registrada' }}
+                  </a-tag>
+                  <span class="finger-quality" v-if="fingerprints[option.value].registered">
+                    Calidad: {{ fingerprints[option.value].quality }}%
+                  </span>
+                </div>
+              </div>
+            </div>
 
-      <div class="huella-card huella-selected">
-        <div class="huella-header">
-          <div>
-            <span>{{ fingerLabel }}</span>
-            <div class="finger-status-line">
-              <a-tag :color="fingerprintBadgeColor(selectedFinger)" size="small">
-                {{ fingerprints[selectedFinger].registered ? 'Registrada' : 'No registrada' }}
-              </a-tag>
-              <span class="finger-quality" v-if="fingerprints[selectedFinger].registered">
-                Calidad: {{ fingerprints[selectedFinger].quality }}%
-              </span>
+            <div class="huella-image">
+              <img v-if="fingerprints[option.value].image" :src="fingerprints[option.value].image" />
+              <div v-else class="huella-placeholder">
+                <span>{{ captureTarget === option.value ? 'Coloca tu dedo...' : option.label }}</span>
+              </div>
+            </div>
+
+            <div class="capture-status" v-if="captureTarget === option.value">
+              <a-alert type="info" show-icon message="Esperando huella..." />
+            </div>
+
+            <div class="button-group">
+              <a-button
+                type="primary"
+                size="small"
+                block
+                :disabled="connectionStatus.type !== 'connected' || !dni"
+                :loading="capturing === option.value"
+                @click.stop="startCapture(option.value)"
+              >
+                <ScanOutlined />
+                Capturar
+              </a-button>
+              <a-button
+                type="default"
+                size="small"
+                block
+                :disabled="!fingerprints[option.value].registered"
+                @click.stop="clearFingerprint(option.value)"
+                class="clear-button"
+              >
+                Limpiar
+              </a-button>
             </div>
           </div>
         </div>
+      </template>
 
-        <div class="huella-image">
-          <img v-if="fingerprints[selectedFinger].image" :src="fingerprints[selectedFinger].image" />
-          <div v-else class="huella-placeholder">
-            <span>{{ captureTarget === selectedFinger ? 'Coloca tu dedo en el lector...' : fingerLabel }}</span>
+      <!-- Vista individual: selector + 1 tarjeta -->
+      <template v-else>
+        <a-select
+          v-model:value="selectedFinger"
+          :options="fingerOptions"
+          size="middle"
+          style="width: 100%; margin-bottom: 10px"
+        />
+        <div class="finger-status">
+          <span>Seleccionado:</span>
+          <a-tag :color="fingerprints[selectedFinger].registered ? 'green' : 'default'" size="small">
+            {{ fingerprints[selectedFinger].registered ? '✓ Capturada' : '○ Pendiente' }}
+          </a-tag>
+          <span class="finger-count">{{ capturedCount }} huella(s) capturada(s)</span>
+        </div>
+
+        <div class="huella-card huella-selected">
+          <div class="huella-header">
+            <div>
+              <span>{{ fingerLabel }}</span>
+              <div class="finger-status-line">
+                <a-tag :color="fingerprintBadgeColor(selectedFinger)" size="small">
+                  {{ fingerprints[selectedFinger].registered ? 'Registrada' : 'No registrada' }}
+                </a-tag>
+                <span class="finger-quality" v-if="fingerprints[selectedFinger].registered">
+                  Calidad: {{ fingerprints[selectedFinger].quality }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="huella-image">
+            <img v-if="fingerprints[selectedFinger].image" :src="fingerprints[selectedFinger].image" />
+            <div v-else class="huella-placeholder">
+              <span>{{ captureTarget === selectedFinger ? 'Coloca tu dedo en el lector...' : fingerLabel }}</span>
+            </div>
+          </div>
+
+          <div class="capture-status" v-if="captureTarget === selectedFinger">
+            <a-alert type="info" show-icon message="Esperando huella..." description="Mantén el dedo en el lector para capturar." />
+          </div>
+
+          <div class="button-group">
+            <a-button
+              type="primary"
+              size="small"
+              block
+              :disabled="connectionStatus.type !== 'connected' || !dni"
+              :loading="capturing === selectedFinger"
+              @click="startCapture(selectedFinger)"
+            >
+              <ScanOutlined />
+              Capturar {{ fingerLabel }}
+            </a-button>
+            <a-button
+              type="default"
+              size="small"
+              block
+              :disabled="!fingerprints[selectedFinger].registered"
+              @click.stop="clearFingerprint(selectedFinger)"
+              class="clear-button"
+            >
+              Limpiar
+            </a-button>
           </div>
         </div>
 
-        <div class="capture-status" v-if="captureTarget === selectedFinger">
-          <a-alert type="info" show-icon message="Esperando huella..." description="Mantén el dedo en el lector para capturar." />
+        <div class="finger-summary">
+          <span>Huellas registradas:</span>
+          <a-space wrap>
+            <a-tag
+              v-for="option in fingerOptions"
+              :key="option.value"
+              :color="fingerprintBadgeColor(option.value)"
+            >
+              {{ option.label }}
+            </a-tag>
+          </a-space>
         </div>
-
-        <div class="button-group">
-          <a-button
-            type="primary"
-            size="small"
-            block
-            :disabled="connectionStatus.type !== 'connected' || !dni"
-            :loading="capturing === selectedFinger"
-            @click="startCapture(selectedFinger)"
-          >
-            <ScanOutlined />
-            Capturar {{ fingerLabel }}
-          </a-button>
-          <a-button
-            type="default"
-            size="small"
-            block
-            :disabled="!fingerprints[selectedFinger].registered"
-            @click.stop="clearFingerprint(selectedFinger)"
-            class="clear-button"
-          >
-            Limpiar
-          </a-button>
-        </div>
-      </div>
-
-      <div class="finger-summary">
-        <span>Huellas registradas:</span>
-        <a-space wrap>
-          <a-tag
-            v-for="option in fingerOptions"
-            :key="option.value"
-            :color="fingerprintBadgeColor(option.value)"
-          >
-            {{ option.label }}
-          </a-tag>
-        </a-space>
-      </div>
+      </template>
     </div>
 
     <div class="action-panel">
@@ -215,7 +280,9 @@ import {
 import axios from 'axios'
 
 const props = defineProps({
-  dni: { type: String, default: '' }
+  dni: { type: String, default: '' },
+  fingerFilter: { type: Array, default: null },
+  contextMode: { type: String, default: 'inscripcion' }
 })
 
 const emit = defineEmits(['huellas-actualizadas'])
@@ -229,7 +296,6 @@ const capturing = ref(null)
 
 const selectedOption = ref('right')
 const selectedMode = ref('register')
-const selectedFinger = ref('indice_derecho')
 const actionLoading = ref(false)
 const verificationResult = ref(null)
 const wsVerificationPending = ref(false)
@@ -240,7 +306,7 @@ const modeOptions = [
   { label: 'Verificar 1:N', value: 'verify1toN' }
 ]
 
-const fingerOptions = [
+const allFingers = [
   { label: 'Índice Derecho', value: 'indice_derecho' },
   { label: 'Índice Izquierdo', value: 'indice_izquierdo' },
   { label: 'Pulgar Derecho', value: 'pulgar_derecho' },
@@ -253,8 +319,17 @@ const fingerOptions = [
   { label: 'Meñique Izquierdo', value: 'menique_izquierdo' }
 ]
 
+const fingerOptions = computed(() => {
+  if (!props.fingerFilter) return allFingers
+  return allFingers.filter(f => props.fingerFilter.includes(f.value))
+})
+
+const showFingerGrid = computed(() => fingerOptions.value.length === 2)
+
+const selectedFinger = ref(fingerOptions.value[0]?.value || 'indice_derecho')
+
 const fingerLabel = computed(() => {
-  const option = fingerOptions.find(opt => opt.value === selectedFinger.value)
+  const option = fingerOptions.value.find(opt => opt.value === selectedFinger.value)
   return option ? option.label : 'Dedo seleccionado'
 })
 
@@ -269,13 +344,13 @@ const fingerprintBadgeColor = (finger) => {
 const autoCaptureEnabled = ref(true)
 
 const nextUnregisteredFinger = () => {
-  const next = fingerOptions.find(option => !fingerprints.value[option.value].registered)
+  const next = fingerOptions.value.find(option => !fingerprints.value[option.value].registered)
   return next ? next.value : null
 }
 
 const captureStatusMessage = computed(() => {
   if (captureTarget.value) {
-    const targetLabel = fingerOptions.find(opt => opt.value === captureTarget.value)?.label || 'dedo'
+    const targetLabel = fingerOptions.value.find(opt => opt.value === captureTarget.value)?.label || 'dedo'
     return `Capturando ${targetLabel}... mantén el dedo en el lector.`
   }
 
@@ -352,7 +427,7 @@ const connectionStatus = ref({
 })
 
 const fingerprints = ref(Object.fromEntries(
-  fingerOptions.map(option => [option.value, {
+  fingerOptions.value.map(option => [option.value, {
     registered: false,
     image: null,
     template: null,
@@ -612,7 +687,7 @@ const updateFingerprint = (decodedData) => {
     data: fingerprints.value
   })
 
-  const fingerName = fingerOptions.find(opt => opt.value === finger)?.label || finger
+  const fingerName = fingerOptions.value.find(opt => opt.value === finger)?.label || finger
   message.success(`Huella ${fingerName} capturada`)
 
   capturing.value = null
@@ -892,7 +967,8 @@ const guardarHuellas = async () => {
             dedo: finger,
             template: entry.template,
             imagen: entry.image,
-            calidad: entry.quality
+            calidad: entry.quality,
+            contexto: props.contextMode
           })
         )
       }
@@ -921,7 +997,7 @@ const guardarHuellas = async () => {
 
 const resetear = () => {
   fingerprints.value = Object.fromEntries(
-    fingerOptions.map(option => [option.value, {
+    fingerOptions.value.map(option => [option.value, {
       registered: false,
       image: null,
       template: null,
@@ -966,238 +1042,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-.huellas-component {
-  height: 100%;
-}
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  background: #fafafa;
-  border-radius: 6px;
-  margin-bottom: 12px;
-}
-
-.status-label {
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-}
-
-.status-text {
-  font-size: 12px;
-}
-
-.huellas-row {
-  margin-bottom: 0px;
-}
-
-.huella-card {
-  padding: 10px;
-  background: #fafafa;
-  border-radius: 8px;
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.huella-card:hover {
-  background: #f0f0f0;
-  transform: translateY(-2px);
-}
-
-.huella-active {
-  border: 2px solid #1890ff;
-  background: #e6f7ff;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
-}
-
-.huella-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.huella-image {
-  width: 100%;
-  aspect-ratio: 3/4;
-  background: white;
-  border-radius: 6px;
-  border: 1px solid #e8e8e8;
-  margin-bottom: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.huella-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.huella-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  text-align: center;
-  color: #8c8c8c;
-  padding: 0 12px;
-}
-
-.capture-status {
-  margin-bottom: 10px;
-}
-
-.capture-status-banner {
-  margin-top: 12px;
-}
-
-.auto-capture-control {
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.finger-status-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-top: 6px;
-}
-
-.finger-quality {
-  color: #595959;
-  font-size: 11px;
-}
-
-.button-group {
-  margin-top: 14px;
-}
-
-.mt-1 {
-  margin-top: 4px;
-}
-
-.mt-2 {
-  margin-top: 8px;
-}
-
-.nav-instructions {
-  margin-top: 12px;
-  padding: 6px;
-  text-align: center;
-  font-size: 11px;
-  color: #8c8c8c;
-  background: #f5f5f5;
-  border-radius: 4px;
-}
-.save-container {
-  margin-top: 16px;
-  display: flex;
-  justify-content: center;
-}
-
-.save-button {
-  min-width: 220px;
-  height: 42px;
-  font-weight: 600;
-  transition: all .2s ease;
-}
-
-.save-active {
-  border: 2px solid #1890ff !important;
-  box-shadow: 0 0 0 4px rgba(24,144,255,.2);
-  transform: scale(1.03);
-}
-
-.save-section {
-  margin-top: 14px;
-}
-
-.save-button-active {
-  border: 2px solid #1890ff !important;
-  box-shadow: 0 0 12px rgba(24,144,255,.45);
-  transform: scale(1.01);
-}
-
-.huella-active {
-  border: 2px solid #1890ff;
-  background: #e6f7ff;
-  box-shadow: 0 0 12px rgba(24,144,255,.35);
-  transform: translateY(-2px);
-}
-
-.mode-panel {
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(24,144,255,0.08), #ffffff);
-  border: 1px solid rgba(24,144,255,0.12);
-  margin-bottom: 16px;
-}
-
-.mode-title {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.mode-description {
-  font-size: 12px;
-  color: #595959;
-  margin-bottom: 10px;
-}
-
-.mode-summary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #595959;
-}
-
-.status-left {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 180px;
-}
-
-.status-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-panel {
-  margin-top: 18px;
-  padding: 14px 0 0;
-  border-top: 1px solid #f0f0f0;
-}
-
-.clear-button {
-  margin-top: 8px;
-}
-
-.verification-result {
-  margin-top: 12px;
-}
-</style>
+<style scoped src="./HuellasComponent.css"></style>

@@ -1,0 +1,273 @@
+.huellas-component {
+  height: 100%;
+}
+
+.finger-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.finger-grid .huella-card {
+  padding: 8px;
+}
+
+.finger-grid .huella-image {
+  aspect-ratio: 3/4;
+}
+
+.finger-grid .huella-placeholder span {
+  font-size: 14px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.status-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 180px;
+}
+
+.status-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.status-text {
+  font-size: 12px;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-panel {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.08), #ffffff);
+  border: 1px solid rgba(24, 144, 255, 0.12);
+  margin-bottom: 16px;
+}
+
+.mode-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.mode-description {
+  font-size: 12px;
+  color: #595959;
+  margin-bottom: 10px;
+}
+
+.mode-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #595959;
+}
+
+.auto-capture-control {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.capture-status-banner {
+  margin-top: 12px;
+}
+
+.finger-selection {
+  margin-bottom: 12px;
+}
+
+.finger-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.finger-count {
+  color: #8c8c8c;
+}
+
+.finger-summary {
+  margin-top: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.huella-card {
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.huella-card:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.huella-selected {
+  border: 2px solid #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.huella-active {
+  border: 2px solid #1890ff;
+  background: #e6f7ff;
+  box-shadow: 0 0 12px rgba(24, 144, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.huella-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.finger-status-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.finger-quality {
+  color: #595959;
+  font-size: 11px;
+}
+
+.huella-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+  margin-bottom: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.huella-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.huella-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  text-align: center;
+  color: #8c8c8c;
+  padding: 0 12px;
+}
+
+.capture-status {
+  margin-bottom: 10px;
+}
+
+.button-group {
+  margin-top: 14px;
+}
+
+.clear-button {
+  margin-top: 8px;
+}
+
+.action-panel {
+  margin-top: 18px;
+  padding: 14px 0 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.verification-result {
+  margin-top: 12px;
+}
+
+.save-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.save-button {
+  min-width: 220px;
+  height: 42px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.save-active {
+  border: 2px solid #1890ff !important;
+  box-shadow: 0 0 0 4px rgba(24, 144, 255, 0.2);
+  transform: scale(1.03);
+}
+
+.save-section {
+  margin-top: 14px;
+}
+
+.save-button-active {
+  border: 2px solid #1890ff !important;
+  box-shadow: 0 0 12px rgba(24, 144, 255, 0.45);
+  transform: scale(1.01);
+}
+
+.nav-instructions {
+  margin-top: 12px;
+  padding: 6px;
+  text-align: center;
+  font-size: 11px;
+  color: #8c8c8c;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.mt-1 {
+  margin-top: 4px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
