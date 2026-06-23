@@ -66,7 +66,7 @@
               mode="inline"
               class="reviewer-menu"
             >
-              <template v-for="item in menuItems" :key="item.key">
+              <template v-for="item in filteredMenuItems" :key="item.key">
                 <a-menu-item v-if="!item.children" :key="item.key">
                   <Link :href="item.route" class="menu-link">
                     <component :is="item.icon" class="menu-icon" />
@@ -285,21 +285,23 @@ const menuItems = [
     icon: DashboardOutlined,
     label: 'Dashboard',
     route: '/revisor',
+    permission: 'revisor.access',
   },
   {
     key: 'mi_actividad',
     icon: AppstoreFilled,
     label: 'Mi Actividad',
     route: '/revisor/mi-actividad',
+    permission: 'revisor-actividad.read',
   },
   {
     key: 'gestion_acceso',
     icon: CameraOutlined,
     label: 'Gestion de acceso',
     children: [
-      { key: 'fotos', label: 'Fotos', route: '/revisor/foto-inscripcion' },
-      { key: 'revision', label: 'Revision', route: '/revisor/impresion' },
-      { key: 'fotos_huellas', label: 'Fotos y huellas', route: '/revisor/fotos-admision' },
+      { key: 'fotos', label: 'Fotos', route: '/revisor/foto-inscripcion', permission: 'revisor-inscripcion.read' },
+      { key: 'revision', label: 'Revision', route: '/revisor/impresion', permission: 'revisor-inscripcion.read' },
+      { key: 'fotos_huellas', label: 'Fotos y huellas', route: '/revisor/fotos-admision', permission: 'revisor-biometrico.read' },
     ],
   },
   {
@@ -307,8 +309,8 @@ const menuItems = [
     icon: AuditOutlined,
     label: 'Control Biometrico',
     children: [
-      { key: 'fotos_bio', label: 'Fotos biometrico', route: '/revisor/foto-biometrico' },
-      { key: 'revision_bio', label: 'Revision biometrico', route: '/revisor/imprimir' },
+      { key: 'fotos_bio', label: 'Fotos biometrico', route: '/revisor/foto-biometrico', permission: 'revisor-biometrico.read' },
+      { key: 'revision_bio', label: 'Revision biometrico', route: '/revisor/imprimir', permission: 'revisor-biometrico.read' },
     ],
   },
   {
@@ -316,16 +318,34 @@ const menuItems = [
     icon: SafetyCertificateOutlined,
     label: 'Certificados',
     route: '/revisor/validacion',
+    permission: 'revisor-validacion.read',
   },
   {
     key: 'solicitudes_revision',
     icon: FileDoneOutlined,
     label: 'Solicitudes',
     route: '/revisor/solicitudes-revision',
+    permission: 'revisor-solicitudes.read',
   },
 ]
 
-const flatMenu = computed(() => menuItems.flatMap((item) => item.children || item))
+const permissions = computed(() => page.props.auth?.permissions || [])
+
+const hasPermission = (perm) => permissions.value.includes(perm)
+
+const filteredMenuItems = computed(() => {
+  return menuItems
+    .map((item) => {
+      if (!item.children) {
+        return hasPermission(item.permission) ? item : null
+      }
+      const visibleChildren = item.children.filter((child) => hasPermission(child.permission))
+      return visibleChildren.length > 0 ? { ...item, children: visibleChildren } : null
+    })
+    .filter(Boolean)
+})
+
+const flatMenu = computed(() => filteredMenuItems.value.flatMap((item) => item.children || item))
 const activeMenuLabel = computed(() => {
   const cleanUrl = page.url.split('?')[0]
   return flatMenu.value.find((item) => item.route === cleanUrl)?.label

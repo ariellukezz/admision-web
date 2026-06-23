@@ -2,10 +2,17 @@
   <div>
     <!-- Menú desplegable del usuario -->
     <a-dropdown :trigger="['click']">
-      <a @click.prevent style="text-decoration: none; color: black;">
-        {{ $page.props.auth.user.name }} &nbsp;
-        <DownOutlined />
-      </a>
+      <div class="flex items-center gap-2 cursor-pointer">
+        <a-avatar
+          :size="36"
+          :src="$page.props.auth.user.foto || undefined"
+          class="header-avatar"
+        >
+          <template #icon><UserOutlined /></template>
+        </a-avatar>
+        <span class="user-name">{{ $page.props.auth.user.name }}</span>
+        <DownOutlined class="text-gray-400" />
+      </div>
       <template #overlay>
         <a-menu>
           <a-menu-item key="0" @click="modalPerfil = true">
@@ -182,3 +189,15 @@ const notificacion = (type, titulo, mensaje) => {
   });
 };
 </script>
+
+<style scoped>
+.header-avatar {
+  border: 2px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.user-name {
+  color: #1f2937;
+  font-weight: 500;
+  white-space: nowrap;
+}
+</style>

@@ -24,15 +24,18 @@
       <div class="h-[calc(100vh-80px)] overflow-y-scroll custom-scrollbar">
         <div class="mb-4">
           <div class="flex justify-center">
-            <img
-              src="../../assets/imagenes/usuario.png"
-              style="width: 150px;"
-            />
+            <a-avatar
+              :size="120"
+              :src="page.props.auth.user.foto || undefined"
+              class="sider-avatar"
+            >
+              <template #icon><UserOutlined /></template>
+            </a-avatar>
           </div>
 
           <div class="flex justify-center text-gray-400" v-if="!collapsed">
             <div>
-              <div class="text-center text-md mb-2">Administrador</div>
+              <div class="text-center text-md mb-2">{{ page.props.auth.user.name }}</div>
               <div>
                 <a-select
                     ref="select"
@@ -124,7 +127,10 @@ import Header from '@/Layouts/Header.vue';
 import {
   AppstoreFilled,
   SettingFilled,
-  MenuFoldOutlined
+  MenuFoldOutlined,
+  UserOutlined,
+  MailOutlined,
+  UserAddOutlined
 } from '@ant-design/icons-vue';
 const page = usePage()
 
@@ -356,6 +362,18 @@ const menuItems = [
         label: 'Usuarios',
         route: 'usuarios-index'
       },
+      {
+        key: 'permisos',
+        icon: SettingFilled,
+        label: 'Permisos',
+        route: 'admin-permisos'
+      },
+      {
+        key: 'modulos',
+        icon: SettingFilled,
+        label: 'Módulos RBAC',
+        route: 'admin-modulos'
+      },
     ]
   },
 
@@ -429,6 +447,18 @@ const menuItems = [
         icon: SettingFilled,
         label: 'Configuración de Citación',
         route: 'admin.configuracion-citacion'
+      },
+      {
+        key: 'registro-postulante',
+        icon: UserAddOutlined,
+        label: 'Registro de Postulante',
+        route: 'admin.registro-postulante'
+      },
+      {
+        key: 'smtp-accounts',
+        icon: MailOutlined,
+        label: 'Correos SMTP',
+        route: 'admin.smtp-accounts'
       },
     ]
   },
@@ -595,6 +625,11 @@ watch(proceso, (newVal, oldVal) => {
 /* Usuario */
 .text-gray-400 {
   color: var(--muted-text) !important;
+}
+
+.sider-avatar {
+  border: 3px solid var(--border-color);
+  background: var(--hover-bg);
 }
 
 /* MENU */
