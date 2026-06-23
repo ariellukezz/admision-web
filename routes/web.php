@@ -77,6 +77,10 @@ use App\Http\Controllers\ResumenBiometricoController;
 use App\Http\Controllers\ResumenInscripcionesController;
 use App\Http\Controllers\DescargarArchivosController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\PermisoController;
+use App\Http\Controllers\ModuloController;
+use App\Http\Controllers\Admin\SmtpAccountController;
+use App\Http\Controllers\Admin\SettingController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->get('/', function () {
@@ -102,6 +106,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/actualizar-datos-perfil', [ProfileController::class, 'actualizarDatosUsuario']);
     Route::post('/cambiar-contrasena-perfil', [ProfileController::class, 'cambiarContrasenaPerfil']);
     Route::post('/actualizar-estado-firma-perfil', [ProfileController::class, 'actualizarEstadoFirma']);
+    Route::post('/subir-foto-perfil', [ProfileController::class, 'subirFotoPerfil']);
     Route::post('/crear-certificado-digital', [ProfileController::class, 'crearCertificadoDigital']);
     Route::get('/get-activity-log', [ProfileController::class, 'getActivityLog']);
     Route::get('/get-certificado-digital', [ProfileController::class, 'getCertificadoDigital']);
@@ -458,138 +463,54 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/api/solicitudes-pendientes', [AdminDocumentoController::class, 'listarSolicitudesPendientes']);
     Route::post('/api/validacion-masiva', [AdminDocumentoController::class, 'validacionMasiva']);
 
+    // ── RBAC: Permisos ──────────────────────────────────
+    Route::get('/permisos', [PermisoController::class, 'index'])->name('admin-permisos');
+    Route::get('/permisos/get-modulos', [PermisoController::class, 'getModulos']);
+    Route::get('/permisos/get-permisos', [PermisoController::class, 'getPermisos']);
+    Route::post('/permisos/save', [PermisoController::class, 'savePermiso']);
+    Route::get('/permisos/delete/{id}', [PermisoController::class, 'deletePermiso']);
+    Route::get('/permisos/get-roles', [PermisoController::class, 'getRoles']);
+    Route::get('/permisos/rol/get', [PermisoController::class, 'getPermisosRol']);
+    Route::post('/permisos/rol/save', [PermisoController::class, 'savePermisoRol']);
+    Route::get('/permisos/get-usuarios', [PermisoController::class, 'getUsuarios']);
+    Route::get('/permisos/usuario/get', [PermisoController::class, 'getPermisosUsuario']);
+    Route::post('/permisos/usuario/save', [PermisoController::class, 'savePermisoUsuario']);
+    Route::get('/permisos/get-acciones', [PermisoController::class, 'getAcciones']);
+    Route::post('/permisos/accion/save', [PermisoController::class, 'saveAccion']);
+    Route::get('/permisos/accion/delete/{id}', [PermisoController::class, 'deleteAccion']);
+
+    // ── RBAC: Módulos ───────────────────────────────────
+    Route::get('/modulos', [ModuloController::class, 'index'])->name('admin-modulos');
+    Route::get('/modulos/get', [ModuloController::class, 'getModulos']);
+    Route::get('/modulos/get-acciones', [ModuloController::class, 'getAcciones']);
+    Route::post('/modulos/save', [ModuloController::class, 'saveModulo']);
+    Route::get('/modulos/delete/{id}', [ModuloController::class, 'deleteModulo']);
+    Route::post('/modulos/save-view', [ModuloController::class, 'saveView']);
+    Route::get('/modulos/delete-view/{id}', [ModuloController::class, 'deleteView']);
+    Route::post('/modulos/save-accion', [ModuloController::class, 'saveAccion']);
+    Route::get('/modulos/delete-accion/{id}', [ModuloController::class, 'deleteAccion']);
+    Route::post('/modulos/toggle-accion/{id}', [ModuloController::class, 'toggleAccion']);
+
+    // ── SMTP Accounts ────────────────────────────────────
+    Route::get('/smtp-accounts', fn () => Inertia::render('Admin/SmtpAccounts/Index'))->name('admin.smtp-accounts');
+    Route::get('/smtp-accounts/lista', [SmtpAccountController::class, 'lista']);
+    Route::post('/smtp-accounts', [SmtpAccountController::class, 'store']);
+    Route::put('/smtp-accounts/{id}', [SmtpAccountController::class, 'update']);
+    Route::delete('/smtp-accounts/{id}', [SmtpAccountController::class, 'destroy']);
+    Route::post('/smtp-accounts/{id}/toggle', [SmtpAccountController::class, 'toggle']);
+    Route::post('/smtp-accounts/{id}/default', [SmtpAccountController::class, 'setDefault']);
+
+    // ── Settings ─────────────────────────────────────────
+    Route::get('/settings/preinscripcion-email', [SettingController::class, 'getPreinscripcionEmailVerification']);
+    Route::post('/settings/preinscripcion-email/toggle', [SettingController::class, 'togglePreinscripcionEmailVerification']);
+
+    // ── Admin Postulante Registration ────────────────────
+    Route::get('/registro-postulante', fn () => Inertia::render('Admin/RegistroPostulante/Index'))->name('admin.registro-postulante');
+
 });
 
 #Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
-
-Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
-
-    Route::get('/', fn () => Inertia::render('Revisor/revisor'))->name('revisor');
-
-    // Notificaciones del revisor
-    Route::get('/notificaciones', [RevisorNotificationController::class, 'index']);
-    Route::get('/notificaciones/no-leidas', [RevisorNotificationController::class, 'noLeidas']);
-    Route::post('/notificaciones/{id}/leer', [RevisorNotificationController::class, 'marcarLeida']);
-    Route::post('/notificaciones/leer-todas', [RevisorNotificationController::class, 'marcarTodasLeidas']);
-    Route::get('/solicitudes-revision', [RevisorNotificationController::class, 'solicitudesRevision'])->name('revisor.solicitudes-revision');
-
-    // Dashboard API
-    // Mi Actividad (dashboard personal)
-    Route::get('/mi-actividad', fn () => Inertia::render('Revisor/miActividad'))->name('revisor-mi-actividad');
-    Route::get('/mi-actividad/resumen', [RevisorPersonalController::class, 'resumen']);
-    Route::get('/mi-actividad/timeline', [RevisorPersonalController::class, 'timeline']);
-    Route::get('/mi-actividad/acciones-recientes', [RevisorPersonalController::class, 'accionesRecientes']);
-    Route::get('/mi-actividad/distribucion-actividad', [RevisorPersonalController::class, 'distribucionActividad']);
-    Route::get('/mi-actividad/ranking', [RevisorPersonalController::class, 'ranking']);
-    Route::get('/mi-actividad/pendientes', [RevisorPersonalController::class, 'pendientes']);
-
-    Route::get('/dashboard/resumen', [RevisorDashboardController::class, 'resumen']);
-    Route::get('/dashboard/biometrico-resumen', [RevisorDashboardController::class, 'biometricoResumen']);
-    Route::get('/dashboard/inscripciones-por-area', [RevisorDashboardController::class, 'inscripcionesPorArea']);
-    Route::get('/dashboard/genero-por-area', [RevisorDashboardController::class, 'generoPorArea']);
-    Route::get('/dashboard/inscritos-por-programa', [RevisorDashboardController::class, 'inscritosPorPrograma']);
-    Route::get('/dashboard/timeline-inscripciones', [RevisorDashboardController::class, 'timelineInscripciones']);
-    Route::get('/dashboard/modalidad-distribucion', [RevisorDashboardController::class, 'modalidadDistribucion']);
-    Route::get('/dashboard/verificaciones-pendientes', [RevisorDashboardController::class, 'verificacionesPendientes']);
-
-    Route::get('/validacion', fn () => Inertia::render('Revisor/validacion'))->name('revisor-validacion');
-    Route::get('/documentos', fn () => Inertia::render('Revisor/documentos'))->name('revisor-documentos');
-    Route::get('/imprimir', fn () => Inertia::render('Revisor/imprimir', [ 'id_proceso' => auth()->user()->id_proceso]))->name('revisor-imprimir');
-    Route::get('/postulantes', fn () => Inertia::render('Revisor/postulantes'))->name('revisor-postulantes');
-    Route::get('/postulante/{dni}', function ($dni) {
-        return Inertia::render('Revisor/postulantes', ['dni' => $dni, 'solicitudId' => request()->query('solicitud')]);
-    })->name('revisor.postulante-perfil');
-    Route::get('/comprobantes-xd', fn () => Inertia::render('Revisor/components/voucher'));
-
-    Route::post('/get-pagos-banco', [PagoBancoController::class, '  ']);
-
-
-    Route::post('/get-certificados-revision', [DocumentoController::class, 'getCertificadosRevision']);
-    Route::post('/cambiar-estado', [DocumentoController::class, 'cambiarEstado']);
-    Route::post('/cambiar-estado-documento', [RevisorDocumentoController::class, 'cambiarEstadoDocumento'])->name('revisor.cambiar-estado-documento');
-    Route::post('/observar-documento', [RevisorDocumentoController::class, 'observarDocumento'])->name('revisor.observar-documento');
-    Route::post('/revision-rapida/{dni}', [RevisorDocumentoController::class, 'revisionRapida'])->name('revisor.revision-rapida');
-    Route::post('/iniciar-revision/{dni}', [RevisorDocumentoController::class, 'iniciarRevision'])->name('revisor.iniciar-revision');
-    Route::post('/finalizar-revision/{dni}', [RevisorDocumentoController::class, 'finalizarRevision'])->name('revisor.finalizar-revision');
-    Route::post('/renotificar-postulante/{dni}', [RevisorDocumentoController::class, 'renotificarPostulante'])->name('revisor.renotificar-postulante');
-    Route::post('/marcar-apto/{dni}', [RevisorDocumentoController::class, 'marcarApto'])->name('revisor.marcar-apto');
-    Route::get('/citacion-sugerida/{dni}', [RevisorDocumentoController::class, 'citacionSugerida'])->name('revisor.citacion-sugerida');
-    Route::get('/documentos-requisitos/{dni}', [RevisorDocumentoController::class, 'documentosPorRequisitos'])->name('revisor.documentos-requisitos');
-    Route::post('/get-comprobantes', [SeleccionDataController::class, 'getComprobantesDNI']);
-    Route::post('/get-comprobantes-banco', [PagoBancoController::class, 'getComprobantesDNI']);
-    Route::post('/verificar-comprobante', [SeleccionDataController::class, 'verificarComprobante']);
-    Route::post('/verificar-comprobante-proceso', [PagoBancoController::class, 'verificarComprobanteProceso']);
-
-    Route::get('/get-requisitos', [SeleccionDataController::class, 'getRequisitos']);
-    Route::post('/save-requisito', [SeleccionDataController::class, 'saveReq']);
-
-    Route::post('/get-postulantes', [SeleccionDataController::class, 'getPostulantes']);
-    Route::post('/get-postulantes-biometrico', [PostulanteController::class, 'getPostulantesBiometrico']);
-
-    Route::post('/get-postulante-dni', [SeleccionDataController::class, '   ']);
-
-    Route::post('/get-postulante-requisitos', [SeleccionDataController::class, 'getPostulanteRequisitos']);
-    Route::post('/get-postulantes-requisitos', [SeleccionDataController::class, 'getRequisitoPostulantes']);
-
-    Route::get('/avance', [TestController::class, 'saveAvance']);
-
-    Route::get('/foto-inscripcion', fn () => Inertia::render('Foto/foto'))->name('foto-inscripcion');
-    Route::get('/foto-biometrico', fn () => Inertia::render('Foto/fotobiometrico'))->name('foto-biometrico');
-    Route::post('/guardar-foto-inscripcion', [FotoController::class, 'guardarFotoInscripcion']);
-    Route::post('/guardar-foto-biometrico', [FotoController::class, 'guardarFotoBiometrico']);
-
-    Route::post('/control-biometrico', [IngresoController::class, 'biometrico']);
-    Route::post('/crear_correo_institucional', [IngresoController::class, 'crearCorreo']);
-
-
-
-    Route::get('/impresion', fn () => Inertia::render('Revisor/impresion'))->name('revisor-impresion-inscripcion');
-    Route::get('/get-postulante-dni/{dni}', [InscripcionController::class, 'getPostulanteByDni']);
-    Route::get('/get-apoderados-postulante/{dni}', [InscripcionController::class, 'getApoderados']);
-    Route::get('/get-vouchers-postulante/{dni}', [InscripcionController::class, 'getVouchers']);
-    Route::get('/get-documentos-postulante/{dni}', [InscripcionController::class, 'getDocumentos']);
-    Route::get('/preview-documento-revisor/{id}', [PostulanteDocumentoController::class, 'previewDocumentoRevisor']);
-    Route::get('/descargar-documento-revisor/{id}', [PostulanteDocumentoController::class, 'descargarDocumentoRevisor']);
-    Route::get('/get-preinscripciones-postulante/{dni}', [InscripcionController::class, 'getPreinscipciones']);
-    Route::get('/get-inscripciones-postulante/{dni}', [InscripcionController::class, 'getInscripciones']);
-    Route::get('/pdf-inscripción/{dni}', [InscripcionController::class, 'pdfInscripcion']);
-    Route::post('/inscribir', [InscripcionController::class, 'Inscribir']);
-
-    Route::get('/seguimiento', fn () => Inertia::render('Revisor/seguimiento'))->name('revisor-seguimiento');
-
-    Route::post('/actualizar-postulante', [PostulanteController::class, 'actualizarDatos']);
-    Route::post('/actualizar-ingresante', [PostulanteController::class, 'actualizarDatosIngresante']);
-
-    Route::get('/get-ingresante/{dni}', [IngresoController::class, 'getDatosIngreso']);
-    Route::get('/get-ingresante-general/{dni}', [IngresoController::class, 'getDatosIngresoGeneral']);
-
-    Route::get('/get-codigo/{dni}', [IngresoController::class, 'getCodigo']);
-
-    Route::get('/get-codigos-postulante/{dni}', [DocumentoController::class, 'getCodigoDNI']);
-
-    Route::get('/nuevo-pdf-inscripcion/{dni}', [InscripcionController::class, 'pdfInscripcion']);
-    Route::post('/cambiar-codigo', [DocumentoController::class, 'cambiarCodigo']);
-
-    Route::get('/api-pagos/{parametro}', function ($parametro) {
-        try {
-            $response = Http::get('http://unap.scielodigital.net.pe/caja/pago_admision/server/CHECK_PAYMENT/?w=' . $parametro);
-            return response($response->body(), $response->status())->header('Content-Type', 'application/json');
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Error en la solicitud'], 500);
-        }
-    });
-
-    Route::get('/fotos-admision', fn () => Inertia::render('Revisor/fotos'))->name('revisor-fotos-admision');
-
-    Route::get('/get-codigo-conexion', [FotoController::class, 'getCodigoConexion']);
-    Route::post('/cambiar_proceso', [ProcesoController::class, 'cambiarProceso']);
-    Route::post('/guardar-huella', [HuellaController::class, 'guardar']);
-    Route::post('/verificar-huella-1-1', [HuellaController::class, 'verificar1a1']);
-    Route::post('/verificar-huella-1-n', [HuellaController::class, 'verificar1aN']);
-
-});
-
-Route::get('/pdf-datos-biometrico/{dni}', [IngresoController::class, 'pdfbiometrico2'])->middleware('auth','revisor');
+require __DIR__.'/revisor.php';
 
 Route::get('/examen-vocacional2', fn () => Inertia::render('Publico/exvocacional2'))->name('ex-vocacional2');
 Route::post('/get-avance-postulante', [TestController::class, 'getAvancePostulante']);
@@ -724,6 +645,8 @@ Route::post('/save-respuesta', [DetalleExamenVocacionalController::class, 'saveR
 Route::post('save-pasos-preinscripcion', [PreinscripcionController::class, 'savePasos']);
 Route::post('/get-postulante-datos-personales', [PostulanteController::class, 'getPostulanteXDni']);
 Route::post('/get-postulante-datos-personales2', [PostulanteController::class, 'getPostulanteXDni2']);
+Route::post('/enviar-codigo-verificacion-datos', [PostulanteController::class, 'enviarCodigoVerificacionDatos']);
+Route::post('/verificar-codigo-datos', [PostulanteController::class, 'verificarCodigoDatos']);
 Route::post('/save-postulante-dni', [PostulanteController::class, 'saveDniPostulante']);
 Route::post('/save-postulante', [PostulanteController::class, 'savePostulante']);
 Route::post('/save-postulante-segundas', [PostulanteController::class, 'savePostulanteSegundas']);

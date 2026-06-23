@@ -8,6 +8,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ResCepreController;
 use App\Http\Controllers\SancionadoController;
 use App\Http\Controllers\CepreController;
+use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\PagoBancoController;
 use App\Http\Controllers\ProcesoController;
@@ -19,6 +20,9 @@ use App\Http\Controllers\ReniecController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\App\AuthController;
 use App\Http\Controllers\App\RegistroController;
+
+// Health Check (sin auth)
+Route::get('/health', HealthCheckController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
