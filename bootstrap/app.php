@@ -52,4 +52,15 @@ $app->singleton(
 |
 */
 
+/*
+|--------------------------------------------------------------------------
+| Force .env override (Laragon env var conflict fix)
+|--------------------------------------------------------------------------
+| Laragon sets DB_DATABASE at process level from a previous .env value.
+| Dotenv createImmutable() won't override existing process env vars,
+| so we load .env as mutable first to force the current values.
+*/
+$dotenv = Dotenv\Dotenv::createMutable(base_path());
+$dotenv->load();
+
 return $app;
