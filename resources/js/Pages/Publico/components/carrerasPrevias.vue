@@ -1,6 +1,6 @@
 <template>
 <div class="flex justify-center">
-    <div style="width: 100%; background: #cdcdcdc; max-width: 1000px; margin-top:20px;">    
+    <div style="width: 100%; background: #cdcdcd; max-width: 1000px; margin-top:20px;">    
         <a-row style="display:flex; justify-content:center;" class="pb-0">
             <a-col :span="24">
                 <a-row :gutter="16" style="display:fleX; justify-content:center;">

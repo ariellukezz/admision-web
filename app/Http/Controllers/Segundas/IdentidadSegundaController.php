@@ -78,7 +78,7 @@ class IdentidadSegundaController extends Controller
         $data['tipo_discapacidad'] = (int)$postulante->tipo_discapacidad;
 
         if ($response->successful()) {
-            $identidadData = $response->json();
+            $identidadData = $response->json() ?? [];
             return response()->json(array_merge($identidadData, $data));
         }
 
