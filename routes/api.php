@@ -11,6 +11,7 @@ use App\Http\Controllers\CepreController;
 use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\PagoBancoController;
 use App\Http\Controllers\ProcesoController;
+use App\Http\Controllers\RequisitoDocumentoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
@@ -140,8 +141,8 @@ Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevia
 Route::post('/actualizar-lista-reniec', [ReniecController::class, 'consultarLista']);
 
 
-Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('api.google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('api.google.callback');
 
 Route::post('/registro', [UserController::class, 'registro']);
 Route::post('/login-app', [UserController::class, 'loginApp']);
@@ -161,6 +162,7 @@ Route::prefix('app')->group(function () {
         // Auth
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+
 
         // PASO 1: Datos personales
         Route::get('/validar-dni/{dni}', [RegistroController::class, 'validarDni']);
@@ -186,5 +188,8 @@ Route::prefix('app')->group(function () {
 
         // CONSULTAR DATOS REGISTRADOS
         Route::get('/consultar-datos/{dni}', [RegistroController::class, 'consultarDatos']);
+
+        Route::get('/requisitos/get-by-modalidad/{id_modalidad}', [RequisitoDocumentoController::class, 'getByModalidad']);
+
     });
 });

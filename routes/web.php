@@ -3,12 +3,15 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PostulanteRegistroController;
+use App\Http\Controllers\PostulanteResultadoController;
 use App\Http\Controllers\SimulacroController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\VacantesController;
+use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\InscripcionController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\FilialController;
@@ -27,6 +30,8 @@ use App\Http\Controllers\DocumentoController;
 use App\Http\Controllers\DetalleExamenVocacionalController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\IngresoController;
+use App\Http\Controllers\PostulanteDocumentoController;
+use App\Http\Controllers\FirebaseConfigController;
 use App\Http\Controllers\FotoController;
 use App\Http\Controllers\PagoSimulacroController;
 use App\Http\Controllers\DocenteController;
@@ -37,6 +42,7 @@ use App\Http\Controllers\PruebasController;
 use App\Http\Controllers\ResultadosController;
 use App\Http\Controllers\CarpetaController;
 use App\Http\Controllers\CertificadoFirmaController;
+use App\Http\Controllers\AuditTrailController;
 use App\Http\Controllers\PonderacionController;
 use App\Http\Controllers\ProgramaProcesoController;
 use App\Http\Controllers\SancionadoController;
@@ -48,6 +54,7 @@ use App\Http\Controllers\CertificadoController;
 use App\Http\Controllers\DocumentosResultadoController;
 use App\Http\Controllers\PuntajeController;
 use App\Http\Controllers\ControlBiometricoController;
+use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\DniController;
 use App\Http\Controllers\DocumentoSegundaController;
@@ -55,6 +62,16 @@ use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ReglamentoController;
 use App\Http\Controllers\RatioController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\RequisitoDocumentoController;
+use App\Http\Controllers\TipoDocumentoController;
+use App\Http\Controllers\RevisorDashboardController;
+use App\Http\Controllers\RevisorPersonalController;
+use App\Http\Controllers\RevisorNotificationController;
+use App\Http\Controllers\PostulanteNotificationController;
+use App\Http\Controllers\RevisorDocumentoController;
+use App\Http\Controllers\ConfiguracionCitacionController;
+use App\Http\Controllers\AdminDocumentoController;
 use App\Http\Controllers\CarrerasPreviasController;
 use App\Http\Controllers\ResumenBiometricoController;
 use App\Http\Controllers\ResumenInscripcionesController;
@@ -72,10 +89,14 @@ Route::middleware('auth')->get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route('admin-dashboard');
 })->middleware(['auth', 'verified','revisor','admin'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::post('/fcm-token', [PostulanteDocumentoController::class, 'registrarFcmToken'])->name('fcm-token');
+    Route::delete('/fcm-token', [PostulanteDocumentoController::class, 'eliminarFcmToken'])->name('fcm-token.delete');
+    Route::get('/firebase-config', [FirebaseConfigController::class, 'config'])->name('firebase-config');
+    Route::get('/firebase-messaging-sw.js', [FirebaseConfigController::class, 'serviceWorker'])->name('firebase-sw');
     Route::get('/perfil', fn () => Inertia::render('Perfil/perfil'))->name('admin-perfil');
     Route::get('/get-datos-perfil', [ProfileController::class, 'getDatosUsuario']);
     Route::post('/actualizar-datos-perfil', [ProfileController::class, 'actualizarDatosUsuario']);
@@ -106,6 +127,16 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('get-inscritos', [DashboardController::class, 'inscritos']);
     Route::get('get-mejores-inscriptores', [DashboardController::class, 'mInscriptores']);
     Route::post('get-mejores-inscriptores-dia', [DashboardController::class, 'mInscriptoresDia']);
+
+    // Dashboard nuevos endpoints
+    Route::get('dashboard/resumen-general', [DashboardController::class, 'resumenGeneral']);
+    Route::get('dashboard/postulantes-por-area', [DashboardController::class, 'postulantesPorArea']);
+    Route::get('dashboard/genero-por-area', [DashboardController::class, 'generoPorArea']);
+    Route::get('dashboard/inscritos-por-programa', [DashboardController::class, 'inscritosPorPrograma']);
+    Route::get('dashboard/timeline-inscripciones', [DashboardController::class, 'timelineInscripciones']);
+    Route::get('dashboard/biometrico-resumen', [DashboardController::class, 'biometricoResumen']);
+    Route::get('dashboard/modalidad-distribucion', [DashboardController::class, 'modalidadDistribucion']);
+    Route::get('dashboard/tipo-colegio-distribucion', [DashboardController::class, 'tipoColegioDistribucion']);
 
     Route::resource('roles',RolController::class);
     Route::get('roles', fn () => Inertia::render('Roles/index'))->name('roles-index');
@@ -151,6 +182,25 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/get-select-procesos', [ProcesoController::class, 'getSelectProceso']);
     Route::post('/cambiar_proceso', [ProcesoController::class, 'cambiarProceso']);
 
+    // REQUISITOS
+    Route::get('/requisitos', [RequisitoDocumentoController::class, 'index'])->name('requisitos-index');
+    Route::post('/requisitos/get-all', [RequisitoDocumentoController::class, 'getAll']);
+    Route::post('/requisitos/save', [RequisitoDocumentoController::class, 'save']);
+    Route::post('/requisitos/save-tipos-documento', [RequisitoDocumentoController::class, 'saveTiposDocumento']);
+    Route::post('/requisitos/importar', [RequisitoDocumentoController::class, 'importarRequisitos']);
+    Route::get('/requisitos/delete/{id}', [RequisitoDocumentoController::class, 'delete']);
+    Route::post('/requisitos/get-by-proceso', [RequisitoDocumentoController::class, 'getByProceso']);
+    Route::post('/requisitos/save-proceso-requisitos', [RequisitoDocumentoController::class, 'saveProcesoRequisitos']);
+    Route::post('/requisitos/get-modalidades', [RequisitoDocumentoController::class, 'getModalidades']);
+    Route::post('/requisitos/get-programas', [RequisitoDocumentoController::class, 'getProgramas']);
+    Route::get('/requisitos/get-by-modalidad/{id_modalidad}', [RequisitoDocumentoController::class, 'getByModalidad']);
+    Route::get('/requisitos/get-tipos-documento', [RequisitoDocumentoController::class, 'getTiposDocumento']);
+
+    // TIPOS DE DOCUMENTO
+    Route::get('/tipos-documento', [TipoDocumentoController::class, 'index'])->name('tipos-documento-index');
+    Route::post('/tipos-documento/get-tipos-documento', [TipoDocumentoController::class, 'getTiposDocumento']);
+    Route::post('/tipos-documento/save', [TipoDocumentoController::class, 'save']);
+    Route::get('/tipos-documento/delete/{id}', [TipoDocumentoController::class, 'delete']);
 
     //PREINSCRIPCION
     Route::post('/get-postulante-datos-personales', [PostulanteController::class, 'getPostulanteXDni']);
@@ -185,6 +235,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/modalidad', [ModalidadController::class, 'index'])->name('modalidad-index');
     Route::post('/save-modalidad', [ModalidadController::class, 'saveModalidad']);
     Route::post('/modalidad/get-modalidades', [ModalidadController::class, 'getModalidades']);
+    Route::post('/cambiar-estado-modalidad/{id}', [ModalidadController::class, 'cambiarEstado']);
     Route::get('/eliminar-modalidad/{id}', [ModalidadController::class, 'deleteModalidad']);
     Route::get('/get-modalidades-activas', [ModalidadController::class, 'getModalidadesActivas']);
 
@@ -227,11 +278,17 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/get-colegios-admin', [ColegioController::class, 'getColegiosAdmin']);
     Route::post('/get-documentos-admin', [DocumentoController::class, 'getDocumentosAdmin']);
     Route::post('/save-documento', [DocumentoController::class, 'saveDocumentoAdmin']);
+    Route::get('/documento/download/{id}', [DocumentoController::class, 'downloadDocumento']);
+    Route::post('/documento/verify/{id}', [DocumentoController::class, 'verifyDocumento']);
+    Route::post('/documento/update/{id}', [DocumentoController::class, 'updateDocumento']);
+    Route::delete('/documento/delete/{id}', [DocumentoController::class, 'deleteDocumento']);
 
     Route::post('/get-postulantes-admin', [PostulanteController::class, 'getPostulantesAdmin']);
   #  Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
 
     Route::post('/save-postulante-admin', [PostulanteController::class, 'savePostulanteAdmin']);
+    Route::post('/vincular-postulante-usuario', [PostulanteController::class, 'vincularUsuario']);
+    Route::post('/buscar-usuario-dni', [PostulanteController::class, 'buscarUsuarioPorDni']);
     // Route::post('/modalidad/get-modalidades', [ModalidadController::class, 'getModalidades']);
     // Route::get('/eliminar-modalidad/{id}', [ModalidadController::class, 'deleteModalidad']);
 
@@ -300,6 +357,13 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/save-numero-vacantes', [VacantesController::class, 'saveNumeroVacantes']);
     Route::post('/delete-vacante', [VacantesController::class, 'eliminar']);
 
+    //TARIFAS
+    Route::get('/tarifas', fn () => Inertia::render('Tarifas/index'))->name('tarifa-index');
+    Route::post('/tarifas/get-tarifas', [TarifaController::class, 'getTarifas']);
+    Route::post('/save-tarifa', [TarifaController::class, 'saveTarifa']);
+    Route::post('/cambiar-estado-tarifa/{id}', [TarifaController::class, 'cambiarEstado']);
+    Route::get('/eliminar-tarifa/{id}', [TarifaController::class, 'deleteTarifa']);
+
     //RENIEC
     Route::get('/consulta-reniec', fn () => Inertia::render('Admin/Reniec/index'))->name('admin-consulta-reniec');
     Route::get('/get-datos-reniec/{dni}', [ReniecController::class, 'consultarReniecPorDni']);
@@ -366,6 +430,34 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/pdf-biometrio-manual/{dni}', [IngresoController::class, 'pdfbiometricoManual']);
 
 
+    // BACKUP BD
+    Route::get('/backup', [BackupController::class, 'index']);
+    Route::post('/backup/crear', [BackupController::class, 'crear']);
+    Route::get('/backup/descargar/{filename}', [BackupController::class, 'descargar']);
+    Route::post('/backup/restaurar', [BackupController::class, 'restaurar']);
+    Route::post('/backup/eliminar', [BackupController::class, 'eliminar']);
+    Route::get('/respaldo-bd', fn () => Inertia::render('Admin/Backup/index'))->name('admin-respaldo-bd');
+
+    // Trazabilidad / Auditoría
+    Route::get('/trazabilidad', fn () => Inertia::render('Admin/Trazabilidad/index'))->name('admin-trazabilidad');
+    Route::get('/trazabilidad/data', [AuditTrailController::class, 'getAuditTrail']);
+    Route::get('/trazabilidad/resumen', [AuditTrailController::class, 'getResumenAcciones']);
+
+    // Configuración de Citación
+    Route::get('/configuracion-citacion', fn () => Inertia::render('Admin/ConfiguracionCitacion/Index'))->name('admin.configuracion-citacion');
+    Route::get('/configuracion-citacion/lista', [ConfiguracionCitacionController::class, 'index']);
+    Route::post('/configuracion-citacion', [ConfiguracionCitacionController::class, 'store']);
+    Route::put('/configuracion-citacion/{id}', [ConfiguracionCitacionController::class, 'update']);
+    Route::delete('/configuracion-citacion/{id}', [ConfiguracionCitacionController::class, 'destroy']);
+    Route::get('/configuracion-citacion/procesos', [ConfiguracionCitacionController::class, 'getProcesos']);
+    Route::get('/configuracion-citacion/modalidades', [ConfiguracionCitacionController::class, 'getModalidades']);
+    Route::get('/configuracion-citacion/programas', [ConfiguracionCitacionController::class, 'getProgramas']);
+
+    // Validación masiva de documentos
+    Route::get('/validacion-masiva', fn () => Inertia::render('Admin/ValidacionMasiva'))->name('admin-validacion-masiva');
+    Route::get('/api/solicitudes-pendientes', [AdminDocumentoController::class, 'listarSolicitudesPendientes']);
+    Route::post('/api/validacion-masiva', [AdminDocumentoController::class, 'validacionMasiva']);
+
 });
 
 #Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
@@ -373,10 +465,40 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
 
     Route::get('/', fn () => Inertia::render('Revisor/revisor'))->name('revisor');
+
+    // Notificaciones del revisor
+    Route::get('/notificaciones', [RevisorNotificationController::class, 'index']);
+    Route::get('/notificaciones/no-leidas', [RevisorNotificationController::class, 'noLeidas']);
+    Route::post('/notificaciones/{id}/leer', [RevisorNotificationController::class, 'marcarLeida']);
+    Route::post('/notificaciones/leer-todas', [RevisorNotificationController::class, 'marcarTodasLeidas']);
+    Route::get('/solicitudes-revision', [RevisorNotificationController::class, 'solicitudesRevision'])->name('revisor.solicitudes-revision');
+
+    // Dashboard API
+    // Mi Actividad (dashboard personal)
+    Route::get('/mi-actividad', fn () => Inertia::render('Revisor/miActividad'))->name('revisor-mi-actividad');
+    Route::get('/mi-actividad/resumen', [RevisorPersonalController::class, 'resumen']);
+    Route::get('/mi-actividad/timeline', [RevisorPersonalController::class, 'timeline']);
+    Route::get('/mi-actividad/acciones-recientes', [RevisorPersonalController::class, 'accionesRecientes']);
+    Route::get('/mi-actividad/distribucion-actividad', [RevisorPersonalController::class, 'distribucionActividad']);
+    Route::get('/mi-actividad/ranking', [RevisorPersonalController::class, 'ranking']);
+    Route::get('/mi-actividad/pendientes', [RevisorPersonalController::class, 'pendientes']);
+
+    Route::get('/dashboard/resumen', [RevisorDashboardController::class, 'resumen']);
+    Route::get('/dashboard/biometrico-resumen', [RevisorDashboardController::class, 'biometricoResumen']);
+    Route::get('/dashboard/inscripciones-por-area', [RevisorDashboardController::class, 'inscripcionesPorArea']);
+    Route::get('/dashboard/genero-por-area', [RevisorDashboardController::class, 'generoPorArea']);
+    Route::get('/dashboard/inscritos-por-programa', [RevisorDashboardController::class, 'inscritosPorPrograma']);
+    Route::get('/dashboard/timeline-inscripciones', [RevisorDashboardController::class, 'timelineInscripciones']);
+    Route::get('/dashboard/modalidad-distribucion', [RevisorDashboardController::class, 'modalidadDistribucion']);
+    Route::get('/dashboard/verificaciones-pendientes', [RevisorDashboardController::class, 'verificacionesPendientes']);
+
     Route::get('/validacion', fn () => Inertia::render('Revisor/validacion'))->name('revisor-validacion');
     Route::get('/documentos', fn () => Inertia::render('Revisor/documentos'))->name('revisor-documentos');
     Route::get('/imprimir', fn () => Inertia::render('Revisor/imprimir', [ 'id_proceso' => auth()->user()->id_proceso]))->name('revisor-imprimir');
     Route::get('/postulantes', fn () => Inertia::render('Revisor/postulantes'))->name('revisor-postulantes');
+    Route::get('/postulante/{dni}', function ($dni) {
+        return Inertia::render('Revisor/postulantes', ['dni' => $dni, 'solicitudId' => request()->query('solicitud')]);
+    })->name('revisor.postulante-perfil');
     Route::get('/comprobantes-xd', fn () => Inertia::render('Revisor/components/voucher'));
 
     Route::post('/get-pagos-banco', [PagoBancoController::class, '  ']);
@@ -384,6 +506,15 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
 
     Route::post('/get-certificados-revision', [DocumentoController::class, 'getCertificadosRevision']);
     Route::post('/cambiar-estado', [DocumentoController::class, 'cambiarEstado']);
+    Route::post('/cambiar-estado-documento', [RevisorDocumentoController::class, 'cambiarEstadoDocumento'])->name('revisor.cambiar-estado-documento');
+    Route::post('/observar-documento', [RevisorDocumentoController::class, 'observarDocumento'])->name('revisor.observar-documento');
+    Route::post('/revision-rapida/{dni}', [RevisorDocumentoController::class, 'revisionRapida'])->name('revisor.revision-rapida');
+    Route::post('/iniciar-revision/{dni}', [RevisorDocumentoController::class, 'iniciarRevision'])->name('revisor.iniciar-revision');
+    Route::post('/finalizar-revision/{dni}', [RevisorDocumentoController::class, 'finalizarRevision'])->name('revisor.finalizar-revision');
+    Route::post('/renotificar-postulante/{dni}', [RevisorDocumentoController::class, 'renotificarPostulante'])->name('revisor.renotificar-postulante');
+    Route::post('/marcar-apto/{dni}', [RevisorDocumentoController::class, 'marcarApto'])->name('revisor.marcar-apto');
+    Route::get('/citacion-sugerida/{dni}', [RevisorDocumentoController::class, 'citacionSugerida'])->name('revisor.citacion-sugerida');
+    Route::get('/documentos-requisitos/{dni}', [RevisorDocumentoController::class, 'documentosPorRequisitos'])->name('revisor.documentos-requisitos');
     Route::post('/get-comprobantes', [SeleccionDataController::class, 'getComprobantesDNI']);
     Route::post('/get-comprobantes-banco', [PagoBancoController::class, 'getComprobantesDNI']);
     Route::post('/verificar-comprobante', [SeleccionDataController::class, 'verificarComprobante']);
@@ -417,6 +548,8 @@ Route::prefix('revisor')->middleware('auth','revisor')->group(function () {
     Route::get('/get-apoderados-postulante/{dni}', [InscripcionController::class, 'getApoderados']);
     Route::get('/get-vouchers-postulante/{dni}', [InscripcionController::class, 'getVouchers']);
     Route::get('/get-documentos-postulante/{dni}', [InscripcionController::class, 'getDocumentos']);
+    Route::get('/preview-documento-revisor/{id}', [PostulanteDocumentoController::class, 'previewDocumentoRevisor']);
+    Route::get('/descargar-documento-revisor/{id}', [PostulanteDocumentoController::class, 'descargarDocumentoRevisor']);
     Route::get('/get-preinscripciones-postulante/{dni}', [InscripcionController::class, 'getPreinscipciones']);
     Route::get('/get-inscripciones-postulante/{dni}', [InscripcionController::class, 'getInscripciones']);
     Route::get('/pdf-inscripción/{dni}', [InscripcionController::class, 'pdfInscripcion']);
@@ -580,9 +713,10 @@ Route::get('/descargar-biomedicas', [ResultadosController::class, 'getExamenBio'
 Route::get('/descargar-sociales', [ResultadosController::class, 'getExamenSoc']);
 
 //PREINSCRIPCION
-Route::get('/preinscripcion-adicional', fn () => Inertia::render('Publico/preinscripcion'))->name('preinscripcion');
+Route::get('/preinscripcion-adicional', fn () => Inertia::render('Publico/preinscripcion-pregrado'))->name('preinscripcion');
 //Route::get('/preinscripcion', fn () => Inertia::render('Publico/preinscripcion'))->name('preinscripcion');
 Route::get('/preinscripcion-general', fn () => Inertia::render('Publico/preinscripciongeneral'))->name('preinscripcion-general');
+Route::get('/preinscripcion-pregrado', fn () => Inertia::render('Publico/preinscripcion-pregrado'))->name('preinscripcion-pregrado');
 Route::get('/examen-vocacional', fn () => Inertia::render('Publico/exvocacional'))->name('ex-vocacional');
 
 Route::post('/save-respuesta', [DetalleExamenVocacionalController::class, 'saveRespuesta']);
@@ -852,6 +986,71 @@ Route::get( '/control-biometrico/{codigo}/pdf', [FirmaController::class, 'verPdf
 
 Route::get('/verificacion/{codigo}', fn ($codigo) => Inertia::render('Publico/Firma/verificar', ['codigo' => $codigo]));
 
+
+// Google Login Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+});
+
+// Postulante Routes
+Route::prefix('postulante')->name('postulante.')->middleware('auth')->group(function () {
+    // Páginas
+    Route::get('/dashboard', [PostulanteRegistroController::class, 'dashboard'])->name('dashboard');
+    Route::get('/documentos', fn () => Inertia::render('Postulante/Documentos'))->name('documentos');
+    Route::get('/mis-requisitos', [PostulanteDocumentoController::class, 'getRequisitos']);
+    Route::get('/mis-documentos', [PostulanteDocumentoController::class, 'misDocumentos']);
+    Route::post('/subir-documento', [PostulanteDocumentoController::class, 'subirDocumento']);
+    Route::get('/descargar-documento/{id}', [PostulanteDocumentoController::class, 'descargarDocumento']);
+    Route::get('/preview-documento/{id}', [PostulanteDocumentoController::class, 'previewDocumento']);
+    Route::post('/actualizar-documento/{id}', [PostulanteDocumentoController::class, 'actualizarDocumento']);
+    Route::delete('/eliminar-documento/{id}', [PostulanteDocumentoController::class, 'eliminarDocumento']);
+    Route::delete('/eliminar-documento-tipo/{idTipoDocumento}', [PostulanteDocumentoController::class, 'eliminarDocumentoPorTipo']);
+    Route::post('/solicitar-revision', [PostulanteDocumentoController::class, 'solicitarRevision'])->name('solicitar-revision');
+    Route::get('/estado-revision', [PostulanteDocumentoController::class, 'estadoRevision'])->name('estado-revision');
+    Route::get('/seguimiento-data', [PostulanteDocumentoController::class, 'seguimientoData'])->name('seguimiento-data');
+    Route::post('/fcm-token', [PostulanteDocumentoController::class, 'registrarFcmToken'])->name('fcm-token');
+
+    // Notificaciones del postulante
+    Route::get('/notificaciones', [PostulanteNotificationController::class, 'index'])->name('notificaciones');
+    Route::get('/notificaciones/no-leidas', [PostulanteNotificationController::class, 'noLeidas'])->name('notificaciones.no-leidas');
+    Route::post('/notificaciones/{id}/leer', [PostulanteNotificationController::class, 'marcarLeida'])->name('notificaciones.leer');
+    Route::post('/notificaciones/leer-todas', [PostulanteNotificationController::class, 'marcarTodasLeidas'])->name('notificaciones.leer-todas');
+
+    Route::get('/seguimiento', fn () => Inertia::render('Postulante/Seguimiento'))->name('seguimiento');
+    Route::get('/mis-resultados', [PostulanteResultadoController::class, 'index'])->name('mis-resultados');
+    Route::get('/mis-resultados/mi-rendimiento', [PostulanteResultadoController::class, 'getMiRendimiento']);
+    Route::get('/mis-resultados/proceso', [PostulanteResultadoController::class, 'getResultadosProceso']);
+    Route::get('/mis-acciones', fn () => Inertia::render('Postulante/MisAcciones'))->name('mis-acciones');
+    Route::get('/mis-acciones/data', [AuditTrailController::class, 'getMisAcciones']);
+    Route::get('/mis-acciones/documentos', [AuditTrailController::class, 'getAccionesMisDocumentos']);
+    Route::get('/mis-acciones/historial', [AuditTrailController::class, 'getHistorialPreinscripciones']);
+
+    // Registro paso a paso (GET con datos existentes, POST guarda)
+    Route::get('/mis-datos', [PostulanteRegistroController::class, 'misDatos'])->name('mis-datos');
+    Route::get('/paso-1', [PostulanteRegistroController::class, 'paso1'])->name('paso1');
+    Route::post('/paso-1', [PostulanteRegistroController::class, 'guardarPaso1']);
+    Route::get('/paso-2', [PostulanteRegistroController::class, 'paso2'])->name('paso2');
+    Route::post('/paso-2', [PostulanteRegistroController::class, 'guardarPaso2']);
+    Route::get('/paso-3', [PostulanteRegistroController::class, 'paso3'])->name('paso3');
+    Route::post('/paso-3', [PostulanteRegistroController::class, 'guardarPaso3']);
+    Route::get('/paso-4', [PostulanteRegistroController::class, 'paso4'])->name('paso4');
+    Route::post('/paso-4', [PostulanteRegistroController::class, 'guardarPaso4']);
+    Route::get('/paso-5', [PostulanteRegistroController::class, 'paso5'])->name('paso5');
+    Route::post('/paso-5', [PostulanteRegistroController::class, 'confirmarDatos']);
+    Route::get('/confirmacion/{dni}', [PostulanteRegistroController::class, 'confirmacion'])->name('confirmacion');
+
+    // APIs internas (para axios desde Vue)
+    Route::post('/api/buscar-ubigeo', [PostulanteRegistroController::class, 'buscarUbigeo'])->name('api.buscar-ubigeo');
+    Route::get('/api/reniec/{dni}', [PostulanteRegistroController::class, 'consultarReniec'])->name('api.reniec');
+    Route::get('/api/colegios/{ubigeo}', [PostulanteRegistroController::class, 'getColegios'])->name('api.colegios');
+    Route::post('/api/validar-correo', [PostulanteRegistroController::class, 'validarCorreo'])->name('api.validar-correo');
+    Route::post('/api/validar-celular', [PostulanteRegistroController::class, 'validarCelular'])->name('api.validar-celular');
+
+    // Selección de proceso
+    Route::get('/mis-procesos', [PostulanteRegistroController::class, 'getMisProcesos'])->name('mis-procesos');
+    Route::post('/seleccionar-proceso', [PostulanteRegistroController::class, 'seleccionarProceso'])->name('seleccionar-proceso');
+});
 
 require __DIR__.'/auth.php';
 require __DIR__.'/segundas.php';
