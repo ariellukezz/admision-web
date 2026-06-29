@@ -19,6 +19,9 @@ class ProcesoController extends Controller
   public function getProcesos(Request $request)
   {
     $query_where = [];
+    if ($request->filled('nivel')) {
+      $query_where[] = ['procesos.nivel', '=', $request->nivel];
+    }
     $res = Proceso::select(
       'procesos.id', 'procesos.nombre','procesos.estado','procesos.anio',
       'procesos.url', 'procesos.fecha_examen', 'procesos.ciclo', 'procesos.slug',
@@ -153,7 +156,7 @@ class ProcesoController extends Controller
     $proceso = Proceso::where('slug', $nombreProceso)->where('estado',1)->first();
     if($proceso){
       if( $proceso->nivel == 1 ){
-        return Inertia::render('Publico/preinscripcioncepre', ['procceso_seleccionado' => $proceso]);
+        return Inertia::render('Publico/preinscripcion-pregrado', ['procceso_seleccionado' => $proceso]);
       }else{
         if( $proceso->nivel == 2 ){
           return Inertia::render('Segundas/Publico/preinscripcion', ['procceso_seleccionado' => $proceso]);
@@ -208,17 +211,9 @@ class ProcesoController extends Controller
   public function getProcesoResultados(Request $request) {
 
       $res = Proceso::select(
-      "procesos.id",
-      "procesos.nombre",
-      "procesos.slug",
-      "procesos.anio",
-      "procesos.estado",
-      "procesos.fec_fin",
-      "procesos.id_sede_filial",
-      "procesos.fecha_examen",
-      "reglamento.url",
-      "procesos.fec_1",
-      "procesos.fec_2"
+        "procesos.id", "procesos.nombre", "procesos.slug", "procesos.anio", "procesos.estado", 
+        "procesos.fec_fin", "procesos.id_sede_filial", "procesos.fecha_examen", "reglamento.url", 
+        "procesos.fec_1", "procesos.fec_2"
       )->orderby('procesos.id','desc')
       ->leftjoin('reglamento','reglamento.id', 'procesos.id_reglamento')
       ->where('nivel',1)->get();

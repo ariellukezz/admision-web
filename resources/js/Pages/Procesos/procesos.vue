@@ -7,7 +7,7 @@
     <div>
       <a-button
         type="primary"
-        style="background: #476175; border: none; border-radius: 5px;"
+        style="background: #2563eb; border: none; border-radius: 6px;"
         @click="showModalProceso"
         class="w-full lg:w-auto"
       >
@@ -17,11 +17,11 @@
 
     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
       <a-select
-        ref="Nivel"
         :options="niveles"
         v-model:value="nivel"
-        placeholder="Nivel"
-        class="min-w-[140px]"
+        placeholder="Todos los niveles"
+        allow-clear
+        class="min-w-[160px]"
       />
 
       <a-input-search
@@ -120,267 +120,383 @@
   :style="{ maxWidth: '900px' }"
   :footer="null"
 >
-  <a-form
-    ref="formProceso"
-    name="proceso"
-    :model="proceso"
-    :rules="formRules"
-    layout="vertical"
-    @finish="guardar"
-  >
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <a-form-item
-        label="Estado"
-        name="estado"
-        class="mb-0"
+  <a-tabs v-model:activeKey="activeTab">
+    <a-tab-pane key="datos" tab="Datos del Proceso">
+      <a-form
+        ref="formProceso"
+        name="proceso"
+        :model="proceso"
+        :rules="formRules"
+        layout="vertical"
+        @finish="guardar"
       >
-        <a-switch
-          v-model:checked="proceso.estado"
-          checked-children="Activo"
-          un-checked-children="Inactivo"
-        />
-      </a-form-item>
-
-      <a-form-item
-        label="Ciclo"
-        name="ciclo"
-        :rules="[{ required: true, message: 'Seleccione el ciclo' }]"
-        class="mb-0"
-      >
-        <a-select
-          v-model:value="proceso.ciclo"
-          :options="ciclos"
-          placeholder="Seleccionar ciclo"
-          allow-clear
-        />
-      </a-form-item>
-
-      <a-form-item
-        label="Nivel"
-        name="nivel"
-        :rules="[{ required: true, message: 'Seleccione el nivel' }]"
-        class="mb-0"
-      >
-        <a-select
-          v-model:value="proceso.nivel"
-          :options="niveles"
-          placeholder="Seleccionar nivel"
-          allow-clear
-        />
-      </a-form-item>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div class="space-y-4">
-        <a-form-item
-          label="Nombre"
-          name="nombre"
-          :rules="[{ required: true, message: 'Ingrese el nombre del proceso' }]"
-        >
-          <a-input
-            v-model:value="proceso.nombre"
-            placeholder="Nombre del proceso"
-            allow-clear
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <a-form-item
+            label="Estado"
+            name="estado"
+            class="mb-0"
           >
-            <template #prefix>
-              <sin-icono/>
+            <a-switch
+              v-model:checked="proceso.estado"
+              checked-children="Activo"
+              un-checked-children="Inactivo"
+            />
+          </a-form-item>
+
+          <a-form-item
+            label="Ciclo"
+            name="ciclo"
+            :rules="[{ required: true, message: 'Seleccione el ciclo' }]"
+            class="mb-0"
+          >
+            <a-select
+              v-model:value="proceso.ciclo"
+              :options="ciclos"
+              placeholder="Seleccionar ciclo"
+              allow-clear
+            />
+          </a-form-item>
+
+          <a-form-item
+            label="Nivel"
+            name="nivel"
+            :rules="[{ required: true, message: 'Seleccione el nivel' }]"
+            class="mb-0"
+          >
+            <a-select
+              v-model:value="proceso.nivel"
+              :options="niveles"
+              placeholder="Seleccionar nivel"
+              allow-clear
+            />
+          </a-form-item>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="space-y-4">
+            <a-form-item
+              label="Nombre"
+              name="nombre"
+              :rules="[{ required: true, message: 'Ingrese el nombre del proceso' }]"
+            >
+              <a-input
+                v-model:value="proceso.nombre"
+                placeholder="Nombre del proceso"
+                allow-clear
+              >
+                <template #prefix>
+                  <sin-icono/>
+                </template>
+              </a-input>
+            </a-form-item>
+
+            <a-form-item label="N° Convocatoria" name="convocatoria">
+              <a-input
+                v-model:value="proceso.convocatoria"
+                placeholder="Número de convocatoria"
+                allow-clear
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Año"
+              name="anio"
+              :rules="[{ required: true, message: 'Ingrese el año' }]"
+            >
+              <a-input-number
+                v-model:value="proceso.anio"
+                :min="2000"
+                :max="2100"
+                class="w-full"
+                placeholder="Año"
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Slug"
+              name="slug"
+              :rules="[{ required: true, message: 'Ingrese el slug' }]"
+            >
+              <a-input
+                v-model:value="proceso.slug"
+                placeholder="slug-proceso"
+                allow-clear
+              />
+            </a-form-item>
+          </div>
+
+          <div class="space-y-4">
+            <a-form-item
+              label="Sede"
+              name="sede"
+              :rules="[{ required: true, message: 'Seleccione la sede' }]"
+            >
+              <a-select
+                v-model:value="proceso.sede"
+                :options="sedes"
+                value="value"
+                label="label"
+                placeholder="Seleccionar sede"
+                allow-clear
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Tipo de estudio"
+              name="tipo"
+              :rules="[{ required: true, message: 'Seleccione el tipo de estudio' }]"
+            >
+              <a-select
+                v-model:value="proceso.tipo"
+                :options="tipoProcesos"
+                placeholder="Seleccionar tipo"
+                allow-clear
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Modalidad de examen"
+              name="modalidad"
+              :rules="[{ required: true, message: 'Seleccione la modalidad' }]"
+            >
+              <a-select
+                v-model:value="proceso.modalidad"
+                :options="modalidades"
+                placeholder="Seleccionar modalidad"
+                allow-clear
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Fecha de examen"
+              name="fec_examen"
+              :rules="[{ required: true, message: 'Ingrese la fecha de examen' }]"
+            >
+              <a-input
+                v-model:value="proceso.fec_examen"
+                placeholder="Fecha de examen"
+                allow-clear
+              />
+            </a-form-item>
+          </div>
+
+          <div class="space-y-4">
+            <a-form-item label="URL de preinscripción">
+              <a-input
+                :value="baseUrl + '/' + (proceso.slug || 'slug') + '/preinscripcion'"
+                disabled
+                class="bg-gray-50"
+              />
+            </a-form-item>
+
+            <a-form-item
+              label="Código de proceso"
+              name="cod_proceso"
+              :rules="[{ required: true, message: 'Ingrese el código del proceso' }]"
+            >
+              <a-input
+                v-model:value="proceso.cod_proceso"
+                placeholder="Código del proceso"
+                allow-clear
+              />
+            </a-form-item>
+
+            <a-form-item label="Reglamento" name="id_reglamento">
+              <a-select
+                v-model:value="proceso.id_reglamento"
+                :options="reglamentos"
+                placeholder="Seleccionar reglamento"
+                allow-clear
+                show-search
+                :filter-option="filterOption"
+              />
+            </a-form-item>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+          <a-form-item label="Fecha de inicio" name="f_inicio">
+            <a-date-picker
+              v-model:value="proceso.f_inicio"
+              format="DD/MM/YYYY"
+              placeholder="Fecha inicio"
+              class="w-full"
+            />
+          </a-form-item>
+
+          <a-form-item label="Fecha de fin" name="f_fin">
+            <a-date-picker
+              v-model:value="proceso.f_fin"
+              format="DD/MM/YYYY"
+              placeholder="Fecha fin"
+              class="w-full"
+            />
+          </a-form-item>
+
+          <a-form-item
+            label="Día 1"
+            name="dia_1"
+            :rules="[{ required: true, message: 'Seleccione el día 1' }]"
+          >
+            <a-date-picker
+              v-model:value="proceso.dia_1"
+              format="DD/MM/YYYY"
+              placeholder="Día 1"
+              class="w-full"
+            />
+          </a-form-item>
+
+          <a-form-item label="Día 2" name="dia_2">
+            <a-date-picker
+              v-model:value="proceso.dia_2"
+              format="DD/MM/YYYY"
+              placeholder="Día 2"
+              class="w-full"
+            />
+          </a-form-item>
+        </div>
+
+        <div class="mt-6">
+          <a-form-item label="Observaciones" name="observacion">
+            <a-textarea
+              v-model:value="proceso.observacion"
+              placeholder="Ingrese observaciones adicionales..."
+              :rows="3"
+              show-count
+              :maxlength="500"
+            />
+          </a-form-item>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t">
+          <a-button @click="cancelar">
+            Cancelar
+          </a-button>
+          <a-button
+            type="primary"
+            html-type="submit"
+            style="background: #2563eb; border: none; border-radius: 6px;"
+            :loading="guardando"
+          >
+            {{ proceso.id ? 'Actualizar' : 'Guardar' }}
+          </a-button>
+        </div>
+      </a-form>
+    </a-tab-pane>
+
+    <a-tab-pane key="requisitos" tab="Requisitos" :disabled="!proceso.id">
+      <div v-if="!proceso.id" class="text-center text-gray-400 py-8">
+        Guarde el proceso primero para configurar sus requisitos.
+      </div>
+
+      <div v-else>
+        <div class="flex justify-end mb-3">
+          <a-button
+            type="primary"
+            size="small"
+            style="background: #2563eb; border: none; border-radius: 6px;"
+            @click="abrirImportarRequisitos"
+          >
+            Importar Requisitos
+          </a-button>
+        </div>
+
+        <a-spin :spinning="cargandoRequisitos">
+          <a-table
+            :columns="columnsRequisitos"
+            :data-source="requisitosProceso"
+            :pagination="false"
+            size="small"
+            :scroll="{ y: 'calc(100vh - 400px)' }"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'tipos_documento'">
+                <a-tag v-for="td in record.tipos_documento" :key="td.id" color="blue" class="mb-1">
+                  {{ td.nombre }}
+                </a-tag>
+                <span v-if="!record.tipos_documento?.length" class="text-gray-400">Sin documentos</span>
+              </template>
+
+              <template v-if="column.dataIndex === 'obligatorio'">
+                <a-tag :color="record.obligatorio ? 'red' : 'blue'">
+                  {{ record.obligatorio ? 'Obligatorio' : 'Opcional' }}
+                </a-tag>
+              </template>
+
+              <template v-if="column.dataIndex === 'activo'">
+                <a-switch
+                  v-model:checked="record.activo"
+                  checked-children="Sí"
+                  un-checked-children="No"
+                  size="small"
+                />
+              </template>
             </template>
-          </a-input>
-        </a-form-item>
+          </a-table>
+        </a-spin>
 
-        <a-form-item label="N° Convocatoria" name="convocatoria">
-          <a-input
-            v-model:value="proceso.convocatoria"
-            placeholder="Número de convocatoria"
-            allow-clear
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Año"
-          name="anio"
-          :rules="[{ required: true, message: 'Ingrese el año' }]"
-        >
-          <a-input-number
-            v-model:value="proceso.anio"
-            :min="2000"
-            :max="2100"
-            class="w-full"
-            placeholder="Año"
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Slug"
-          name="slug"
-          :rules="[{ required: true, message: 'Ingrese el slug' }]"
-        >
-          <a-input
-            v-model:value="proceso.slug"
-            placeholder="slug-proceso"
-            allow-clear
-          />
-        </a-form-item>
+        <div class="flex justify-end gap-3 pt-4 border-t mt-4">
+          <a-button @click="cancelar">
+            Cancelar
+          </a-button>
+          <a-button
+            type="primary"
+            style="background: #2563eb; border: none; border-radius: 6px;"
+            :loading="guardandoRequisitos"
+            @click="guardarRequisitosProceso"
+          >
+            Guardar Requisitos
+          </a-button>
+        </div>
       </div>
-
-      <div class="space-y-4">
-        <a-form-item
-          label="Sede"
-          name="sede"
-          :rules="[{ required: true, message: 'Seleccione la sede' }]"
-        >
-          <a-select
-            v-model:value="proceso.sede"
-            :options="sedes"
-            value="value"
-            label="label"
-            placeholder="Seleccionar sede"
-            allow-clear
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Tipo de estudio"
-          name="tipo"
-          :rules="[{ required: true, message: 'Seleccione el tipo de estudio' }]"
-        >
-          <a-select
-            v-model:value="proceso.tipo"
-            :options="tipoProcesos"
-            placeholder="Seleccionar tipo"
-            allow-clear
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Modalidad de examen"
-          name="modalidad"
-          :rules="[{ required: true, message: 'Seleccione la modalidad' }]"
-        >
-          <a-select
-            v-model:value="proceso.modalidad"
-            :options="modalidades"
-            placeholder="Seleccionar modalidad"
-            allow-clear
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Fecha de examen"
-          name="fec_examen"
-          :rules="[{ required: true, message: 'Ingrese la fecha de examen' }]"
-        >
-          <a-input
-            v-model:value="proceso.fec_examen"
-            placeholder="Fecha de examen"
-            allow-clear
-          />
-        </a-form-item>
-      </div>
-
-      <div class="space-y-4">
-        <a-form-item label="URL de preinscripción">
-          <a-input
-            :value="baseUrl + '/' + (proceso.slug || 'slug') + '/preinscripcion'"
-            disabled
-            class="bg-gray-50"
-          />
-        </a-form-item>
-
-        <a-form-item
-          label="Código de proceso"
-          name="cod_proceso"
-          :rules="[{ required: true, message: 'Ingrese el código del proceso' }]"
-        >
-          <a-input
-            v-model:value="proceso.cod_proceso"
-            placeholder="Código del proceso"
-            allow-clear
-          />
-        </a-form-item>
-
-        <a-form-item label="Reglamento" name="id_reglamento">
-          <a-select
-            v-model:value="proceso.id_reglamento"
-            :options="reglamentos"
-            placeholder="Seleccionar reglamento"
-            allow-clear
-            show-search
-            :filter-option="filterOption"
-          />
-        </a-form-item>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-      <a-form-item label="Fecha de inicio" name="f_inicio">
-        <a-date-picker
-          v-model:value="proceso.f_inicio"
-          format="DD/MM/YYYY"
-          placeholder="Fecha inicio"
-          class="w-full"
-        />
-      </a-form-item>
-
-      <a-form-item label="Fecha de fin" name="f_fin">
-        <a-date-picker
-          v-model:value="proceso.f_fin"
-          format="DD/MM/YYYY"
-          placeholder="Fecha fin"
-          class="w-full"
-        />
-      </a-form-item>
-
-      <a-form-item
-        label="Día 1"
-        name="dia_1"
-        :rules="[{ required: true, message: 'Seleccione el día 1' }]"
-      >
-        <a-date-picker
-          v-model:value="proceso.dia_1"
-          format="DD/MM/YYYY"
-          placeholder="Día 1"
-          class="w-full"
-        />
-      </a-form-item>
-
-      <a-form-item label="Día 2" name="dia_2">
-        <a-date-picker
-          v-model:value="proceso.dia_2"
-          format="DD/MM/YYYY"
-          placeholder="Día 2"
-          class="w-full"
-        />
-      </a-form-item>
-    </div>
-
-    <div class="mt-6">
-      <a-form-item label="Observaciones" name="observacion">
-        <a-textarea
-          v-model:value="proceso.observacion"
-          placeholder="Ingrese observaciones adicionales..."
-          :rows="3"
-          show-count
-          :maxlength="500"
-        />
-      </a-form-item>
-    </div>
-
-    <div class="flex justify-end gap-3 pt-4 border-t">
-      <a-button @click="cancelar">
-        Cancelar
-      </a-button>
-      <a-button
-        type="primary"
-        html-type="submit"
-        style="background: #476175; border: none;"
-        :loading="guardando"
-      >
-        {{ proceso.id ? 'Actualizar' : 'Guardar' }}
-      </a-button>
-    </div>
-  </a-form>
+    </a-tab-pane>
+  </a-tabs>
 </a-modal>
+
+    <!-- Modal Importar Requisitos -->
+    <a-modal
+      v-model:open="visibleImportar"
+      title="Importar Requisitos"
+      width="600px"
+      :footer="null"
+      centered
+    >
+      <a-spin :spinning="cargandoImportar">
+        <div v-if="requisitosDisponibles.length">
+          <a-checkbox-group v-model:value="requisitosSeleccionados" class="w-full">
+            <div v-for="r in requisitosDisponibles" :key="r.id" class="flex items-center gap-3 py-2 border-b last:border-b-0">
+              <a-checkbox :value="r.id" />
+              <div class="flex-1">
+                <span class="font-medium">{{ r.nombre }}</span>
+                <div class="mt-1">
+                  <a-tag v-for="td in r.tipos_documento" :key="td.id" color="blue" class="text-xs">
+                    {{ td.nombre }}
+                  </a-tag>
+                </div>
+              </div>
+              <div>
+                <a-tag v-for="m in r.modalidades" :key="m.id" color="cyan" class="text-xs">
+                  {{ m.nombre }}
+                </a-tag>
+              </div>
+            </div>
+          </a-checkbox-group>
+
+          <div class="flex justify-end gap-3 pt-4 border-t mt-4">
+            <a-button @click="visibleImportar = false">Cancelar</a-button>
+            <a-button
+              type="primary"
+              style="background: #2563eb; border: none; border-radius: 6px;"
+              :disabled="!requisitosSeleccionados.length"
+              @click="importarRequisitos"
+            >
+              Importar ({{ requisitosSeleccionados.length }})
+            </a-button>
+          </div>
+        </div>
+        <a-empty v-else description="No hay requisitos disponibles para importar" />
+      </a-spin>
+    </a-modal>
 
 </AuthenticatedLayout>
 </template>
@@ -410,6 +526,14 @@ const modalidades = ref([]);
 const formProceso = ref(null);
 const reglamentos = ref([]);
 const guardando = ref(false);
+const activeTab = ref('datos');
+const requisitosProceso = ref([]);
+const cargandoRequisitos = ref(false);
+const guardandoRequisitos = ref(false);
+const visibleImportar = ref(false);
+const cargandoImportar = ref(false);
+const requisitosDisponibles = ref([]);
+const requisitosSeleccionados = ref([]);
 
 const proceso = reactive({
   id: null,
@@ -443,6 +567,14 @@ const columnsProcesos = [
   { title: 'Acciones', dataIndex: 'acciones', key: 'acciones', align: 'center', width: '120px', fixed: 'right'},
 ];
 
+const columnsRequisitos = [
+  { title: 'Orden', dataIndex: 'orden', key: 'orden', width: '70px', align: 'center' },
+  { title: 'Requisito', dataIndex: 'nombre', key: 'nombre', ellipsis: true },
+  { title: 'Docs. aceptados', dataIndex: 'tipos_documento', key: 'tipos_documento', ellipsis: true },
+  { title: 'Obligatorio', dataIndex: 'obligatorio', key: 'obligatorio', width: '120px', align: 'center' },
+  { title: 'Aplica', dataIndex: 'activo', key: 'activo', width: '100px', align: 'center' },
+];
+
 const niveles = ref([
   { value: 1, label: "Pre grado" },
   { value: 2, label: "Segunda especialidad" },
@@ -455,6 +587,7 @@ const ciclos = ref([
 
 const showModalProceso = () => {
   resetProceso();
+  activeTab.value = 'datos';
   visible.value = true;
 };
 
@@ -480,12 +613,92 @@ const abrirEditar = (item) => {
     anio: item.anio,
     estado: item.estado == 1
   });
+  activeTab.value = 'datos';
+  requisitosProceso.value = [];
   visible.value = true;
 };
 
+const getRequisitosProceso = async () => {
+  if (!proceso.id) return;
+  cargandoRequisitos.value = true;
+  try {
+    const res = await axios.post('requisitos/get-by-proceso', {
+      id_proceso: proceso.id
+    });
+    requisitosProceso.value = res.data.datos;
+  } catch (error) {
+    console.error('Error al obtener requisitos del proceso:', error);
+  } finally {
+    cargandoRequisitos.value = false;
+  }
+};
+
+const guardarRequisitosProceso = async () => {
+  guardandoRequisitos.value = true;
+  try {
+    const payload = {
+      id_proceso: proceso.id,
+      requisitos: requisitosProceso.value.map(r => ({
+        id_requisito_documento: r.id,
+        activo: r.activo,
+      })),
+    };
+    const response = await axios.post('requisitos/save-proceso-requisitos', payload);
+    notificacion('success', response.data.titulo, response.data.mensaje);
+  } catch (error) {
+    console.error('Error al guardar requisitos:', error);
+    notificacion('error', 'Error', 'No se pudieron guardar los requisitos');
+  } finally {
+    guardandoRequisitos.value = false;
+  }
+};
+
+const abrirImportarRequisitos = async () => {
+  visibleImportar.value = true;
+  cargandoImportar.value = true;
+  requisitosSeleccionados.value = [];
+  try {
+    const res = await axios.post('requisitos/get-all', { id_proceso: proceso.id });
+    const existentes = new Set(requisitosProceso.value.map(r => r.id));
+    requisitosDisponibles.value = res.data.datos.filter(r => !existentes.has(r.id));
+  } catch (error) {
+    console.error('Error al obtener requisitos disponibles:', error);
+  } finally {
+    cargandoImportar.value = false;
+  }
+};
+
+const importarRequisitos = async () => {
+  cargandoImportar.value = true;
+  try {
+    const payload = {
+      id_proceso: proceso.id,
+      requisitos: requisitosSeleccionados.value.map(id => ({
+        id_requisito_documento: id,
+        activo: true,
+      })),
+    };
+    const response = await axios.post('requisitos/importar', payload);
+    notificacion('success', response.data.titulo, response.data.mensaje);
+    visibleImportar.value = false;
+    getRequisitosProceso();
+  } catch (error) {
+    console.error('Error al importar requisitos:', error);
+    notificacion('error', 'Error', 'No se pudieron importar los requisitos');
+  } finally {
+    cargandoImportar.value = false;
+  }
+};
+
+watch(activeTab, (val) => {
+  if (val === 'requisitos' && proceso.id) {
+    getRequisitosProceso();
+  }
+});
+
 const getProcesos = async () => {
   try {
-    const res = await axios.post("/admin/procesos/get-procesos", {
+    const res = await axios.post("procesos/get-procesos", {
       term: buscar.value,
       nivel: nivel.value
     });
@@ -592,6 +805,7 @@ const resetProceso = () => {
   proceso.fec_examen = "";
   proceso.cod_proceso = "";
   proceso.observacion = "";
+  requisitosProceso.value = [];
 };
 
 const filterOption = (input, option) => {
@@ -616,3 +830,33 @@ getTipos();
 getModalidades();
 getReglamentos();
 </script>
+
+<style scoped>
+:deep(.ant-btn-primary) {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+:deep(.ant-btn-primary:hover) {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+:deep(.ant-input:focus),
+:deep(.ant-input-focused),
+:deep(.ant-input-affix-wrapper:focus),
+:deep(.ant-input-affix-wrapper-focused) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+:deep(.ant-pagination .ant-pagination-item-active) {
+  border-color: #2563eb !important;
+}
+:deep(.ant-pagination .ant-pagination-item-active a) {
+  color: #2563eb !important;
+}
+:deep(.ant-tabs .ant-tabs-ink-bar) {
+  background: #2563eb !important;
+}
+:deep(.ant-tabs .ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #2563eb !important;
+}
+</style>
