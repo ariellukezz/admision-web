@@ -92,6 +92,20 @@ class ModalidadController extends Controller
     }
 
 
+  public function cambiarEstado(Request $request, $id)
+  {
+    $modalidad = Modalidad::findOrFail($id);
+    $modalidad->estado = $request->estado ? 1 : 0;
+    $modalidad->save();
+
+    $this->response['estado'] = true;
+    $this->response['titulo'] = 'ESTADO ACTUALIZADO';
+    $this->response['mensaje'] = 'Modalidad ' . $modalidad->nombre . ' ' . ($modalidad->estado ? 'activada' : 'desactivada');
+    $this->response['datos'] = $modalidad;
+    return response()->json($this->response, 200);
+  }
+
+
   public function deleteModalidad($id){
     $modalidad = Modalidad::find($id);
     $p = $modalidad;
