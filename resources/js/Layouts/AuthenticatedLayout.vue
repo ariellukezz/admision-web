@@ -155,13 +155,25 @@ const menuItems = [
         key: 'tarifas',
         icon: SettingFilled,
         label: 'Tarifas',
-        route: 'programa-index'
+        route: 'tarifa-index'
       },
       {
         key: 'observados',
         icon: SettingFilled,
         label: 'Observados',
         route: 'programa-index'
+      },
+      {
+        key: 'requisitos',
+        icon: SettingFilled,
+        label: 'Requisitos',
+        route: 'requisitos-index'
+      },
+      {
+        key: 'tipos-documento',
+        icon: SettingFilled,
+        label: 'Tipos de Documento',
+        route: 'tipos-documento-index'
       },
       // {
       //   key: 'vacantes',
@@ -399,6 +411,24 @@ const menuItems = [
         icon: SettingFilled,
         label: 'Certificados Firma',
         route: 'admin-certificados-firma'
+      },
+      {
+        key: 'respaldobd',
+        icon: SettingFilled,
+        label: 'Respaldo BD',
+        route: 'admin-respaldo-bd'
+      },
+      {
+        key: 'trazabilidad',
+        icon: SettingFilled,
+        label: 'Trazabilidad',
+        route: 'admin-trazabilidad'
+      },
+      {
+        key: 'configuracion-citacion',
+        icon: SettingFilled,
+        label: 'Configuración de Citación',
+        route: 'admin.configuracion-citacion'
       },
     ]
   },
