@@ -60,6 +60,8 @@ class ProgramaController extends Controller
             $programa = Programa::create([
                 'nombre' => $request->nombre,
                 'codigo' => $request->codigo,
+                'nivel_academico' => $request->nivel_academico,
+                'tipo_autorizacion' => $request->tipo_autorizacion,
                 'estado' => $request->estado,
                 'id_facultad' => $request->id_facultad,
                 'area' => $request->area,
@@ -75,10 +77,11 @@ class ProgramaController extends Controller
             Dataversion::create([ 'registro_id' => $programa->id, 'tabla' => $programa->getTable(),  'usuario_id' => auth()->id(), 'fecha' => now(), 'datos' => $programa->toJson() ]);
             $programa->nombre = $request->nombre;
             $programa->codigo = $request->codigo;
+            $programa->nivel_academico = $request->nivel_academico;
+            $programa->tipo_autorizacion = $request->tipo_autorizacion;
             $programa->estado = $request->estado;
             $programa->id_facultad = $request->id_facultad;
             $programa->area = $request->area;
-            $programa->estado = $request->estado;
             $programa->id_usuario = auth()->id();
             $programa->save();
 

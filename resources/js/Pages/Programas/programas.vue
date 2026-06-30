@@ -1,343 +1,380 @@
 <template>
-<Head title="Procesos"/>
+<Head title="Programas"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px);">
-    <!-- {{ buscar }} -->
-    <row class="flex justify-between mb-4" >
-        <div class="mr-3">
-            <a-button type="primary" style="border-radius: 5px; background: #476175" @click="showModalPrograma">Agregar</a-button>
-        </div>
-        <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 30px;"/>
-        <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
-        </div>
-    </row>
+<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 md:p-6" style="height: calc(100vh - 100px);">
 
-    <div style="">
-        <a-table
-            :columns="columnsProgramas"
-            :data-source="programas"
-            :pagination="false"
-            size="small"
-            :scroll="{ x: 380, y: 'calc(100vh - 240px)' }"
-            >
-            <template #bodyCell="{ column, index, record }">
-                <template v-if="column.dataIndex === 'codigo'">
-                    <div><span style="font-size: .9rem">{{ record.codigo }}</span></div>
-                </template>
+  <div class="flex flex-col sm:flex-row justify-between mb-6 gap-4">
+    <a-button
+      type="primary"
+      style="background: #2563eb; border: none; border-radius: 6px;"
+      @click="showModalPrograma"
+    >
+      <template #icon><PlusOutlined /></template>
+      Nuevo Programa
+    </a-button>
 
-                <template v-if="column.dataIndex === 'nombre'">
-                    <div><span style="font-size: .9rem;">{{ record.nombre }}</span></div>
-                </template>
-                <template v-if="column.dataIndex === 'facultad'">
-                    <div><span style="font-size: .9rem;">{{ record.facultad }}</span></div>
-                </template>
-                <template v-if="column.dataIndex === 'area'">
-                    <div class="flex" style="justify-content: center;">
-                        <a-tag style="font-size: .8rem;" color="cyan" v-if=" programas[index].area == 'BIOMÉDICAS'">{{ programas[index].area }}</a-tag>
-                        <a-tag style="font-size: .8rem;" color="purple" v-if=" programas[index].area == 'SOCIALES'">{{ programas[index].area }}</a-tag>
-                        <a-tag style="font-size: .8rem;" color="blue" v-if=" programas[index].area == 'INGENIERÍAS'">{{ programas[index].area }}</a-tag>
-                    </div>
-                </template>
+    <a-input-search
+      v-model:value="buscar"
+      placeholder="Buscar programas..."
+      class="max-w-full sm:max-w-xs"
+      @search="getProgramas"
+    >
+      <template #prefix>
+        <SearchOutlined />
+      </template>
+    </a-input-search>
+  </div>
 
-                <template v-if="column.dataIndex === 'estado'">
-                    <div class="flex" style="justify-content: center;">
-                        <div v-if="1 == programas[index].estado">
-                            <a-tag color="green">Si</a-tag>
-                        </div>
-                        <div v-if="programas[index].estado == 0">
-                            <a-tag color="red">No</a-tag>
-                        </div>
-                    </div>
-                </template>
-
-                <template v-if="column.dataIndex === 'acciones'">
-                    <a-button type="" @click="verDetalle(record)" style="border-radius:4px; background: none; color: green" size="small">
-                        <template #icon><eye-outlined/></template>
-                    </a-button>
-                    <a-button type="" @click="abrirEditar(record)" style="border-radius:4px; background: none; color: gray" size="small">
-                        <template #icon><form-outlined/></template>
-                    </a-button>
-                    <a-button class="" @click="eliminar(record)" style="border-radius:4px; background: none; color: red;" shape="" size="small">
-                    <template #icon><delete-outlined/></template>
-                    </a-button>
-                </template>
-            </template>
-        </a-table>
-    </div>
-    <div class="flex" style="justify-content: flex-end;">
-        <a-pagination v-model:current="pagina" simple page-size="50" :total="totalpaginas" />
-    </div>
-
-    </div>
-
-    </AuthenticatedLayout>
-
-    <div>
-        <a-modal v-model:visible="visible" :title="programa.id == null?'Nuevo Programa':'Editar Programa'" style="margin-top: -40px;">
-
-            <a-form
-                ref="formRef"
-                name="custom-validation"
-                :model="formState"
-                :rules="rules"
-                v-bind="layout"
-                @finish="handleFinish"
-                @validate="handleValidate"
-                @finishFailed="handleFinishFailed"
-            >
-            <a-form-item has-feedback label="Codigo" name="codigo">
-                <a-input type="text" v-model:value="programa.codigo" autocomplete="off" />
-            </a-form-item>
-            <a-form-item has-feedback label="Nombre" name="nombre">
-                <a-input type="text" v-model:value="programa.nombre" autocomplete="off" />
-            </a-form-item>
-
-            <a-form-item has-feedback label="Facultad" name="facultad">
-                <a-select
-                    :options="facultades"
-                    ref="Tipo"
-                    style="width: 100%"
-                    @focus="focus"
-                    @change="handleChange"
-                    v-model:value="programa.id_facultad"
-                    >
-                </a-select>
-            </a-form-item>
-
-            <a-form-item has-feedback label="Area" name="area">
-                <a-select
-                    style="width: 100%"
-                    @focus="focus"
-                    @change="handleChange"
-                    v-model:value="programa.area"
-                    >
-                    <a-select-option value="BIOMÉDICAS">
-                        BIOMEDICAS
-                    </a-select-option>
-                    <a-select-option value="INGENIERÍAS">
-                        INGENIERÍAS
-                    </a-select-option>
-                    <a-select-option value="SOCIALES">
-                        SOCIALES
-                    </a-select-option>
-                </a-select>
-            </a-form-item>
-
-            <a-form-item has-feedback label="Vigente" name="estado">
-                <a-switch v-model:checked="programa.estado"/>
-            </a-form-item>
-
-            </a-form>
-
-        <template #footer>
-            <a-button style="margin-left: 10px;" @click="resetForm">Cancelar</a-button>
-            <a-button type="primary" @click="guardar()">Guardar</a-button>
+  <div class="overflow-x-auto">
+    <a-table
+      :columns="columnsProgramas"
+      :data-source="programas"
+      :pagination="{ pageSize: 50 }"
+      size="small"
+      :scroll="{ x: 'max-content', y: 'calc(100vh - 280px)' }"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'area'">
+          <a-tag
+            :color="areaColors[record.area] || 'default'"
+            class="text-xs"
+          >
+            {{ record.area }}
+          </a-tag>
         </template>
-        </a-modal>
+
+        <template v-if="column.dataIndex === 'estado'">
+          <a-tag :color="record.estado == 1 ? 'green' : 'red'">
+            {{ record.estado == 1 ? 'VIGENTE' : 'NO VIGENTE' }}
+          </a-tag>
+        </template>
+
+        <template v-if="column.dataIndex === 'acciones'">
+          <a-space size="small">
+            <a-tooltip title="Editar">
+              <a-button
+                size="small"
+                type="text"
+                class="text-blue-600 hover:text-blue-800"
+                @click="abrirEditar(record)"
+              >
+                <template #icon><FormOutlined /></template>
+              </a-button>
+            </a-tooltip>
+
+            <a-popconfirm
+              title="¿Está seguro de eliminar?"
+              @confirm="eliminar(record)"
+            >
+              <a-tooltip title="Eliminar">
+                <a-button
+                  size="small"
+                  type="text"
+                  danger
+                >
+                  <template #icon><DeleteOutlined /></template>
+                </a-button>
+              </a-tooltip>
+            </a-popconfirm>
+          </a-space>
+        </template>
+      </template>
+    </a-table>
+  </div>
+
+</div>
+
+<a-modal
+  v-model:open="visible"
+  centered
+  :title="programa.id ? 'Editar Programa' : 'Nuevo Programa'"
+  width="90%"
+  :style="{ maxWidth: '600px' }"
+  :footer="null"
+>
+  <a-form
+    ref="formRef"
+    name="programa"
+    :model="programa"
+    :rules="rules"
+    layout="vertical"
+  >
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <a-form-item has-feedback label="Código" name="codigo">
+        <a-input
+          v-model:value="programa.codigo"
+          placeholder="Código del programa"
+          allow-clear
+        />
+      </a-form-item>
+
+      <a-form-item has-feedback label="Nombre" name="nombre">
+        <a-input
+          v-model:value="programa.nombre"
+          placeholder="Nombre del programa"
+          allow-clear
+        />
+      </a-form-item>
     </div>
 
-    </template>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <a-form-item label="Facultad" name="id_facultad">
+        <a-select
+          v-model:value="programa.id_facultad"
+          :options="facultades"
+          placeholder="Seleccionar facultad"
+          allow-clear
+          show-search
+          :filter-option="filterOption"
+        />
+      </a-form-item>
+
+      <a-form-item label="Área" name="area">
+        <a-select
+          v-model:value="programa.area"
+          placeholder="Seleccionar área"
+          allow-clear
+        >
+          <a-select-option value="BIOMÉDICAS">BIOMÉDICAS</a-select-option>
+          <a-select-option value="INGENIERÍAS">INGENIERÍAS</a-select-option>
+          <a-select-option value="SOCIALES">SOCIALES</a-select-option>
+        </a-select>
+      </a-form-item>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <a-form-item label="Nivel académico" name="nivel_academico">
+        <a-input
+          v-model:value="programa.nivel_academico"
+          placeholder="Nivel académico"
+          allow-clear
+        />
+      </a-form-item>
+
+      <a-form-item label="Tipo de autorización" name="tipo_autorizacion">
+        <a-input
+          v-model:value="programa.tipo_autorizacion"
+          placeholder="Tipo de autorización"
+          allow-clear
+        />
+      </a-form-item>
+    </div>
+
+    <a-form-item label="Vigente" name="estado">
+      <a-switch
+        v-model:checked="programa.estado"
+        checked-children="Activo"
+        un-checked-children="Inactivo"
+      />
+    </a-form-item>
+
+    <div class="flex justify-end gap-3 pt-4 border-t">
+      <a-button @click="cancelar">Cancelar</a-button>
+      <a-button
+        type="primary"
+        style="background: #2563eb; border: none; border-radius: 6px;"
+        :loading="guardando"
+        @click="guardar"
+      >
+        {{ programa.id ? 'Actualizar' : 'Guardar' }}
+      </a-button>
+    </div>
+  </a-form>
+</a-modal>
+
+</AuthenticatedLayout>
+</template>
 
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { watch, computed, ref, unref } from 'vue';
-import { EyeOutlined, FormOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { watch, ref, reactive } from 'vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
-    const buscar = ref("");
-    const pagina = ref(1)
-    const totalpaginas = ref(null)
-    const dep = ref("PUNO")
-    const facultades = ref([])
+const buscar = ref('');
+const facultades = ref([]);
+const programas = ref([]);
+const visible = ref(false);
+const guardando = ref(false);
+const formRef = ref(null);
 
-    const visible = ref(false);
-    const buscarDep = ref("")
-    const programas = ref([])
-    const programa = ref({
-        id:null,
-        codigo:"",
-        nombre:"",
-        nivel_academico:"CARRERA PROFESIONAL",
-        tipo_autorizacion:"RECONOCIDO POR LIC.",
-        id_facultad:1,
-        estado:true,
-        area:"BIOMEDICAS"
-    })
+const programa = reactive({
+  id: null,
+  codigo: '',
+  nombre: '',
+  nivel_academico: 'CARRERA PROFESIONAL',
+  tipo_autorizacion: 'RECONOCIDO POR LIC.',
+  id_facultad: null,
+  estado: true,
+  area: 'BIOMÉDICAS'
+});
 
-    const showModalPrograma = () => {
-        visible.value = true;
-    };
+const areaColors = {
+  'BIOMÉDICAS': 'cyan',
+  'SOCIALES': 'purple',
+  'INGENIERÍAS': 'blue'
+};
 
-    watch(buscar, ( newValue, oldValue ) => {
-        getProgramas()
-    })
+const rules = {
+  codigo: [{ required: true, message: 'Ingrese el código' }],
+  nombre: [{ required: true, message: 'Ingrese el nombre' }],
+  id_facultad: [{ required: true, message: 'Seleccione la facultad' }],
+  area: [{ required: true, message: 'Seleccione el área' }],
+};
 
+const columnsProgramas = [
+  { title: 'Código', dataIndex: 'codigo', key: 'codigo', width: 80, align: 'center' },
+  { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', ellipsis: true },
+  { title: 'Facultad', dataIndex: 'facultad', key: 'facultad', ellipsis: true, responsive: ['md'] },
+  { title: 'Área', dataIndex: 'area', key: 'area', align: 'center', width: 120, responsive: ['md'] },
+  { title: 'Estado', dataIndex: 'estado', key: 'estado', align: 'center', width: 110 },
+  { title: 'Acciones', dataIndex: 'acciones', key: 'acciones', align: 'center', width: 100, fixed: 'right' },
+];
 
-    watch(buscarDep, ( newValue, oldValue ) => {
-        getDepartamentos()
-    })
+const showModalPrograma = () => {
+  resetPrograma();
+  visible.value = true;
+};
 
-    watch(visible, ( newValue, oldValue ) => {
-    if(visible.value == false && programa.value.id != null ){
-        programa.value.id = null;
-        programa.value.codigo = null;
-        programa.value.nombre = null;
-        programa.value.estado = true;
-    }
-    })
+const abrirEditar = (item) => {
+  Object.assign(programa, {
+    id: item.id,
+    codigo: item.codigo,
+    nombre: item.nombre,
+    nivel_academico: item.nivel_academico || 'CARRERA PROFESIONAL',
+    tipo_autorizacion: item.tipo_autorizacion || 'RECONOCIDO POR LIC.',
+    id_facultad: item.id_fac,
+    estado: item.estado == 1,
+    area: item.area
+  });
+  visible.value = true;
+};
 
-    watch(pagina, ( newValue, oldValue ) => {
-        getProgramas()
-    })
+const getFacultades = async () => {
+  try {
+    const res = await axios.get('get-facultades');
+    facultades.value = res.data.datos;
+  } catch (error) {
+    console.error('Error al obtener facultades:', error);
+  }
+};
 
-    const abrirEditar = (item) => {
-
-        visible.value = true;
-        programa.value.id = item.id;
-        programa.value.codigo = item.codigo;
-        programa.value.nombre = item.nombre;
-        programa.value.nivel_academico = item.nivel_academico;
-        programa.value.tipo_autorizacion = item.tipo_autorizacion;
-        programa.value.id_facultad = item.id_fac;
-        if(item.estado == 1){ programa.value.estado = true }
-        else { programa.value.estado = false}
-        programa.value.area = item.area
-    }
-
-
-    const getFacultades =  async ( ) => {
-        let res = await axios.get(
-        "get-facultades");
-        facultades.value = res.data.datos;
-    }
-
-
-    const getProgramas =  async (term = "") => {
-        let res = await axios.post(
-        "programas/get-programas?page=" + pagina.value,
-        { term: buscar.value }
-        );
-        programas.value = res.data.datos.data;
-        totalpaginas.value = res.data.datos.total;
-    }
-
-
-    const guardar = () => {
-        let post = {
-        id: programa.value.id,
-        codigo: programa.value.codigo,
-        nombre: programa.value.nombre,
-        nivel_academico: programa.value.nivel_academico,
-        tipo_autorizacion: programa.value.tipo_autorizacion,
-        estado: programa.value.estado,
-        id_facultad: programa.value.id_facultad,
-        area: programa.value.area,
-        };
-        axios.post("save-programa", post).then((result) => {
-        getProgramas()
-        notificacion('success',result.data.titulo, result.data.mensaje);
-        visible.value = false;
-        programa.value.codigo = null,
-        programa.value.id = null,
-        programa.value.nombre = ""
-        });
-    }
-
-    const eliminar = (item) => {
-        axios.get("eliminar-programa/"+item.id).then((result) => {
-        getProgramas();
-        notificacion('warning', 'PROGRAMA ELIMINADO', result.data.mensaje );
-        });
-    }
-
-    const columnsProgramas = [
-        { title: 'Cod', dataIndex: 'codigo', width:'60px', align:'center', responsive: ['md'],},
-        { title: 'Nombre', dataIndex: 'nombre'},
-        { title: 'Area', dataIndex: 'area', align:'center', width:"100px", responsive: ['md'],},
-        { title: 'Fun.', dataIndex: 'estado', align:'center', width:'60px', responsive: ['md'],},
-        { title: 'Acciones', dataIndex: 'acciones', width:"90px", align:'center'},
-    ];
-
-
-    const selectedRowKeys = ref([]);
-
-    const onSelectChange = changableRowKeys => {
-        console.log('selectedRowKeys changed: ', changableRowKeys);
-        selectedRowKeys.value = changableRowKeys;
-    };
-    const rowSelection = computed(() => {
-        return {
-        selectedRowKeys: unref(selectedRowKeys),
-        onChange: onSelectChange,
-        hideDefaultSelections: true,
-        };
+const getProgramas = async () => {
+  try {
+    const res = await axios.post('programas/get-programas', {
+      term: buscar.value
     });
+    programas.value = res.data.datos.data;
+  } catch (error) {
+    console.error('Error al obtener programas:', error);
+  }
+};
 
-    const notificacion = (type, titulo, mensaje) => {
-        notification[type]({
-        message: titulo,
-        description: mensaje,
-        });
+const guardar = async () => {
+  try {
+    await formRef.value.validate();
+    guardando.value = true;
+
+    const payload = {
+      id: programa.id,
+      codigo: programa.codigo,
+      nombre: programa.nombre,
+      nivel_academico: programa.nivel_academico,
+      tipo_autorizacion: programa.tipo_autorizacion,
+      estado: programa.estado,
+      id_facultad: programa.id_facultad,
+      area: programa.area,
     };
 
-    const verDetalle = (item) => {
-        console.log("Detalle:", item);
-    };
+    const res = await axios.post('save-programa', payload);
+    notificacion('success', res.data.titulo, res.data.mensaje);
+    getProgramas();
+    visible.value = false;
+  } catch (error) {
+    if (error.response?.data?.errors) {
+      Object.values(error.response.data.errors).forEach(err => {
+        notificacion('error', 'Error', err[0]);
+      });
+    }
+  } finally {
+    guardando.value = false;
+  }
+};
 
-    getFacultades()
-    getProgramas()
+const eliminar = async (item) => {
+  try {
+    const res = await axios.get(`eliminar-programa/${item.id}`);
+    notificacion('warning', 'PROGRAMA ELIMINADO', res.data.mensaje);
+    getProgramas();
+  } catch (error) {
+    notificacion('error', 'Error', 'No se pudo eliminar el programa');
+  }
+};
 
+const cancelar = () => {
+  visible.value = false;
+};
 
+const resetPrograma = () => {
+  Object.assign(programa, {
+    id: null,
+    codigo: '',
+    nombre: '',
+    nivel_academico: 'CARRERA PROFESIONAL',
+    tipo_autorizacion: 'RECONOCIDO POR LIC.',
+    id_facultad: null,
+    estado: true,
+    area: 'BIOMÉDICAS'
+  });
+};
+
+const notificacion = (type, titulo, mensaje) => {
+  notification[type]({
+    message: titulo,
+    description: mensaje,
+    placement: 'topRight'
+  });
+};
+
+const filterOption = (input, option) => {
+  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+};
+
+watch(buscar, (newValue) => {
+  clearTimeout(timeoutId);
+  timeoutId = setTimeout(() => {
+    getProgramas();
+  }, 500);
+});
+
+let timeoutId;
+
+getFacultades();
+getProgramas();
 </script>
 
-<style >
-::-webkit-scrollbar {
-  width: 9px;
-  height: 12px;
+<style scoped>
+:deep(.ant-btn-primary) {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
 }
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+:deep(.ant-btn-primary:hover) {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
 }
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
+:deep(.ant-input:focus),
+:deep(.ant-input-focused),
+:deep(.ant-input-affix-wrapper:focus),
+:deep(.ant-input-affix-wrapper-focused) {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
 }
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+:deep(.ant-pagination .ant-pagination-item-active) {
+  border-color: #2563eb !important;
 }
-
-/* Estilo para un scroll específico */
-.scroll-container {
-  overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
+:deep(.ant-pagination .ant-pagination-item-active a) {
+  color: #2563eb !important;
 }
-
-/* Estilo para el scroll específico en Webkit (Chrome, Safari) */
-.scroll-container::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-.scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
 </style>
