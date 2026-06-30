@@ -115,17 +115,12 @@ class ApoderadoController extends Controller {
             'tipo_apoderado' => $request->tipo_apoderado,
         ]);
 
-        if($request->actualizar == 'si'){
-          $this->savePasos($request->name, $request->nro, $request->avance, $request->id_postulante, $request->proceso, $request->tipo_apoderado);
-        }
-
         $this->response['tipo'] = 'success';
         $this->response['titulo'] = 'REGISTRO NUEVO';
-        $this->response['mensaje'] = 'Proceso '.$apoderado->nombre.' creado con exito';
+        $this->response['mensaje'] = 'Apoderado '.$apoderado->nombres.' creado con exito';
         $this->response['estado'] = true;
         $this->response['datos'] = $apoderado;
     } else {
-        $temp = Apoderado::find($request->id);
         $apoderado = Apoderado::find($request->id);
         $apoderado->tipo_doc = $tipo_doc;
         $apoderado->nro_documento = $request->dni;
@@ -133,23 +128,13 @@ class ApoderadoController extends Controller {
         $apoderado->materno = $request->materno;
         $apoderado->nombres = $request->nombres;
         $apoderado->tipo_apoderado = $request->tipo_apoderado;
-        $apoderado->id_usuario = auth()->id();
         $apoderado->save();
 
-        if($request->actualizar == 'si'){
-          $this->savePasos($request->name, $request->nro, $request->avance, $request->id_postulante, $request->proceso, $request->tipo_apoderado);
-        }
-        if( $temp == $apoderado ) {
-          $this->response['estado'] = false;
-        }else 
-        {
-          $this->response['tipo'] = 'info';
-          $this->response['titulo'] = '!REGISTRO MODIFICADO!';
-          $this->response['mensaje'] = 'Datos del '.$apoderado->nombres.' actualizados';
-          $this->response['estado'] = true;
-          $this->response['datos'] = $apoderado;
-        }
-
+        $this->response['tipo'] = 'info';
+        $this->response['titulo'] = '!REGISTRO MODIFICADO!';
+        $this->response['mensaje'] = 'Datos del '.$apoderado->nombres.' actualizados';
+        $this->response['estado'] = true;
+        $this->response['datos'] = $apoderado;
       }
 
       return response()->json($this->response, 200);
@@ -203,7 +188,7 @@ class ApoderadoController extends Controller {
   
           $this->response['tipo'] = 'success';
           $this->response['titulo'] = 'REGISTRO NUEVO';
-          $this->response['mensaje'] = 'Proceso '.$apoderado->nombre.' creado con exito';
+          $this->response['mensaje'] = 'Apoderado '.$apoderado->nombres.' creado con exito';
           $this->response['estado'] = true;
           $this->response['datos'] = $apoderado;
       } else {

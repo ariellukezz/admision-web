@@ -102,6 +102,9 @@ class PostulanteController extends Controller
 
   public function savePostulante(Request $request) {
 
+    DB::beginTransaction();
+    try {
+
     $solo_unapellido = 1;
     if($request->segundo_apellido === null){
       $solo_unapellido = 0;
@@ -125,11 +128,10 @@ class PostulanteController extends Controller
         ]);
         $this->response['tipo'] = 'success';
         $this->response['titulo'] = 'REGISTRO NUEVO';
-        $this->response['mensaje'] = 'Proceso '.$postulante->nombre.' creado con exito';
+        $this->response['mensaje'] = 'Postulante '.$postulante->nombres.' creado con exito';
         $this->response['estado'] = true;
         $this->response['datos'] = $postulante;
     } else {
-        $temp = Postulante::find($request->id);
         $postulante = Postulante::find($request->id);
         $postulante->tipo_doc = $request->tipo_doc;
         $postulante->nro_doc = $request->nro_doc;
@@ -143,29 +145,31 @@ class PostulanteController extends Controller
         $postulante->email = $request->correo;
         $postulante->celular = $request->celular;
         $postulante->fec_nacimiento = $request->fec_nacimiento;
-        $postulante->id_usuario = auth()->id();
         $postulante->save();
 
-        if( $temp == $postulante ) {
-          $this->response['estado'] = false;
-        }else
-        {
-          $this->response['tipo'] = 'info';
-          $this->response['titulo'] = '!REGISTRO MODIFICADO!';
-          $this->response['mensaje'] = 'Datos del '.$postulante->nombres.' actualizados';
-          $this->response['estado'] = true;
-          $this->response['datos'] = $postulante;
-        } 
+        $this->response['tipo'] = 'info';
+        $this->response['titulo'] = '!REGISTRO MODIFICADO!';
+        $this->response['mensaje'] = 'Datos del '.$postulante->nombres.' actualizados';
+        $this->response['estado'] = true;
+        $this->response['datos'] = $postulante;
 
       }
 
+      DB::commit();
       return response()->json($this->response, 200);
+
+    } catch (\Exception $e) {
+      DB::rollBack();
+      $this->response['estado'] = false;
+      $this->response['mensaje'] = 'Error al guardar: ' . $e->getMessage();
+      return response()->json($this->response, 500);
     }
+
+  }
 
     public function saveResidencia(Request $request ) {
 
       $postulante = Postulante::find($request->id);
-      $temp = $postulante;
       if($request->pais){
         $postulante->id_pais = $request->pais;
         $postulante->direccion = $request->direccion;
@@ -176,15 +180,11 @@ class PostulanteController extends Controller
 
       $postulante->save();
 
-      if( $temp == $postulante ) {
-        $this->response['estado'] = false;
-      } else {
-        $this->response['tipo'] = 'info';
-        $this->response['titulo'] = '!REGISTRO ACTUALIZADO!';
-        $this->response['mensaje'] = 'La residencia del '.$postulante->nombres.' se actualizó.';
-        $this->response['estado'] = true;
-        $this->response['datos'] = $postulante;
-      }
+      $this->response['tipo'] = 'info';
+      $this->response['titulo'] = '!REGISTRO ACTUALIZADO!';
+      $this->response['mensaje'] = 'La residencia del '.$postulante->nombres.' se actualizó.';
+      $this->response['estado'] = true;
+      $this->response['datos'] = $postulante;
 
         return response()->json($this->response, 200);
     }
@@ -193,24 +193,15 @@ class PostulanteController extends Controller
     public function saveColegio(Request $request ) {
 
       $postulante = Postulante::find($request->id);
-      $temp = $postulante;
       $postulante->anio_egreso = $request->anio_egreso;
       $postulante->id_colegio = $request->colegio;
       $postulante->save();
 
-      if( $temp == $postulante ) {
-        $this->response['estado'] = false;
-      } else {
-        $this->response['tipo'] = 'info';
-        $this->response['titulo'] = '!REGISTRO ACTUALIZADO!';
-        $this->response['mensaje'] = 'Los dato del colegio de '.$postulante->nombres.' se actualizó.';
-        $this->response['estado'] = true;
-        $this->response['datos'] = $postulante;
-      }
-
-      if($request->actualizar == 'si'){
-        $this->savePasos("Datos colegio registrados", 3, 48, $request->id, $request->proceso);
-      }
+      $this->response['tipo'] = 'info';
+      $this->response['titulo'] = '!REGISTRO ACTUALIZADO!';
+      $this->response['mensaje'] = 'Los dato del colegio de '.$postulante->nombres.' se actualizó.';
+      $this->response['estado'] = true;
+      $this->response['datos'] = $postulante;
 
         return response()->json($this->response, 200);
     }
@@ -395,7 +386,7 @@ class PostulanteController extends Controller
           ]);
           $this->response['tipo'] = 'success';
           $this->response['titulo'] = 'REGISTRO NUEVO';
-          $this->response['mensaje'] = 'Proceso '.$postulante->nombre.' creado con exito';
+          $this->response['mensaje'] = 'Postulante '.$postulante->nombres.' creado con exito';
           $this->response['estado'] = true;
           $this->response['datos'] = $postulante;
       } else {
@@ -704,5 +695,72 @@ class PostulanteController extends Controller
         return response()->json($this->response, 200);
     }
 
+    /**
+     * Buscar usuario por DNI para vincular con postulante.
+     */
+    public function buscarUsuarioPorDni(Request $request)
+    {
+        $request->validate(['dni' => 'required|string']);
+
+        $user = \App\Models\User::where('dni', $request->dni)->first();
+
+        if (!$user) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'No se encontró un usuario con ese DNI',
+            ]);
+        }
+
+        // Verificar si el DNI del usuario ya coincide con un postulante (vinculado)
+        $postulanteVinculado = Postulante::where('nro_doc', $user->dni)->first();
+
+        return response()->json([
+            'estado' => true,
+            'datos' => [
+                'id' => $user->id,
+                'dni' => $user->dni,
+                'nombre' => $user->getFullNameAttribute(),
+                'email' => $user->email,
+                'id_rol' => $user->id_rol,
+                'ya_vinculado' => $postulanteVinculado ? $postulanteVinculado->id : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Vincular un postulante con un usuario (revisor/admin).
+     * La vinculación se hace seteando User.dni = Postulante.nro_doc,
+     * ya que la relación User↔Postulante es por DNI.
+     */
+    public function vincularUsuario(Request $request)
+    {
+        $request->validate([
+            'postulante_id' => 'required|integer|exists:postulante,id',
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+
+        $postulante = Postulante::find($request->postulante_id);
+        $user = \App\Models\User::find($request->user_id);
+
+        // Verificar si el usuario ya tiene un DNI que corresponde a otro postulante
+        if ($user->dni && $user->dni != $postulante->nro_doc) {
+            $otroPostulante = Postulante::where('nro_doc', $user->dni)->first();
+            if ($otroPostulante) {
+                return response()->json([
+                    'estado' => false,
+                    'mensaje' => 'Este usuario ya tiene DNI ' . $user->dni . ' vinculado al postulante ID: ' . $otroPostulante->id,
+                ]);
+            }
+        }
+
+        // Vincular: setear el DNI del usuario = nro_doc del postulante
+        $user->dni = $postulante->nro_doc;
+        $user->save();
+
+        return response()->json([
+            'estado' => true,
+            'mensaje' => 'Postulante vinculado correctamente con ' . $user->getFullNameAttribute() . ' (DNI: ' . $postulante->nro_doc . ')',
+        ]);
+    }
 
 }
