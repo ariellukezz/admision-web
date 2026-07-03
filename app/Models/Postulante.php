@@ -18,6 +18,7 @@ class Postulante extends Model
     protected $fillable = [
         'tipo_doc',
         'nro_doc',
+        'nro_doc_opcional',
         'primer_apellido',
         'segundo_apellido',
         'apellido_casada',
@@ -28,6 +29,7 @@ class Postulante extends Model
         'ubigeo_residencia',
         'discapacidad',
         'tipo_discapacidad',
+        'tipo_discapacidad_otro',
         'celular',
         'email',
         'estado_civil',

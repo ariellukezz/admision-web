@@ -107,7 +107,7 @@ class RegistroController extends Controller
     public function registroDatosPersonales(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'nro_doc'           => 'required|string|size:8',
+            'nro_doc'           => ['required', 'string', $request->tipo_doc == 1 ? 'size:8' : 'min:8|max:12'],
             'tipo_doc'          => 'nullable|integer',
             'primer_apellido'   => 'required|string|max:100',
             'segundo_apellido'  => 'nullable|string|max:100',
@@ -161,6 +161,7 @@ class RegistroController extends Controller
             $postulante = Postulante::create([
                 'tipo_doc'          => $request->tipo_doc ?? 1,
                 'nro_doc'           => $request->nro_doc,
+                'nro_doc_opcional'  => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
                 'primer_apellido'   => $safeUpper($request->primer_apellido),
                 'segundo_apellido'  => $safeUpper($request->segundo_apellido),
                 'nombres'           => $safeUpper($request->nombres),
@@ -472,7 +473,7 @@ class RegistroController extends Controller
         $validator = Validator::make($request->all(), [
             'id_postulante'  => 'required|integer|exists:postulante,id',
             'apoderados'     => 'nullable|array',
-            'apoderados.*.nro_documento' => 'required_with:apoderados|string|size:8',
+            'apoderados.*.nro_documento' => 'required_with:apoderados|string|min:8|max:12',
             'apoderados.*.paterno'        => 'required_with:apoderados|string|max:100',
             'apoderados.*.materno'        => 'nullable|string|max:100',
             'apoderados.*.nombres'        => 'required_with:apoderados|string|max:200',

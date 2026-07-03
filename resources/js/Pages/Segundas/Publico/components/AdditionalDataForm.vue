@@ -64,6 +64,21 @@
                   />
                 </a-form-item>
               </a-col>
+
+              <a-col v-if="datos_transversales.discapacidad === 1 && datos_transversales.tipo_discapacidad === 12" :xs="24" :md="24">
+                <a-form-item
+                  label="Especifique la discapacidad"
+                  name="tipo_discapacidad_otro"
+                  :rules="[{ required: true, message: 'Especifique la discapacidad' }]"
+                >
+                  <a-input
+                    v-model:value="datos_transversales.tipo_discapacidad_otro"
+                    placeholder="Describa la discapacidad"
+                    size="large"
+                    :maxlength="255"
+                  />
+                </a-form-item>
+              </a-col>
             </a-row>
           </section>
 

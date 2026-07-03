@@ -76,6 +76,7 @@ class IdentidadSegundaController extends Controller
 
         $data['discapacidad'] = $postulante->discapacidad;
         $data['tipo_discapacidad'] = (int)$postulante->tipo_discapacidad;
+        $data['tipo_discapacidad_otro'] = $postulante->tipo_discapacidad_otro;
 
         if ($response->successful()) {
             $identidadData = $response->json() ?? [];

@@ -32,6 +32,7 @@ export const usePreinscripcion = (props) => {
   const datos_transversales = reactive({
     discapacidad: null,
     tipo_discapacidad: '',
+    tipo_discapacidad_otro: '',
     id_postulante: 3,
     id_proceso: 1,
     id_pertenencia_cultural: null,
@@ -239,6 +240,7 @@ export const usePreinscripcion = (props) => {
       .then((response) => {
         datos_transversales.discapacidad = response.data.discapacidad
         datos_transversales.tipo_discapacidad = response.data.tipo_discapacidad
+        datos_transversales.tipo_discapacidad_otro = response.data.tipo_discapacidad_otro || ''
         datos_transversales.id_condicion_lengua = response.data.id_condicion_lengua
         datos_transversales.id_lengua_indigena = response.data.id_lengua_indigena
         datos_transversales.id_pertenencia_cultural = response.data.id_pertenencia_cultural
@@ -380,6 +382,7 @@ const saveAdditionalData = async () => {
         id_proceso: props.procceso_seleccionado.id,
         discapacidad: datos_transversales.discapacidad,
         tipo_discapacidad: datos_transversales.tipo_discapacidad,
+        tipo_discapacidad_otro: datos_transversales.tipo_discapacidad_otro,
         id_condicion_lengua: datos_transversales.id_condicion_lengua,
         id_lengua_indigena : datos_transversales.id_lengua_indigena,
         id_pertenencia_cultural: datos_transversales.id_pertenencia_cultural,

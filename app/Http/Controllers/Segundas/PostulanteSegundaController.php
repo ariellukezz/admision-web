@@ -210,6 +210,7 @@ class PostulanteSegundaController extends Controller
                 'direccion' => $request->direccion,
                 'anio_egreso' => $request->egreso,
                 'nro_doc' => $request->nro_doc,
+                'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
                 'tipo_doc'=> $request->tipo_doc,
                 'observaciones' => $request->observaciones,
                 'id_colegio' => $request->colegio,
@@ -237,6 +238,7 @@ class PostulanteSegundaController extends Controller
             $postulante->direccion = $request->direccion;
             $postulante->anio_egreso = $request->egreso;
             $postulante->nro_doc = $request->nro_doc;
+            $postulante->nro_doc_opcional = strlen($request->nro_doc) > 8 ? $request->nro_doc : null;
             $postulante->observaciones = $request->observaciones;
             $postulante->id_colegio = $request->colegio;
             $postulante->id_usuario = auth()->id();
@@ -265,6 +267,7 @@ class PostulanteSegundaController extends Controller
     $postulante = Postulante::find($request->id_postulante );
     $postulante->discapacidad = $request->discapacidad;
     $postulante->tipo_discapacidad = $request->tipo_discapacidad;
+    $postulante->tipo_discapacidad_otro = $request->tipo_discapacidad_otro;
     $postulante->save();
 
     $request->validate([

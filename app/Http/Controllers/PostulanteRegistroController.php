@@ -488,7 +488,7 @@ class PostulanteRegistroController extends Controller
         }
 
         $validated = $request->validate([
-            'nro_doc'           => 'required|string|size:8',
+            'nro_doc'           => ['required', 'string', $request->tipo_doc == 1 ? 'size:8' : 'min:8|max:12'],
             'tipo_doc'          => 'nullable|integer',
             'primer_apellido'   => 'required|string|max:100',
             'segundo_apellido'  => 'nullable|string|max:100',
@@ -528,6 +528,7 @@ class PostulanteRegistroController extends Controller
             $postulante = Postulante::create([
                 'tipo_doc'          => $validated['tipo_doc'] ?? 1,
                 'nro_doc'           => $validated['nro_doc'],
+                'nro_doc_opcional'  => strlen($validated['nro_doc']) > 8 ? $validated['nro_doc'] : null,
                 'primer_apellido'   => $safeUpper($validated['primer_apellido']),
                 'segundo_apellido'  => $safeUpper($validated['segundo_apellido']),
                 'nombres'           => $safeUpper($validated['nombres']),
@@ -649,7 +650,7 @@ class PostulanteRegistroController extends Controller
             'id_postulante'              => 'required|integer|exists:postulante,id',
             'tiene_apoderado'            => 'required|boolean',
             'apoderados'                 => 'nullable|array',
-            'apoderados.*.nro_documento' => 'required_with:apoderados|string|size:8',
+            'apoderados.*.nro_documento' => 'required_with:apoderados|string|min:8|max:12',
             'apoderados.*.paterno'       => 'required_with:apoderados|string|max:100',
             'apoderados.*.materno'       => 'nullable|string|max:100',
             'apoderados.*.nombres'       => 'required_with:apoderados|string|max:200',
