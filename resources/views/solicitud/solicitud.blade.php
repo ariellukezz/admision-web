@@ -152,7 +152,7 @@
                         <div style="padding-left:20px; margin-top: 14px;">
                           @if( $data->id_modalidad == 12)
                             <table>
-                                <tr><td style="height: 23px;">1.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia).</td></tr>
+                                <tr><td style="height: 23px;">1.</td><td>Documento de identidad (<span style="color:red;">*</span>original y copia) y esta solicitud.</td></tr>
                                 <tr><td style="height: 23px;">2.</td><td>Certificado de estudios (<span style="color:red;">*</span>original y copia).</td></tr>
                                 <tr><td v-align="top"><div style="margin-top:-20px;">3.</div></td><td style="height: 23px;">Otros requisitos según lo estipulado en el Art. 15 del Reglamento General de admisión 2026 conforme a la modalidad de postulación.</td></tr>
                             </table>
@@ -192,7 +192,7 @@
                                             {{$index + 1}}. {{ $item->nombre }} - CODIGO: <span style="font-weight: bold;">{{ $item->codigo }} </span>
                                         </div>
                                     @endforeach
-                                    <p style="margin-top: 5px; margin-bottom: -3px;"> Importante: Revisar artículo 18 del Reglamento General de Admisión 2025</p>
+                                    <p style="margin-top: 5px; margin-bottom: -3px;"> Importante: Revisar artículo 18 del Reglamento General de Admisión 2026</p>
                                 @else
                                 @endif
                             @endif
@@ -247,7 +247,7 @@
             </table>
         </div>
 
-        <div style="margin-top:88px">
+        <div style="margin-top:60px">
 
             <table style="width:100%; bakcground:orange; margin-top:0px">
                 <tr>

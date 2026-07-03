@@ -74,8 +74,8 @@
               <div class="text-gray-900 font-medium">{{ temp_date || 'No especificado' }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-4">
-              <div class="text-sm font-medium text-gray-500 mb-1">Ubigeo de Nacimiento</div>
-              <div class="text-gray-900 font-medium">{{ datospersonales.ubigeo || 'No especificado' }}</div>
+              <div class="text-sm font-medium text-gray-500 mb-1">Lugar de Nacimiento</div>
+              <div class="text-gray-900 font-medium">{{ datospersonales.nacimiento_label || datospersonales.ubigeo || 'No especificado' }}</div>
             </div>
           </div>
         </div>

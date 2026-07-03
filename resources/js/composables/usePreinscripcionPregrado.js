@@ -465,6 +465,7 @@ export const usePreinscripcionPregrado = (props) => {
         ubigeoNacSeleccionado.value = d.ubigeo
         if (d.nacimiento) {
           ubigeoNacOptions.value = [{ key: d.ubigeo, value: d.nacimiento }]
+          datospersonales.nacimiento_label = d.nacimiento
         }
       }
       // Cargar ubigeo de residencia en el select unificado
@@ -473,6 +474,14 @@ export const usePreinscripcionPregrado = (props) => {
         datosresidencia.ubigeo_res = d.ubigeo_residencia
         if (d.residencia) {
           ubigeoResOptions.value = [{ key: d.ubigeo_residencia, value: d.residencia }]
+          // Parse "210105-Puno/Puno/Puno" → dep/prov/dist
+          const parts = d.residencia.split('-')
+          if (parts.length > 1) {
+            const names = parts[1].split('/')
+            datosresidencia.dep = names[0] || null
+            datosresidencia.prov = names[1] || null
+            datosresidencia.dist = names[2] || null
+          }
         }
       }
     }
@@ -599,6 +608,7 @@ export const usePreinscripcionPregrado = (props) => {
         ubigeoNacSeleccionado.value = d.ubigeo
         if (d.nacimiento) {
           ubigeoNacOptions.value = [{ key: d.ubigeo, value: d.nacimiento }]
+          datospersonales.nacimiento_label = d.nacimiento
         }
       }
       // Cargar ubigeo de residencia en el select unificado
@@ -607,6 +617,14 @@ export const usePreinscripcionPregrado = (props) => {
         datosresidencia.ubigeo_res = d.ubigeo_residencia
         if (d.residencia) {
           ubigeoResOptions.value = [{ key: d.ubigeo_residencia, value: d.residencia }]
+          // Parse "210105-Puno/Puno/Puno" → dep/prov/dist
+          const parts = d.residencia.split('-')
+          if (parts.length > 1) {
+            const names = parts[1].split('/')
+            datosresidencia.dep = names[0] || null
+            datosresidencia.prov = names[1] || null
+            datosresidencia.dist = names[2] || null
+          }
         }
       }
 
@@ -643,6 +661,7 @@ export const usePreinscripcionPregrado = (props) => {
         ubigeoNacSeleccionado.value = d.ubigeo
         if (d.nacimiento) {
           ubigeoNacOptions.value = [{ key: d.ubigeo, value: d.nacimiento }]
+          datospersonales.nacimiento_label = d.nacimiento
         }
       }
       // Cargar ubigeo de residencia en el select unificado
@@ -651,6 +670,14 @@ export const usePreinscripcionPregrado = (props) => {
         datosresidencia.ubigeo_res = d.ubigeo_residencia
         if (d.residencia) {
           ubigeoResOptions.value = [{ key: d.ubigeo_residencia, value: d.residencia }]
+          // Parse "210105-Puno/Puno/Puno" → dep/prov/dist
+          const parts = d.residencia.split('-')
+          if (parts.length > 1) {
+            const names = parts[1].split('/')
+            datosresidencia.dep = names[0] || null
+            datosresidencia.prov = names[1] || null
+            datosresidencia.dist = names[2] || null
+          }
         }
       }
     }
@@ -985,6 +1012,17 @@ export const usePreinscripcionPregrado = (props) => {
     ubigeoResSeleccionado.value = value
     datospersonales.ubigeo_residencia = value
     datosresidencia.ubigeo_res = value
+    // Parse label "210105-Puno/Puno/Puno" to extract dep/prov/dist
+    const opt = ubigeoResOptions.value.find(o => o.key === value)
+    if (opt) {
+      const parts = opt.value.split('-')
+      if (parts.length > 1) {
+        const names = parts[1].split('/')
+        datosresidencia.dep = names[0] || null
+        datosresidencia.prov = names[1] || null
+        datosresidencia.dist = names[2] || null
+      }
+    }
   }
 
   // ── Unified ubigeo search (colegio) ────────────────────────
@@ -1427,7 +1465,17 @@ export const usePreinscripcionPregrado = (props) => {
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', 'reglamento.pdf')
+      // Extract filename from Content-Disposition header, fallback to 'reglamento.pdf'
+      const disposition = response.headers['content-disposition']
+      let filename = 'reglamento.pdf'
+      if (disposition) {
+        const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/)
+        if (match && match[1]) {
+          filename = match[1].replace(/['"]/g, '').replace(/UTF-8''/i, '')
+          try { filename = decodeURIComponent(filename) } catch (e) { /* keep as-is */ }
+        }
+      }
+      link.setAttribute('download', filename)
       document.body.appendChild(link)
       link.click()
     } catch (error) {

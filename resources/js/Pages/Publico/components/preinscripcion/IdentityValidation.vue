@@ -195,7 +195,7 @@
               @input="(e) => { setCodigoVerificacion(e.target.value); setCodigoError('') }"
               :maxlength="6"
               placeholder="Código de 6 dígitos"
-              style="height: 48px; font-size: 22px; text-align: center; letter-spacing: 0.5rem; font-family: 'Courier New', monospace;"
+              style="height: 48px; font-size: 18px; text-align: center; letter-spacing: 0.5rem; font-family: 'Courier New', monospace;"
             />
           </div>
           <div class="mb-4" style="font-size: 14px; color: #6b7280;">
