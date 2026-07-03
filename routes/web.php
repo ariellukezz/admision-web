@@ -499,6 +499,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::delete('/smtp-accounts/{id}', [SmtpAccountController::class, 'destroy']);
     Route::post('/smtp-accounts/{id}/toggle', [SmtpAccountController::class, 'toggle']);
     Route::post('/smtp-accounts/{id}/default', [SmtpAccountController::class, 'setDefault']);
+    Route::post('/smtp-accounts/{id}/test', [SmtpAccountController::class, 'testEmail']);
 
     // ── Settings ─────────────────────────────────────────
     Route::get('/settings/preinscripcion-email', [SettingController::class, 'getPreinscripcionEmailVerification']);

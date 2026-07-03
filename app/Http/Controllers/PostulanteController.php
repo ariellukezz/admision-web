@@ -114,9 +114,48 @@ class PostulanteController extends Controller
           Config::set('mail.from.address', $smtp->from_address);
           Config::set('mail.from.name', $smtp->from_name);
 
-          Mail::mailer('smtp_dynamic')->to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+          try {
+              Mail::mailer('smtp_dynamic')->to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+          } catch (\Exception $e) {
+              $smtp->update([
+                  'is_active'     => false,
+                  'error_message' => $e->getMessage(),
+                  'error_at'      => now(),
+              ]);
+
+              $fallback = SmtpAccount::where('is_active', true)->inRandomOrder()->first();
+              if ($fallback) {
+                  Config::set('mail.mailers.smtp_dynamic', [
+                      'transport'  => $fallback->mailer,
+                      'host'       => $fallback->host,
+                      'port'       => $fallback->port,
+                      'encryption' => $fallback->encryption,
+                      'username'   => $fallback->username,
+                      'password'   => $fallback->password,
+                  ]);
+                  Config::set('mail.from.address', $fallback->from_address);
+                  Config::set('mail.from.name', $fallback->from_name);
+
+                  try {
+                      Mail::mailer('smtp_dynamic')->to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+                  } catch (\Exception $e2) {
+                      $fallback->update([
+                          'is_active'     => false,
+                          'error_message' => $e2->getMessage(),
+                          'error_at'      => now(),
+                      ]);
+                      return response()->json(['estado' => false, 'mensaje' => 'No se pudo enviar el correo. Intente nuevamente.'], 500);
+                  }
+              } else {
+                  return response()->json(['estado' => false, 'mensaje' => 'No se pudo enviar el correo. Intente nuevamente.'], 500);
+              }
+          }
       } else {
-          Mail::to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+          try {
+              Mail::to($postulante->email)->send(new CodigoVerificacionDatos($codigo, $postulante->nombres ?? ''));
+          } catch (\Exception $e) {
+              return response()->json(['estado' => false, 'mensaje' => 'No se pudo enviar el correo. Intente nuevamente.'], 500);
+          }
       }
 
       $email = $postulante->email;
@@ -161,6 +200,7 @@ class PostulanteController extends Controller
       $postulante = Postulante::create([
         'tipo_doc' => $request->tipo_doc,
         'nro_doc' => $request->nro_doc,
+        'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
         'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
         'primer_apellido' => $this->safeUpper($request->paterno),
         'segundo_apellido' => $this->safeUpper($request->materno),
@@ -190,6 +230,7 @@ class PostulanteController extends Controller
         $postulante = Postulante::create([
             'tipo_doc' => $request->tipo_doc,
             'nro_doc' => $request->nro_doc,
+            'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
             'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
             'sexo' => $request->sexo,
             'estado_civil' => $request->estado_civil,
@@ -210,6 +251,7 @@ class PostulanteController extends Controller
         $postulante = Postulante::find($request->id);
         $postulante->tipo_doc = $request->tipo_doc;
         $postulante->nro_doc = $request->nro_doc;
+        $postulante->nro_doc_opcional = strlen($request->nro_doc) > 8 ? $request->nro_doc : null;
         $postulante->ubigeo_nacimiento = $request->ubigeo_nacimiento;
         $postulante->sexo = $request->sexo;
         $postulante->estado_civil = $request->estado_civil;
@@ -455,6 +497,7 @@ class PostulanteController extends Controller
             'direccion' => $request->direccion,
             'anio_egreso' => $request->egreso,
             'nro_doc' => $request->nro_doc,
+            'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
             'tipo_doc'=> $request->tipo_doc,
             'observaciones' => $request->observaciones,
             'id_colegio' => $request->colegio,
@@ -482,6 +525,7 @@ class PostulanteController extends Controller
           $postulante->direccion = $request->direccion;
           $postulante->anio_egreso = $request->egreso;
           $postulante->nro_doc = $request->nro_doc;
+          $postulante->nro_doc_opcional = strlen($request->nro_doc) > 8 ? $request->nro_doc : null;
           $postulante->observaciones = $request->observaciones;
           $postulante->id_colegio = $request->colegio;
           $postulante->id_usuario = auth()->id();
@@ -687,6 +731,7 @@ class PostulanteController extends Controller
                 $postulante = Postulante::create([
                     'tipo_doc' => $request->tipo_doc,
                     'nro_doc' => $request->nro_doc,
+                    'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
                     'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
                     'ubigeo_residencia' => $request->ubigeo_residencia,
                     'sexo' => $request->sexo,
@@ -722,6 +767,7 @@ class PostulanteController extends Controller
                 $postulante->update([
                     'tipo_doc' => $request->tipo_doc,
                     'nro_doc' => $request->nro_doc,
+                    'nro_doc_opcional' => strlen($request->nro_doc) > 8 ? $request->nro_doc : null,
                     'ubigeo_nacimiento' => $request->ubigeo_nacimiento,
                     'ubigeo_residencia' => $request->ubigeo_residencia,
                     'sexo' => $request->sexo,

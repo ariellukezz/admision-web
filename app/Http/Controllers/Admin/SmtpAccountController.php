@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SmtpAccount;
+use App\Mail\TestSmtp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 
 class SmtpAccountController extends Controller
 {
@@ -132,5 +135,44 @@ class SmtpAccountController extends Controller
             'mensaje' => 'Cuenta establecida como predeterminada',
             'datos'   => $cuenta,
         ]);
+    }
+
+    public function testEmail($id)
+    {
+        $cuenta = SmtpAccount::findOrFail($id);
+
+        Config::set('mail.mailers.smtp_dynamic', [
+            'transport'  => $cuenta->mailer,
+            'host'       => $cuenta->host,
+            'port'       => $cuenta->port,
+            'encryption' => $cuenta->encryption,
+            'username'   => $cuenta->username,
+            'password'   => $cuenta->password,
+        ]);
+        Config::set('mail.from.address', $cuenta->from_address);
+        Config::set('mail.from.name', $cuenta->from_name);
+
+        try {
+            Mail::mailer('smtp_dynamic')->to($cuenta->from_address)->send(new TestSmtp($cuenta->name));
+
+            $cuenta->error_message = null;
+            $cuenta->error_at = null;
+            $cuenta->save();
+
+            return response()->json([
+                'estado'  => true,
+                'mensaje' => 'Correo de prueba enviado correctamente a ' . $cuenta->from_address,
+            ]);
+        } catch (\Exception $e) {
+            $cuenta->is_active = false;
+            $cuenta->error_message = $e->getMessage();
+            $cuenta->error_at = now();
+            $cuenta->save();
+
+            return response()->json([
+                'estado'  => false,
+                'mensaje' => 'Error al enviar: ' . $e->getMessage(),
+            ], 422);
+        }
     }
 }

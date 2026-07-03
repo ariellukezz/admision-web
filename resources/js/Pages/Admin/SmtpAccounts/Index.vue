@@ -34,17 +34,18 @@
       </div>
 
       <!-- Table -->
-      <div class="flex-1 overflow-auto px-8 py-6">
-        <table class="w-full">
-          <thead class="bg-gray-50 rounded-lg sticky top-0">
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Host:Port</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Usuario</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Remitente</th>
-              <th class="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Activo</th>
-              <th class="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Predeterminado</th>
-              <th class="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">Acciones</th>
+      <div class="flex-1 overflow-auto pl-4 pb-4">
+        <table class="w-full border-collapse">
+          <thead class="sticky top-0 z-10 mt-0" style="margin-top:20px; background: #f9fafb; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);">
+            <tr class="bg-gray-100 border-b-2 border-gray-300">
+              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Nombre</th>
+              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Host:Port</th>
+              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Usuario</th>
+              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Remitente</th>
+              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Estado</th>
+              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Activo</th>
+              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Predet.</th>
+              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap w-40">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -62,6 +63,19 @@
               <td class="py-3 px-4">
                 <div class="text-sm text-gray-900 font-medium">{{ item.from_name }}</div>
                 <div class="text-xs text-gray-500">{{ item.from_address }}</div>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <a-tooltip v-if="item.error_message" :title="item.error_message">
+                  <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200 cursor-help">
+                    ⚠ Error
+                  </span>
+                </a-tooltip>
+                <span v-else-if="item.is_active" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-200">
+                  ✓ OK
+                </span>
+                <span v-else class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-50 text-gray-400 border border-gray-200">
+                  Inactivo
+                </span>
               </td>
               <td class="py-3 px-4 text-center">
                 <a-switch
@@ -82,13 +96,16 @@
                   ★ Predeterminado
                 </span>
               </td>
-              <td class="py-3 px-4 text-center">
+              <td class="py-3 px-4 text-center whitespace-nowrap">
+                <button @click="testEmail(item)" :disabled="probandoId === item.id" class="text-green-600 hover:text-green-800 text-sm font-medium mr-3 disabled:opacity-50">
+                  {{ probandoId === item.id ? '...' : 'Probar' }}
+                </button>
                 <button @click="editar(item)" class="text-blue-600 hover:text-blue-800 text-sm font-medium mr-3">Editar</button>
                 <button @click="confirmarEliminar(item)" class="text-red-500 hover:text-red-700 text-sm font-medium">Eliminar</button>
               </td>
             </tr>
             <tr v-if="cuentas.length === 0">
-              <td colspan="7" class="py-8 text-center text-gray-400 text-sm">No hay cuentas SMTP registradas.</td>
+              <td colspan="8" class="py-8 text-center text-gray-400 text-sm">No hay cuentas SMTP registradas.</td>
             </tr>
           </tbody>
         </table>
@@ -211,6 +228,7 @@ const editando = ref(false);
 const guardando = ref(false);
 const eliminarItem = ref(null);
 const emailVerificationEnabled = ref(true);
+const probandoId = ref(null);
 
 const form = ref({
   id: null,
@@ -336,6 +354,21 @@ const setDefault = async (item) => {
     await getCuentas();
   } catch (e) {
     notification.error({ message: 'Error', description: 'No se pudo establecer como predeterminada.' });
+  }
+};
+
+const testEmail = async (item) => {
+  probandoId.value = item.id;
+  try {
+    const res = await axios.post(`/admin/smtp-accounts/${item.id}/test`);
+    notification.success({ message: 'Correo enviado', description: res.data.mensaje });
+    await getCuentas();
+  } catch (e) {
+    const msg = e.response?.data?.mensaje || 'Error al enviar correo de prueba.';
+    notification.error({ message: 'Error SMTP', description: msg, duration: 10 });
+    await getCuentas();
+  } finally {
+    probandoId.value = null;
   }
 };
 
