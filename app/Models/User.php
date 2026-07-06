@@ -146,7 +146,8 @@ class User extends Authenticatable
 
         $codes = $rolePermissions->map(fn ($p) => $p->view?->code . '.' . $p->action?->code)
             ->filter()
-            ->values();
+            ->values()
+            ->toBase();
 
         // Overrides del usuario
         $userOverrides = $this->rbacPermissions()

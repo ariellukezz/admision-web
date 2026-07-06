@@ -6,7 +6,7 @@
                     <a-button @click="visible = true">Calificar</a-button>
                 </div>
                 <div class="flex" style="gap:5px">
-                    <div v-if="resultados != []" class="mt-0 mb-4">
+                    <div v-if="resultados.length > 0" class="mt-0 mb-4">
                         <a-button style="width: 140px; background:crimson; border:none; color:white;" @click="descargar()">Descargar</a-button>
                     </div>
 
@@ -46,23 +46,17 @@
             </div>
 
             <div style="display:flex; gap:16px;" class="mt-4">
-                <div>
-                    <label>Correctas</label>
-                    <a-input ref="select" v-model:value="correctas" style="width: 100%">
-                        <template #suffix><Icono/> </template>
-                    </a-input>
-                </div>
-                <div>
-                    <label>Incorrectas</label>
-                    <a-input ref="select" v-model:value="incorrectas" style="width: 100%">
-                        <template #suffix><Icono/> </template>
-                    </a-input>
-                </div>
-                <div>
-                    <label>En Blanco</label>
-                    <a-input ref="select" v-model:value="blanco" style="width: 100%">
-                        <template #suffix><Icono/> </template>
-                    </a-input>
+                <div style="flex:1">
+                    <label>Multiplicador</label>
+                    <a-select
+                        v-model:value="id_multiplicador"
+                        style="width: 100%"
+                        placeholder="Seleccione multiplicador..."
+                    >
+                        <a-select-option v-for="m in multiplicadores" :key="m.id" :value="m.id">
+                            {{ m.nombre }} (C={{ Number(m.correcta).toFixed(1) }} / I={{ Number(m.incorrecta).toFixed(1) }} / B={{ Number(m.blanco).toFixed(1) }})
+                        </a-select-option>
+                    </a-select>
                 </div>
             </div>
 
@@ -92,7 +86,7 @@
 
             <div class="flex justify-end mt-4">
                 <div class="mr-2">
-                    <a-button style="margin-left: 6px; border-radius: 4px;">Cancelar</a-button>
+                    <a-button style="margin-left: 6px; border-radius: 4px;" @click="visible = false">Cancelar</a-button>
                 </div>
                 <div>
                     <a-button type="primary" @click="califar()" style="background: #476175; border:none; border-radius: 4px;">Calificar</a-button>
@@ -106,7 +100,7 @@
 <script setup>
 import { watch, computed, defineProps, ref, unref } from 'vue';
 import { DownOutlined, SearchOutlined, EyeOutlined, FormOutlined, DeleteOutlined } from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
+import { notification, message } from 'ant-design-vue';
 import axios from 'axios';
 
 const props = defineProps(['proceso']);
@@ -125,9 +119,8 @@ const totalRegistros = ref(0);
 const pagina = ref(1);
 const paginasize = ref(10);
 const buscar = ref("");
-const correctas = ref(1);
-const incorrectas = ref(0);
-const blanco = ref(0);
+const id_multiplicador = ref(null);
+const multiplicadores = ref([]);
 
 
 const puestos = ref([]);
@@ -145,14 +138,21 @@ const getPonderaciones =  async () => {
     totalRegistros.value = res.data.datos.total;
 }
 
+const getMultiplicadores = async () => {
+    let res = await axios.get("/calificacion/multiplicadores-list");
+    multiplicadores.value = res.data.datos;
+}
+
 const califar =  async () => {
+    if (!id_multiplicador.value) {
+        message.warning('Seleccione un multiplicador');
+        return;
+    }
     let res = await axios.post("/calificar-examen",
     {
         id_simulacro: props.proceso,
         id_ponderacion: ponderacion.value.key,
-        correctas: correctas.value,
-        incorrectas: incorrectas.value,
-        blanco: blanco.value,
+        id_multiplicador: id_multiplicador.value,
         area: area.value
     } );
     visible.value = false;
@@ -167,6 +167,7 @@ const getPuntajes =  async () => {
 getPuntajes();
 const visible = ref(false);
 getPonderaciones();
+getMultiplicadores();
 
 const formatPuntaje = (puntaje) =>  {
     return Number(puntaje).toFixed(2);

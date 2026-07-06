@@ -182,7 +182,7 @@ const guardarParticipante = async () => {
 }
 
 const eliminarParticipante = async (p) => {
-    await axios.delete(`/api/participantes/${p.id}`)
+    await axios.delete(`/participantes/${p.id}`)
     message.success('Eliminado')
     getParticipantes()
 }

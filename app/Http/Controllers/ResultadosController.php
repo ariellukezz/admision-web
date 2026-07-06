@@ -232,7 +232,7 @@ class ResultadosController extends Controller
                 'url' => "app/calificar/$proceso/patron/$nombreArchivo"
             ]);
 
-            $this->subirResBD(storage_path($archivo->url), $archivo->id);
+            $this->subirPatBD(storage_path($archivo->url), $archivo->id);
             $respuesta = [ 'message' => 'Archivo subido', 'archivo' => [ 'nombre' => $nombreArchivo ],];
 
             return response()->json($respuesta, 200);
@@ -244,240 +244,6 @@ class ResultadosController extends Controller
 
 
 
-    public function leerIde($area)
-    {
-        if($area == 1){ $ponderaciones = DB::select("SELECT * FROM ponderacion WHERE area = 'biomedicas'"); }
-        if($area == 2){ $ponderaciones = DB::select("SELECT * FROM ponderacion WHERE area = 'ingenierias'"); }
-        if($area == 3){ $ponderaciones = DB::select("SELECT * FROM ponderacion WHERE area = 'sociales'"); }
-
-        // $respFile = file(storage_path('app/calificar/resp101.dat'), FILE_IGNORE_NEW_LINES);
-
-        if($area == 1){ $carpetaide = storage_path("app/calificar/ides/biomedicas"); }
-        if($area == 2){ $carpetaide = storage_path("app/calificar/ides/ingenierias"); }
-        if($area == 3){ $carpetaide = storage_path("app/calificar/ides/sociales"); }
-
-        $calificaride = glob($carpetaide . '/*');
-
-        $ideFile = [];
-
-        foreach ($calificaride as $archivo) {
-            if (is_file($archivo)) {
-                $contenido = file($archivo, FILE_IGNORE_NEW_LINES);
-                $ideFile = array_merge($ideFile, $contenido);
-            }
-        }
-
-        $ides = $ideFile;
-
-        if($area == 1){ $carpeta = storage_path("app/calificar/res/biomedicas"); }
-        if($area == 2){ $carpeta = storage_path("app/calificar/res/ingenierias"); }
-        if($area == 3){ $carpeta = storage_path("app/calificar/res/sociales"); }
-        $calificar = glob($carpeta . '/*'); // Obtiene la lista de calificar en la carpeta
-
-        $respFile = [];
-
-        foreach ($calificar as $archivo) {
-            // Verifica si es un archivo (no un directorio)
-            if (is_file($archivo)) {
-                // Lee el contenido del archivo y lo agrega al array
-                $contenido = file($archivo, FILE_IGNORE_NEW_LINES);
-                $respFile = array_merge($respFile, $contenido);
-            }
-        }
-
-        // if($area == 1){ $patronFile = file(storage_path("app/calificar/patrones/biomedicas/biomedicas.dat"), FILE_IGNORE_NEW_LINES); }
-        // if($area == 2){ $patronFile = file(storage_path("app/calificar/patrones/ingenierias/ingenierias.dat"), FILE_IGNORE_NEW_LINES); }
-        // if($area == 3){ $patronFile = file(storage_path("app/calificar/patrones/sociales/sociales.dat"), FILE_IGNORE_NEW_LINES); }
-        $patronFile = file(storage_path('app/calificar/patrones/biomedicas/biomedicas.dat'), FILE_IGNORE_NEW_LINES);
-
-        $comparaciones = [];
-
-        $tipoPruebaMap = [ 'U' => 0, 'Q' => 1, 'R' => 2, 'S' => 3, 'T' => 4,];
-
-        foreach ($respFile as $lineaResp) {
-
-                if (strlen($lineaResp) > 46 && isset($tipoPruebaMap[$lineaResp[46]])) {
-                    $tipoPrueba = $lineaResp[46];
-                    $filaPatron = $tipoPruebaMap[$tipoPrueba];
-
-                    // Inicializar el array para la comparación actual
-                    $comparacionActual = "";
-
-                    $puntaje = 0;
-                    for ($i = 0; $i < 60; $i++) {
-                        $caracterResp = $lineaResp[$i + 47];
-                        $caracterPatron = $patronFile[$filaPatron][$i + 47];
-
-                        $puntuacion = 0;
-                        if($caracterResp === " "){
-                            $puntuacion = ($ponderaciones[$i]->ponderacion * 0);
-                        }else {
-                            if($caracterResp === $caracterPatron){
-                                $puntuacion = ($ponderaciones[$i]->ponderacion * .33333333);
-                            }
-                            else{
-                                $puntuacion = 0;
-                            }
-                        }
-                        $comparacionActual = $comparacionActual.$caracterResp;
-
-                        // $comparacionActual[] = [
-                        //     'caracter_resp' => $caracterResp,
-                        //     'caracter_patron' => $caracterPatron,
-                        //     'coincide' => ($caracterResp === $caracterPatron) ? 1 : 0,
-                        //     'ponderacion' => $ponderaciones[$i]->ponderacion,
-                        //     'puntos' => $puntuacion,
-                        // ];
-
-                        $puntaje = $puntaje + $puntuacion;
-                    }
-                    $k = 0;
-                    foreach ($ides as $elemento) {
-                        if (strpos($elemento, substr($lineaResp,39,7)) !== false){
-                            $k = $elemento;
-                        }
-                    }
-
-                    $comparaciones[] = [
-                        'respuestas' => $comparacionActual,
-                        'puntaje' => round($puntaje,3),
-                        'litho' => substr(substr($k,39,7),1,6),
-                        'tipo' => substr($k,46,1),
-                        'dni' => substr($k,47,8),
-                        'aula' => substr($k,55,3)
-                    ];
-
-                }
-
-        }
-
-        DB::table('puntajes_simulacro')->insert($comparaciones);
-
-        return response()->json(['comparaciones' => $comparaciones]);
-
-    }
-
-    public function cargarIdeBD( $area )
-    {
-
-        if($area == 1){ $carpetaide = storage_path("app/calificar/ides/biomedicas/"); }
-        if($area == 2){ $carpetaide = storage_path("app/calificar/ides/ingenierias/"); }
-        if($area == 3){ $carpetaide = storage_path("app/calificar/ides/sociales/"); }
-
-        $calificaride = glob($carpetaide . '/*'); // Obtiene la lista de calificar en la carpeta
-
-        $ideFile = [];
-
-        foreach ($calificaride as $archivo) {
-            // Verifica si es un archivo (no un directorio)
-            if (is_file($archivo)) {
-                // Lee el contenido del archivo y lo agrega al array
-                $contenido = file($archivo, FILE_IGNORE_NEW_LINES);
-                $ideFile = array_merge($ideFile, $contenido);
-            }
-        }
-
-        $ides = $ideFile;
-
-        $datosParaInsercion = [];
-
-        foreach ($ides as $linea) {
-            $campo1 = substr($linea, 0, 21);
-            $campo2 = substr(substr($linea, 21 , 8),3,5);
-            $campo3 = substr(substr($linea, 26, 9),3,5);
-            $campo4 = substr($linea, 38, 1);
-            $campo5 = substr($linea, 40);
-
-            // Descomposición de campo5
-            $litho = substr($campo5, 0, 6);
-            $tipo = substr($campo5, 6, 1);
-            $dni = substr($campo5, 7, 8);
-            $aula = substr($campo5, 15, 3);
-
-            if (strlen($campo1) > 1) {
-                $datosParaInsercion[] = [
-                    'camp1' => $campo1,
-                    'camp2' => $campo2,
-                    'camp3' => $campo3,
-                    'camp4' => $campo4,
-                    'litho' => $litho,
-                    'tipo' => $tipo,
-                    'dni' => $dni,
-                    'aula' => $aula,
-                ];
-            }
-        }
-        // Inserta en lote utilizando Eloquent
-        Ide::insert($datosParaInsercion);
-        return 'Datos insertados en lote correctamente.';
-
-    }
-
-    public function cargarResBD($area)
-    {
-
-        if($area == 1){ $carpetaide = storage_path("app/calificar/res/biomedicas/"); }
-        if($area == 2){ $carpetaide = storage_path("app/calificar/res/ingenierias/"); }
-        if($area == 3){ $carpetaide = storage_path("app/calificar/res/sociales/"); }
-
-        $calificaride = glob($carpetaide . '/*'); // Obtiene la lista de calificar en la carpeta
-
-        $ideFile = [];
-
-        foreach ($calificaride as $archivo) {
-            // Verifica si es un archivo (no un directorio)
-            if (is_file($archivo)) {
-                // Lee el contenido del archivo y lo agrega al array
-                $contenido = file($archivo, FILE_IGNORE_NEW_LINES);
-                $ideFile = array_merge($ideFile, $contenido);
-            }
-        }
-
-        $ides = $ideFile;
-
-        // $rutaArchivo = storage_path('app/calificar/ides/id101.dat');
-        // $datos = file($rutaArchivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-        // // Prepara los datos para la inserción
-        $datosParaInsercion = [];
-
-        foreach ($ides as $linea) {
-            $campo1 = substr($linea, 0, 21);
-            $campo2 = substr(substr($linea, 21 , 8),3,5);
-            $campo3 = substr(substr($linea, 26, 9),3,5);
-            $campo4 = substr($linea, 38, 1);
-            $campo5 = substr($linea, 40);
-
-            // Descomposición de campo5
-            $litho = substr($campo5, 0, 6);
-            $tipo = substr($campo5, 6, 1);
-            $dni = substr($campo5, 7, 8);
-            $aula = substr($campo5, 15, 3);
-
-            if (strlen($campo1) > 1) {
-                $datosParaInsercion[] = [
-                    'camp1' => $campo1,
-                    'camp2' => $campo2,
-                    'camp3' => $campo3,
-                    'camp4' => $campo4,
-                    'litho' => $litho,
-                    'tipo' => $tipo,
-                    'dni' => $dni,
-                    'aula' => $aula,
-                ];
-            }
-
-        }
-
-        // Inserta en lote utilizando Eloquent
-        Ide::insert($datosParaInsercion);
-
-        return 'Datos insertados en lote correctamente.';
-
-    }
-
-
-    //ARCHIVOS
     public function getArchivosIde(Request $request){
 
         $res = ArchivoSimulacro::select(DB::raw('COUNT(*) AS registros'), 'archivos_simulacro.*')
@@ -833,80 +599,6 @@ class ResultadosController extends Controller
     }
 
 
-    public function Calificar($area)
-    {
-        $ponderaciones = DB::select("SELECT * FROM ponderacion WHERE id_ponderacion_simulacro = $area");
-        $id_sim = 15;
-
-        $patrones = DB::select("SELECT i.*, asim.categoria AS ide_tipe FROM res i
-        JOIN archivos_simulacro asim ON asim.id = i.id_archivo
-        JOIN simulacro sim ON sim.id = asim.id_simulacro
-        WHERE sim.id = $id_sim AND asim.area = $area
-        AND asim.categoria = 'patron'");
-
-        $respuestas = DB::select("SELECT i.*, r.tipo AS ide_tipe FROM res i
-        JOIN archivos_simulacro asim ON asim.id = i.id_archivo
-        JOIN simulacro sim ON sim.id = asim.id_simulacro
-        LEFT JOIN ides r ON r.litho = i.litho
-        WHERE sim.id = $id_sim AND asim.area = $area
-        AND asim.categoria = 'respuesta'");
-
-        $comparaciones = [];
-
-        foreach ($respuestas as $line ){
-
-            $comparacionActual = "";
-            $puntaje = 0;
-
-            $correctas = "";
-
-            if($line->tipo == 'U'){ $correctas = $patrones[0]->respuestas; }
-            if($line->tipo == 'Q'){ $correctas = $patrones[1]->respuestas; }
-            if($line->tipo == 'R'){ $correctas = $patrones[2]->respuestas; }
-            if($line->tipo == 'S'){ $correctas = $patrones[3]->respuestas; }
-            if($line->tipo == 'T'){ $correctas = $patrones[4]->respuestas; }
-
-            for ($i = 0; $i < 60; $i++) {
-                if(strlen($line->respuestas) == 60 && strlen($correctas) == 60 ){
-                    $caracterResp = $line->respuestas[$i];
-                    $caracterPatron = $correctas[$i];
-                    $puntuacion = 0;
-
-
-                    if($caracterResp === " "){
-                        $puntuacion = ($ponderaciones[$i]->ponderacion * 0);
-                    }else {
-                        if($caracterResp === $correctas[$i]){
-                            $puntuacion = ($ponderaciones[$i]->ponderacion * 0.3333333);
-                        }
-                        else{ $puntuacion = 0; }
-                    }
-                    $comparacionActual = $comparacionActual.$caracterResp;
-                    $puntaje = $puntaje + $puntuacion;
-                }
-
-            }
-
-            $resp = Resp::find($line->id);
-            $resp->puntaje = round($puntaje,3);
-            $resp->save();
-
-            $comparaciones[] = [
-                'id'=> $line->id,
-                'respuestas' => $comparacionActual,
-                'puntaje' => round($puntaje,3)
-            ];
-
-        }
-
-        //DB::table('puntajes_simulacro')->insert($comparaciones);
-
-        return response()->json(['comparaciones' => $comparaciones]);
-
-    }
-
-
-
     public function CalificarExamen(Request $request)
     {
         $puntaje = 0;
@@ -914,12 +606,41 @@ class ResultadosController extends Controller
         $id_sim = $request->id_simulacro;
         $pond = $request->id_ponderacion;
 
+        $multiplicador = \App\Models\Multiplicador::find($request->id_multiplicador);
+        if (!$multiplicador) {
+            return response()->json(['estado' => false, 'mensaje' => 'Multiplicador no encontrado'], 404);
+        }
+
+        $val_correcta = $multiplicador->correcta;
+        $val_incorrecta = $multiplicador->incorrecta;
+        $val_blanco = $multiplicador->blanco;
+
         $ponderaciones = DB::select("SELECT numero, ponderacion FROM ponderacion WHERE id_ponderacion_simulacro = $pond");
 
-        $patrones = DB::select("SELECT i.respuestas, asim.cod_examen, i.tipo FROM res i
-        JOIN archivos_simulacro asim ON asim.id = i.id_archivo AND asim.id_simulacro = $id_sim
-        JOIN simulacro sim ON sim.id = $id_sim
-        WHERE asim.categoria = 'patron'");
+        // Buscar el examen_simulacro para este simulacro + área
+        $examenSimulacro = DB::table('examen_simulacro')
+            ->where('id_simulacro', $id_sim)
+            ->where('area', $request->area)
+            ->first();
+
+        // Cargar tipos con sus respuestas y excepciones
+        $tipos = collect();
+        if ($examenSimulacro) {
+            $tipos = DB::table('examen_tipos')
+                ->where('id_examen_simulacro', $examenSimulacro->id)
+                ->whereNotNull('respuestas')
+                ->get()
+                ->keyBy('tipo');
+        }
+
+        // Fallback: si no hay tipos con respuestas, usar patrones de res (compatibilidad)
+        $patrones = collect();
+        if ($tipos->isEmpty()) {
+            $patrones = collect(DB::select("SELECT i.respuestas, asim.cod_examen, i.tipo FROM res i
+                JOIN archivos_simulacro asim ON asim.id = i.id_archivo AND asim.id_simulacro = $id_sim
+                JOIN simulacro sim ON sim.id = $id_sim
+                WHERE asim.categoria = 'patron'"));
+        }
 
         $respuestas = DB::select(" SELECT  re.id, re.litho, re.respuestas, i.tipo, i.litho AS id_litho, i.camp2, p.dni, p.cod_examen
             FROM res re
@@ -932,28 +653,64 @@ class ResultadosController extends Controller
         $comparaciones = [];
         $comparacionActual = "";
 
+        // Cache de excepciones por id_examen_tipo
+        $excCache = [];
+
         foreach ($respuestas as $line) {
 
             if (!$line->dni) continue;
 
-            $patron = collect($patrones)->first(function ($p) use ($line) {
-                return $p->cod_examen === $line->cod_examen
-                    && $p->tipo === $line->tipo;
-            });
+            // Determinar la clave de respuestas según estructura nueva o vieja
+            $clave = null;
+            $idExamenTipo = null;
 
-            if (!$patron) continue;
+            if ($tipos->isNotEmpty()) {
+                // Nueva estructura: buscar por tipo en examen_tipos
+                $tipoKey = $tipos->keys()->count() === 1 && $tipos->keys()->first() === null
+                    ? null  // Examen único (sin tipo)
+                    : $line->tipo;
 
-            $correctas = $patron->respuestas;
+                $tipoRow = $tipos->get($tipoKey) ?? $tipos->first();
+                if ($tipoRow) {
+                    $clave = $tipoRow->respuestas;
+                    $idExamenTipo = $tipoRow->id;
+                }
+            } else {
+                // Estructura vieja: buscar en patrones de res
+                $patron = $patrones->first(function ($p) use ($line) {
+                    return $p->cod_examen === $line->cod_examen && $p->tipo === $line->tipo;
+                });
+                if ($patron) {
+                    $clave = $patron->respuestas;
+                }
+            }
+
+            if (!$clave) continue;
+
+            $correctas = $clave;
             $puntaje = 0;
             $comparacionActual = '';
 
-            $excepciones = DB::select("
-                SELECT nro_pregunta, accion, puntaje 
-                FROM excepciones
-                WHERE cod_examen = ?
-            ", [$line->cod_examen]);
+            // Cargar excepciones (nueva o vieja estructura)
+            if ($idExamenTipo) {
+                if (!isset($excCache[$idExamenTipo])) {
+                    $excCache[$idExamenTipo] = DB::table('excepciones')
+                        ->where('id_examen_tipo', $idExamenTipo)
+                        ->get()
+                        ->keyBy('nro_pregunta');
+                }
+                $excepciones = $excCache[$idExamenTipo];
+            } else {
+                $excepciones = collect(DB::select("
+                    SELECT nro_pregunta, accion, claves_validas, puntaje
+                    FROM excepciones
+                    WHERE cod_examen = ?
+                ", [$line->cod_examen]))->keyBy('nro_pregunta');
+            }
 
-            for ($i = 0; $i < 60; $i++) {
+            $n_preguntas = $examenSimulacro ? $examenSimulacro->n_preguntas : 60;
+
+            for ($i = 0; $i < $n_preguntas; $i++) {
 
                 if (!isset($line->respuestas[$i]) || !isset($correctas[$i])) {
                     continue;
@@ -963,18 +720,28 @@ class ResultadosController extends Controller
                 $pat  = $correctas[$i];
                 $puntuacion = 0;
 
-                $excepcion = collect($excepciones)
-                    ->firstWhere('nro_pregunta', $i + 1);
+                $excepcion = $excepciones->get($i + 1);
 
-                if ($excepcion && $excepcion->accion === 'todas_validas') {
-                    $puntuacion = $excepcion->puntaje;
+                if ($excepcion) {
+                    if ($excepcion->accion === 'todas_validas') {
+                        $puntuacion = $excepcion->puntaje;
+                    } elseif ($excepcion->accion === 'multiples_validas') {
+                        $validas = array_map('trim', explode(',', $excepcion->claves_validas ?? ''));
+                        $puntuacion = in_array($resp, $validas)
+                            ? $ponderaciones[$i]->ponderacion * $val_correcta
+                            : $val_incorrecta;
+                    } elseif ($excepcion->accion === 'anulada') {
+                        $puntuacion = 0;
+                    } elseif ($excepcion->accion === 'asignar_puntaje') {
+                        $puntuacion = $excepcion->puntaje;
+                    }
                 } else {
                     if ($resp === ' ') {
-                        $puntuacion = $ponderaciones[$i]->ponderacion * $request->blanco;
+                        $puntuacion = $ponderaciones[$i]->ponderacion * $val_blanco;
                     } elseif ($resp === $pat) {
-                        $puntuacion = $ponderaciones[$i]->ponderacion * $request->correctas;
+                        $puntuacion = $ponderaciones[$i]->ponderacion * $val_correcta;
                     } else {
-                        $puntuacion = $request->incorrectas;
+                        $puntuacion = $val_incorrecta;
                     }
                 }
 
@@ -1204,8 +971,7 @@ class ResultadosController extends Controller
                 WHERE par.id_proceso = ?
             ) AS participantes
             LEFT JOIN res ON res.litho = participantes.litho
-            WHERE res.puntaje > 0
-            order by res.puntaje desc
+            ORDER BY puntaje DESC
             ;
         ", [$request->id_simulacro]);
 
@@ -1504,6 +1270,25 @@ public function getResultadosPDF($sim)
             'datos' => $participante
         ], 201);
 
+    }
+
+    public function eliminarParticipante($id)
+    {
+        $part = DB::table('participantes')->where('id', $id)->first();
+
+        if (!$part) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Participante no encontrado.'
+            ], 404);
+        }
+
+        DB::table('participantes')->where('id', $id)->delete();
+
+        return response()->json([
+            'estado' => true,
+            'mensaje' => 'Participante eliminado correctamente'
+        ], 200);
     }
 
 

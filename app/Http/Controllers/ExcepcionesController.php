@@ -6,7 +6,7 @@ use App\Models\Excepciones;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ExcepcionController extends Controller
+class ExcepcionesController extends Controller
 {
 
     public function index(Request $request)

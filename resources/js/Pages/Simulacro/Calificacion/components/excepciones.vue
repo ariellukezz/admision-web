@@ -144,6 +144,8 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
+import axios from 'axios'
+import { message } from 'ant-design-vue'
 
 const props = defineProps({
   id_proceso: {
@@ -195,7 +197,7 @@ const loadExcepciones = async () => {
       ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''))
     }
     
-    const response = await axios.get('/api/excepciones', { params })
+    const response = await axios.get('/calificacion/excepciones', { params })
     excepciones.value = response.data.data.data
     Object.assign(pagination, {
       current_page: response.data.data.current_page,
@@ -204,7 +206,7 @@ const loadExcepciones = async () => {
     })
   } catch (error) {
     console.error('Error:', error)
-    alert('Error al cargar datos')
+    message.error('Error al cargar datos')
   } finally {
     loading.value = false
   }
@@ -244,8 +246,8 @@ const editItem = (item) => {
 const saveItem = async () => {
   try {
     const url = modalMode.value === 'create' 
-      ? '/api/excepciones' 
-      : `/api/excepciones/${form.id}`
+      ? '/calificacion/excepciones' 
+      : `/calificacion/excepciones/${form.id}`
     
     const method = modalMode.value === 'create' ? 'post' : 'put'
     
@@ -259,29 +261,28 @@ const saveItem = async () => {
     
     showModal.value = false
     loadExcepciones()
-    alert('Excepción guardada correctamente')
+    message.success('Excepción guardada correctamente')
   } catch (error) {
     console.error('Error:', error)
     if (error.response?.data?.errors) {
-      // Mostrar errores de validación
       const errors = Object.values(error.response.data.errors).flat().join('\n')
-      alert('Errores:\n' + errors)
+      message.error('Errores:\n' + errors)
     } else {
-      alert(error.response?.data?.message || 'Error al guardar')
+      message.error(error.response?.data?.message || 'Error al guardar')
     }
   }
 }
 
 const deleteItem = async (item) => {
-  if (!confirm('¿Eliminar esta excepción?')) return
+  if (!window.confirm('¿Eliminar esta excepción?')) return
   
   try {
-    await axios.delete(`/api/excepciones/${item.id}`)
+    await axios.delete(`/calificacion/excepciones/${item.id}`)
     loadExcepciones()
-    alert('Excepción eliminada')
+    message.success('Excepción eliminada')
   } catch (error) {
     console.error('Error:', error)
-    alert('Error al eliminar')
+    message.error('Error al eliminar')
   }
 }
 

@@ -14,6 +14,7 @@ class ArchivoSimulacro extends Model
         'nombre',
         'tipo',
         'id_simulacro',
+        'id_examen_tipo',
         'area',
         'fecha',
         'url',

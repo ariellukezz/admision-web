@@ -82,6 +82,64 @@
               <div class="nav-highlight"></div>
             </NavLink>
           </li>
+
+          <li class="nav-gradient-item" :class="{ 'nav-gradient-active': route().current('calificar-asignaturas') }">
+            <NavLink :href="route('calificar-asignaturas')" :active="route().current('calificar-asignaturas')" class="nav-gradient-link">
+              <div class="nav-content-wrapper">
+                <div class="nav-gradient-icon">
+                  <div class="icon-bg"></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M6.5 2H20V20H6.5A2.5 2.5 0 0 1 4 17.5V4.5A2.5 2.5 0 0 1 6.5 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M8 7H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 11H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="nav-gradient-text">Asignaturas</span>
+              </div>
+              <div class="nav-highlight"></div>
+            </NavLink>
+          </li>
+
+          <li class="nav-gradient-item" :class="{ 'nav-gradient-active': route().current('calificar-examenes') }">
+            <NavLink :href="route('calificar-examenes')" :active="route().current('calificar-examenes')" class="nav-gradient-link">
+              <div class="nav-content-wrapper">
+                <div class="nav-gradient-icon">
+                  <div class="icon-bg"></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 2H18C19.1046 2 20 2.89543 20 4V20C20 21.1046 19.1046 22 18 22H6C4.89543 22 4 21.1046 4 20V7L9 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    <path d="M9 2V7H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 16H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="nav-gradient-text">Exámenes</span>
+              </div>
+              <div class="nav-highlight"></div>
+            </NavLink>
+          </li>
+
+          <li class="nav-gradient-item" :class="{ 'nav-gradient-active': route().current('calificar-multiplicadores') }">
+            <NavLink :href="route('calificar-multiplicadores')" :active="route().current('calificar-multiplicadores')" class="nav-gradient-link">
+              <div class="nav-content-wrapper">
+                <div class="nav-gradient-icon">
+                  <div class="icon-bg"></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M8 6H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M14 6H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 10H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M14 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 14H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M14 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M8 18H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span class="nav-gradient-text">Multiplicadores</span>
+              </div>
+              <div class="nav-highlight"></div>
+            </NavLink>
+          </li>
         </ul>
       </div>
 

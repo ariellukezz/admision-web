@@ -1,513 +1,388 @@
 <template>
-    <Head title="Ponderacion"/>
+    <Head title="Ponderación"/>
     <AuthenticatedLayout>
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="border-radius: 10px; width: 100%; min-height: calc(100vh - 95px);">
-    
-    <div class="flex justify-between mb-2" >
+
+    <div class="flex justify-between mb-4">
         <div class="mr-3">
-        <a-button type="primary" @click="showModalFilial" style="background: #476175; border: none; border-radius: 5px;">Nuevo</a-button>
+            <a-button type="primary" @click="abrirCrear" style="background: #476175; border: none; border-radius: 5px;">Nueva Ponderación</a-button>
         </div>
-        <div class="flex justify-between" style="position: relative;" >
+        <div class="flex justify-between" style="position: relative;">
             <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; border-radius:6px; padding-left: 10px;">
                 <template #prefix><search-outlined /></template>
-            </a-input>        
+            </a-input>
         </div>
     </div>
 
-    <a-table 
-        :columns="columnsFiliales" 
+    <a-table
+        :columns="columns"
         :data-source="ponderaciones"
-        :key="id"
+        rowKey="id"
         size="small"
         :pagination="false"
-        style="scale: .7rem;"
-        > 
-        <template #bodyCell="{ column, index, record }">
-    
-            <template v-if="column.dataIndex === 'nro'">
-                <div class="flex" style="justify-content: center;">
-                    <span style="font-weight: bold;">{{ index + 1 }}</span>
-                </div>
-            </template>
-    
-            <template v-if="column.dataIndex === 'acciones'">
-                <div class="acciones-container">
-                    <a-tooltip title="Ver detalles" placement="top">
-                        <a-button 
-                            class="accion-btn ver-btn"
-                            @click="abrirDetallePonderacion(record)"
-                            size="small"
-                            type="text"
-                        >
-                            <template #icon>
-                                <div class="btn-icon-wrapper">
-                                    <EyeOutlined class="btn-icon" />
-                                </div>
-                            </template>
-                        </a-button>
-                    </a-tooltip>
-
-                    <a-tooltip title="Editar" placement="top">
-                        <a-button 
-                            class="accion-btn editar-btn"
-                            @click="abrirEditarPonderacion(record)"
-                            size="small"
-                            type="text"
-                        >
-                            <template #icon>
-                                <div class="btn-icon-wrapper">
-                                    <FormOutlined class="btn-icon" />
-                                </div>
-                            </template>
-                        </a-button>
-                    </a-tooltip>
-
-                    <a-tooltip title="Eliminar" placement="top">
-                        <a-popconfirm
-                            title="¿Estás seguro de eliminar esta ponderación?"
-                            ok-text="Sí, eliminar"
-                            cancel-text="Cancelar"
-                            @confirm="eliminarPonderacion(record)"
-                        >
-                            <a-button 
-                                class="accion-btn eliminar-btn"
-                                size="small"
-                                type="text"
-                            >
-                                <template #icon>
-                                    <div class="btn-icon-wrapper">
-                                        <DeleteOutlined class="btn-icon" />
-                                    </div>
-                                </template>
-                            </a-button>
-                        </a-popconfirm>
-                    </a-tooltip>
-                </div>
-            </template>
-        </template>
-    </a-table> 
-    
-    <div class="flex justify-between mt-2 pr-4" style="margin-bottom: -5px;">
-            <div>
-                <a-pagination v-model:current="pagina" simple :total="totalRegistros"  v-model:pageSize="paginasize" show-less-items />
-            </div>
-            <div clas="" style="scale: 0.9; margin-right: -20px;"> 
-                <a-select
-                    v-model:value="paginasize"
-                    style="width: 90px;">
-                    <a-select-option :value="10">10 Reg.</a-select-option>
-                    <a-select-option :value="20">20 Reg.</a-select-option>    
-                    <a-select-option :value="50">50 Reg.</a-select-option>    
-                    <a-select-option :value="100">100 Reg.</a-select-option>    
-                </a-select>
-            </div>
-        </div>
-    
-    </div>
-    
-    
-    </AuthenticatedLayout>
-    
-    <div>
-        <a-modal v-model:open="visible" :title="ponderacion.id?'Editar Ponderación':'Nueva ponderación'">
-        <div class="mt-6">
-            <a-form
-                ref="formPonderacion"
-                name="form"
-                :model="ponderacion"
-                v-bind="layout"
-                >
-                <a-form-item label="Nombre" :rules="[{ required: true, message: 'Ingrese el nombre', trigger: 'change' },]"name="nombre">
-                    <a-input type="text" placeholder="Ingrese el nombre" v-model:value="ponderacion.nombre" autocomplete="off"  >
-                        <template #prefix><sin-icono /></template>
-                    </a-input>
-                </a-form-item>
-
-                <a-form-item class="mt-4" name="area" label="Area" :rules="[{ required: true, message: 'Seleccione un area', trigger: 'change' },]">
-                    <a-select ref="select" v-model:value="ponderacion.area" style="width: 100%">
-                        <a-select-option :value="1">BIOMEDICAS</a-select-option>
-                        <a-select-option :value="2">INGENIERIAS</a-select-option>
-                        <a-select-option :value="3">SOCIALES</a-select-option>
-                    </a-select>
-                </a-form-item>
-        
-            </a-form>
-        </div>
-    
-        <template #footer>
-            <a-button style="margin-left: 6px; border-radius: 4px;" @click="resetForm">Cancelar</a-button>
-            <a-button type="primary" style="background: #476175; border:none; border-radius: 4px;" @click="guardar()">Guardar</a-button>
-        </template>
-        </a-modal>
-    </div>
-
-
-
-<div>
-  <a-modal
-    v-model:open="modalDetallePonderacion"
-    title="Detalle Ponderación"
-    :width="900"
-    body-style="max-height: 600px; overflow-y: auto; padding: 16px;"
-    centered
-  >
-    <a-form
-      ref="formPesos"
-      name="formpesos"
-      :model="pesos"
-      layout="horizontal"
     >
-      <div v-for="(item, index) in nroItems" :key="index" class="mb-0">
-        <a-row :gutter="[8, 0]" align="middle">
+        <template #bodyCell="{ column, index, record }">
+            <template v-if="column.dataIndex === 'nro'">
+                {{ index + 1 }}
+            </template>
+            <template v-if="column.dataIndex === 'totales'">
+                <div class="text-xs">
+                    <span>{{ record.total_preguntas }} preg.</span> ·
+                    <span>{{ formatNum(record.total_ponderacion) }}</span>
+                </div>
+            </template>
+            <template v-if="column.dataIndex === 'estado'">
+                <a-tag :color="record.estado ? 'green' : 'default'">{{ record.estado ? 'Activo' : 'Inactivo' }}</a-tag>
+            </template>
+            <template v-if="column.dataIndex === 'acciones'">
+                <a-space>
+                    <a-tooltip title="Editar">
+                        <a-button type="text" size="small" @click="abrirEditar(record)">
+                            <FormOutlined />
+                        </a-button>
+                    </a-tooltip>
+                    <a-tooltip title="Detalle de asignaturas">
+                        <a-button type="text" size="small" @click="abrirDetalle(record)">
+                            <EyeOutlined />
+                        </a-button>
+                    </a-tooltip>
+                    <a-tooltip title="Duplicar">
+                        <a-button type="text" size="small" @click="duplicar(record)">
+                            <CopyOutlined />
+                        </a-button>
+                    </a-tooltip>
+                    <a-popconfirm title="¿Eliminar esta ponderación?" @confirm="eliminar(record)">
+                        <a-button type="text" danger size="small">
+                            <DeleteOutlined />
+                        </a-button>
+                    </a-popconfirm>
+                </a-space>
+            </template>
+        </template>
+    </a-table>
 
-          <a-col :xs="24" :sm="2" :md="1" class="flex justify-center">
-            <a-button type="default" size="small" style="height: 30px; width: 30px; margin-top: -22px;">{{ index + 1 }}</a-button>
-          </a-col>
+    <div class="flex justify-between mt-4">
+        <a-pagination
+            v-model:current="pagina"
+            simple
+            :total="totalRegistros"
+            v-model:pageSize="paginasize"
+            show-less-items
+        />
+        <a-select v-model:value="paginasize" style="width: 90px;">
+            <a-select-option :value="10">10 Reg.</a-select-option>
+            <a-select-option :value="20">20 Reg.</a-select-option>
+            <a-select-option :value="50">50 Reg.</a-select-option>
+        </a-select>
+    </div>
 
-          <a-col :xs="24" :sm="11" :md="15">
-            <a-form-item :name="'nombre_' + index">
-              <a-input 
-                v-model:value="pesos[index].nombre" 
-                placeholder="Asignatura" 
-                size=""
-              >
-                <template #prefix><sin-icono /></template>
-              </a-input>
+    </div>
+
+    <!-- MODAL CREAR/EDITAR CABECERA -->
+    <a-modal
+        v-model:open="modalCabecera"
+        :title="form.id ? 'Editar Ponderación' : 'Nueva Ponderación'"
+        @ok="guardarCabecera"
+        :confirmLoading="saving"
+    >
+        <a-form layout="vertical" class="mt-4">
+            <a-form-item label="Nombre" required>
+                <a-input v-model:value="form.nombre" placeholder="Ej: CEPREUNA 2026 - Biomédicas" />
             </a-form-item>
-          </a-col>
-
-          <a-col :xs="12" :sm="6" :md="4">
-            <a-form-item :name="'npreguntas_' + index">
-              <a-input 
-                v-model:value="pesos[index].n_preguntas" 
-                placeholder="N° preguntas" 
-                size=""
-              >
-                <template #prefix><sin-icono /></template>
-              </a-input>
+            <a-form-item label="Estado">
+                <a-switch v-model:checked="form.estado" checked-children="Activo" un-checked-children="Inactivo" />
             </a-form-item>
-          </a-col>
+        </a-form>
+    </a-modal>
 
-          <a-col :xs="12" :sm="5" :md="4">
-            <a-form-item :name="'ponderacion_' + index">
-              <a-input 
-                v-model:value="pesos[index].ponderacion" 
-                placeholder="Ponderación 0.000" 
-                size=""
-              >
-                <template #prefix><sin-icono /></template>
-              </a-input>
-            </a-form-item>
-          </a-col>
-
-        </a-row>
-      </div>
-    </a-form>
-
-    <template #footer>
-      <div class="flex justify-between w-full items-center mt-2">
-        <a-button type="dashed"  @click="agregarFila">+ 1 más</a-button>
-
-        <div class="flex gap-2">
-          <a-button  @click="resetForm">Cancelar</a-button>
-          <a-button
-            type="primary"
-            style="background: #476175; border:none; border-radius: 4px;"
-            @click="saveDetalle"
-          >
-            Guardar
-          </a-button>
+    <!-- MODAL DETALLE (ASIGNATURAS) -->
+    <a-modal
+        v-model:open="modalDetalle"
+        :title="`Detalle: ${ponderacionSeleccionada?.nombre || ''}`"
+        :width="1000"
+        :footer="null"
+        centered
+    >
+        <div class="mb-4 flex justify-between items-center">
+            <div class="text-sm text-gray-500">
+                Ponderación = cantidad_preguntas × ponderación
+            </div>
+            <a-button type="primary" size="small" @click="guardarDetalle" :loading="savingDetalle">
+                Guardar Detalle
+            </a-button>
         </div>
-      </div>
-    </template>
-  </a-modal>
-</div>
 
+        <a-table
+            :dataSource="detalle"
+            :columns="detalleColumns"
+            rowKey="numero"
+            size="small"
+            :pagination="false"
+            :scroll="{ y: 400 }"
+        >
+            <template #bodyCell="{ column, record, index }">
+                <template v-if="column.dataIndex === 'numero'">
+                    {{ index + 1 }}
+                </template>
+                <template v-if="column.dataIndex === 'asignatura'">
+                    <a-select
+                        v-model:value="record.id_asignatura"
+                        style="width: 100%"
+                        show-search
+                        :filter-option="filterOption"
+                        @change="(val) => onAsignaturaChange(index, val)"
+                    >
+                        <a-select-option v-for="a in asignaturas" :key="a.id" :value="a.id">{{ a.nombre }}</a-select-option>
+                    </a-select>
+                </template>
+                <template v-if="column.dataIndex === 'cantidad_preguntas'">
+                    <a-input-number v-model:value="record.cantidad_preguntas" :min="0" :max="60" style="width: 80px" @change="calcSubtotal(index)" />
+                </template>
+                <template v-if="column.dataIndex === 'ponderacion'">
+                    <a-input-number v-model:value="record.ponderacion" :step="0.001" :precision="3" :min="0" style="width: 120px" @change="calcSubtotal(index)" />
+                </template>
+                <template v-if="column.dataIndex === 'subtotal'">
+                    <span class="font-medium">{{ formatNum(record.subtotal) }}</span>
+                </template>
+                <template v-if="column.dataIndex === 'acciones'">
+                    <a-button type="text" danger size="small" @click="eliminarFila(index)">
+                        <DeleteOutlined />
+                    </a-button>
+                </template>
+            </template>
 
-    
+            <template #footer>
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <a-button size="small" @click="agregarFila">+ Agregar asignatura</a-button>
+                        <a-button size="small" type="dashed" @click="cargarPlantilla">Cargar 18 asignaturas</a-button>
+                    </div>
+                    <div class="text-right">
+                        <div>Total preguntas: <span class="font-bold" :class="totalPreguntas === 60 ? 'text-green-600' : 'text-red-600'">{{ totalPreguntas }}</span></div>
+                        <div>Total ponderación: <span class="font-bold">{{ formatNum(totalPonderacion) }}</span></div>
+                    </div>
+                </div>
+            </template>
+        </a-table>
+    </a-modal>
+
+    </AuthenticatedLayout>
 </template>
-    
+
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/LayoutCalificador.vue'
-import { watch, computed, ref, onMounted, reactive } from 'vue';
-import { FormOutlined, DeleteOutlined, SearchOutlined, DownOutlined, EyeOutlined } from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
-
+import AuthenticatedLayout from '@/Layouts/LayoutCalificador.vue';
+import { watch, ref, reactive, computed, onMounted } from 'vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, EyeOutlined, CopyOutlined } from '@ant-design/icons-vue';
+import { message } from 'ant-design-vue';
 import axios from 'axios';
-const loading = ref(false);
-const buscar = ref("");
-const visible = ref(false);
-const buscarResidencia = ref("")
+
+const saving = ref(false);
+const savingDetalle = ref(false);
+const buscar = ref('');
 const pagina = ref(1);
 const paginasize = ref(10);
-const totalRegistros = ref(1);
+const totalRegistros = ref(0);
 
+const ponderaciones = ref([]);
+const asignaturas = ref([]);
 
+const modalCabecera = ref(false);
+const modalDetalle = ref(false);
+const ponderacionSeleccionada = ref(null);
 
-const showModalFilial = () => { visible.value = true; };
-let timeoutId;
-watch(buscar, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-        getFiliales(); 
-    }, 500);    
-})
-watch(pagina, ( newValue, oldValue ) => { getFiliales(); })
-watch(paginasize, ( newValue, oldValue ) => { getFiliales(); })
+const form = reactive({
+    id: null,
+    nombre: '',
+    estado: true,
+});
 
-let timeout2;
-watch(buscarResidencia, ( newValue, oldValue ) => {  
-    clearTimeout(timeout2);
-    timeout2 = setTimeout(() => {
-        getUbigeosResidencia() 
-    }, 500); 
-})
+const detalle = ref([]);
 
+const columns = [
+    { title: 'N°', dataIndex: 'nro', width: 50 },
+    { title: 'Nombre', dataIndex: 'nombre' },
+    { title: 'Totales', dataIndex: 'totales', width: 160 },
+    { title: 'Estado', dataIndex: 'estado', width: 80 },
+    { title: 'Acciones', dataIndex: 'acciones', width: 180, align: 'center' },
+];
 
-const abrirEditar = (item) => {
+const detalleColumns = [
+    { title: '#', dataIndex: 'numero', width: 40 },
+    { title: 'Asignatura', dataIndex: 'asignatura' },
+    { title: 'Cant. Preg.', dataIndex: 'cantidad_preguntas', width: 100 },
+    { title: 'Ponderación', dataIndex: 'ponderacion', width: 130 },
+    { title: 'Subtotal', dataIndex: 'subtotal', width: 120 },
+    { title: '', dataIndex: 'acciones', width: 50 },
+];
 
-    visible.value = true;
-    filial.id = item.id;
-    filial.codigo = item.codigo;
-    filial.nombre = item.nombre;
-    filial.lugar = item.ubigeo;
-    filial.direccion = item.direccion;
-    residencia.value = item.lugar;
-    if(item.estado == 1){ filial.estado = true }
-    else { filial.estado = false}
-}
+const totalPreguntas = computed(() => detalle.value.reduce((s, d) => s + (Number(d.cantidad_preguntas) || 0), 0));
+const totalPonderacion = computed(() => detalle.value.reduce((s, d) => s + (Number(d.subtotal) || 0), 0));
 
+const filterOption = (input, option) => {
+    return option.children?.[0]?.children?.toLowerCase?.().includes(input.toLowerCase());
+};
 
+const formatNum = (n) => Number(n || 0).toFixed(2);
 
-const eliminar = (item) => {
-    axios.get("eliminar-filial/"+item.id).then((result) => {
-        getFiliales();
-        notificacion('error', 'PROCESO ELIMINADO', result.data.mensaje );
+const getPonderaciones = async () => {
+    const res = await axios.post('/calificacion/get-ponderaciones?page=' + pagina.value, {
+        term: buscar.value,
+        paginasize: paginasize.value,
     });
-}
+    ponderaciones.value = res.data.datos.data;
+    totalRegistros.value = res.data.datos.total;
+};
 
-const resetForm = () => {
+let timeoutId;
+watch(buscar, (val) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(getPonderaciones, 400);
+});
+watch(pagina, getPonderaciones);
+watch(paginasize, getPonderaciones);
 
-    filial.id = null;
-    filial.codigo = "";
-    filial.nombre = "";
-    filial.lugar = null;
-    filial.direccion = "";
-    filial.estado =  "";
-    residencia.value = "";
-    redseleccionado.value = ""
-    cerramodal();
+const getAsignaturas = async () => {
+    const res = await axios.get('/calificacion/asignaturas-list');
+    asignaturas.value = res.data.datos;
+};
 
-}
+const abrirCrear = () => {
+    Object.assign(form, { id: null, nombre: '', estado: true });
+    modalCabecera.value = true;
+};
 
-const notificacion = (type, titulo, mensaje) => {
-    notification[type]({
-    message: titulo,
-    description: mensaje,
+const abrirEditar = (record) => {
+    Object.assign(form, {
+        id: record.id,
+        nombre: record.nombre,
+        estado: record.estado,
+    });
+    modalCabecera.value = true;
+};
+
+const guardarCabecera = async () => {
+    if (!form.nombre.trim()) {
+        message.warning('Ingrese un nombre');
+        return;
+    }
+    saving.value = true;
+    try {
+        const res = await axios.post('/calificacion/save-ponderacion', form);
+        message.success(res.data.estado ? 'Guardado correctamente' : 'Error al guardar');
+        modalCabecera.value = false;
+        await getPonderaciones();
+        if (!form.id && res.data.datos?.id) {
+            form.id = res.data.datos.id;
+            ponderacionSeleccionada.value = res.data.datos;
+            await abrirDetalle(res.data.datos);
+        }
+    } catch (e) {
+        message.error('Error: ' + (e.response?.data?.message || e.message));
+    } finally {
+        saving.value = false;
+    }
+};
+
+const abrirDetalle = async (record) => {
+    ponderacionSeleccionada.value = record;
+    modalDetalle.value = true;
+    try {
+        const res = await axios.get('/calificacion/get-ponderacion-detalle/' + record.id);
+        if (res.data.datos && res.data.datos.length > 0) {
+            detalle.value = res.data.datos.map((d) => ({
+                numero: d.numero,
+                id_asignatura: d.id_asignatura,
+                asignatura: d.asignatura,
+                cantidad_preguntas: d.cantidad_preguntas,
+                ponderacion: Number(d.ponderacion),
+                subtotal: Number(d.subtotal),
+            }));
+        } else {
+            cargarPlantilla();
+        }
+    } catch (e) {
+        cargarPlantilla();
+    }
+};
+
+const cargarPlantilla = () => {
+    detalle.value = asignaturas.value.map((a, i) => ({
+        numero: i + 1,
+        id_asignatura: a.id,
+        asignatura: a.nombre,
+        cantidad_preguntas: 0,
+        ponderacion: 0,
+        subtotal: 0,
+    }));
+};
+
+const agregarFila = () => {
+    detalle.value.push({
+        numero: detalle.value.length + 1,
+        id_asignatura: null,
+        asignatura: '',
+        cantidad_preguntas: 0,
+        ponderacion: 0,
+        subtotal: 0,
     });
 };
 
-const cerramodal = () => { visible.value = false; }
+const eliminarFila = (index) => {
+    detalle.value.splice(index, 1);
+    detalle.value.forEach((d, i) => d.numero = i + 1);
+};
 
-const ponderaciones = ref([])
+const onAsignaturaChange = (index, val) => {
+    const asig = asignaturas.value.find(a => a.id === val);
+    if (asig) detalle.value[index].asignatura = asig.nombre;
+    calcSubtotal(index);
+};
 
-const getPonderaciones =  async () => {
-    let res = await axios.post("get-ponderaciones?page=" + pagina.value, { term: buscar.value, paginasize: paginasize.value } );
-    ponderaciones.value = res.data.datos.data;
-    totalRegistros.value = res.data.datos.total;
-}
+const calcSubtotal = (index) => {
+    const d = detalle.value[index];
+    if (!d) return;
+    d.subtotal = (Number(d.cantidad_preguntas) || 0) * (Number(d.ponderacion) || 0);
+};
 
-
-const formPonderacion = ref()
-const ponderacion = reactive({ id:null, nombre:"", area:null, simulacro:"" })
-const buscarSimulacro = ref("")
-const simulacro = ref(null)
-const simulacros = ref([])
-
-const modalDetallePonderacion = ref(false)
-
-const getSimulacros = async () => {
-    axios.post("/get-simulacros",{"term": buscarSimulacro.value})
-    .then((response) => {
-        simulacros.value = response.data.datos.data;
-    })
-    .catch((error) => {
-        if (error.response) {
-            console.error('Error de servidor:', error.response.data);
-        } else if (error.request) {
-            console.error('Error de red:', error.request);
-            } else { console.error('Error de configuración:', error.message); }
-    });
-}
-
-const onSelect = (value, option) => { simulacro.value = option; };
-let timeoutIde;
-watch(buscarSimulacro, ( newValue, oldValue ) => { 
-    clearTimeout(timeoutIde);
-    timeoutIde = setTimeout(() => {
-        getSimulacros();
-    }, 500);    
-})
-
-
-const guardar = async () => {
-    loading.value = true;
+const guardarDetalle = async () => {
+    savingDetalle.value = true;
     try {
-        const values = await formPonderacion.value.validateFields();
-        axios.post("save-ponderacion", ponderacion).then((result) => {
-            notificacion('success',result.data.titulo, result.data.mensaje);
-            getPonderaciones()
-            visible.value = false;
+        const res = await axios.post('/calificacion/save-ponderacion-detalle', {
+            id_ponderacion: ponderacionSeleccionada.value.id,
+            detalles: detalle.value,
         });
-        
-    } catch (error) {
-        console.error(error);
+        message.success(res.data.mensaje || 'Detalle guardado');
+        await getPonderaciones();
+    } catch (e) {
+        message.error('Error: ' + (e.response?.data?.error || e.message));
+    } finally {
+        savingDetalle.value = false;
     }
+};
 
-}
-
-
-const saveDetalle = async () => {
-    loading.value = true;
+const duplicar = async (record) => {
     try {
-        axios.post("save-ponderacion-detalle", {"pesos":pesos.value, "id_ponderacion": id_ponderacion.value }).then((result) => {
-            notificacion('success',result.data.titulo, result.data.mensaje);
-            getPonderaciones()
-            visible.value = false;
-        });
-    } catch (error) {
-        console.error(error);
+        const res = await axios.post('/calificacion/duplicar-ponderacion/' + record.id);
+        message.success('Ponderación duplicada');
+        await getPonderaciones();
+    } catch (e) {
+        message.error('Error al duplicar');
     }
+};
 
-}
+const eliminar = async (record) => {
+    try {
+        await axios.delete('/calificacion/delete-ponderacion/' + record.id);
+        message.success('Ponderación eliminada');
+        await getPonderaciones();
+    } catch (e) {
+        message.error('Error al eliminar');
+    }
+};
 
-getSimulacros()
-getPonderaciones()
-
-const id_ponderacion = ref(null)
-const nroItems = ref(1);
-const pesos = ref([
-    {"nombre":null, "ponderacion":null, "n_preguntas":null}
-]);
-const abrirDetallePonderacion = (id) => {
-    modalDetallePonderacion.value = true;
-    id_ponderacion.value = id;
-}
-
-const agregarFila = () => { 
-    pesos.value.push({"nombre":null, "ponderacion":null, "n_preguntas":null});
-    nroItems.value += 1; 
-}
-
-
-    
-const layout = { labelCol: { span: 4, }, wrapperCol: { span: 20, } };
-const columnsFiliales = [
-    { title: 'N°', dataIndex: 'nro',},
-    { title: 'Nombre', dataIndex: 'nombre',},
-    { title: 'Area', dataIndex: 'area',},
-    { title: 'Acciones', dataIndex: 'acciones', align:'center', width:'96px'},
-];
-
+onMounted(() => {
+    getPonderaciones();
+    getAsignaturas();
+});
 </script>
-<style scoped>
-.acciones-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 0;
-}
-
-.accion-btn {
-    width: 30px;
-    height: 28px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
-}
-
-.accion-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.btn-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-}
-
-.btn-icon {
-    font-size: 14px;
-    transition: transform 0.2s ease;
-}
-
-.accion-btn:hover .btn-icon {
-    transform: scale(1.1);
-}
-
-.ver-btn {
-    color: #476175;
-    background: rgba(71, 97, 117, 0.08);
-}
-
-.ver-btn:hover {
-    color: #476175;
-    background: rgba(71, 97, 117, 0.12);
-    border-color: rgba(71, 97, 117, 0.3);
-}
-
-.editar-btn {
-    color: #1890ff;
-    background: rgba(24, 144, 255, 0.08);
-}
-
-.editar-btn:hover {
-    color: #1890ff;
-    background: rgba(24, 144, 255, 0.12);
-    border-color: rgba(24, 144, 255, 0.3);
-}
-
-.eliminar-btn {
-    color: #ff4d4f;
-    background: rgba(255, 77, 79, 0.08);
-}
-
-.eliminar-btn:hover {
-    color: #ff4d4f;
-    background: rgba(255, 77, 79, 0.12);
-    border-color: rgba(255, 77, 79, 0.3);
-}
-
-:deep(.ant-btn) {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-:deep(.ant-tooltip-inner) {
-    border-radius: 4px;
-    font-size: 12px;
-    padding: 4px 8px;
-}
-
-@media (max-width: 768px) {
-    .acciones-container {
-        gap: 2px;
-    }
-    
-    .accion-btn {
-        width: 28px;
-        height: 28px;
-    }
-    
-    .btn-icon {
-        font-size: 12px;
-    }
-}
-</style>

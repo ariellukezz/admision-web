@@ -12,14 +12,19 @@ class Excepciones extends Model
     protected $table = 'excepciones';
 
     protected $fillable = [
+        'id_examen_tipo',
         'nro_pregunta',
         'accion',
         'cod_examen',
         'observacion',
         'claves_validas',
         'puntaje',
-        'tipo',        
+        'tipo',
         'id_proceso'
     ];
-    
+
+    public function examenTipo()
+    {
+        return $this->belongsTo(ExamenTipo::class, 'id_examen_tipo');
+    }
 }

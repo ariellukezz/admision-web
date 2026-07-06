@@ -10,6 +10,6 @@ class Resp extends Model
     use HasFactory;
 
     protected $table = 'res';
-    protected $fillable = [ 'id', 'c1', 'n_lectura', 'c3', 'c4', 'c5', 'c6', 'c7',  'litho', 'tipo', 'respuestas','id_archivo'];
+    protected $fillable = [ 'id', 'c1', 'n_lectura', 'c3', 'c4', 'c5', 'c6', 'c7', 'litho', 'tipo', 'respuestas', 'id_archivo', 'id_examen_tipo', 'puntaje'];
 
 }

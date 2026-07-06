@@ -4,7 +4,7 @@
       <div class="mb-8">
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">Información adicional</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Información requerida por SUNEDU</h1>
             <p class="text-gray-600 mt-1">Complete todos los campos requeridos (*)</p>
           </div>
           <div class="hidden md:block">
@@ -30,7 +30,7 @@
             </div>
 
             <a-row :gutter="[16, 16]">
-              <a-col :xs="24" :md="8">
+              <a-col :xs="24" :md="10">
                 <a-form-item
                   label="¿Tiene discapacidad?"
                   name="discapacidad"
@@ -47,7 +47,7 @@
                 </a-form-item>
               </a-col>
 
-              <a-col :xs="24" :md="16">
+              <a-col :xs="24" :md="14">
                 <a-form-item
                   label="Tipo de discapacidad"
                   name="tipo_discapacidad"
@@ -87,11 +87,11 @@
           <section class="mb-10">
             <div class="flex items-center mb-6">
               <div class="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
-              <h2 class="text-lg font-semibold text-gray-900">Lengua Indígena</h2>
+              <h2 class="text-lg font-semibold text-gray-900">Lengua Indígena u originaria</h2>
             </div>
 
             <a-row :gutter="[16, 16]">
-              <a-col :xs="24" :md="8">
+              <a-col :xs="24" :md="10">
                 <a-form-item
                   label="¿Se identifica con alguna lengua indígena?"
                   name="id_condicion_lengua"
@@ -107,7 +107,7 @@
                 </a-form-item>
               </a-col>
 
-              <a-col :xs="24" :md="16">
+              <a-col :xs="24" :md="14">
                 <a-form-item
                   label="Lengua indígena"
                   name="id_lengua_indigena"
@@ -136,11 +136,11 @@
           <section>
             <div class="flex items-center mb-6">
               <div class="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
-              <h2 class="text-lg font-semibold text-gray-900">Pueblo Indígena</h2>
+              <h2 class="text-lg font-semibold text-gray-900">Pueblo Indígena u originario</h2>
             </div>
 
             <a-row :gutter="[16, 16]">
-              <a-col :xs="24" :md="8">
+              <a-col :xs="24" :md="10">
                 <a-form-item
                   label="¿Pertenece a algún pueblo indígena?"
                   name="id_pertenencia_cultural"
@@ -156,7 +156,7 @@
                 </a-form-item>
               </a-col>
 
-              <a-col :xs="24" :md="16">
+              <a-col :xs="24" :md="14">
                 <a-form-item
                   label="Pueblo indígena"
                   name="id_pueblo_indigena"
@@ -222,8 +222,6 @@ const tipos_discapacidad = [
   { value: 8, label: 'Parálisis Cerebral' },
   { value: 9, label: 'Discapacidad Intelectual' },
   { value: 10, label: 'Sordoceguera' },
-  { value: 11, label: 'No Cuenta con Información' },
-  { value: 12, label: 'Otros' },
   { value: 13, label: 'Sindrome de Asperger' },
   { value: 14, label: 'Hemiplejia no Identificada' },
   { value: 15, label: 'Estenosis Congénita de la Válvula Aortica' },
@@ -237,6 +235,7 @@ const tipos_discapacidad = [
   { value: 23, label: 'Talla Baja' },
   { value: 24, label: 'Talento' },
   { value: 25, label: 'Superdotación' },
+  { value: 12, label: 'Otros' },
 ]
 </script>
 

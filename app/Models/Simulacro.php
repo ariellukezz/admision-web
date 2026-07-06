@@ -18,4 +18,19 @@ class Simulacro extends Model
         'fecha',
         'id_usuario'
     ];
+
+    protected $casts = [
+        'estado' => 'integer',
+        'fecha' => 'date',
+    ];
+
+    public function examenAreas()
+    {
+        return $this->hasMany(ExamenSimulacro::class, 'id_simulacro');
+    }
+
+    public function archivos()
+    {
+        return $this->hasMany(ArchivoSimulacro::class, 'id_simulacro');
+    }
 }
