@@ -1285,9 +1285,10 @@ export const usePreinscripcionPregrado = (props) => {
 
   const getParticipanteCepre = async () => {
     datacepre.value = []
+    participa.value = 0
     try {
       let res = await axios.get('/get-participante-cepre/' + formState.dni)
-      if (res.data.estado === true) {
+      if (res.data.estado === true && res.data.datos?.habilitado === 1) {
         datacepre.value = res.data.datos
         datospersonales.nombres = datacepre.value.nombres
         datospersonales.primerapellido = datacepre.value.paterno
@@ -1298,14 +1299,16 @@ export const usePreinscripcionPregrado = (props) => {
         participa.value = 1
         getDataPrisma()
         getDatosPersonales2()
-      } else {
-        loading.value = false
-        modalSancionado.value = true
-        return
+        return true
       }
+
+      loading.value = false
+      modalSancionado.value = true
+      return false
     } catch (error) {
       console.error('Error al obtener datos del participante', error)
       loading.value = false
+      return false
     }
   }
 
@@ -1320,7 +1323,10 @@ export const usePreinscripcionPregrado = (props) => {
         pagina_pre.value = 7
       } else {
         if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
-          await getParticipanteCepre()
+          const puedeContinuar = await getParticipanteCepre()
+          if (!puedeContinuar) {
+            return
+          }
           participa.value = 1
         } else {
           await getDataPrisma()
@@ -1428,6 +1434,24 @@ export const usePreinscripcionPregrado = (props) => {
   const getCarrerasPreviasPostulacion = async () => {
     const response = await axios.get('/carreras-previas/' + formState.dni)
     carreras_previas.value = response.data.datos
+  }
+
+  const getCertificadoPreinscripcion = async () => {
+    if (!formState.dni) return
+    try {
+      const response = await axios.get('/get-certificado-preinscripcion/' + formState.dni)
+      if (response.data?.estado === true && response.data.datos) {
+        const certificado = response.data.datos
+        if (!datos_preinscripcion.tipo_certificado && certificado.tipo_certificado) {
+          datos_preinscripcion.tipo_certificado = certificado.tipo_certificado
+        }
+        if (!datos_preinscripcion.codigo_certificado && certificado.codigo_certificado) {
+          datos_preinscripcion.codigo_certificado = certificado.codigo_certificado
+        }
+      }
+    } catch (error) {
+      console.error('Error al obtener certificado previo:', error)
+    }
   }
 
   // ── UI helpers ────────────────────────────────────────────
@@ -1580,6 +1604,7 @@ export const usePreinscripcionPregrado = (props) => {
     }
     if (newValue === 7) {
       getModalidades()
+      getCertificadoPreinscripcion()
     }
   })
 
@@ -1720,6 +1745,7 @@ export const usePreinscripcionPregrado = (props) => {
     getDatosPersonales2,
     getCodigoAleatorio,
     getModalidades,
+    getCertificadoPreinscripcion,
     getProgramas,
     getProgramasArea,
     getAreaCodigo,

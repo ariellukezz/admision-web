@@ -13,6 +13,7 @@ use App\Models\Postulante;
 use App\Models\Apoderado;
 use App\Models\Paso;
 use App\Models\Cambio;
+use App\Models\Documento;
 use App\Mail\CodigoVerificacionDatos;
 use App\Models\Setting;
 use App\Models\SmtpAccount;
@@ -85,6 +86,40 @@ class PostulanteController extends Controller
     $this->response['datos'] = $res;
     $this->response['requires_email_verification'] = Setting::get('preinscripcion_email_verification', '1') === '1';
     return response()->json($this->response, 200);
+  }
+
+  public function getCertificadoPreinscripcion(Request $request, $dni = null)
+  {
+    $nroDoc = $dni ?? $request->nro_doc;
+    if (!$nroDoc) {
+        return response()->json(['estado' => false, 'mensaje' => 'El documento es obligatorio'], 422);
+    }
+
+    $postulante = Postulante::where('nro_doc', $nroDoc)->first();
+    if (!$postulante) {
+        return response()->json(['estado' => false, 'mensaje' => 'No se encontró el postulante'], 404);
+    }
+
+    $documento = Documento::where('id_postulante', $postulante->id)
+        ->where('id_tipo_documento', 1)
+        ->where('estado', 1)
+        ->where(function ($query) {
+            $query->whereNull('is_deleted')->orWhere('is_deleted', false);
+        })
+        ->orderByDesc('id')
+        ->first();
+
+    if (!$documento) {
+        return response()->json(['estado' => false, 'mensaje' => 'No hay certificado registrado'], 404);
+    }
+
+    return response()->json([
+        'estado' => true,
+        'datos' => [
+            'tipo_certificado' => $documento->observacion,
+            'codigo_certificado' => $documento->codigo,
+        ],
+    ], 200);
   }
 
   public function enviarCodigoVerificacionDatos(Request $request)

@@ -1048,7 +1048,7 @@ watch(mostrarModalProceso, (val) => {
 /* ═══ NOTIFICATION BELL ═══ */
 .btn-bell, .btn-bell-desktop {
   position: relative;
-  background: rgba(255,255,255,.1);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   border: none;
   border-radius: 8px;
   width: 36px;
@@ -1056,14 +1056,15 @@ watch(mostrarModalProceso, (val) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,.8);
+  color: #fff;
   cursor: pointer;
   transition: all .2s;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 .btn-bell svg, .btn-bell-desktop svg { width: 18px; height: 18px; }
-.btn-bell:hover, .btn-bell-desktop:hover { background: rgba(255,255,255,.2); color: #fff; }
-.btn-bell.active, .btn-bell-desktop.active { background: rgba(245,158,11,.25); color: #fbbf24; }
+.btn-bell:hover, .btn-bell-desktop:hover { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; transform: translateY(-1px); }
+.btn-bell.active, .btn-bell-desktop.active { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color: #fff; box-shadow: 0 6px 16px rgba(29, 78, 216, 0.3); }
 
 .btn-bell-desktop {
   display: none;

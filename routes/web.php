@@ -617,6 +617,7 @@ Route::post('/save-respuesta', [DetalleExamenVocacionalController::class, 'saveR
 Route::post('save-pasos-preinscripcion', [PreinscripcionController::class, 'savePasos']);
 Route::post('/get-postulante-datos-personales', [PostulanteController::class, 'getPostulanteXDni']);
 Route::post('/get-postulante-datos-personales2', [PostulanteController::class, 'getPostulanteXDni2']);
+Route::get('/get-certificado-preinscripcion/{dni}', [PostulanteController::class, 'getCertificadoPreinscripcion']);
 Route::post('/enviar-codigo-verificacion-datos', [PostulanteController::class, 'enviarCodigoVerificacionDatos']);
 Route::post('/verificar-codigo-datos', [PostulanteController::class, 'verificarCodigoDatos']);
 Route::post('/save-postulante-dni', [PostulanteController::class, 'saveDniPostulante']);
