@@ -427,7 +427,7 @@ export const usePreinscripcionPregrado = (props) => {
         if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null }
         modalCargarDatos.value = false
         resetCodigoVerificacion()
-        await cargarDatosYNavegar()
+        await cargarDatosYNavegar(false)
       } else {
         codigoError.value = res.data.mensaje || 'Código incorrecto'
       }
@@ -555,7 +555,7 @@ export const usePreinscripcionPregrado = (props) => {
   }
 
   // Load postulante data and navigate to last registered step
-  const cargarDatosYNavegar = async () => {
+  const cargarDatosYNavegar = async (mostrarModalCepre = true) => {
     loading.value = true
     try {
       await getDatosPersonales2()
@@ -565,7 +565,7 @@ export const usePreinscripcionPregrado = (props) => {
         await navegarSegunPaso()
         loading.value = false
       } else {
-        if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
+        if (props.procceso_seleccionado.id_modalidad_proceso == 2 && mostrarModalCepre) {
           // CEPREUNA — eligibility already verified, show carreras previas
           participa.value = 1
           getDataPrisma()
@@ -1325,8 +1325,9 @@ export const usePreinscripcionPregrado = (props) => {
         // Check for existing data before loading CEPREUNA data
         const tieneDatos = await verificarDatosExistentes()
         if (tieneDatos) {
-          // "Load data?" modal is showing or data was loaded via cargarDatosYNavegar
-          // loading is managed by the respective flow
+          // "Load data?" modal is showing or data was loaded via cargarDatosYNavegar.
+          // Close CarrerasPreviasModal to avoid double modals; loading is managed by the respective flow
+          modalcarrerasprevias.value = false
           return true
         }
         // No existing data — load CEPREUNA data

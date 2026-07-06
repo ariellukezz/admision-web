@@ -413,6 +413,12 @@ const {
 // Close verification modal and check for existing data
 const handleCerrarVerificacion = async () => {
   modalcarrerasprevias.value = false
+  if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
+    // CEPREUNA — data was already verified during getParticipanteCepre flow
+    pagina_pre.value = 1
+    loading.value = false
+    return
+  }
   const tieneDatos = await verificarDatosExistentes()
   if (!tieneDatos) {
     // No existing data — fetch from external API and go to step 1
