@@ -44,6 +44,8 @@ use App\Http\Controllers\CarpetaController;
 use App\Http\Controllers\CertificadoFirmaController;
 use App\Http\Controllers\AuditTrailController;
 use App\Http\Controllers\PonderacionController;
+use App\Http\Controllers\AsignaturaController;
+use App\Http\Controllers\ExcepcionesController;
 use App\Http\Controllers\ProgramaProcesoController;
 use App\Http\Controllers\SancionadoController;
 use App\Http\Controllers\CepreController;
@@ -95,6 +97,8 @@ Route::middleware('auth')->get('/', function () {
 Route::get('/dashboard', function () {
     return redirect()->route('admin-dashboard');
 })->middleware(['auth', 'verified','revisor','admin'])->name('dashboard');
+
+Route::get('/preinscripcion/verification-setting', [SettingController::class, 'getPreinscripcionEmailVerification']);
 
 Route::middleware('auth')->group(function () {
     Route::post('/fcm-token', [PostulanteDocumentoController::class, 'registrarFcmToken'])->name('fcm-token');
@@ -591,40 +595,7 @@ Route::prefix('simulacros')->group(function () {
 
 
 
-Route::prefix('calificacion')->group(function () {
-
-    Route::get('/', fn () => Inertia::render('Simulacro/Calificacion/calificacion'))->name('calificar-cal') ;
-
-    Route::get('/subir-resultado', fn () => Inertia::render('Simulacro/SubirResultado'));
-    Route::get('/resultado-simulacro', fn () => Inertia::render('Simulacro/resultados'));
-    Route::post('/subir-excel-simulacro', [ResultadosController::class, 'SubirResultado']);
-
-    //CALIFICACIÓN
-    Route::get('/calificacion', fn () => Inertia::render('Simulacro/Calificacion/lecturas'))->name('simulacro-calificacion');
-    Route::post('/carga-ide', [ResultadosController::class, 'cargaArchivoIde']);
-    Route::post('/actualizar-ide', [ResultadosController::class, 'actualizarIde']);
-
-
-    //TEMP
-    Route::post('/carga-ide/{proceso}/{area}', [ResultadosController::class, 'cargaArchivoIde'])->withoutMiddleware(['web']);
-    Route::post('/carga-res/{proceso}', [ResultadosController::class, 'cargaArchivoRes'])->withoutMiddleware(['web']);
-    Route::post('/carga-pat/{proceso}', [ResultadosController::class, 'cargaArchivoPat'])->withoutMiddleware(['web']);
-
-    Route::get('/get-select-puestos/{id_proceso}', [ResultadosController::class, 'selectPuestos']);
-    // Route::post('/carga-res', [ResultadosController::class, 'cargaArchivoRes']);
-    Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
-
-    Route::get('/descargar-excel', [ResultadosController::class, 'descargarExcel']);
-    Route::get('/ponderacion', fn () => Inertia::render('Simulacro/Calificacion/ponderacion'))->name('calificar-ponderacion');
-
-    Route::post('/save-ponderacion', [PonderacionController::class, 'save']);
-    Route::post('/get-ponderaciones', [PonderacionController::class, 'getPonderaciones']);
-    Route::post('/save-ponderacion-detalle', [PonderacionController::class, 'insertarPonderacion']);
-
-    Route::post('/get-ponderaciones-select', [PonderacionController::class, 'getPonderacionesSelect']);
-
-
-});
+require __DIR__.'/calificacion.php';
 Route::post('/get-puntaje-simulacro', [ResultadosController::class, 'getResultados']);
 
 
@@ -744,7 +715,6 @@ Route::get('/distribucion', [TestController::class, 'Distribucion']);
 Route::get('/pdf-lista', [TestController::class, 'pdfLista']);
 
 Route::get('/aleatorizar', [PruebasController::class, 'aleatorizar']);
-Route::get('/c-ides-bd/{area}', [ResultadosController::class, 'cargarIdeBD']);
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('raiz')->group(function () {
@@ -758,9 +728,6 @@ Route::middleware(['web'])->group(function () {
 Route::middleware('redirect')->get('/', fn () => Inertia::render('Auth/Login'));
 
 //RUTAS TEMPORALES
-Route::get('/leer-ides', fn () => Inertia::render('Simulacro/Calificacion/components/leer-ide'));
-Route::get('/leer-ide/{area}', [ResultadosController::class, 'leerIde']);
-
 Route::post('/get-sim', [SimulacroController::class, 'getSimulacros']);
 Route::post('/get-archivos', [ResultadosController::class, 'getArchivosIde']);
 Route::post('/get-archivos-res', [ResultadosController::class, 'getArchivosRes']);
@@ -780,7 +747,6 @@ Route::get('/ver-ficha', fn () => Inertia::render('Simulacro/Calificacion/compon
 Route::post('/get-simulacros', [SimulacroController::class, 'getSimulacrosSelect']);
 Route::get('/get-ficha-respuesta/{id}', [ResultadosController::class, 'getFichaRespuesta']);
 
-Route::get('/calific/{a}', [ResultadosController::class, 'Calificar']);
 Route::get('/pdf-errores/{D}', [ResultadosController::class, 'PdfErroresCalifacion']);
 
 Route::post('/calificar-examen', [ResultadosController::class, 'CalificarExamen']);
@@ -902,6 +868,7 @@ Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::c
 
 Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipantes']);
 Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
+Route::delete('/participantes/{id}', [ResultadosController::class, 'eliminarParticipante']);
 
 
 Route::get('/verificar/{codigo}', [FirmaController::class, 'verificarFirma']);

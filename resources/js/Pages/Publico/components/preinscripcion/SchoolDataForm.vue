@@ -103,8 +103,9 @@
                   :field-names="{ value: 'key', label: 'value' }"
                   :filter-option="false"
                   @search="handleSearchUbigeoCole"
+                  @dropdownVisibleChange="handleDropdownVisibleChange"
                   @change="(val) => onSelectUbigeoCole(val)"
-                  placeholder="Ej: 010101, Amazonas, Chachapoyas..."
+                  placeholder="Escribe para buscar ubigeo"
                   size="large"
                   class="w-full"
                   allow-clear
@@ -123,7 +124,7 @@
                     @change="(val) => onSelectColegio(val)"
                     :options="colegios"
                     :field-names="{ value: 'value', label: 'label' }"
-                    placeholder="Seleccione su colegio"
+                    placeholder="Escribe para buscar colegio"
                     size="large"
                     class="w-full"
                     show-search
@@ -181,10 +182,19 @@ const formDatosColegio = ref(null)
 let searchTimer = null
 
 const handleSearchUbigeoCole = (value) => {
-  if (searchTimer) clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    props.getUbigeosCole(value)
-  }, 300)
+  const term = (value || '').trim()
+  if (!term || term.length >= 2) {
+    if (searchTimer) clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+      props.getUbigeosCole(term)
+    }, 250)
+  }
+}
+
+const handleDropdownVisibleChange = (open) => {
+  if (open && (!props.ubigeoColeOptions || props.ubigeoColeOptions.length === 0)) {
+    props.getUbigeosCole('')
+  }
 }
 
 const filterOption = (input, option) => {
@@ -195,6 +205,9 @@ onMounted(async () => {
   await nextTick()
   if (props.setFormDatosColegio && formDatosColegio.value) {
     props.setFormDatosColegio(formDatosColegio.value)
+  }
+  if (!props.ubigeoColeOptions?.length) {
+    props.getUbigeosCole('')
   }
 })
 </script>

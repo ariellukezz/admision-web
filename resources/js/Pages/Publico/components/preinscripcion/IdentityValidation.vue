@@ -70,7 +70,7 @@
                 <div class="w-full border-t border-gray-200"></div>
               </div>
               <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white text-gray-500 font-medium">Código de Verificación</span>
+                <span class="px-2 bg-white text-gray-500 font-medium">Código de Seguridad</span>
               </div>
             </div>
 
@@ -250,6 +250,7 @@ const props = defineProps({
   codigoExpirado: Boolean,
   codigoError: [String, null],
   emailMasked: [String, null],
+  requiereCodigoVerificacion: Boolean,
   countdownSegundos: Number,
   setFormRef: Function,
   dniInput: Function,

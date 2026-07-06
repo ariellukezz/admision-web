@@ -94,8 +94,9 @@
                       :field-names="{ value: 'key', label: 'value' }"
                       :filter-option="false"
                       @search="handleSearchUbigeoRes"
+                      @dropdownVisibleChange="handleDropdownVisibleChange"
                       @change="(val) => onSelectUbigeoRes(val)"
-                      placeholder="Ej: 010101, Amazonas, Chachapoyas..."
+                      placeholder="Escribe para buscar ubigeo"
                       size="large"
                       class="w-full"
                       allow-clear
@@ -151,16 +152,28 @@ const formDatosResidencia = ref(null)
 let searchTimer = null
 
 const handleSearchUbigeoRes = (value) => {
-  if (searchTimer) clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    props.getUbigeosRes(value)
-  }, 300)
+  const term = (value || '').trim()
+  if (!term || term.length >= 2) {
+    if (searchTimer) clearTimeout(searchTimer)
+    searchTimer = setTimeout(() => {
+      props.getUbigeosRes(term)
+    }, 250)
+  }
+}
+
+const handleDropdownVisibleChange = (open) => {
+  if (open && (!props.ubigeoResOptions || props.ubigeoResOptions.length === 0)) {
+    props.getUbigeosRes('')
+  }
 }
 
 onMounted(async () => {
   await nextTick()
   if (props.setFormDatosResidencia && formDatosResidencia.value) {
     props.setFormDatosResidencia(formDatosResidencia.value)
+  }
+  if (!props.ubigeoResOptions?.length) {
+    props.getUbigeosRes('')
   }
 })
 </script>

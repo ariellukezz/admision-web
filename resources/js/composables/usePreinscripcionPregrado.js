@@ -114,6 +114,7 @@ export const usePreinscripcionPregrado = (props) => {
   const datosPrevios = ref(null)
   const enviandoCodigo = ref(false)
   const verificandoCodigo = ref(false)
+  const requiereCodigoVerificacion = ref(true)
   const codigoVerificacion = ref('')
   const codigoEnviado = ref(false)
   const codigoExpirado = ref(false)
@@ -349,11 +350,21 @@ export const usePreinscripcionPregrado = (props) => {
     }
   }
 
+  const cargarConfiguracionVerificacion = async () => {
+    try {
+      const res = await axios.get('/preinscripcion/verification-setting')
+      requiereCodigoVerificacion.value = res.data.estado !== false
+    } catch (error) {
+      console.error('Error al cargar la configuración de verificación:', error)
+    }
+  }
+
   const verificarDatosExistentes = async () => {
     try {
       let res = await axios.post('/get-postulante-datos-personales2', { nro_doc: formState.dni })
       if (res.data.datos && res.data.datos.length > 0) {
         datosPrevios.value = res.data.datos[0]
+        requiereCodigoVerificacion.value = res.data.requires_email_verification !== false
         // If email verification is disabled, load data and navigate directly
         if (res.data.requires_email_verification === false) {
           modalCargarDatos.value = false
@@ -994,7 +1005,9 @@ export const usePreinscripcionPregrado = (props) => {
   // ── Unified ubigeo search (nacimiento) ─────────────────────
   const getUbigeosNac = async (term) => {
     let res = await axios.post('/get-ubigeo', { term: term || '' })
-    ubigeoNacOptions.value = res.data.datos.data
+    const options = res.data.datos.data || []
+    const limited = options.slice(0, 10)
+    ubigeoNacOptions.value = limited
   }
 
   const onSelectUbigeoNac = (value) => {
@@ -1005,7 +1018,9 @@ export const usePreinscripcionPregrado = (props) => {
   // ── Unified ubigeo search (residencia) ─────────────────────
   const getUbigeosRes = async (term) => {
     let res = await axios.post('/get-ubigeo', { term: term || '' })
-    ubigeoResOptions.value = res.data.datos.data
+    const options = res.data.datos.data || []
+    const limited = options.slice(0, 10)
+    ubigeoResOptions.value = limited
   }
 
   const onSelectUbigeoRes = (value) => {
@@ -1028,7 +1043,7 @@ export const usePreinscripcionPregrado = (props) => {
   // ── Unified ubigeo search (colegio) ────────────────────────
   const getUbigeosCole = async (term) => {
     let res = await axios.post('/get-ubigeo', { term: term || '' })
-    const newOptions = res.data.datos.data
+    const newOptions = (res.data.datos.data || []).slice(0, 10)
     if (ubigeoColeSeleccionado.value) {
       const exists = newOptions.some(o => o.key === ubigeoColeSeleccionado.value)
       if (!exists) {
@@ -1570,6 +1585,7 @@ export const usePreinscripcionPregrado = (props) => {
 
   // ── Init ──────────────────────────────────────────────────
   getCodigoAleatorio()
+  cargarConfiguracionVerificacion()
 
   // ── Return ─────────────────────────────────────────────────
   return {
@@ -1800,6 +1816,7 @@ export const usePreinscripcionPregrado = (props) => {
     iniciarPostulacion,
 
     // Code verification
+    requiereCodigoVerificacion,
     enviandoCodigo,
     verificandoCodigo,
     codigoVerificacion,

@@ -15,7 +15,7 @@
           <div class="flex items-center gap-4">
             <!-- Toggle email verification -->
             <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
-              <span class="text-sm font-medium text-gray-700">Verificación por correo</span>
+              <span class="text-sm font-medium text-gray-700">Verificación de preinscripción</span>
               <a-switch
                 :checked="emailVerificationEnabled"
                 @change="toggleEmailVerification"

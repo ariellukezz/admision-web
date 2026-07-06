@@ -10,6 +10,7 @@
       :datoscolegio="datoscolegio"
       :datospadre="datospadre"
       :datosmadre="datosmadre"
+      :datos_transversales="datos_transversales"
       :datos_preinscripcion="datos_preinscripcion"
       :checkbox1="checkbox1"
       :temp_date="temp_date"
@@ -19,6 +20,10 @@
       :estados_civil="estados_civil"
       :sexos="sexos"
       :programas="programas"
+      :condiciones_lengua="condiciones_lengua"
+      :lenguas_indigenas="lenguas_indigenas"
+      :opciones_pertenencia_cultural="opciones_pertenencia_cultural"
+      :pueblos_indigenas="pueblos_indigenas"
       @close="open = false"
       @submit="submit"
       @update:checkbox1="(val) => checkbox1 = val"
@@ -91,6 +96,7 @@
       :codigoExpirado="codigoExpirado"
       :codigoError="codigoError"
       :emailMasked="emailMasked"
+      :requiereCodigoVerificacion="requiereCodigoVerificacion"
       :countdownSegundos="countdownSegundos"
       :setFormRef="setFormRef"
       :dniInput="dniInput"
@@ -390,6 +396,7 @@ const {
   codigoExpirado,
   codigoError,
   emailMasked,
+  requiereCodigoVerificacion,
   countdownSegundos,
   solicitarCodigoVerificacion,
   verificarCodigoYCargar,

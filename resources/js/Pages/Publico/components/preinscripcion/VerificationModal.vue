@@ -190,6 +190,47 @@
           </div>
         </div>
 
+        <!-- Datos Adicionales (SUNEDU) -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Datos Adicionales (SUNEDU)
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">¿Tiene discapacidad?</div>
+              <div class="text-gray-900 font-medium">{{ discapacidadLabel }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">Tipo de discapacidad</div>
+              <div class="text-gray-900 font-medium">{{ tipoDiscapacidadLabel }}</div>
+            </div>
+            <div v-if="datos_transversales?.tipo_discapacidad === 12 && datos_transversales?.tipo_discapacidad_otro" class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">Especificación de discapacidad</div>
+              <div class="text-gray-900 font-medium">{{ datos_transversales.tipo_discapacidad_otro }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">¿Se identifica con alguna lengua indígena?</div>
+              <div class="text-gray-900 font-medium">{{ condicionLenguaLabel }}</div>
+            </div>
+            <div v-if="datos_transversales?.id_condicion_lengua === SI_LENGUA_ID" class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">Lengua indígena</div>
+              <div class="text-gray-900 font-medium">{{ lenguaIndigenaLabel }}</div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">¿Pertenece a algún pueblo indígena?</div>
+              <div class="text-gray-900 font-medium">{{ pertenenciaCulturalLabel }}</div>
+            </div>
+            <div v-if="datos_transversales?.id_pertenencia_cultural === SI_PUEBLO_ID" class="bg-gray-50 rounded-lg p-4">
+              <div class="text-sm font-medium text-gray-500 mb-1">Pueblo indígena</div>
+              <div class="text-gray-900 font-medium">{{ puebloIndigenaLabel }}</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Datos de Postulación -->
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -273,6 +314,9 @@
 <script setup>
 import { computed } from 'vue'
 
+const SI_LENGUA_ID = '820ddc3b-dad9-4fce-8d58-942d1c46c4ab'
+const SI_PUEBLO_ID = '47de46ba-be45-41a6-a542-6f88fcd4653c'
+
 const props = defineProps({
   visible: Boolean,
   datospersonales: Object,
@@ -280,6 +324,7 @@ const props = defineProps({
   datoscolegio: Object,
   datospadre: Object,
   datosmadre: Object,
+  datos_transversales: Object,
   datos_preinscripcion: Object,
   checkbox1: Boolean,
   temp_date: [String, null],
@@ -289,9 +334,40 @@ const props = defineProps({
   estados_civil: Object,
   sexos: Object,
   programas: Array,
+  condiciones_lengua: Array,
+  lenguas_indigenas: Array,
+  opciones_pertenencia_cultural: Array,
+  pueblos_indigenas: Array,
 })
 
 defineEmits(['close', 'submit', 'update:checkbox1'])
+
+const tipos_discapacidad = [
+  { value: 1, label: 'Discapacidad Motriz' },
+  { value: 2, label: 'Discapacidad Visual' },
+  { value: 3, label: 'Visual y Esquema Corporal' },
+  { value: 4, label: 'Disminuidos Visuales' },
+  { value: 5, label: 'Discapacidad Auditiva' },
+  { value: 6, label: 'Autismo' },
+  { value: 7, label: 'Discapacidad Mental' },
+  { value: 8, label: 'Parálisis Cerebral' },
+  { value: 9, label: 'Discapacidad Intelectual' },
+  { value: 10, label: 'Sordoceguera' },
+  { value: 13, label: 'Sindrome de Asperger' },
+  { value: 14, label: 'Hemiplejia no Identificada' },
+  { value: 15, label: 'Estenosis Congénita de la Válvula Aortica' },
+  { value: 16, label: 'Multidiscapacidad' },
+  { value: 17, label: 'Discapacidad Fisica' },
+  { value: 18, label: 'Transtorno del Espectro Autista' },
+  { value: 19, label: 'T. por Déficit de Atención con Hiperactividad' },
+  { value: 20, label: 'T. Especifico del Aprendizaje' },
+  { value: 21, label: 'T. Mentales y del Comportamiento' },
+  { value: 22, label: 'Enfermedades Raras' },
+  { value: 23, label: 'Talla Baja' },
+  { value: 24, label: 'Talento' },
+  { value: 25, label: 'Superdotación' },
+  { value: 12, label: 'Otros' },
+]
 
 const modalidadLabels = {
   9: 'CEPREUNA',
@@ -313,6 +389,48 @@ const modalidadLabel = computed(() => {
 const programaLabel = computed(() => {
   const programa = props.programas?.find(p => p.value === props.datos_preinscripcion.programa)
   return programa?.label || 'No especificado'
+})
+
+const discapacidadLabel = computed(() => {
+  const val = props.datos_transversales?.discapacidad
+  if (val === 1) return 'Sí'
+  if (val === 0) return 'No'
+  return 'No especificado'
+})
+
+const tipoDiscapacidadLabel = computed(() => {
+  const val = props.datos_transversales?.tipo_discapacidad
+  if (!val || val === 0 || val === '0' || val === '') return 'No especificado'
+  const tipo = tipos_discapacidad.find(t => t.value === val)
+  return tipo?.label || 'No especificado'
+})
+
+const condicionLenguaLabel = computed(() => {
+  const id = props.datos_transversales?.id_condicion_lengua
+  if (!id) return 'No especificado'
+  const item = props.condiciones_lengua?.find(c => c.id === id)
+  return item?.descripcion || 'No especificado'
+})
+
+const lenguaIndigenaLabel = computed(() => {
+  const id = props.datos_transversales?.id_lengua_indigena
+  if (!id) return 'No especificado'
+  const item = props.lenguas_indigenas?.find(l => l.id === id)
+  return item?.descripcion || 'No especificado'
+})
+
+const pertenenciaCulturalLabel = computed(() => {
+  const id = props.datos_transversales?.id_pertenencia_cultural
+  if (!id) return 'No especificado'
+  const item = props.opciones_pertenencia_cultural?.find(o => o.id === id)
+  return item?.descripcion || 'No especificado'
+})
+
+const puebloIndigenaLabel = computed(() => {
+  const id = props.datos_transversales?.id_pueblo_indigena
+  if (!id) return 'No especificado'
+  const item = props.pueblos_indigenas?.find(p => p.id === id)
+  return item?.descripcion || 'No especificado'
 })
 </script>
 
