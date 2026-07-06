@@ -523,7 +523,14 @@ export const usePreinscripcionPregrado = (props) => {
     ubigeoResSeleccionado.value = null
     datosresidencia.ubigeo_res = null
     modalCargarDatos.value = false
-    pagina_pre.value = 1
+    if (props.procceso_seleccionado.id_modalidad_proceso == 2 && datacepre.value) {
+      // CEPREUNA — eligibility already verified, load CEPREUNA data and show carreras previas
+      cargarDatosCepre()
+      modalcarrerasprevias.value = true
+    } else {
+      pagina_pre.value = 1
+      loading.value = false
+    }
   }
 
   // Navigate to the correct step based on ultimopaso
@@ -556,13 +563,21 @@ export const usePreinscripcionPregrado = (props) => {
       if (res.data.estado == true) {
         ultimopaso.value = res.data.datos
         await navegarSegunPaso()
+        loading.value = false
       } else {
-        pagina_pre.value = 1
+        if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
+          // CEPREUNA — eligibility already verified, show carreras previas
+          participa.value = 1
+          getDataPrisma()
+          modalcarrerasprevias.value = true
+        } else {
+          pagina_pre.value = 1
+          loading.value = false
+        }
       }
     } catch (error) {
       console.error('Error al cargar datos y navegar:', error)
       pagina_pre.value = 1
-    } finally {
       loading.value = false
     }
   }
@@ -571,13 +586,14 @@ export const usePreinscripcionPregrado = (props) => {
   const iniciarPostulacion = async () => {
     loading.value = true
     try {
-      // Always check for existing data — verification required to protect postulante data
-      const tieneDatos = await verificarDatosExistentes()
-      if (tieneDatos) {
-        loading.value = false
-        return // Modal is showing, wait for user to verify code
+      // For CEPREUNA, check eligibility first — data verification happens after
+      if (props.procceso_seleccionado.id_modalidad_proceso != 2) {
+        const tieneDatos = await verificarDatosExistentes()
+        if (tieneDatos) {
+          loading.value = false
+          return
+        }
       }
-      // No existing data — proceed with normal registration flow
       await getPasoRegistrado()
       if (ultimopaso.value) {
         await navegarSegunPaso()
@@ -1285,6 +1301,20 @@ export const usePreinscripcionPregrado = (props) => {
     }
   }
 
+  const cargarDatosCepre = () => {
+    if (datacepre.value) {
+      datospersonales.nombres = datacepre.value.nombres
+      datospersonales.primerapellido = datacepre.value.paterno
+      datospersonales.segundo_apellido = datacepre.value.materno
+      datospersonales.sexo = datacepre.value.sexo
+      datospersonales.ubigeo_residencia = datacepre.value.codigo_distrito
+      datoscolegio.egreso = datacepre.value.anio_egreso
+    }
+    participa.value = 1
+    getDataPrisma()
+    getDatosPersonales2()
+  }
+
   const getParticipanteCepre = async () => {
     datacepre.value = []
     participa.value = 0
@@ -1292,15 +1322,15 @@ export const usePreinscripcionPregrado = (props) => {
       let res = await axios.get('/get-participante-cepre/' + formState.dni)
       if (res.data.estado === true && res.data.datos?.habilitado === 1) {
         datacepre.value = res.data.datos
-        datospersonales.nombres = datacepre.value.nombres
-        datospersonales.primerapellido = datacepre.value.paterno
-        datospersonales.segundo_apellido = datacepre.value.materno
-        datospersonales.sexo = datacepre.value.sexo
-        datospersonales.ubigeo_residencia = datacepre.value.codigo_distrito
-        datoscolegio.egreso = datacepre.value.anio_egreso
-        participa.value = 1
-        getDataPrisma()
-        getDatosPersonales2()
+        // Check for existing data before loading CEPREUNA data
+        const tieneDatos = await verificarDatosExistentes()
+        if (tieneDatos) {
+          // "Load data?" modal is showing or data was loaded via cargarDatosYNavegar
+          // loading is managed by the respective flow
+          return true
+        }
+        // No existing data — load CEPREUNA data
+        cargarDatosCepre()
         return true
       }
 

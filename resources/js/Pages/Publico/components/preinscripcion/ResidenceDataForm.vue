@@ -80,12 +80,14 @@
                   </a-form-item>
                 </div>
 
-                <div v-if="datospersonales.tipo_doc === 1">
+                <div class="col-span-1 md:col-span-3" v-if="datospersonales.tipo_doc === 1">
                   <a-form-item
                     label="Ubigeo de Residencia"
                     name="ubigeo_res"
                     :rules="[{ required: true, message: 'Seleccione su ubigeo de residencia' }]"
-                    class="mb-0"
+                    size="large"
+                    class="w-full mb-0"
+                    
                   >
                     <a-select
                       :value="ubigeoResSeleccionado"

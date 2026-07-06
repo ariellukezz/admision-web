@@ -212,9 +212,11 @@
                     :rules="[{ required: true, message: 'Ingrese el código de certificado' }]"
                     class="mb-0"
                   >
-                    <div class="flex justify-between items-center mb-1">
+                    <div class="flex justify-between items-center mb-1" style="position: relative; background: yellow;">
                       <span></span>
-                      <span class="text-sm text-blue-600 cursor-pointer hover:text-blue-800" @click="$emit('showExample')">ver ejemplo</span>
+                      <div style="position:absolute; bottom: 10px; right:0px;">
+                        <span class="text-sm text-blue-600 cursor-pointer hover:text-blue-800" @click="$emit('showExample')">ver ejemplo</span>
+                      </div>
                     </div>
                     <a-input
                       :value="datos_preinscripcion.codigo_certificado"

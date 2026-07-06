@@ -44,7 +44,7 @@
           <p class="text-center mx-4" style="font-size:1.1rem;">El participante no reúne las condiciones para participar en este proceso.</p>
         </div>
         <div class="flex justify-center">
-          <a-button @click="$emit('cancel')" style="background:teal; color:white; font-weight:bold; height:40px; width:110px; border-radius:8px; border:none;">
+          <a-button @click="$emit('cancel')" type="primary" style="font-weight:bold; height:40px; width:100%; border-radius:8px; border:none;">
             Aceptar
           </a-button>
         </div>
