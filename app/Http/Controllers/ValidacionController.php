@@ -8,17 +8,19 @@ use App\Models\Postulante;
 class ValidacionController extends Controller {
 
     public function existeCelular(Request $request) {
-        $postulante = Postulante::where('celular', $request->celular)->first();
-        if (!$postulante) {return response()->json(false, 200); }   
-        $nro_doc_correcto = $postulante->nro_doc == $request->dni;
-        return response()->json(!$nro_doc_correcto, 200);
+        $existeEnOtroDni = Postulante::where('celular', $request->celular)
+            ->where('nro_doc', '!=', $request->dni)
+            ->exists();
+
+        return response()->json($existeEnOtroDni, 200);
     }
 
     public function existeCorreo(Request $request) {
-        $postulante = Postulante::where('email', $request->email)->first();
-        if (!$postulante) {return response()->json(false, 200); }   
-        $nro_doc_correcto = $postulante->nro_doc == $request->dni;
-        return response()->json(!$nro_doc_correcto, 200);
+        $existeEnOtroDni = Postulante::where('email', $request->email)
+            ->where('nro_doc', '!=', $request->dni)
+            ->exists();
+
+        return response()->json($existeEnOtroDni, 200);
     }
 
     

@@ -260,8 +260,11 @@ class PostulanteController extends Controller
       $solo_unapellido = 0;
     }
 
-    $postulante = null;
-    if (!$request->id) {
+    $postulante = $request->id
+        ? Postulante::find($request->id)
+        : Postulante::where('nro_doc', $request->nro_doc)->first();
+
+    if (!$postulante) {
         $postulante = Postulante::create([
             'tipo_doc' => $request->tipo_doc,
             'nro_doc' => $request->nro_doc,
@@ -283,7 +286,6 @@ class PostulanteController extends Controller
         $this->response['estado'] = true;
         $this->response['datos'] = $postulante;
     } else {
-        $postulante = Postulante::find($request->id);
         $postulante->tipo_doc = $request->tipo_doc;
         $postulante->nro_doc = $request->nro_doc;
         $postulante->nro_doc_opcional = strlen($request->nro_doc) > 8 ? $request->nro_doc : null;

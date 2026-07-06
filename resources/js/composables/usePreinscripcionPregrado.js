@@ -502,7 +502,8 @@ export const usePreinscripcionPregrado = (props) => {
 
   const rechazarCargarDatos = () => {
     resetCodigoVerificacion()
-    datospersonales.id = null
+    const d = datosPrevios.value
+    datospersonales.id = d?.id ?? null
     datospersonales.primerapellido = ''
     datospersonales.segundo_apellido = ''
     datospersonales.nombres = ''
@@ -512,6 +513,7 @@ export const usePreinscripcionPregrado = (props) => {
     datospersonales.celular = ''
     datospersonales.fec_nacimiento = ''
     datospersonales.ubigeo = ''
+    datospersonales.nacimiento_label = ''
     datosresidencia.direccion = ''
     datosresidencia.dep = null
     datosresidencia.prov = null
