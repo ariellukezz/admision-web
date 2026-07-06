@@ -1320,7 +1320,7 @@ export const usePreinscripcionPregrado = (props) => {
     participa.value = 0
     try {
       let res = await axios.get('/get-participante-cepre/' + formState.dni)
-      if (res.data.estado === true && res.data.datos?.habilitado === 1) {
+      if (res.data.estado === true && String(res.data.datos?.habilitado) === '1') {
         datacepre.value = res.data.datos
         // Check for existing data before loading CEPREUNA data
         const tieneDatos = await verificarDatosExistentes()

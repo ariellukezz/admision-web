@@ -22,9 +22,11 @@ class CepreController extends Controller
             ]);
 
             $data = json_decode($response->getBody(), true);
-            if(count($data) > 0 && $data[0]['habilitado'] == 1){
+            $participante = isset($data[0]) ? $data[0] : $data;
+
+            if(!empty($participante) && isset($participante['habilitado']) && (string) $participante['habilitado'] === '1'){
                 $this->response['estado'] = true;
-                $this->response['datos'] = $data[0];
+                $this->response['datos'] = $participante;
                 return response()->json($this->response, 200);
             }else { 
                 $this->response['estado'] = false;
