@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use App\Models\User;
 
 class FotoController extends Controller {
 
@@ -56,12 +58,37 @@ class FotoController extends Controller {
         return response()->json(['error' => 'No se proporcionó ninguna foto recortada'], 400);
     }
 
-    public function getCodigoConexion()
+    public function generarCodigoConexion()
     {
+        $user = auth()->user();
+        $intentos = 0;
+        do {
+            $codigoConexion = random_int(100000, 999999);
+            $intentos++;
+        } while (
+            $intentos < 10 && 
+            User::where('codigo_conexion', $codigoConexion)
+                ->where('id', '!=', $user->id)
+                ->exists()
+        );
+
+        $token = 'HUELLA-' .
+            strtoupper(Str::random(8)) . '-' .
+            strtoupper(Str::random(8)) . '-' .
+            strtoupper(Str::random(8)) . '-' .
+            strtoupper(Str::random(8));
+
+        $user->codigo_conexion = $codigoConexion;
+        $user->token_conexion = $token;
+        $user->save();
+
         return response()->json([
             'status' => true,
-            'codigo_conexion' => '8hIcptrxisoqUtpvU1YZa9eYaZgViuS0LqI0pq6RfmT3O1QJnyAqzwKQNjzr'
+            'codigo_conexion' => $codigoConexion,
+            'token' => $token,
         ], 200);
+
     }
+
 
 }

@@ -30,6 +30,7 @@ use App\Http\Controllers\PreguntaController;
 | en el grupo. Mantener 'auth' siempre.
 */
 
+
 Route::prefix('revisor')->middleware('auth', 'revisor')->group(function () {
 
     Route::get('/', fn () => Inertia::render('Revisor/revisor'))->name('revisor');
@@ -124,7 +125,9 @@ Route::prefix('revisor')->middleware('auth', 'revisor')->group(function () {
     Route::post('/control-biometrico', [IngresoController::class, 'biometrico']);
     Route::post('/crear_correo_institucional', [IngresoController::class, 'crearCorreo']);
     Route::get('/fotos-admision', fn () => Inertia::render('Revisor/fotos/fotos'))->name('revisor-fotos-admision')->middleware('rbac:revisor-biometrico.read');
-    Route::get('/get-codigo-conexion', [FotoController::class, 'getCodigoConexion']);
+    Route::get('/generar-codigo-conexion', [FotoController::class, 'generarCodigoConexion']);
+
+
     Route::post('/guardar-huella', [HuellaController::class, 'guardar']);
     Route::post('/verificar-huella-1-1', [HuellaController::class, 'verificar1a1']);
     Route::post('/verificar-huella-1-n', [HuellaController::class, 'verificar1aN']);

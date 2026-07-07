@@ -83,6 +83,8 @@ use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\Admin\SmtpAccountController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Segundas\IdentidadSegundaController;
+use App\Http\Controllers\Segundas\PostulanteSegundaController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->get('/', function () {
@@ -511,6 +513,14 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     // ── Admin Postulante Registration ────────────────────
     Route::get('/registro-postulante', fn () => Inertia::render('Admin/RegistroPostulante/Index'))->name('admin.registro-postulante');
+
+    // ── Cultural data routes (for admin RegistroPostulante) ──
+    Route::get('/get-condiciones-lengua-segundas', [IdentidadSegundaController::class, 'getCondicionesLengua']);
+    Route::get('/get-pertenencia-cultural-segundas', [IdentidadSegundaController::class, 'getPertenenciaCultural']);
+    Route::get('/get-lengua-segundas', [IdentidadSegundaController::class, 'getLenguaIndigena']);
+    Route::get('/get-pueblos-indigenes-segundas', [IdentidadSegundaController::class, 'getPueblosIndigenas']);
+    Route::get('/get-identidad-cultural/{id_postulante}/{id_proceso}', [IdentidadSegundaController::class, 'getIdentidadCulturalByPostulanteProceso']);
+    Route::post('/save-postulante-adicional', [PostulanteSegundaController::class, 'saveDataAdicional']);
 
 });
 

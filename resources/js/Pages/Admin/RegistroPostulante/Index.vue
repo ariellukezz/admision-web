@@ -7,267 +7,481 @@
       <!-- Header -->
       <div class="border-b border-gray-100 px-8 py-6 bg-white rounded-t-2xl">
         <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Registro de Postulante</h1>
-        <p class="text-sm text-gray-500 mt-1">Registre un postulante directamente sin verificación por correo</p>
+        <p class="text-sm text-gray-500 mt-1">Registre o edite un postulante con todos los datos de la preinscripción</p>
       </div>
 
-      <!-- Form -->
-      <div class="px-8 py-6">
-        <a-form :model="form" layout="vertical">
-          <a-row :gutter="16">
+      <div class="px-6 md:px-8 py-6">
 
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Doc</label>
-              <a-select v-model:value="form.tipo_doc" class="w-full">
-                <a-select-option :value="1">DNI</a-select-option>
-                <a-select-option :value="3">Carné Ext.</a-select-option>
-              </a-select>
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">N° Documento *</label>
-              <a-input v-model:value="form.nro_doc" :maxlength="form.tipo_doc === 1 ? 8 : 12" placeholder="Ingrese el número" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ap. Paterno *</label>
-              <a-input v-model:value="form.primer_apellido" placeholder="Primer apellido" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ap. Materno</label>
-              <a-input v-model:value="form.segundo_apellido" placeholder="Segundo apellido" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ap. Casada</label>
-              <a-input v-model:value="form.apellido_casada" placeholder="Apellido de casada" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nombres *</label>
-              <a-input v-model:value="form.nombres" placeholder="Nombres completos" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
-              <a-select v-model:value="form.sexo" placeholder="Seleccionar...">
-                <a-select-option value="1">Masculino</a-select-option>
-                <a-select-option value="2">Femenino</a-select-option>
-              </a-select>
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">F. Nacimiento *</label>
-              <a-date-picker v-model:value="form.fec_nacimiento" format="DD/MM/YYYY" style="width: 100%;" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ubigeo Nacimiento *</label>
-              <a-input v-model:value="form.ubigeo_nacimiento" placeholder="Código ubigeo" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ubigeo Residencia *</label>
-              <a-input v-model:value="form.ubigeo_residencia" placeholder="Código ubigeo" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Celular *</label>
-              <a-input v-model:value="form.celular" placeholder="Número de celular" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Correo *</label>
-              <a-input v-model:value="form.email" placeholder="correo@ejemplo.com" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
-              <a-select v-model:value="form.estado_civil" placeholder="Seleccionar...">
-                <a-select-option value="1">Soltero</a-select-option>
-                <a-select-option value="2">Casado</a-select-option>
-              </a-select>
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-              <a-input v-model:value="form.direccion" placeholder="Dirección" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Año Egreso</label>
-              <a-input v-model:value="form.anio_egreso" placeholder="Ej: 2025" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Colegio (ID)</label>
-              <a-input v-model:value="form.id_colegio" placeholder="ID del colegio" />
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Proceso *</label>
-              <a-select v-model:value="form.proceso" placeholder="Seleccionar proceso...">
-                <a-select-option v-for="p in procesos" :key="p.id" :value="p.id">{{ p.nombre }}</a-select-option>
-              </a-select>
-            </a-col>
-
-            <a-col :xs="24" :sm="12" :md="6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-              <a-input v-model:value="form.observaciones" placeholder="Observaciones" />
-            </a-col>
-
-          </a-row>
-
-          <!-- Actions -->
-          <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-            <button @click="limpiar" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
-              Limpiar
-            </button>
-            <button @click="guardar" :disabled="guardando" class="px-6 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-              {{ guardando ? 'Guardando...' : 'Registrar Postulante' }}
-            </button>
+        <!-- ── Barra superior: Proceso + Búsqueda DNI ──────────── -->
+        <div class="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-end">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Proceso *</label>
+            <a-select
+              v-model:value="procesoSeleccionado"
+              placeholder="Seleccionar proceso..."
+              style="width: 100%;"
+              size="large"
+              :options="procesos.map(p => ({ value: p.id, label: p.nombre }))"
+            />
           </div>
-        </a-form>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por DNI (editar existente)</label>
+            <a-input-search
+              v-model:value="datospersonales.nro_doc"
+              placeholder="Ingrese DNI (8 dígitos)"
+              :maxlength="datospersonales.tipo_doc === 1 ? 8 : 12"
+              size="large"
+              :loading="buscando"
+              @search="loadByDni"
+            />
+          </div>
+          <a-button size="large" @click="limpiar">Limpiar</a-button>
+        </div>
+
+        <a-alert
+          v-if="esEdicion"
+          message="Modo edición — Los cambios se actualizarán sobre el registro existente."
+          type="info"
+          show-icon
+          class="mb-6"
+        />
+
+        <!-- ── Formulario por secciones ────────────────────────── -->
+        <a-collapse v-model:activeKey="activeTabs" :bordered="false" style="background: transparent;">
+
+          <!-- ═══ 1. Datos Personales ═══ -->
+          <a-collapse-panel key="1" :header="panelHeader('1', 'Datos Personales')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datospersonales" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Tipo Doc" name="tipo_doc">
+                    <a-select v-model:value="datospersonales.tipo_doc" :options="tipo_docs" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="N° Documento *" name="nro_doc" :rules="[{ required: true, message: 'N° documento requerido' }]">
+                    <a-input v-model:value="datospersonales.nro_doc" :maxlength="datospersonales.tipo_doc === 1 ? 8 : 12" placeholder="Número de documento" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Paterno *" name="primer_apellido" :rules="[{ required: true, message: 'Apellido requerido' }]">
+                    <a-input v-model:value="datospersonales.primer_apellido" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Materno">
+                    <a-input v-model:value="datospersonales.segundo_apellido" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Casada">
+                    <a-input v-model:value="datospersonales.apellido_casada" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Nombres *" name="nombres" :rules="[{ required: true, message: 'Nombres requeridos' }]">
+                    <a-input v-model:value="datospersonales.nombres" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Sexo *" name="sexo" :rules="[{ required: true, message: 'Sexo requerido' }]">
+                    <a-select v-model:value="datospersonales.sexo" :options="sexos" placeholder="Seleccionar" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Estado Civil">
+                    <a-select v-model:value="datospersonales.estado_civil" :options="estados_civil" placeholder="Seleccionar" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="F. Nacimiento *">
+                    <a-date-picker v-model:value="datospersonales.fec_nacimiento" format="DD/MM/YYYY" style="width: 100%;" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Correo *" name="correo" :rules="[{ required: true, message: 'Correo requerido' }, { type: 'email', message: 'Correo inválido' }]">
+                    <a-input v-model:value="datospersonales.correo" placeholder="correo@ejemplo.com" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Celular *" name="celular" :rules="[{ required: true, message: 'Celular requerido' }]">
+                    <a-input v-model:value="datospersonales.celular" :maxlength="9" placeholder="999999999" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ubigeo Nacimiento *">
+                    <a-select
+                      v-model:value="ubigeoNacSeleccionado"
+                      show-search
+                      placeholder="Buscar ubigeo..."
+                      :options="ubigeoNacOptions"
+                      :field-names="{ value: 'key', label: 'value' }"
+                      :filter-option="false"
+                      @search="(term) => getUbigeos(term, ubigeoNacOptions)"
+                      @dropdownVisibleChange="(open) => { if (open && !ubigeoNacOptions.length) getUbigeos('', ubigeoNacOptions) }"
+                      @change="onSelectUbigeoNac"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Dirección">
+                    <a-input v-model:value="datospersonales.direccion" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 2. Datos de Residencia ═══ -->
+          <a-collapse-panel key="2" :header="panelHeader('2', 'Datos de Residencia')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datosresidencia" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Ubigeo Residencia *">
+                    <a-select
+                      v-model:value="ubigeoResSeleccionado"
+                      show-search
+                      placeholder="Buscar ubigeo..."
+                      :options="ubigeoResOptions"
+                      :field-names="{ value: 'key', label: 'value' }"
+                      :filter-option="false"
+                      @search="(term) => getUbigeos(term, ubigeoResOptions)"
+                      @dropdownVisibleChange="(open) => { if (open && !ubigeoResOptions.length) getUbigeos('', ubigeoResOptions) }"
+                      @change="onSelectUbigeoRes"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Dirección">
+                    <a-input v-model:value="datosresidencia.direccion" placeholder="Dirección de residencia" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="País">
+                    <a-input :value="datosresidencia.pais === 125 ? 'Perú' : 'Extranjero'" disabled />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 3. Datos del Colegio ═══ -->
+          <a-collapse-panel key="3" :header="panelHeader('3', 'Datos del Colegio')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datoscolegio" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Ubigeo del Colegio">
+                    <a-select
+                      v-model:value="ubigeoColeSeleccionado"
+                      show-search
+                      placeholder="Buscar ubigeo..."
+                      :options="ubigeoColeOptions"
+                      :field-names="{ value: 'key', label: 'value' }"
+                      :filter-option="false"
+                      @search="(term) => getUbigeos(term, ubigeoColeOptions)"
+                      @dropdownVisibleChange="(open) => { if (open && !ubigeoColeOptions.length) getUbigeos('', ubigeoColeOptions) }"
+                      @change="onSelectUbigeoCole"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Colegio">
+                    <a-select
+                      v-model:value="datospersonales.id_colegio"
+                      placeholder="Seleccionar colegio"
+                      :options="colegios"
+                      :field-names="{ value: 'value', label: 'label' }"
+                      :disabled="!colegios.length"
+                      show-search
+                      :filter-option="filterColegio"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Año de Egreso">
+                    <a-select v-model:value="datospersonales.anio_egreso" placeholder="Seleccionar año">
+                      <a-select-option v-for="y in aniosEgreso" :key="y" :value="y">{{ y }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 4. Datos del Padre ═══ -->
+          <a-collapse-panel key="4" :header="panelHeader('4', 'Datos del Padre / Tutor')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datospadre" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="DNI">
+                    <a-input v-model:value="datospadre.dni" :maxlength="8" placeholder="DNI del padre" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Paterno">
+                    <a-input v-model:value="datospadre.paterno" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Materno">
+                    <a-input v-model:value="datospadre.materno" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Nombres">
+                    <a-input v-model:value="datospadre.nombres" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 5. Datos de la Madre ═══ -->
+          <a-collapse-panel key="5" :header="panelHeader('5', 'Datos de la Madre')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datosmadre" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="DNI">
+                    <a-input v-model:value="datosmadre.dni" :maxlength="8" placeholder="DNI de la madre" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Paterno">
+                    <a-input v-model:value="datosmadre.paterno" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Ap. Materno">
+                    <a-input v-model:value="datosmadre.materno" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Nombres">
+                    <a-input v-model:value="datosmadre.nombres" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 6. Datos Adicionales (Identidad Cultural) ═══ -->
+          <a-collapse-panel key="6" :header="panelHeader('6', 'Datos Adicionales (SUNEDU)')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datos_transversales" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="¿Tiene discapacidad?">
+                    <a-select v-model:value="datos_transversales.discapacidad" placeholder="Seleccionar">
+                      <a-select-option :value="1">Sí</a-select-option>
+                      <a-select-option :value="0">No</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Tipo de discapacidad">
+                    <a-select
+                      v-model:value="datos_transversales.tipo_discapacidad"
+                      :options="tipos_discapacidad"
+                      :disabled="datos_transversales.discapacidad !== 1"
+                      placeholder="Seleccionar"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col v-if="datos_transversales.tipo_discapacidad === 12" :xs="24" :sm="12" :md="12">
+                  <a-form-item label="Especifique">
+                    <a-input v-model:value="datos_transversales.tipo_discapacidad_otro" placeholder="Describa la discapacidad" />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="¿Se identifica con alguna lengua indígena?">
+                    <a-select
+                      v-model:value="datos_transversales.id_condicion_lengua"
+                      :options="condiciones_lengua"
+                      :field-names="{ value: 'id', label: 'descripcion' }"
+                      placeholder="Seleccionar"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Lengua indígena">
+                    <a-select
+                      v-model:value="datos_transversales.id_lengua_indigena"
+                      :options="lenguas_indigenas"
+                      :field-names="{ value: 'id', label: 'descripcion' }"
+                      :disabled="datos_transversales.id_condicion_lengua !== SI_LENGUA_ID"
+                      placeholder="Seleccionar"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="¿Pertenece a algún pueblo indígena?">
+                    <a-select
+                      v-model:value="datos_transversales.id_pertenencia_cultural"
+                      :options="opciones_pertenencia_cultural"
+                      :field-names="{ value: 'id', label: 'descripcion' }"
+                      placeholder="Seleccionar"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="6">
+                  <a-form-item label="Pueblo indígena">
+                    <a-select
+                      v-model:value="datos_transversales.id_pueblo_indigena"
+                      :options="pueblos_indigenas"
+                      :field-names="{ value: 'id', label: 'descripcion' }"
+                      :disabled="datos_transversales.id_pertenencia_cultural !== SI_PUEBLO_ID"
+                      placeholder="Seleccionar"
+                    />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+          <!-- ═══ 7. Datos de Postulación ═══ -->
+          <a-collapse-panel key="7" :header="panelHeader('7', 'Datos de Postulación')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+            <a-form :model="datos_preinscripcion" layout="vertical">
+              <a-row :gutter="[16, 8]">
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Modalidad">
+                    <a-select
+                      v-model:value="datos_preinscripcion.modalidad"
+                      :options="modalidades"
+                      :field-names="{ value: 'value', label: 'label' }"
+                      placeholder="Seleccionar modalidad"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Programa">
+                    <a-select
+                      v-model:value="datos_preinscripcion.programa"
+                      :options="programas"
+                      :field-names="{ value: 'value', label: 'label' }"
+                      placeholder="Seleccionar programa"
+                      show-search
+                      :filter-option="filterColegio"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Código de matrícula (CEPREUNA)">
+                    <a-input v-model:value="datos_preinscripcion.observacion" placeholder="Código de matrícula" />
+                  </a-form-item>
+                </a-col>
+                <template v-if="![1, 2, 3].includes(datos_preinscripcion.modalidad)">
+                  <a-col :xs="24" :sm="12" :md="8">
+                    <a-form-item label="Tipo de certificado">
+                      <a-select v-model:value="datos_preinscripcion.tipo_certificado" placeholder="Seleccionar">
+                        <a-select-option value="CERTIFICADO BLANCO">CERTIFICADO BLANCO</a-select-option>
+                        <a-select-option value="CERTIFICADO AMARILLO">CERTIFICADO AMARILLO</a-select-option>
+                        <a-select-option value="CONSTANCIA DE ESTUDIOS">CONSTANCIA DE ESTUDIOS</a-select-option>
+                      </a-select>
+                    </a-form-item>
+                  </a-col>
+                  <a-col :xs="24" :sm="12" :md="8">
+                    <a-form-item label="Código de certificado">
+                      <a-input v-model:value="datos_preinscripcion.codigo_certificado" placeholder="Código" />
+                    </a-form-item>
+                  </a-col>
+                </template>
+                <a-col v-if="datos_preinscripcion.programa === 38 || datos_preinscripcion.programa === 16" :xs="24" :sm="12" :md="8">
+                  <a-form-item label="Código de examen médico">
+                    <a-input v-model:value="datos_preinscripcion.codigo_medico" placeholder="Código" />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+            </a-form>
+          </a-collapse-panel>
+
+        </a-collapse>
+
+        <!-- ── Botones de acción ─────────────────────────────── -->
+        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+          <button @click="limpiar" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            Limpiar
+          </button>
+          <button
+            @click="saveAll"
+            :disabled="guardando"
+            class="px-6 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+          >
+            {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar Postulante' : 'Registrar Postulante') }}
+          </button>
+        </div>
+
       </div>
     </div>
   </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { reactive, ref, onMounted } from 'vue';
-import { notification } from 'ant-design-vue';
-import dayjs from 'dayjs';
-import { format } from 'date-fns';
-import axios from 'axios';
+import { ref, onMounted, watch } from 'vue'
+import { Head } from '@inertiajs/vue3'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import {
+  CheckCircleOutlined,
+  UserOutlined,
+  EnvironmentOutlined,
+  BankOutlined,
+  ManOutlined,
+  WomanOutlined,
+  SolutionOutlined,
+  FormOutlined,
+} from '@ant-design/icons-vue'
+import { useRegistroPostulanteAdmin } from '@/composables/useRegistroPostulanteAdmin'
 
-const guardando = ref(false);
-const procesos = ref([]);
+const {
+  // State
+  datospersonales, datosresidencia, datoscolegio,
+  datospadre, datosmadre, datos_transversales, datos_preinscripcion,
+  // UI
+  guardando, buscando, procesoSeleccionado, esEdicion,
+  procesos, modalidades, programas, colegios,
+  ubigeoNacOptions, ubigeoNacSeleccionado,
+  ubigeoResOptions, ubigeoResSeleccionado,
+  ubigeoColeOptions, ubigeoColeSeleccionado,
+  condiciones_lengua, opciones_pertenencia_cultural,
+  lenguas_indigenas, pueblos_indigenas,
+  // Constants
+  tipo_docs, estados_civil, sexos, tipos_discapacidad, aniosEgreso,
+  SI_LENGUA_ID, SI_PUEBLO_ID,
+  // Validators
+  validateCelular, validateCorreo,
+  // Data loading
+  loadProcesos, loadByDni, loadCulturalData,
+  // Ubigeo
+  getUbigeos, onSelectUbigeoNac, onSelectUbigeoRes, onSelectUbigeoCole,
+  // Save
+  saveAll, limpiar,
+} = useRegistroPostulanteAdmin()
 
-const form = reactive({
-  id: null,
-  tipo_doc: 1,
-  nro_doc: '',
-  primer_apellido: '',
-  segundo_apellido: '',
-  apellido_casada: '',
-  nombres: '',
-  sexo: '',
-  fec_nacimiento: '',
-  ubigeo_nacimiento: '',
-  ubigeo_residencia: '',
-  celular: '',
-  email: '',
-  estado_civil: '',
-  direccion: '',
-  anio_egreso: '',
-  observaciones: '',
-  id_colegio: '',
-  proceso: null,
-});
+const activeTabs = ref(['1'])
 
-const limpiar = () => {
-  Object.assign(form, {
-    id: null,
-    tipo_doc: 1,
-    nro_doc: '',
-    primer_apellido: '',
-    segundo_apellido: '',
-    apellido_casada: '',
-    nombres: '',
-    sexo: '',
-    fec_nacimiento: '',
-    ubigeo_nacimiento: '',
-    ubigeo_residencia: '',
-    celular: '',
-    email: '',
-    estado_civil: '',
-    direccion: '',
-    anio_egreso: '',
-    observaciones: '',
-    id_colegio: '',
-    proceso: null,
-  });
-};
+const panelHeader = (key, title) => title
 
-const guardar = async () => {
-  if (!form.nro_doc || !form.nombres || !form.primer_apellido || !form.email || !form.proceso) {
-    notification.warning({ message: 'Datos incompletos', description: 'Complete los campos obligatorios (*).' });
-    return;
-  }
-
-  guardando.value = true;
-  try {
-    // 1. Save postulante
-    const fecNac = form.fec_nacimiento ? format(new Date(form.fec_nacimiento), 'yyyy-MM-dd') : null;
-
-    const res = await axios.post('/save-postulante-admin', {
-      id: form.id,
-      tipo_doc: form.tipo_doc,
-      nro_doc: form.nro_doc,
-      primer_apellido: form.primer_apellido,
-      segundo_apellido: form.segundo_apellido,
-      apellido_casada: form.apellido_casada,
-      nombres: form.nombres,
-      sexo: form.sexo,
-      fec_nacimiento: fecNac,
-      ubigeo_nacimiento: form.ubigeo_nacimiento,
-      ubigeo_residencia: form.ubigeo_residencia,
-      celular: form.celular,
-      correo: form.email,
-      estado_civil: form.estado_civil,
-      direccion: form.direccion,
-      egreso: form.anio_egreso,
-      observaciones: form.observaciones,
-      colegio: form.id_colegio,
-    });
-
-    if (res.data.estado === true) {
-      const postulanteId = res.data.datos.id;
-
-      // 2. Register initial step (Paso 1)
-      await axios.post('/save-pasos-preinscripcion', {
-        id: null,
-        nombre: 'Registro de datos preinscripcion',
-        nro: 1,
-        avance: 16,
-        postulante: postulanteId,
-        proceso: form.proceso,
-      });
-
-      notification.success({
-        message: 'Postulante registrado',
-        description: `${form.nombres} ${form.primer_apellido} registrado correctamente.`,
-      });
-      limpiar();
-    }
-  } catch (e) {
-    notification.error({
-      message: 'Error',
-      description: e.response?.data?.mensaje || 'No se pudo registrar el postulante.',
-    });
-  } finally {
-    guardando.value = false;
-  }
-};
-
-const getProcesos = async () => {
-  try {
-    const res = await axios.get('/admin/configuracion-citacion/procesos');
-    procesos.value = res.data.datos || [];
-  } catch {
-    // fallback: use select-proceso endpoint
-    try {
-      const res = await axios.get('/get-select-proceso');
-      procesos.value = res.data.datos || [];
-    } catch {
-      procesos.value = [];
-    }
-  }
-};
+const filterColegio = (input, option) => {
+  return option.label?.toLowerCase().includes(input.toLowerCase())
+}
 
 onMounted(() => {
-  getProcesos();
-});
+  loadProcesos()
+  loadCulturalData()
+})
 </script>
+
+<style scoped>
+:deep(.ant-collapse-header) {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 16px !important;
+}
+
+:deep(.ant-input),
+:deep(.ant-select-selector),
+:deep(.ant-picker) {
+  border-radius: 6px !important;
+}
+</style>

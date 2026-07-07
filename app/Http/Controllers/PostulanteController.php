@@ -67,8 +67,8 @@ class PostulanteController extends Controller
   public function getPostulanteXDni2(Request $request)
   {
     $res = DB::table('postulante as p')
-        ->select('p.id','p.primer_apellido','p.segundo_apellido','p.nombres','p.email as correo','p.celular','p.fec_nacimiento',
-            'p.anio_egreso as egreso','p.ubigeo_nacimiento as ubigeo','p.ubigeo_residencia','p.direccion','p.sexo','p.estado_civil',
+        ->select('p.id','p.tipo_doc','p.primer_apellido','p.segundo_apellido','p.apellido_casada','p.nombres','p.email as correo','p.celular','p.fec_nacimiento',
+            'p.anio_egreso as egreso','p.id_colegio','p.observaciones','p.ubigeo_nacimiento as ubigeo','p.ubigeo_residencia','p.direccion','p.sexo','p.estado_civil',
             DB::raw("CONCAT(p.ubigeo_nacimiento,'-',depN.nombre,'/',provN.nombre,'/',distN.nombre) AS nacimiento"),
             DB::raw("CONCAT(p.ubigeo_residencia,'-',depR.nombre,'/',provR.nombre,'/',distR.nombre) AS residencia"))
         ->leftJoin('ubigeo as un', 'p.ubigeo_nacimiento', '=', 'un.ubigeo')

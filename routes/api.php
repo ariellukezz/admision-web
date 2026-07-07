@@ -41,6 +41,9 @@ Route::get('/biometrico/seguimiento/{periodo}/{dni}', [ApixController::class, 'g
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/get-codigo-conexion/{codigoConexion}', [LoginController::class, 'getCodigoConexion']);
+Route::get('/verificar-token-huella', [LoginController::class, 'validarConexion']);
+
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

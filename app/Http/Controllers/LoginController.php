@@ -42,19 +42,35 @@ class LoginController extends Controller {
 
     public function getCodigoConexion($codigoConexion){
 
-        // $user = User::where('token_conexion', $codigoConexion)->first();
-        // if (!$user) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'errors' => ['Invalid connection code']
-        //     ], 404);
-        // }
+        $usuario = User::where('codigo_conexion', $codigoConexion)->first();
 
+        if (!$usuario) {    
+            return response()->json([
+                'status' => false,
+                'message' => 'Código de conexión inválido'
+            ], 404);
+        }
+        
         return response()->json([
             'status' => true,
-            'codigo_conexion' => '8hIcptrxisoqUtpvU1YZa9eYaZgViuS0LqI0pq6RfmT3O1QJnyAqzwKQNjzr'
+            'token_conexion' => $usuario->token_conexion,
+            'id_usuario' => $usuario->id,
+            'nombres' => $usuario->name,
+            'paterno' => $usuario->paterno.' '.$usuario->materno,
+            'id_proceso' => $usuario->id_proceso,
+            'message' => 'Código de conexión válido',
+
         ], 200);
     }
+
+
+    public function validarConexion(Request $request)
+    {
+        return response()->json([
+            'status' => (bool) User::where('token_conexion', $request->token_conexion)->exists()
+        ]);
+    }
+
 
     public function logout(){
         auth()->user()->tokens()->delete();
