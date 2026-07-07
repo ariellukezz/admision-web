@@ -85,8 +85,7 @@ class FotoController extends Controller {
         return response()->json([
             'status' => true,
             'codigo_conexion' => $codigoConexion,
-            'token' => $token,
-            'app_huella_key' => config('app.sqlite_encryption_key'),
+            'token' => $token
         ], 200);
 
     }

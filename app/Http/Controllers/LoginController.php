@@ -58,6 +58,7 @@ class LoginController extends Controller {
             'nombres' => $usuario->name,
             'paterno' => $usuario->paterno.' '.$usuario->materno,
             'id_proceso' => $usuario->id_proceso,
+            'app_huella_key' => config('app.sqlite_encryption_key'),
             'message' => 'Código de conexión válido',
 
         ], 200);
