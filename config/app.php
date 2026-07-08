@@ -30,6 +30,7 @@ return [
 
     'env' => env('APP_ENV', 'production'),
     'sqlite_encryption_key' => env('SQLITE_ENCRYPTION_KEY'),
+    'pass_firma' => env('PASS_FIRMA_ENV'),
 
     /*
     |--------------------------------------------------------------------------

@@ -113,7 +113,7 @@
                                 Reconozco y acepto los términos establecidos en el
                                 Reglamento General de Admisión de 2026,
                                 así como permitir una rigurosa revisión física exhaustiva
-                                para acceder a la Ciudad Universitaria y realizar el examen de admisión.
+                                para acceder a la Ciudad Universitaria y durante el examen de admisión.
                                 En caso de obtener una vacante, me comprometo a cumplir con lo estipulado en el reglamento.
                                 Como muestra de conformidad, firmo la presente constancia de inscripción.
                             </p>
@@ -135,7 +135,7 @@
 
                             <div style="margin-top: -8px; margin-left:-5px;">
                                 <ul>
-                                    <li>Presentar Constancia de Inscripción y DNI (original).</li>
+                                    <li>Presentar esta constancia de Inscripción y DNI (original).</li>
                                     <li>No portar dispositivos electrónicos, ni objetos metálicos.</li>
                                     <li>Presentarse con cabello recogido o corto.</li>
                                     <li>El cuello y las orejas deben estar visibles.</li>

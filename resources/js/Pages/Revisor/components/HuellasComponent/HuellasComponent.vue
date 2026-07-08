@@ -3,7 +3,7 @@
     <!-- Estado de conexión compacto -->
     <div class="connection-status">
       <div class="status-left">
-        <div class="status-label">Lector de Huellas</div>
+        <!-- <div class="status-label">Lector de Huellas</div> -->
         <div class="status-info">
           <a-badge :status="connectionStatus.type === 'connected' ? 'success' : 'error'" />
           <span class="status-text">{{ connectionStatus.text }}</span>
@@ -11,18 +11,22 @@
       </div>
 
       <div class="status-actions">
-        <a-select
-          v-model:value="selectedMode"
-          :options="modeOptions"
+        <a-button
+          type="primary"
           size="small"
-          style="min-width: 180px"
-          @change="handleModeChange"
-        />
+          :loading="generatingCode"
+          :disabled="connectionStatus.type === 'connected'"
+          @click="handleGenerateCode"
+        >
+          <KeyOutlined />
+          Generar Código
+        </a-button>
         <a-button
           v-if="connectionStatus.type !== 'connected'"
           type="primary"
           size="small"
           :loading="connecting"
+          :disabled="!tokenConexion"
           @click="connectWebSocket"
         >
           <WifiOutlined />
@@ -40,28 +44,21 @@
       </div>
     </div>
 
-    <div class="mode-panel">
+    <!-- <div class="mode-panel">
       <div class="mode-title">{{ modeLabel }}</div>
-      <div class="mode-description">{{ modeDescription }}</div>
-      <div class="mode-summary">
-        <span>Modo activo:</span>
-        <a-tag :color="selectedMode === 'register' ? 'blue' : selectedMode === 'verify1to1' ? 'cyan' : 'purple'">
-          {{ modeLabel }}
-        </a-tag>
-      </div>
       <div class="auto-capture-control">
-        <a-space align="center">
-          <span>Captura automática</span>
-          <a-switch v-model:checked="autoCaptureEnabled" />
-        </a-space>
+        <div class="w-full" style="display:flex; justify-content: space-between;">
+          <div>
+            <span>Captura automática</span>            
+          </div>
+          <div>
+            <a-switch v-model:checked="autoCaptureEnabled" />
+          </div>
+        </div>
       </div>
-      <div class="capture-status-banner" v-if="captureStatusMessage">
-        <a-alert type="info" show-icon :message="captureStatusMessage" />
-      </div>
-    </div>
+    </div> -->
 
     <div class="finger-selection">
-      <!-- Vista de grilla: 2 dedos lado a lado -->
       <template v-if="showFingerGrid">
         <div class="finger-grid">
           <div
@@ -69,15 +66,12 @@
             :key="option.value"
             class="huella-card"
             :class="{ 'huella-selected': selectedFinger === option.value }"
-            @click="selectedFinger = option.value"
+            @click="selectFinger(option.value)"
           >
             <div class="huella-header">
               <div>
                 <span>{{ option.label }}</span>
                 <div class="finger-status-line">
-                  <a-tag :color="fingerprintBadgeColor(option.value)" size="small">
-                    {{ fingerprints[option.value].registered ? 'Registrada' : 'No registrada' }}
-                  </a-tag>
                   <span class="finger-quality" v-if="fingerprints[option.value].registered">
                     Calidad: {{ fingerprints[option.value].quality }}%
                   </span>
@@ -95,30 +89,6 @@
             <div class="capture-status" v-if="captureTarget === option.value">
               <a-alert type="info" show-icon message="Esperando huella..." />
             </div>
-
-            <div class="button-group">
-              <a-button
-                type="primary"
-                size="small"
-                block
-                :disabled="connectionStatus.type !== 'connected' || !dni"
-                :loading="capturing === option.value"
-                @click.stop="startCapture(option.value)"
-              >
-                <ScanOutlined />
-                Capturar
-              </a-button>
-              <a-button
-                type="default"
-                size="small"
-                block
-                :disabled="!fingerprints[option.value].registered"
-                @click.stop="clearFingerprint(option.value)"
-                class="clear-button"
-              >
-                Limpiar
-              </a-button>
-            </div>
           </div>
         </div>
       </template>
@@ -130,6 +100,7 @@
           :options="fingerOptions"
           size="middle"
           style="width: 100%; margin-bottom: 10px"
+          @change="selectFinger"
         />
         <div class="finger-status">
           <span>Seleccionado:</span>
@@ -261,6 +232,24 @@
   </div>
 </a-modal>
 
+<a-modal
+  v-model:open="showCodeModal"
+  title="Código de conexión"
+  :footer="null"
+  centered
+  width="360px"
+>
+  <div style="text-align: center;">
+    <p style="margin-bottom: 12px; color: #666;">Ingresa este código en la aplicación de escritorio:</p>
+    <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; padding: 16px; background: #f5f5f5; border-radius: 8px; margin-bottom: 16px;">
+      {{ codigoGenerado }}
+    </div>
+    <a-button type="primary" block @click="showCodeModal = false">
+      Entendido
+    </a-button>
+  </div>
+</a-modal>
+
 </template>
 
 <script setup>
@@ -275,7 +264,8 @@ import {
   SaveOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
-  SearchOutlined
+  SearchOutlined,
+  KeyOutlined
 } from '@ant-design/icons-vue'
 import axios from 'axios'
 
@@ -288,11 +278,12 @@ const props = defineProps({
 const emit = defineEmits(['huellas-actualizadas'])
 
 const ws = ref(null)
-const wsUrl = 'ws://localhost:3000/websocket'
+const wsUrl = 'wss://test-admision.unap.edu.pe/ws-huellas/'
 
 const connecting = ref(false)
 const captureTarget = ref(null)
 const capturing = ref(null)
+const captureSessionId = ref(null)
 
 const selectedOption = ref('right')
 const selectedMode = ref('register')
@@ -307,16 +298,16 @@ const modeOptions = [
 ]
 
 const allFingers = [
-  { label: 'Índice Derecho', value: 'indice_derecho' },
   { label: 'Índice Izquierdo', value: 'indice_izquierdo' },
-  { label: 'Pulgar Derecho', value: 'pulgar_derecho' },
+  { label: 'Índice Derecho', value: 'indice_derecho' },
   { label: 'Pulgar Izquierdo', value: 'pulgar_izquierdo' },
-  { label: 'Medio Derecho', value: 'medio_derecho' },
+  { label: 'Pulgar Derecho', value: 'pulgar_derecho' },
   { label: 'Medio Izquierdo', value: 'medio_izquierdo' },
-  { label: 'Anular Derecho', value: 'anular_derecho' },
+  { label: 'Medio Derecho', value: 'medio_derecho' },
   { label: 'Anular Izquierdo', value: 'anular_izquierdo' },
-  { label: 'Meñique Derecho', value: 'menique_derecho' },
-  { label: 'Meñique Izquierdo', value: 'menique_izquierdo' }
+  { label: 'Anular Derecho', value: 'anular_derecho' },
+  { label: 'Meñique Izquierdo', value: 'menique_izquierdo' },
+  { label: 'Meñique Derecho', value: 'menique_derecho' }
 ]
 
 const fingerOptions = computed(() => {
@@ -326,7 +317,7 @@ const fingerOptions = computed(() => {
 
 const showFingerGrid = computed(() => fingerOptions.value.length === 2)
 
-const selectedFinger = ref(fingerOptions.value[0]?.value || 'indice_derecho')
+const selectedFinger = ref(fingerOptions.value[0]?.value || 'indice_izquierdo')
 
 const fingerLabel = computed(() => {
   const option = fingerOptions.value.find(opt => opt.value === selectedFinger.value)
@@ -381,9 +372,26 @@ const scheduleNextCapture = () => {
 const showConfirmModal = ref(false)
 const saving = ref(false)
 
-const tokenFijo = ref(
-  '8hIcptrxisoqUtpvU1YZa9eYaZgViuS0LqI0pq6RfmT3O1QJnyAqzwKQNjzr'
-)
+const codigoGenerado = ref('')
+const tokenConexion = ref('')
+const showCodeModal = ref(false)
+const generatingCode = ref(false)
+
+const handleGenerateCode = async () => {
+  generatingCode.value = true
+  try {
+    const { data } = await axios.get('/revisor/generar-codigo-conexion')
+    codigoGenerado.value = data.codigo_conexion
+    tokenConexion.value = data.token
+    showCodeModal.value = true
+    connectWebSocket()
+  } catch (error) {
+    console.error(error)
+    message.error('No se pudo generar el código de conexión')
+  } finally {
+    generatingCode.value = false
+  }
+}
 
 const modeLabel = computed(() => {
   if (selectedMode.value === 'verify1to1') return 'Verificación 1:1'
@@ -407,7 +415,6 @@ const actionEnabled = computed(() => {
 
   if (selectedMode.value === 'register') {
     return (
-      connectionStatus.value.type === 'connected' &&
       hasAnyFingerprint &&
       !!props.dni
     )
@@ -438,16 +445,28 @@ const fingerprints = ref(Object.fromEntries(
 const connectWebSocket = async () => {
 
   if (connecting.value) return
+  if (!tokenConexion.value) return
 
   connecting.value = true
 
-  ws.value = new WebSocket(
-    `${wsUrl}?token_conexion=${tokenFijo.value}`
-  )
+  tokenConexion.value = 'HUELLA-GCF1XHPK-1UIRHTRL-TUJPL7KO-ORIGJUKC';
+  try {
+    ws.value = new WebSocket(
+      `${wsUrl}?token_conexion=${tokenConexion.value}`
+    )
+  } catch (error) {
+    console.error('[WS] Error al crear WebSocket:', error)
+    message.error('No se pudo conectar al servidor')
+    connecting.value = false
+    return
+  }
 
   ws.value.binaryType = 'arraybuffer'
 
+  console.log('[WS] Conectando a:', `${wsUrl}?token_conexion=${tokenConexion.value}`)
+
   ws.value.onopen = () => {
+    console.log('[WS] Conexión abierta')
 
     connectionStatus.value = {
       type: 'connected',
@@ -461,20 +480,26 @@ const connectWebSocket = async () => {
 
     ws.value.send(
       JSON.stringify({
-        type: 'frontend'
+        type:'frontend'
       })
     )
+
+    console.log('[WS] Enviado: { type: "frontend" }')
 
     scheduleNextCapture()
   }
 
   ws.value.onmessage = async (event) => {
+    console.log('[WS] Mensaje recibido:', event.data)
+    console.log('[WS] Tipo:', typeof event.data, 'instanceof Blob:', event.data instanceof Blob, 'instanceof ArrayBuffer:', event.data instanceof ArrayBuffer)
+
     try {
       let jsonData = null
       let decoded = null
 
       if (typeof event.data === 'string') {
         jsonData = JSON.parse(event.data)
+        console.log('[WS] JSON parseado:', jsonData)
       } else {
         let arrayBuffer
 
@@ -492,12 +517,18 @@ const connectWebSocket = async () => {
           throw new Error('Formato de datos WS no soportado')
         }
 
+        console.log('[WS] ArrayBuffer size:', arrayBuffer.byteLength)
+
         try {
           decoded = unpack(new Uint8Array(arrayBuffer))
+          console.log('[WS] MessagePack decodificado:', decoded)
+          console.log('[WS] Keys:', Object.keys(decoded || {}))
         } catch (unpackError) {
+          console.log('[WS] No era MessagePack, intentando JSON...')
           const text = new TextDecoder().decode(arrayBuffer)
           try {
             jsonData = JSON.parse(text)
+            console.log('[WS] JSON desde texto:', jsonData)
           } catch (jsonError) {
             throw unpackError
           }
@@ -535,21 +566,44 @@ const connectWebSocket = async () => {
           }
         }
 
+        if (jsonData.type === 'error') {
+          console.log('[WS] Error del servidor:', jsonData.codigo, jsonData.mensaje)
+        }
+
+        if (jsonData.type === 'desconexion') {
+          console.log('[WS] Desconexión:', jsonData.cliente)
+          message.warning(jsonData.cliente === 'app'
+            ? 'La aplicación de escritorio se desconectó'
+            : 'El frontend se desconectó')
+        }
+
+        if (jsonData.type === 'conectado') {
+          console.log('[WS] Servidor confirmó conexión')
+        }
+
+        if (jsonData.template || jsonData.template_base64) {
+          console.log('[WS] JSON con template, actualizando huella...')
+          updateFingerprint(jsonData)
+        }
+
         return
       }
 
-      if (decoded && decoded.template && decoded.image) {
+      if (decoded && (decoded.template || decoded.template_base64)) {
+        console.log('[WS] Tiene template, actualizando huella...')
         updateFingerprint(decoded)
+      } else {
+        console.log('[WS] No tiene template. decoded:', !!decoded, 'template:', !!decoded?.template, 'template_base64:', !!decoded?.template_base64, 'image:', !!decoded?.image)
       }
     } catch (err) {
-      console.error(err)
+      console.error('[WS] Error procesando mensaje:', err)
       wsVerificationPending.value = false
       actionLoading.value = false
     }
   }
 
-  ws.value.onerror = () => {
-
+  ws.value.onerror = (error) => {
+    console.error('[WS] Error:', error)
     connectionStatus.value = {
       type: 'error',
       text: 'Error',
@@ -561,13 +615,19 @@ const connectWebSocket = async () => {
     connecting.value = false
   }
 
-  ws.value.onclose = () => {
-
+  ws.value.onclose = (event) => {
+    console.log('[WS] Close:', event.code, event.reason)
     connectionStatus.value = {
       type: 'disconnected',
       text: 'Desconectado',
       color: 'default'
     }
+
+    if (event.code !== 1000) {
+      message.warning(`Conexión cerrada (${event.code})${event.reason ? ': ' + event.reason : ''}`)
+    }
+
+    connecting.value = false
   }
 }
 
@@ -651,7 +711,19 @@ const generateMockFingerprintImage = () => {
 
 const updateFingerprint = (decodedData) => {
 
-  if (!captureTarget.value) return
+  if (captureSessionId.value && decodedData.capture_id && decodedData.capture_id !== captureSessionId.value) {
+    console.log('[updateFingerprint] Descartada - capture_id no coincide:', decodedData.capture_id, '!=', captureSessionId.value)
+    return
+  }
+
+  const finger = captureTarget.value || selectedFinger.value
+
+  if (!finger) {
+    console.log('[updateFingerprint] Descartada - no hay dedo seleccionado')
+    return
+  }
+
+  console.log('[updateFingerprint] finger:', finger, 'captureTarget:', captureTarget.value, 'selectedFinger:', selectedFinger.value)
 
   let imageUrl = null
 
@@ -672,8 +744,7 @@ const updateFingerprint = (decodedData) => {
     imageUrl = generateMockFingerprintImage()
   }
 
-  const finger = captureTarget.value
-  const normalizedTemplate = normalizeTemplateToBase64(decodedData.template)
+  const normalizedTemplate = normalizeTemplateToBase64(decodedData.template || decodedData.template_base64)
 
   fingerprints.value[finger] = {
     registered: true,
@@ -692,6 +763,7 @@ const updateFingerprint = (decodedData) => {
 
   capturing.value = null
   captureTarget.value = null
+  captureSessionId.value = null
 
   scheduleNextCapture()
 }
@@ -846,18 +918,12 @@ const handleKeydown = async (event) => {
 
     event.preventDefault()
 
-    if (selectedOption.value === 'right') {
+    const fingers = fingerOptions.value
+    if (fingers.length < 2) return
 
-      selectedOption.value = 'left'
-
-    } else if (selectedOption.value === 'left') {
-
-      selectedOption.value = 'save'
-
-    } else {
-
-      selectedOption.value = 'right'
-    }
+    const currentIdx = fingers.findIndex(f => f.value === selectedFinger.value)
+    const nextIdx = (currentIdx + 1) % fingers.length
+    selectFinger(fingers[nextIdx].value)
 
     return
   }
@@ -889,6 +955,11 @@ const handleKeydown = async (event) => {
     }
 
     if (selectedOption.value === 'right' || selectedOption.value === 'left') {
+      const hasCaptured = Object.values(fingerprints.value).some(f => f.registered)
+      if (hasCaptured) {
+        showConfirmModal.value = true
+        return
+      }
       startCapture(selectedFinger.value)
       return
     }
@@ -910,11 +981,27 @@ const sendCaptureRequest = () => {
     return
   }
 
+  captureSessionId.value = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+
   ws.value.send(
     JSON.stringify({
-      type: 'request_capture'
+      type: 'request_capture',
+      capture_id: captureSessionId.value
     })
   )
+
+  console.log('[WS] Captura solicitada, capture_id:', captureSessionId.value)
+}
+
+const selectFinger = (finger) => {
+  selectedFinger.value = finger
+
+  if (connectionStatus.value.type !== 'connected') return
+  if (!props.dni) return
+
+  captureTarget.value = finger
+  capturing.value = finger
+  sendCaptureRequest()
 }
 
 const startCapture = (finger) => {

@@ -1,8 +1,7 @@
 <template>
   <Layout :pagina="'Fotos y Huellas'">
-    <a-card :bordered="false" class="compact-card">
+    <div :bordered="false" class="compact-card p-6">
       
-      <!-- HEADER compacto con DNI y contexto -->
       <div class="compact-header">
         <div class="header-left">
           <h3 class="mb-0">Registro Biométrico</h3>
@@ -95,7 +94,7 @@
         </div>
       </div>
 
-    </a-card>
+    </div>
   </Layout>
 </template>
 
