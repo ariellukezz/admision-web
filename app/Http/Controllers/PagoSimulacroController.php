@@ -192,7 +192,7 @@ class PagoSimulacroController extends Controller
             'operacion' => $req['operacion'],
             'fecha' => $req['fecha'],
             'monto' => $req['monto'],
-            'medio' => "Caja",
+            'medio' => $req['medio'] ?? 'Caja',
             'proceso' => auth()->user()->id_proceso
         ]);
 

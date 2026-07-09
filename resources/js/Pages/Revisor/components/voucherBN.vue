@@ -88,7 +88,8 @@ const verificarCaja = async (comp) => {
     dni: props.dni,
     operacion: comp.paymentTitle,
     fecha: comp.paymentDatetime,
-    monto: comp.paymentAmount
+    monto: comp.paymentAmount,
+    medio: 'Caja'
   }
 
   if (comp.estado == 1) {
@@ -96,12 +97,14 @@ const verificarCaja = async (comp) => {
     comp.estado = 0;
     getPagosGeneral();
     getBN();
+    getCaja();
     notificacion('info', 'PAGO REMOVIDO', 'Pago eliminado correctamente');
   } else {
     comp.estado = 1;
     let res = await axios.post('/insertar-pago', { pag });
     getPagosGeneral();
     getBN();
+    getCaja();
     notificacion(res.data.type, res.data.titulo, res.data.mensaje);
   }
 };
@@ -111,24 +114,27 @@ const verificarCaja = async (comp) => {
 const verificarBN = async (comp) => {
   let pag = {
     dni: props.dni,
-    operacion:comp.paymentId,
+    operacion: comp.paymentId,
     fecha: comp.date,
-    monto: comp.amount
+    monto: comp.amount,
+    medio: 'BN'
   }
 
-  if(comp.status){
-    if(comp.status == 1){ 
-      let res = await axios.get('/eliminar-pago/'+pag.dni+"/"+pag.operacion);
-      comp.status = 0; 
-      getPagosGeneral();
-    }else{ comp.status = 1; }
-  }else{
+  if (comp.status == 1) {
+    let res = await axios.get('/eliminar-pago/' + pag.dni + '/' + pag.operacion);
+    comp.status = 0;
+    getPagosGeneral();
+    getBN();
+    getCaja();
+    notificacion('info', 'PAGO REMOVIDO', 'Pago eliminado correctamente');
+  } else {
     comp.status = 1;
     let res = await axios.post('/insertar-pago', { pag });
     getPagosGeneral();
+    getBN();
+    getCaja();
     notificacion(res.data.type, res.data.titulo, res.data.mensaje);
   }
-
 };
 
 const getPagosGeneral = async (comp) => {
