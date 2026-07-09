@@ -1080,5 +1080,8 @@ const colAnteriores = ref([
     flex-direction: column;
   }
 
+  .profile-photo {
+    height: 200px;
+  }
 }
 </style>

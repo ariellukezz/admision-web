@@ -4,6 +4,7 @@
         <div class="page-wrapper">
 
             <!-- SEARCH BAR -->
+             
             <div class="search-section">
                 <a-auto-complete
                     v-model:value="dniseleccionado"
@@ -765,9 +766,9 @@ getPostulantes()
 }
 .image-box img {
     width: 100%;
-    height: 200px;
     object-fit: cover;
     display: block;
+    aspect-ratio: 6 / 9;
 }
 .image-label {
     display: block;
