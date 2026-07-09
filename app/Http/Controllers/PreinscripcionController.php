@@ -145,8 +145,33 @@ class PreinscripcionController extends Controller
                 ]);
             }
 
+            // Guardar el paso dentro de la misma transacción
+            $paso = null;
+            $pasoExistente = Paso::where('postulante', $request->id_postulante)
+                ->where('proceso', $request->id_proceso)
+                ->first();
+
+            if ($pasoExistente) {
+                $pasoExistente->nombre = $request->paso_nombre;
+                $pasoExistente->nro = $request->paso_nro;
+                $pasoExistente->avance = $request->paso_avance;
+                $pasoExistente->save();
+                $paso = $pasoExistente;
+            } else {
+                $paso = Paso::create([
+                    'nombre' => $request->paso_nombre,
+                    'nro' => $request->paso_nro,
+                    'avance' => $request->paso_avance,
+                    'postulante' => $request->id_postulante,
+                    'proceso' => $request->id_proceso,
+                ]);
+            }
+
         DB::commit();
-        return response()->json(['message' => 'Preinscripción exitosa'], 200);
+        return response()->json([
+            'message' => 'Preinscripción exitosa',
+            'datos' => $paso
+        ], 200);
 
     }
     catch (\Exception $e) {

@@ -536,18 +536,18 @@ export const usePreinscripcionPregrado = (props) => {
   // Navigate to the correct step based on ultimopaso
   const navegarSegunPaso = async () => {
     if (!ultimopaso.value) return
-    if (ultimopaso.value.nro == 6) {
+    if (ultimopaso.value.nro == 7) {
       try {
         let res = await axios.get('/participa-proceso/' + PROCESO() + '/' + formState.dni)
         if (res.data.estado === true) {
           postulante_inscrito.value = 1
-          pagina_pre.value = 7
+          pagina_pre.value = 8
         } else {
-          pagina_pre.value = 6
+          pagina_pre.value = 7
         }
       } catch (error) {
         console.error('Error al verificar inscripción:', error)
-        pagina_pre.value = 6
+        pagina_pre.value = 7
       }
     } else {
       pagina_pre.value = ultimopaso.value.nro
@@ -940,12 +940,15 @@ export const usePreinscripcionPregrado = (props) => {
     fd.append('id_postulante', datospersonales.id)
     fd.append('id_proceso', PROCESO())
     fd.append('id_anterior', id_anterior.value)
+    fd.append('paso_nombre', 'Registro de datos preinscripcion')
+    fd.append('paso_nro', 7)
+    fd.append('paso_avance', 110)
     await axios.post('/save-pre-inscripcion', fd).then(async res => {
-      if (avance_current.value < 100) {
-        await savePasos('Registro de datos preinscripcion', 7, 110)
-      } else {
-        next()
+      if (res.data.datos) {
+        id_pasos.value = res.data.datos.id
+        avance_current.value = 110
       }
+      next()
       notificacion('success', 'Éxito', res.data.message)
     }).catch(err => console.log(err))
     open.value = false
@@ -1353,7 +1356,7 @@ export const usePreinscripcionPregrado = (props) => {
         postulante_inscrito.value = 1
         modalcarrerasprevias.value = false
         loading.value = false
-        pagina_pre.value = 7
+        pagina_pre.value = 8
       } else {
         if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
           const puedeContinuar = await getParticipanteCepre()
@@ -1378,9 +1381,10 @@ export const usePreinscripcionPregrado = (props) => {
     try {
       let res = await axios.get('/participa-proceso/' + PROCESO() + '/' + formState.dni)
       if (res.data.estado === true) {
-        pagina_pre.value = 7
+        postulante_inscrito.value = 1
+        pagina_pre.value = 8
       } else {
-        pagina_pre.value = 6
+        pagina_pre.value = 7
       }
     } catch (error) {
       console.error('Error al obtener datos del participante', error)

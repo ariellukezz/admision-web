@@ -57,6 +57,14 @@ class PagoBancoController extends Controller
     ->where('secuencia', $request['comp']['secuencia'])
     ->first();
 
+    if (!$comprobante) {
+      $this->response['type'] = 'error';
+      $this->response['titulo'] = '!ERROR!';
+      $this->response['mensaje'] = 'No se encontró el comprobante';
+      $this->response['estado'] = false;
+      return response()->json($this->response, 404);
+    }
+
     if($comprobante->id_usuario == auth()->id() || !$comprobante->id_usuario){
 
       if( $request['comp']['estado'] == 1 ){
@@ -68,12 +76,14 @@ class PagoBancoController extends Controller
       }else{
         if( $request['comp']['estado'] == 0 ){
           $comprobante->estado = 1;
-          $comprobante->fecha_usado = date('Y-m-d H:s:m');
+          $comprobante->fecha_usado = date('Y-m-d H:i:s');
           $comprobante->id_proceso = auth()->user()->id_proceso;
           $comprobante->id_usuario = auth()->id();
           $comprobante->dni_postulante = $request['comp']['dni'];
         }
       }
+
+      $comprobante->save();
 
       $this->response['type'] = 'success';
       $this->response['titulo'] = '!COMPROBANTE ACTUALIZADO!';
@@ -87,11 +97,6 @@ class PagoBancoController extends Controller
       $this->response['estado'] = true;
       $this->response['datos'] = $comprobante;
     }
-
-    $comprobante->save();
-
-
-
 
     return response()->json($this->response, 200);
   }

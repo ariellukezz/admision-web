@@ -69,11 +69,6 @@ const comprobantes = ref([]);
 const props = defineProps(['dni', 'proceso']);
 
 const pagos = ref([]);
-
-//const getComprobantes = async () => {
-  //let res = await axios.post('get-pagos-banco', { dni: props.dni });
-  //comprobantes.value = res.data.datos;
-//};
 const comprobantesCaja = ref([]);
 const getCaja = async () => {
   let res = await axios.get('/get-pago-caja/'+props.dni);
@@ -90,7 +85,7 @@ const getBN = async () => {
 const verificar = async (comp) => {
   let res = await axios.post('verificar-comprobante-proceso', { comp });
   notificacion(res.data.type, res.data.titulo, res.data.mensaje);
-  getComprobantes();
+  getPagosGeneral();
 };
 
 const verificarCaja = async (comp) => {
@@ -149,13 +144,12 @@ const getPagosGeneral = async (comp) => {
 };
 
 watch(() => props.dni, async (newDni) => {
-  if (props.dni.length === 8 && /^[0-9]+$/.test(props.dni)) {
-    // await getComprobantes();
+  if (newDni && newDni.length === 8 && /^[0-9]+$/.test(newDni)) {
     await getCaja();
     await getBN();
     await getPagosGeneral();    
   }
-});
+}, { immediate: true });
 
 const colcomprobantes =  [
   { title: 'N° Operación', dataIndex: 'operacion'},

@@ -414,8 +414,12 @@ const {
 const handleCerrarVerificacion = async () => {
   modalcarrerasprevias.value = false
   if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
-    // CEPREUNA — data was already verified during getParticipanteCepre flow
-    pagina_pre.value = 1
+    // CEPREUNA — data was already verified during getParticipanteCepre flow.
+    // If cargarDatosYNavegar already navigated (email verif disabled + existing data),
+    // pagina_pre is already set — don't override it.
+    if (pagina_pre.value === 0) {
+      pagina_pre.value = 1
+    }
     loading.value = false
     return
   }

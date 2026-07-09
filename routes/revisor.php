@@ -79,7 +79,7 @@ Route::prefix('revisor')->middleware('auth', 'revisor')->group(function () {
     Route::post('/verificar-comprobante-proceso', [PagoBancoController::class, 'verificarComprobanteProceso']);
     Route::get('/api-pagos/{parametro}', function ($parametro) {
         try {
-            $response = Http::get('http://unap.scielodigital.net.pe/caja/pago_admision/server/CHECK_PAYMENT/?w=' . $parametro);
+            $response = Http::get('http://tesoreria.unap.edu.pe/services/document/?w=' . $parametro);
             return response($response->body(), $response->status())->header('Content-Type', 'application/json');
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error en la solicitud'], 500);

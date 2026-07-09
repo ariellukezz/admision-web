@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, watch } from 'vue';
+import { ref, defineProps, watch, onMounted } from 'vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -42,8 +42,8 @@ const verificar = async (comp) => {
   getComprobantes();
 };
 
-watch(() => {
-  getComprobantes();
+watch(() => props.dni, () => {
+  if (props.dni) getComprobantes();
 });
 
 const colVouchers =  [
@@ -57,8 +57,6 @@ const colVouchers =  [
 ];
 
 const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
-
-getComprobantes();
 </script>
 
 

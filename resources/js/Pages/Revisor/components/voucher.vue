@@ -7,12 +7,12 @@
                     <div>
                         <div class="flex justify-center align-center" style="width: 40px; height:40px; border: 1px solid #d9d9d9;">
                             <div style="margin-top: -3px;">
-                                <span style="font-weight: bold; font-size: 1.9rem;">{{ item.codigo.slice(-2) }}</span>
+                                <span style="font-weight: bold; font-size: 1.9rem;">{{ (item.codigo || '').slice(-2) }}</span>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <div>{{ item.fecha.split("-").reverse().join("-") }}</div> 
+                        <div>{{ (item.fecha || '').split("-").reverse().join("-") }}</div>
                         <div class="flex justify-end">
                             <span style="font-weight: bold; font-size: 1.2rem;"> {{ item.nro_operacion }} </span>
                         </div>
@@ -29,7 +29,7 @@
                         </div>
 
                         <div>
-                        <span style="font-size: 1.5rem; font-weight: bold;"> S/ {{ item.monto.toFixed(2) }} </span>
+                        <span style="font-size: 1.5rem; font-weight: bold;"> S/ {{ Number(item.monto || 0).toFixed(2) }} </span>
                     </div>
                     </div>
                 </div>
