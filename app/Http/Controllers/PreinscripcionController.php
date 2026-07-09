@@ -137,9 +137,7 @@ class PreinscripcionController extends Controller
             ->where('dni_postulante', $request->dni)
             ->exists();
 
-            if($resultado){
-                print("Avance ya registrado");
-            }else{
+            if(!$resultado){
                 $ava = AvancePostulante::create([
                     'dni_postulante'=> $request->dni,
                     'id_proceso' => $request->id_proceso,

@@ -1064,7 +1064,7 @@ const colAnteriores = ref([
 
 .profile-photo {
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 6 / 9;
   object-fit: cover;
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
@@ -1080,8 +1080,5 @@ const colAnteriores = ref([
     flex-direction: column;
   }
 
-  .profile-photo {
-    height: 200px;
-  }
 }
 </style>

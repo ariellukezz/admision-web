@@ -940,13 +940,13 @@ export const usePreinscripcionPregrado = (props) => {
     fd.append('id_postulante', datospersonales.id)
     fd.append('id_proceso', PROCESO())
     fd.append('id_anterior', id_anterior.value)
-    await axios.post('/save-pre-inscripcion', fd).then(res => {
+    await axios.post('/save-pre-inscripcion', fd).then(async res => {
       if (avance_current.value < 100) {
-        savePasos('Registro de datos preinscripcion', 7, 110)
+        await savePasos('Registro de datos preinscripcion', 7, 110)
       } else {
         next()
       }
-      notificacion('success', 'Éxito', res.data.menssje)
+      notificacion('success', 'Éxito', res.data.message)
     }).catch(err => console.log(err))
     open.value = false
   }

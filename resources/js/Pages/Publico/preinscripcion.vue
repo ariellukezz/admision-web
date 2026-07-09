@@ -1502,9 +1502,9 @@ const submit = async () => {
   fd.append('codigo_certificado', datos_preinscripcion.value.codigo_certificado)
   fd.append('codigo_medico', datos_preinscripcion.value.codigo_medico)
   fd.append('id_postulante', datospersonales.id)
-  await axios.post("save-pre-inscripcion", fd).then(res=>{
-    if( avance_current.value < 100){ savePasos("Registro de datos preinscripcion", 6, 110) } else{ next() }
-    showToast("success","2",res.data.menssje);
+  await axios.post("save-pre-inscripcion", fd).then(async res=>{
+    if( avance_current.value < 100){ await savePasos("Registro de datos preinscripcion", 6, 110) } else{ next() }
+    showToast("success","2",res.data.message);
     getResoluciones()
   }).catch(err=>console.log(err))
 }
