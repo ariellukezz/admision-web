@@ -414,22 +414,20 @@ const {
 const handleCerrarVerificacion = async () => {
   modalcarrerasprevias.value = false
   if (props.procceso_seleccionado.id_modalidad_proceso == 2) {
-    // CEPREUNA — data was already verified during getParticipanteCepre flow.
-    // If cargarDatosYNavegar already navigated (email verif disabled + existing data),
-    // pagina_pre is already set — don't override it.
     if (pagina_pre.value === 0) {
       pagina_pre.value = 1
     }
     loading.value = false
     return
   }
-  const tieneDatos = await verificarDatosExistentes()
-  if (!tieneDatos) {
-    // No existing data — fetch from external API and go to step 1
+  // Non-CEPREUNA: if postulante data was already loaded by getCarrerasPrevias flow,
+  // just navigate to step 1. Otherwise, fetch from external API.
+  if (!datospersonales.id) {
     await getDatosPersonales()
+  } else if (pagina_pre.value === 0) {
+    pagina_pre.value = 1
   }
-  // If tieneDatos, the data modal is showing.
-  // After user accepts/rejects, aceptarCargarDatos/rechazarCargarDatos sets pagina_pre = 1
+  loading.value = false
 }
 
 // Step-specific next handler

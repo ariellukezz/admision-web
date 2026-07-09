@@ -342,7 +342,7 @@ export const usePreinscripcionPregrado = (props) => {
         loading.value = false
       } else {
         modalcarrerasprevias.value = true
-        getSancionado()
+        await getSancionado()
       }
     } catch (error) {
       console.error('Error al obtener paso registrado:', error)
@@ -586,7 +586,6 @@ export const usePreinscripcionPregrado = (props) => {
   const iniciarPostulacion = async () => {
     loading.value = true
     try {
-      // For CEPREUNA, check eligibility first — data verification happens after
       if (props.procceso_seleccionado.id_modalidad_proceso != 2) {
         const tieneDatos = await verificarDatosExistentes()
         if (tieneDatos) {
@@ -600,8 +599,8 @@ export const usePreinscripcionPregrado = (props) => {
         loading.value = false
         return
       }
-      // If not registered, CarrerasPreviasModal is showing (started by getSancionado)
-      // getSancionado() manages loading through its own flow
+      // No paso found — getPasoRegistrado already opened the modal and ran getSancionado
+      // getSancionado manages loading internally
     } catch (error) {
       console.error('Error en iniciarPostulacion:', error)
       loading.value = false
@@ -1297,10 +1296,17 @@ export const usePreinscripcionPregrado = (props) => {
         return
       } else {
         await consultaInscripcion()
+        // Fallback: if consultaInscripcion didn't open the modal and didn't navigate,
+        // make sure loading is false and the modal shows
+        if (loading.value && !modalcarrerasprevias.value) {
+          loading.value = false
+          anteriores.value = []
+        }
       }
     } catch (error) {
       console.error('Error al obtener datos de sancionado', error)
       loading.value = false
+      anteriores.value = []
     }
   }
 

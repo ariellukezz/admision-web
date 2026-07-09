@@ -798,6 +798,17 @@ Route::get('/get-pago-caja/{dni}', function ($dni) {
         $response = Http::get('http://tesoreria.unap.edu.pe/services/document/?w=' . $dni . '&d=2025-12-01');
          if ($response->successful()) {
             $datosCaja = $response->json(['data']);
+            if (is_array($datosCaja)) {
+                $pagados = DB::table('pagos_general')
+                    ->where('dni', $dni)
+                    ->where('medio', 'Caja')
+                    ->pluck('operacion')
+                    ->toArray();
+                foreach ($datosCaja as &$item) {
+                    $operacion = $item['paymentTitle'] ?? null;
+                    $item['estado'] = in_array($operacion, $pagados) ? 1 : 0;
+                }
+            }
             return response()->json($datosCaja);
         } else {
             return response()->json(['error' => 'La solicitud no fue exitosa'], $response->status());

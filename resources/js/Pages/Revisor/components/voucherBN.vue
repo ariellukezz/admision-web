@@ -40,13 +40,8 @@
             <strong>S/ {{ record.paymentAmount }}</strong>
           </template>
           <template v-if="column.dataIndex === 'opcion'">
-            <div v-if="record.estado">
-              <a-button v-if="record.estado === 0" class="vch-btn-select" @click="verificarCaja(record)">Seleccionar</a-button>
-              <a-button v-if="record.estado === 1" class="vch-btn-selected" @click="verificarCaja(record)">Seleccionado</a-button>
-            </div>
-            <div v-else>
-              <a-button class="vch-btn-select" @click="verificarCaja(record)">Seleccionar</a-button>
-            </div>
+            <a-button v-if="record.estado === 1" class="vch-btn-selected" @click="verificarCaja(record)">Seleccionado</a-button>
+            <a-button v-else class="vch-btn-select" @click="verificarCaja(record)">Seleccionar</a-button>
           </template>
         </template>
       </a-table>
@@ -91,26 +86,24 @@ const verificar = async (comp) => {
 const verificarCaja = async (comp) => {
   let pag = {
     dni: props.dni,
-    operacion:comp.paymentTitle,
+    operacion: comp.paymentTitle,
     fecha: comp.paymentDatetime,
     monto: comp.paymentAmount
   }
 
-  if(comp.status){
-    if(comp.status == 1){ 
-      let res = await axios.get('/eliminar-pago/'+pag.dni+"/"+pag.operacion);
-      getPagosGeneral();
-      getBN();
-      comp.status = 0;
-    }else{ comp.status = 1; }
-  }else{
+  if (comp.estado == 1) {
+    let res = await axios.get('/eliminar-pago/' + pag.dni + '/' + pag.operacion);
+    comp.estado = 0;
+    getPagosGeneral();
+    getBN();
+    notificacion('info', 'PAGO REMOVIDO', 'Pago eliminado correctamente');
+  } else {
+    comp.estado = 1;
     let res = await axios.post('/insertar-pago', { pag });
     getPagosGeneral();
     getBN();
-    notificacion("success", res.data.titulo, res.data.mensaje);
+    notificacion(res.data.type, res.data.titulo, res.data.mensaje);
   }
-
-
 };
 
 

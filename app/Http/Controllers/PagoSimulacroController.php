@@ -196,7 +196,11 @@ class PagoSimulacroController extends Controller
             'proceso' => auth()->user()->id_proceso
         ]);
 
-        return response()->json(['message' => 'Pago insertado correctamente'], 201);
+        return response()->json([
+            'type' => 'success',
+            'titulo' => 'PAGO REGISTRADO',
+            'mensaje' => 'Pago insertado correctamente'
+        ], 201);
     }
 
     public function eliminarPago($dni, $operacion)
