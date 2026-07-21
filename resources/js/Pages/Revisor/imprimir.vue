@@ -607,7 +607,7 @@ const ingresante = ref({
                          
 const crearCorreo = async () => {
   try {
-    await axios.post('crear_correo_institucional', {
+    const res = await axios.post('crear_correo_institucional', {
       id: ingresante.value.id,
       apellido_paterno: ingresante.value.primer_apellido,
       apellido_materno: ingresante.value.segundo_apellido,
@@ -619,11 +619,14 @@ const crearCorreo = async () => {
       escuela: ingresante.value.programa_correo,
       numero_ingresos: 1,
     });
-    getCorreos();
+
+    if (res.data.users && res.data.users.length > 0) {
+      correo_anteriores.value = res.data.users;
+      ingresante.value.correo_institucional = res.data.users[0].email;
+    }
   } catch (error) {
     console.error('Error al crear correo:', error);
-  } finally {
-    await getCorreos();
+    notification('error', 'Error', 'No se pudo crear el correo institucional');
   }
 };
 
