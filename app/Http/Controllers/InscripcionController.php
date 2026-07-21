@@ -88,7 +88,7 @@ class InscripcionController extends Controller
             if(count($res) > 0 ){
                 $edad = Carbon::parse($res[0]->fec_nacimiento)->age;
 
-                if ($edad >= 18) {
+                if ($edad >= 98) {
                     if ($res[0]->postulante_revisado == 0 || $res[0]->postulante_revisado == null) {
                         $consulta = DB::table('consultas_reniec')
                             ->orderBy('cant', 'asc')
@@ -452,6 +452,82 @@ class InscripcionController extends Controller
         return response()->file($rutaFinal);
 
     }
+
+    ## GENERACIÓN DE PDF SIN FIRMA
+    // public function pdfInscripcion($dni)
+    // {
+    //     $proceso = Proceso::find(auth()->user()->id_proceso);
+    //     $dia1 = $this->formatDate($proceso->fec_1);
+    //     $dia2 = $this->formatDate($proceso->fec_2 ?? null);
+
+    //     $carreras_previas = DB::select("
+    //         SELECT codigo, cod_car, nombre, condicion
+    //         FROM carreras_previas
+    //         WHERE dni_postulante = ?
+    //     ", [$dni]);
+
+    //     $datos = DB::select("
+    //         SELECT
+    //             postulante.nro_doc AS dni,
+    //             inscripciones.codigo as codigo,
+    //             postulante.nombres AS nombre,
+    //             postulante.primer_apellido AS paterno,
+    //             postulante.segundo_apellido AS materno,
+    //             programa.nombre AS programa,
+    //             inscripciones.id_programa as id_programa,
+    //             modalidad.nombre AS modalidad,
+    //             procesos.nombre AS proceso,
+    //             LPAD(codigo_sunedu,3,'0') AS cod_sunedu,
+    //             inscripciones.created_at as fecha,
+    //             users.name,
+    //             users.paterno as upaterno,
+    //             users.dni as user_dni
+    //         FROM inscripciones
+    //         JOIN postulante ON inscripciones.id_postulante = postulante.id
+    //         JOIN programa ON inscripciones.id_programa = programa.id
+    //         JOIN modalidad ON inscripciones.id_modalidad = modalidad.id
+    //         JOIN procesos ON inscripciones.id_proceso = procesos.id
+    //         JOIN users ON inscripciones.id_usuario = users.id
+    //         WHERE postulante.nro_doc = ?
+    //         AND inscripciones.estado = 0
+    //         AND inscripciones.id_proceso = ?
+    //     ", [$dni, auth()->user()->id_proceso]);
+
+    //     if (empty($datos)) {
+    //         abort(404, "No se encontraron datos para el DNI {$dni}");
+    //     }
+
+    //     $foto = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/fotos/' . $dni . '.jpg');
+    //     $huellaIzquierda = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . '.jpg');
+    //     $huellaDerecha = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/huellas/' . $dni . 'x.jpg');
+
+    //     $data = $datos[0];
+
+    //     $pdf = Pdf::loadView(
+    //         'inscripcion.inscripcion',
+    //         compact(
+    //             'data',
+    //             'carreras_previas',
+    //             'foto',
+    //             'huellaIzquierda',
+    //             'huellaDerecha',
+    //             'dia1',
+    //             'dia2'
+    //         )
+    //     )->setPaper('A4', 'portrait');
+
+    //     $rutaCarpeta = public_path('/documentos/' . auth()->user()->id_proceso . '/inscripciones/constancias/');
+
+    //     if (!File::exists($rutaCarpeta)) {
+    //         File::makeDirectory($rutaCarpeta, 0755, true);
+    //     }
+
+    //     $rutaFinal = $rutaCarpeta . $dni . '.pdf';
+
+    //     $pdf->save($rutaFinal);
+
+    //     return response()->file($rutaFinal);
+    // }
 
 
     // public function pdfInscripcion($dni) {
