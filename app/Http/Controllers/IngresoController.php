@@ -221,7 +221,7 @@ class IngresoController extends Controller {
 
     public function biometrico(Request $request)
     {
-        // $database2 = 'mysql_secondary';
+        $database2 = 'mysql_secondary';
 
         $re = DB::table('resultados as r')
             ->select([
