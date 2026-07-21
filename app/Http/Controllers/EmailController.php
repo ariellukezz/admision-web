@@ -5,96 +5,28 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\MensajeCorreo;
 use App\Mail\Reprogramacion;
 use App\Mail\Comunicado;
+use App\Jobs\EnviarCorreoJob;
 
 use Illuminate\Http\Request;
 use DB;
 
 class EmailController extends Controller
 {
-public function enviarCorreo($area)
-{
-    $mailers = ['smtp1','smtp2','smtp3','smtp4','smtp5','smtp6','smtp7','smtp8','smtp9','smtp10'];
+    public function enviarCorreo($area)
+    {
+        $mailers = ['smtp9'];
 
-    $destinatarios = DB::select("SELECT * FROM enviar_correos WHERE enviado = 0 AND area = ?", [$area]);
-    $errores = [];
+        $destinatarios = DB::select("SELECT * FROM enviar_correos WHERE enviado = 0 AND area = ?", [$area]);
 
-    $chunks = array_chunk($destinatarios, 10); // enviamos 10 a la vez
-
-    foreach ($chunks as $grupo) {
-        $promesas = [];
-
-        foreach ($grupo as $destinatario) {
-
-            $promesas[] = function() use ($destinatario, $mailers, &$errores) {
-
-                $mailer = $mailers[array_rand($mailers)];
-
-                try {
-                    Mail::mailer($mailer)
-                        ->to($destinatario->correo)
-                        ->send(new MensajeCorreo(
-                            $destinatario->nombres,
-                            $destinatario->correo,
-                            $destinatario->programa,
-                            $destinatario->puerta
-                        ));
-
-                    DB::table('enviar_correos')
-                        ->where('id', $destinatario->id)
-                        ->update(['enviado' => 1]);
-
-                } catch (\Exception $e) {
-                    // si falla, rotamos a otro SMTP y reintentamos 1 vez más
-                    $otrosSMTP = array_diff($mailers, [$mailer]);
-                    $nuevoMailer = $otrosSMTP[array_rand($otrosSMTP)];
-
-                    try {
-                        Mail::mailer($nuevoMailer)
-                            ->to($destinatario->correo)
-                            ->send(new MensajeCorreo(
-                                $destinatario->nombres,
-                                $destinatario->correo,
-                                $destinatario->programa,
-                                $destinatario->puerta
-                            ));
-
-                        DB::table('enviar_correos')
-                            ->where('id', $destinatario->id)
-                            ->update(['enviado' => 1]);
-
-                    } catch (\Exception $e2) {
-                        $errores[] = [
-                            'nombre' => $destinatario->nombres,
-                            'correo' => $destinatario->correo,
-                            'error' => $e2->getMessage()
-                        ];
-                    }
-                }
-            };
+        foreach ($destinatarios as $destinatario) {
+            EnviarCorreoJob::dispatch($destinatario, $mailers);
         }
 
-        // Ejecutar las 10 promesas en paralelo
-        foreach ($promesas as $promesa) {
-            $promesa(); // aquí PHP ejecuta cada closure "en paralelo" dentro del loop
-        }
-
-        // Opcional: pequeña pausa para no saturar SMTP
-        usleep(100000); // 0.1s entre grupos de 10
-    }
-
-    if (!empty($errores)) {
         return response()->json([
-            'status' => 'error',
-            'mensaje' => 'Hubo errores al enviar correos.',
-            'no_enviados' => $errores
+            'status' => 'success',
+            'mensaje' => 'Se encolaron ' . count($destinatarios) . ' correos para envío asíncrono.'
         ]);
     }
-
-    return response()->json([
-        'status' => 'success',
-        'mensaje' => 'Correos enviados correctamente a todos los destinatarios.'
-    ]);
-}
 
 
     public function enviarConfirmacion(Request $request)
