@@ -9,8 +9,18 @@ use App\Models\Postulante;
 use App\Models\Colegio;
 use App\Models\ControlBiometrico;
 use App\Models\Proceso;
+use App\Models\AuditTrail;
+use App\Models\CarrerasPrevias;
+use App\Models\Documento;
+use App\Models\Ingresante;
+use App\Models\Paso;
+use App\Models\Comprobante;
+use App\Models\RevisionSolicitud;
+use App\Models\AvancePostulante;
+use App\Models\TipoDocumento;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use DB;
 
 class DashboardController extends Controller
@@ -529,9 +539,23 @@ class DashboardController extends Controller
   public function showPostulante($dni) {
     $postulanteInfo = Postulante::select(
         'postulante.id AS id_postulante',
+        'postulante.nro_doc',
         'postulante.nombres',
+        'postulante.primer_apellido',
+        'postulante.segundo_apellido',
         'postulante.email',
         'postulante.celular',
+        'postulante.sexo',
+        'postulante.fec_nacimiento',
+        'postulante.direccion',
+        'postulante.discapacidad',
+        'postulante.tipo_discapacidad',
+        'postulante.estado_civil',
+        'postulante.anio_egreso',
+        'postulante.correo_institucional',
+        'postulante.cod_orcid',
+        'postulante.foto_url',
+        'postulante.observaciones',
         'departamento.nombre AS departamento',
         'provincia.nombre AS provincia',
         'distritos.nombre AS distrito'
@@ -543,6 +567,10 @@ class DashboardController extends Controller
     ->where('postulante.nro_doc', '=', $dni)
     ->first();
 
+    if (!$postulanteInfo) {
+        abort(404, 'Postulante no encontrado');
+    }
+
     $colegioInfo = Colegio::select( 'colegios.nombre AS colegio', 'distritos.nombre AS distrito' )
     ->join('postulante','postulante.id_colegio','=','colegios.id')
     ->leftJoin('ubigeo', 'ubigeo.ubigeo', '=', 'postulante.ubigeo_residencia')
@@ -550,17 +578,89 @@ class DashboardController extends Controller
     ->where('postulante.nro_doc', '=', $dni)
     ->first();
 
+    // Inscripciones con relaciones
+    $inscripciones = Inscripcion::with(['programa:id,nombre,codigo', 'modalidad:id,nombre,codigo'])
+        ->select('inscripciones.id', 'inscripciones.codigo', 'inscripciones.id_proceso', 'inscripciones.id_programa', 'inscripciones.id_modalidad', 'inscripciones.estado', 'inscripciones.created_at')
+        ->where('inscripciones.id_postulante', '=', $postulanteInfo->id_postulante)
+        ->orderBy('inscripciones.id', 'desc')
+        ->get();
+
     $procesos = Inscripcion::select('procesos.id AS id_proceso','procesos.nombre AS proceso','inscripciones.codigo')
     ->join('procesos', 'procesos.id', '=', 'inscripciones.id_proceso')
     ->where('inscripciones.id_postulante', '=', $postulanteInfo->id_postulante)
     ->orderBy('procesos.id', 'desc')
     ->get();
 
-    $foto = "https://inscripciones.admision.unap.edu.pe/fotos/inscripcion/$dni.jpg";
+    // Preinscripciones con relaciones
+    $preinscripcionesData = Preinscripcion::with(['programa:id,nombre,codigo', 'modalidad:id,nombre,codigo'])
+        ->select('pre_inscripcion.id', 'pre_inscripcion.id_programa', 'pre_inscripcion.id_modalidad', 'pre_inscripcion.estado', 'pre_inscripcion.codigo_seguridad', 'pre_inscripcion.observacion', 'pre_inscripcion.created_at')
+        ->where('pre_inscripcion.id_postulante', '=', $postulanteInfo->id_postulante)
+        ->orderBy('pre_inscripcion.id', 'desc')
+        ->get();
 
-    $countPreInscripcion = Preinscripcion::where('id_postulante', '=', $postulanteInfo->id_postulante)->count();
-    $countInscripcion = Inscripcion::where('id_postulante', '=', $postulanteInfo->id_postulante)->count();
+    // Foto: buscar localmente primero
+    $foto = null;
+    if ($postulanteInfo->foto_url) {
+        $fotoPath = public_path($postulanteInfo->foto_url);
+        if (File::exists($fotoPath)) {
+            $foto = url($postulanteInfo->foto_url) . '?v=' . time();
+        }
+    }
+    if (!$foto) {
+        $procesoIds = $inscripciones->pluck('id_proceso')->unique();
+        foreach ($procesoIds as $pid) {
+            $localPath = public_path("documentos/{$pid}/inscripciones/fotos/{$dni}.jpg");
+            if (File::exists($localPath)) {
+                $foto = url("documentos/{$pid}/inscripciones/fotos/{$dni}.jpg") . '?v=' . time();
+                break;
+            }
+            $bioPath = public_path("documentos/{$pid}/control_biometrico/fotos/{$dni}.jpg");
+            if (File::exists($bioPath)) {
+                $foto = url("documentos/{$pid}/control_biometrico/fotos/{$dni}.jpg") . '?v=' . time();
+                break;
+            }
+        }
+    }
+    if (!$foto) {
+        $foto = "https://inscripciones.admision.unap.edu.pe/fotos/inscripcion/$dni.jpg";
+    }
+
+    $countPreInscripcion = $preinscripcionesData->count();
+    $countInscripcion = $inscripciones->count();
     $countControlBiometrico = ControlBiometrico::where('id_postulante', '=', $postulanteInfo->id_postulante)->count();
+
+    // Puntajes / Resultados
+    $puntajes = Ingresante::where('dni_postulante', $dni)
+        ->orderBy('id_proceso', 'desc')
+        ->get();
+
+    // Pasos realizados
+    $pasos = Paso::where('postulante', $postulanteInfo->id_postulante)
+        ->orderBy('nro', 'asc')
+        ->get();
+
+    // Avance del postulante
+    $avance = AvancePostulante::where('dni_postulante', $dni)
+        ->orderBy('id_proceso', 'desc')
+        ->get();
+
+    // Documentos con tipo
+    $documentos = Documento::with('tipoDocumento:id,nombre,codigo')
+        ->select('id', 'nombre', 'id_tipo_documento', 'estado', 'verificado', 'valido', 'observacion', 'url', 'path', 'created_at', 'revisado_at', 'validado_at')
+        ->where('id_postulante', '=', $postulanteInfo->id_postulante)
+        ->where('is_deleted', false)
+        ->orderBy('id', 'desc')
+        ->get();
+
+    // Comprobantes de pago
+    $comprobantes = Comprobante::where('ndoc_postulante', $dni)
+        ->orderBy('fecha', 'desc')
+        ->get();
+
+    // Solicitudes de revisión
+    $revisiones = RevisionSolicitud::where('id_postulante', '=', $postulanteInfo->id_postulante)
+        ->orderBy('id', 'desc')
+        ->get();
 
     $usuarioVinculado = null;
     if ($postulanteInfo) {
@@ -568,16 +668,87 @@ class DashboardController extends Controller
             ->first(['id', 'dni', 'name', 'paterno', 'materno', 'email']);
     }
 
+    // Carreras terminadas
+    $carrerasPrevias = CarrerasPrevias::where('dni_postulante', $dni)
+        ->orderBy('fecha', 'desc')
+        ->get();
+    $countCarrerasTerminadas = $carrerasPrevias->count();
+
+    // IDs para filtrar actividad
+    $inscripcionIds = $inscripciones->pluck('id');
+    $preinscripcionIds = $preinscripcionesData->pluck('id');
+    $documentIds = $documentos->pluck('id');
+
+    // Descargas
+    $countDownloads = AuditTrail::where('action', 'download')
+        ->where('model_type', Documento::class)
+        ->whereIn('model_id', $documentIds)
+        ->count();
+
+    // Actividad reciente
+    $actividades = DB::table('activity_logs')
+        ->leftJoin('users', 'users.id', '=', 'activity_logs.user_id')
+        ->select(
+            'users.name as usuario',
+            'activity_logs.action as acciones',
+            'activity_logs.model_id as registro',
+            'activity_logs.tabla',
+            'activity_logs.direccion',
+            'activity_logs.fecha'
+        )
+        ->where(function ($q) use ($postulanteInfo, $inscripcionIds, $preinscripcionIds, $documentIds, $usuarioVinculado) {
+            $q->where(function ($q2) use ($postulanteInfo) {
+                $q2->where('activity_logs.tabla', 'postulante')
+                   ->where('activity_logs.model_id', $postulanteInfo->id_postulante);
+            });
+            if ($inscripcionIds->isNotEmpty()) {
+                $q->orWhere(function ($q2) use ($inscripcionIds) {
+                    $q2->where('activity_logs.tabla', 'inscripciones')
+                       ->whereIn('activity_logs.model_id', $inscripcionIds);
+                });
+            }
+            if ($preinscripcionIds->isNotEmpty()) {
+                $q->orWhere(function ($q2) use ($preinscripcionIds) {
+                    $q2->where('activity_logs.tabla', 'pre_inscripcion')
+                       ->whereIn('activity_logs.model_id', $preinscripcionIds);
+                });
+            }
+            if ($documentIds->isNotEmpty()) {
+                $q->orWhere(function ($q2) use ($documentIds) {
+                    $q2->where('activity_logs.tabla', 'documento')
+                       ->whereIn('activity_logs.model_id', $documentIds);
+                });
+            }
+            if ($usuarioVinculado) {
+                $q->orWhere('activity_logs.user_id', $usuarioVinculado->id);
+            }
+        })
+        ->orderBy('activity_logs.fecha', 'desc')
+        ->limit(20)
+        ->get();
+
     return Inertia::render('Admin/Postulante/Perfil',
       [
         'info' => $postulanteInfo, 
         'infoColegio' => $colegioInfo, 
-        'preinscripciones'=>  $countPreInscripcion,
+        'preinscripciones' => $countPreInscripcion,
         'inscripciones' => $countInscripcion,
         'control_biometrico' => $countControlBiometrico,
         'foto' => $foto,
         'pro' => $procesos,
         'usuarioVinculado' => $usuarioVinculado,
+        'carrerasTerminadas' => $countCarrerasTerminadas,
+        'downloads' => $countDownloads,
+        'actividades' => $actividades,
+        'puntajes' => $puntajes,
+        'pasos' => $pasos,
+        'avance' => $avance,
+        'documentos' => $documentos,
+        'comprobantes' => $comprobantes,
+        'revisiones' => $revisiones,
+        'inscripcionesData' => $inscripciones,
+        'preinscripcionesData' => $preinscripcionesData,
+        'carrerasPrevias' => $carrerasPrevias,
       ]); 
   }
 
