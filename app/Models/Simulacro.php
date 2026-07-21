@@ -26,11 +26,11 @@ class Simulacro extends Model
 
     public function examenAreas()
     {
-        return $this->hasMany(ExamenSimulacro::class, 'id_simulacro');
+        return $this->hasMany(\App\Modules\Calificacion\Models\ExamenSimulacro::class, 'id_simulacro');
     }
 
     public function archivos()
     {
-        return $this->hasMany(ArchivoSimulacro::class, 'id_simulacro');
+        return $this->hasMany(\App\Modules\Calificacion\Models\ArchivoSimulacro::class, 'id_simulacro');
     }
 }
