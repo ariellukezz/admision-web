@@ -107,7 +107,7 @@
     >
         <div class="mt-4">
             <a-upload-dragger
-                :action="'/calificacion/examenes-res/' + (tipoActual?.id || 0)"
+                :action="'/api/calificacion/examenes-res/' + (tipoActual?.id || 0)"
                 name="file"
                 :multiple="true"
                 accept=".txt,.dat"
@@ -219,7 +219,7 @@
     >
         <div class="mt-4">
             <a-upload-dragger
-                :action="'/calificacion/examenes-tipos-archivo/' + (examen?.id || 0)"
+                :action="'/api/calificacion/examenes-tipos-archivo/' + (examen?.id || 0)"
                 name="file"
                 accept=".txt,.dat"
                 @change="handleTiposArchivoUpload"
@@ -256,9 +256,10 @@ import { message } from 'ant-design-vue';
 import axios from 'axios';
 
 const props = defineProps({
-    examen: Object,
+    examen_id: [Number, String],
 });
 
+const examen = ref(null);
 const loadingTipos = ref(false);
 const savingTipo = ref(false);
 const tipos = ref([]);
@@ -323,8 +324,8 @@ const volver = () => router.visit('/calificacion/examenes');
 const getTipos = async () => {
     loadingTipos.value = true;
     try {
-        const res = await axios.get('/calificacion/examenes-tipos/' + props.examen.id);
-        tipos.value = res.data.datos;
+        const res = await axios.get('/api/calificacion/examenes/' + examen.value.id + '/tipos');
+        tipos.value = res.data.data;
     } catch (e) {
         message.error('Error al cargar tipos');
     } finally {
@@ -341,9 +342,9 @@ const editarTipoResp = (record) => {
 const guardarTipoResp = async () => {
     savingTipo.value = true;
     try {
-        await axios.post('/calificacion/examenes-tipos', {
+        await axios.post('/api/calificacion/examenes-tipos', {
             id: tipoEditando.value.id,
-            id_examen_simulacro: props.examen.id,
+            id_examen_simulacro: examen.value.id,
             tipo: tipoEditando.value.tipo,
             respuestas: respuestasEdit.value,
         });
@@ -359,7 +360,7 @@ const guardarTipoResp = async () => {
 
 const eliminarTipo = async (record) => {
     try {
-        await axios.delete('/calificacion/examenes-tipos/' + record.id);
+        await axios.delete('/api/calificacion/examenes-tipos/' + record.id);
         message.success('Tipo eliminado');
         await getTipos();
     } catch (e) {
@@ -377,8 +378,8 @@ const abrirAgregarTipo = () => {
 const guardarNuevoTipo = async () => {
     savingTipo.value = true;
     try {
-        await axios.post('/calificacion/examenes-tipos', {
-            id_examen_simulacro: props.examen.id,
+        await axios.post('/api/calificacion/examenes-tipos', {
+            id_examen_simulacro: examen.value.id,
             tipo: nuevoTipo.tipo || null,
             respuestas: nuevoTipo.respuestas || null,
         });
@@ -416,8 +417,8 @@ const verArchivo = async (record) => {
     modalVerArchivo.value = true;
     Object.assign(archivoData, { nombre: record.archivo.nombre, contenido: '' });
     try {
-        const res = await axios.get('/calificacion/examenes-archivo/' + record.archivo.id);
-        archivoData.contenido = res.data.datos.contenido;
+        const res = await axios.get('/api/calificacion/examenes-archivo/' + record.archivo.id);
+        archivoData.contenido = res.data.data.contenido;
     } catch (e) {
         archivoData.contenido = 'Error al cargar el archivo';
     }
@@ -443,8 +444,8 @@ const abrirRes = async (record) => {
 };
 
 const getRes = async (idTipo) => {
-    const res = await axios.get('/calificacion/examenes-res/' + idTipo);
-    resData.value = res.data.datos.data;
+    const res = await axios.get('/api/calificacion/examenes-res/' + idTipo);
+    resData.value = res.data.data.data;
 };
 
 const handleResUpload = async (info) => {
@@ -460,7 +461,7 @@ const handleResUpload = async (info) => {
 
 const limpiarRes = async () => {
     try {
-        await axios.delete('/calificacion/examenes-res/' + tipoActual.value.id);
+        await axios.delete('/api/calificacion/examenes-res/' + tipoActual.value.id);
         message.success('Registros RES eliminados');
         await getTipos();
         await getRes(tipoActual.value.id);
@@ -480,13 +481,13 @@ const abrirExcepciones = async (record) => {
 };
 
 const getExcepciones = async (idTipo) => {
-    const res = await axios.get('/calificacion/examenes-excepciones/' + idTipo);
-    excepciones.value = res.data.datos;
+    const res = await axios.get('/api/calificacion/examenes-excepciones/' + idTipo);
+    excepciones.value = res.data.data;
 };
 
 const agregarExcepcion = async () => {
     try {
-        await axios.post('/calificacion/examenes-excepciones', {
+        await axios.post('/api/calificacion/examenes-excepciones', {
             id_examen_tipo: tipoActual.value.id,
             nro_pregunta: nuevaExc.nro_pregunta,
             accion: nuevaExc.accion,
@@ -503,7 +504,7 @@ const agregarExcepcion = async () => {
 
 const eliminarExcepcion = async (record) => {
     try {
-        await axios.delete('/calificacion/examenes-excepciones/' + record.id);
+        await axios.delete('/api/calificacion/examenes-excepciones/' + record.id);
         message.success('Excepción eliminada');
         await getExcepciones(tipoActual.value.id);
         await getTipos();
@@ -512,7 +513,13 @@ const eliminarExcepcion = async (record) => {
     }
 };
 
-onMounted(() => {
+onMounted(async () => {
+    if (props.examen_id) {
+        try {
+            const res = await axios.get('/api/calificacion/examenes', { params: { paginasize: 100 } });
+            examen.value = res.data.data.data.find(e => e.id == props.examen_id);
+        } catch (e) { console.error('Error al cargar examen:', e); }
+    }
     getTipos();
 });
 </script>

@@ -226,12 +226,11 @@ const filterOption = (input, option) => {
 const formatNum = (n) => Number(n || 0).toFixed(2);
 
 const getPonderaciones = async () => {
-    const res = await axios.post('/calificacion/get-ponderaciones?page=' + pagina.value, {
-        term: buscar.value,
-        paginasize: paginasize.value,
+    const res = await axios.get('/api/calificacion/ponderaciones', {
+        params: { term: buscar.value, paginasize: paginasize.value, page: pagina.value }
     });
-    ponderaciones.value = res.data.datos.data;
-    totalRegistros.value = res.data.datos.total;
+    ponderaciones.value = res.data.data.data;
+    totalRegistros.value = res.data.data.total;
 };
 
 let timeoutId;
@@ -243,8 +242,8 @@ watch(pagina, getPonderaciones);
 watch(paginasize, getPonderaciones);
 
 const getAsignaturas = async () => {
-    const res = await axios.get('/calificacion/asignaturas-list');
-    asignaturas.value = res.data.datos;
+    const res = await axios.get('/api/calificacion/asignaturas');
+    asignaturas.value = res.data.data;
 };
 
 const abrirCrear = () => {
@@ -268,14 +267,14 @@ const guardarCabecera = async () => {
     }
     saving.value = true;
     try {
-        const res = await axios.post('/calificacion/save-ponderacion', form);
-        message.success(res.data.estado ? 'Guardado correctamente' : 'Error al guardar');
+        const res = await axios.post('/api/calificacion/ponderaciones', form);
+        message.success(res.data.message || 'Guardado correctamente');
         modalCabecera.value = false;
         await getPonderaciones();
-        if (!form.id && res.data.datos?.id) {
-            form.id = res.data.datos.id;
-            ponderacionSeleccionada.value = res.data.datos;
-            await abrirDetalle(res.data.datos);
+        if (!form.id && res.data.data?.id) {
+            form.id = res.data.data.id;
+            ponderacionSeleccionada.value = res.data.data;
+            await abrirDetalle(res.data.data);
         }
     } catch (e) {
         message.error('Error: ' + (e.response?.data?.message || e.message));
@@ -288,9 +287,9 @@ const abrirDetalle = async (record) => {
     ponderacionSeleccionada.value = record;
     modalDetalle.value = true;
     try {
-        const res = await axios.get('/calificacion/get-ponderacion-detalle/' + record.id);
-        if (res.data.datos && res.data.datos.length > 0) {
-            detalle.value = res.data.datos.map((d) => ({
+        const res = await axios.get('/api/calificacion/ponderaciones/detalle/' + record.id);
+        if (res.data.data && res.data.data.length > 0) {
+            detalle.value = res.data.data.map((d) => ({
                 numero: d.numero,
                 id_asignatura: d.id_asignatura,
                 asignatura: d.asignatura,
@@ -348,11 +347,11 @@ const calcSubtotal = (index) => {
 const guardarDetalle = async () => {
     savingDetalle.value = true;
     try {
-        const res = await axios.post('/calificacion/save-ponderacion-detalle', {
+        const res = await axios.post('/api/calificacion/ponderaciones/detalle', {
             id_ponderacion: ponderacionSeleccionada.value.id,
             detalles: detalle.value,
         });
-        message.success(res.data.mensaje || 'Detalle guardado');
+        message.success(res.data.message || 'Detalle guardado');
         await getPonderaciones();
     } catch (e) {
         message.error('Error: ' + (e.response?.data?.error || e.message));
@@ -363,7 +362,7 @@ const guardarDetalle = async () => {
 
 const duplicar = async (record) => {
     try {
-        const res = await axios.post('/calificacion/duplicar-ponderacion/' + record.id);
+        const res = await axios.post('/api/calificacion/ponderaciones/' + record.id + '/duplicar');
         message.success('Ponderación duplicada');
         await getPonderaciones();
     } catch (e) {
@@ -373,7 +372,7 @@ const duplicar = async (record) => {
 
 const eliminar = async (record) => {
     try {
-        await axios.delete('/calificacion/delete-ponderacion/' + record.id);
+        await axios.delete('/api/calificacion/ponderaciones/' + record.id);
         message.success('Ponderación eliminada');
         await getPonderaciones();
     } catch (e) {
