@@ -39,13 +39,13 @@ use App\Http\Controllers\AdministrativoController;
 use App\Http\Controllers\ReniecController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PruebasController;
-use App\Http\Controllers\ResultadosController;
+// use App\Http\Controllers\ResultadosController; // Migrado a Modules\Calificacion
 use App\Http\Controllers\CarpetaController;
 use App\Http\Controllers\CertificadoFirmaController;
 use App\Http\Controllers\AuditTrailController;
-use App\Http\Controllers\PonderacionController;
-use App\Http\Controllers\AsignaturaController;
-use App\Http\Controllers\ExcepcionesController;
+// use App\Http\Controllers\PonderacionController; // Migrado a Modules\Calificacion
+// use App\Http\Controllers\AsignaturaController; // Migrado a Modules\Calificacion
+// use App\Http\Controllers\ExcepcionesController; // Migrado a Modules\Calificacion
 use App\Http\Controllers\ProgramaProcesoController;
 use App\Http\Controllers\SancionadoController;
 use App\Http\Controllers\CepreController;
@@ -584,7 +584,7 @@ Route::prefix('simulacro')->group(function () {
 
         //Route::get('/', fn () => Inertia::render('Simulacro/index'))->name('simulacros');
         Route::get('/simulacros', fn () => Inertia::render('Simulacro/Simulacros'))->name('simulacro-simulacros');
-        Route::get('/calificacion', fn () => Inertia::render('Simulacro/Ficha'))->name('simulacro-calificacion');
+        Route::get('/calificacion-ficha', fn () => Inertia::render('Simulacro/Ficha'))->name('simulacro-calificacion');
 
         //Route::post('/save-simulacro', [SimulacroController::class, 'saveSimulacro']);
         Route::post('/get-simulacros', [SimulacroController::class, 'getSimulacros']);
@@ -605,15 +605,27 @@ Route::prefix('simulacros')->group(function () {
 
 
 
-require __DIR__.'/calificacion.php';
-Route::post('/get-puntaje-simulacro', [ResultadosController::class, 'getResultados']);
+// require __DIR__.'/calificacion.php'; // Migrado a app/Modules/Calificacion (API REST)
+// Rutas de ResultadosController migradas a API: /api/calificacion/*
+// Route::post('/get-puntaje-simulacro', [ResultadosController::class, 'getResultados']);
+
+// Páginas de Calificación (vistas Inertia)
+Route::middleware(['auth', 'calificador'])->group(function () {
+    Route::get('/calificacion', fn () => Inertia::render('Simulacro/Calificacion/calificacion'))->name('calificar-cal');
+    Route::get('/calificacion/lecturas', fn () => Inertia::render('Simulacro/Calificacion/lecturas'))->name('calificar-lecturas');
+    Route::get('/calificacion/examenes', fn () => Inertia::render('Simulacro/Calificacion/examenes'))->name('calificar-examenes');
+    Route::get('/calificacion/examenes/{id}/tipos', fn ($id) => Inertia::render('Simulacro/Calificacion/tipos', ['examen_id' => $id]))->name('calificar-examenes-tipos');
+    Route::get('/calificacion/ponderacion', fn () => Inertia::render('Simulacro/Calificacion/ponderacion'))->name('calificar-ponderacion');
+    Route::get('/calificacion/asignaturas', fn () => Inertia::render('Simulacro/Calificacion/asignaturas'))->name('calificar-asignaturas');
+    Route::get('/calificacion/multiplicadores', fn () => Inertia::render('Simulacro/Calificacion/multiplicadores'))->name('calificar-multiplicadores');
+});
 
 
 Route::get('/resultados-simulacro', fn () => Inertia::render('Simulacro/resultados'));
 
-Route::get('/descargar-ingenierias', [ResultadosController::class, 'getExamenIng']);
-Route::get('/descargar-biomedicas', [ResultadosController::class, 'getExamenBio']);
-Route::get('/descargar-sociales', [ResultadosController::class, 'getExamenSoc']);
+// Route::get('/descargar-ingenierias', [ResultadosController::class, 'getExamenIng']);
+// Route::get('/descargar-biomedicas', [ResultadosController::class, 'getExamenBio']);
+// Route::get('/descargar-sociales', [ResultadosController::class, 'getExamenSoc']);
 
 //PREINSCRIPCION
 Route::get('/preinscripcion-adicional', fn () => Inertia::render('Publico/preinscripcion-pregrado'))->name('preinscripcion');
@@ -740,29 +752,30 @@ Route::middleware('redirect')->get('/', fn () => Inertia::render('Auth/Login'));
 
 //RUTAS TEMPORALES
 Route::post('/get-sim', [SimulacroController::class, 'getSimulacros']);
-Route::post('/get-archivos', [ResultadosController::class, 'getArchivosIde']);
-Route::post('/get-archivos-res', [ResultadosController::class, 'getArchivosRes']);
-Route::post('/get-archivos-pat', [ResultadosController::class, 'getArchivosPat']);
-Route::get('/eliminar-archivo/{id}', [ResultadosController::class, 'eliminarArchivo']);
-Route::post('/get-ides', [ResultadosController::class, 'getIdes']);
-Route::post('/get-res', [ResultadosController::class, 'getRes']);
-Route::post('/get-pat', [ResultadosController::class, 'getPat']);
-Route::post('/subir-participantes-simulacro', [ResultadosController::class, 'SubirParticipantes']);
-Route::post('/get-participantes-externo', [ResultadosController::class, 'getParticipantesSimulacro']);
-Route::get('/descargar-template-participantes-simulacro', [ResultadosController::class, 'descargarTemplate']);
+// Rutas de ResultadosController migradas a API: /api/calificacion/*
+// Route::post('/get-archivos', [ResultadosController::class, 'getArchivosIde']);
+// Route::post('/get-archivos-res', [ResultadosController::class, 'getArchivosRes']);
+// Route::post('/get-archivos-pat', [ResultadosController::class, 'getArchivosPat']);
+// Route::get('/eliminar-archivo/{id}', [ResultadosController::class, 'eliminarArchivo']);
+// Route::post('/get-ides', [ResultadosController::class, 'getIdes']);
+// Route::post('/get-res', [ResultadosController::class, 'getRes']);
+// Route::post('/get-pat', [ResultadosController::class, 'getPat']);
+// Route::post('/subir-participantes-simulacro', [ResultadosController::class, 'SubirParticipantes']);
+// Route::post('/get-participantes-externo', [ResultadosController::class, 'getParticipantesSimulacro']);
+// Route::get('/descargar-template-participantes-simulacro', [ResultadosController::class, 'descargarTemplate']);
 
 Route::get('/ver-ficha', fn () => Inertia::render('Simulacro/Calificacion/components/ficha'));
 
 
 
 Route::post('/get-simulacros', [SimulacroController::class, 'getSimulacrosSelect']);
-Route::get('/get-ficha-respuesta/{id}', [ResultadosController::class, 'getFichaRespuesta']);
+// Route::get('/get-ficha-respuesta/{id}', [ResultadosController::class, 'getFichaRespuesta']);
 
-Route::get('/pdf-errores/{D}', [ResultadosController::class, 'PdfErroresCalifacion']);
+// Route::get('/pdf-errores/{D}', [ResultadosController::class, 'PdfErroresCalifacion']);
 
-Route::post('/calificar-examen', [ResultadosController::class, 'CalificarExamen']);
-Route::post('/get-puntajes-examen', [ResultadosController::class, 'getPuntajes']);
-Route::post('/get-pdf-resultados/{sim}', [ResultadosController::class, 'getResultadosPDF']);
+// Route::post('/calificar-examen', [ResultadosController::class, 'CalificarExamen']);
+// Route::post('/get-puntajes-examen', [ResultadosController::class, 'getPuntajes']);
+// Route::post('/get-pdf-resultados/{sim}', [ResultadosController::class, 'getResultadosPDF']);
 
 Route::get('/segundas-especialidades-2026-test/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
 Route::get('/segundas-especialidades-2026/preinscripcion', fn () => Inertia::render('Publico/temp/cronogram'));
@@ -781,7 +794,7 @@ Route::get('/get-data-prisma/{dni}', [PostulanteController::class, 'getDataPrism
 Route::post('/registrar-carreras-previas', [PostulanteController::class, 'registrarCarreras']);
 Route::get('/get-paso-registrado/{p}/{dni}', [PreinscripcionController::class, 'pasoRegistrado']);
 
-Route::get('/pdf-resultados', [ResultadosController::class, 'generarReportePrograma']);
+// Route::get('/pdf-resultados', [ResultadosController::class, 'generarReportePrograma']);
 
 Route::get('/ver-puntaje-alcanzado', fn () => Inertia::render('Publico/resultados'));
 
@@ -790,7 +803,7 @@ Route::get('/carreras-previas/{dni}', [IngresoController::class, 'carrerasPrevia
 Route::get('/subir-archivos-pdf', fn () => Inertia::render('Publico/subir-archivos'));
 Route::post('/verificar-padres', [PostulanteController::class, 'verificarPadres']);
 
-Route::post('subir-pdf/{dni}/{cod}/{tipo}', [ResultadosController::class, 'cargaArchivoPDF']);
+// Route::post('subir-pdf/{dni}/{cod}/{tipo}', [ResultadosController::class, 'cargaArchivoPDF']);
 
 
 Route::get('/get-pago-caja/{dni}', function ($dni) {
@@ -888,9 +901,9 @@ Route::get('/prueba-correo/{a}', [EmailController::class, 'enviarCorreo']);
 
 Route::get('/actualizar-correos-ingresantes/{actualizar}', [IngresoController::class, 'actualizarCorreos']);
 
-Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipantes']);
-Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
-Route::delete('/participantes/{id}', [ResultadosController::class, 'eliminarParticipante']);
+// Route::put('/participantes/{id}', [ResultadosController::class, 'updateParticipantes']);
+// Route::post('/participantes', [ResultadosController::class, 'guardarParticipante']);
+// Route::delete('/participantes/{id}', [ResultadosController::class, 'eliminarParticipante']);
 
 
 Route::get('/verificar/{codigo}', [FirmaController::class, 'verificarFirma']);
