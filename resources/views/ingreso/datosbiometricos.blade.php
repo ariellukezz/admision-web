@@ -187,7 +187,7 @@
         <p style="line-height: 1.5rem;">
             Así mismo, se deja constancia que ha validado su identidad a 
             través del control biométrico y acreditó los documentos personales, según 
-            los requisitos exigidos en el Reglamento General de Admisión 2026-I. De 
+            los requisitos exigidos en el Reglamento General de Admisión 2026-II. De 
             igual manera se proporciona al ingresante 
             un correo institucional de gran utilidad para fines académicos y administrativos.
         </p>
