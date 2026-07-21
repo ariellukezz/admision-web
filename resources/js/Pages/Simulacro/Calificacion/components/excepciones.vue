@@ -197,7 +197,7 @@ const loadExcepciones = async () => {
       ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''))
     }
     
-    const response = await axios.get('/calificacion/excepciones', { params })
+    const response = await axios.get('/api/calificacion/excepciones', { params })
     excepciones.value = response.data.data.data
     Object.assign(pagination, {
       current_page: response.data.data.current_page,
@@ -246,8 +246,8 @@ const editItem = (item) => {
 const saveItem = async () => {
   try {
     const url = modalMode.value === 'create' 
-      ? '/calificacion/excepciones' 
-      : `/calificacion/excepciones/${form.id}`
+      ? '/api/calificacion/excepciones' 
+      : `/api/calificacion/excepciones/${form.id}`
     
     const method = modalMode.value === 'create' ? 'post' : 'put'
     
@@ -277,7 +277,7 @@ const deleteItem = async (item) => {
   if (!window.confirm('¿Eliminar esta excepción?')) return
   
   try {
-    await axios.delete(`/calificacion/excepciones/${item.id}`)
+    await axios.delete(`/api/calificacion/excepciones/${item.id}`)
     loadExcepciones()
     message.success('Excepción eliminada')
   } catch (error) {
@@ -324,11 +324,11 @@ const selectCodigo = ref(null);
 const selectUnidad = ref(null);
 
 const getSelect = async () => {
-    axios.get("/calificacion/get-select-puestos/"+props.id_proceso)
+    axios.get("/api/calificacion/lecturas/get-select-puestos/"+props.id_proceso)
     .then((response) => {
-        puestos.value = response.data.puestos;
-        codigos_puesto.value = response.data.codigos_puesto;
-        codigos_examen.value = response.data.codigos_examen;
+        puestos.value = response.data.data.puestos;
+        codigos_puesto.value = response.data.data.codigos_puesto;
+        codigos_examen.value = response.data.data.codigos_examen;
     })
     .catch((error) => {
         if (error.response) {

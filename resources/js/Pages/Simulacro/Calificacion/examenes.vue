@@ -120,8 +120,8 @@ const filtrados = computed(() => {
 });
 
 const getExamenes = async () => {
-    const res = await axios.get('/calificacion/examenes-list');
-    examenes.value = res.data.datos.data;
+    const res = await axios.get('/api/calificacion/examenes', { params: { paginasize: 100 } });
+    examenes.value = res.data.data.data;
 };
 
 const abrirCrear = () => {
@@ -146,10 +146,10 @@ const guardar = async () => {
     try {
         const payload = { ...form };
         if (form.id) {
-            await axios.put('/calificacion/examenes/' + form.id, payload);
+            await axios.put('/api/calificacion/examenes/' + form.id, payload);
             message.success('Actualizado correctamente');
         } else {
-            await axios.post('/calificacion/examenes', payload);
+            await axios.post('/api/calificacion/examenes', payload);
             message.success('Creado correctamente');
         }
         modal.value = false;
@@ -161,7 +161,7 @@ const guardar = async () => {
 
 const eliminar = async (record) => {
     try {
-        await axios.delete('/calificacion/examenes/' + record.id);
+        await axios.delete('/api/calificacion/examenes/' + record.id);
         message.success('Eliminado correctamente');
         await getExamenes();
     } catch (e) { message.error('Error al eliminar'); }

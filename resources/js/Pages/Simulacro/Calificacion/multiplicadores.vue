@@ -123,8 +123,8 @@ const filtrados = computed(() => {
 });
 
 const getMultiplicadores = async () => {
-    const res = await axios.get('/calificacion/multiplicadores-list');
-    multiplicadores.value = res.data.datos;
+    const res = await axios.get('/api/calificacion/multiplicadores');
+    multiplicadores.value = res.data.data;
 };
 
 const abrirCrear = () => {
@@ -152,10 +152,10 @@ const guardar = async () => {
     saving.value = true;
     try {
         if (form.id) {
-            await axios.put('/calificacion/multiplicadores/' + form.id, form);
+            await axios.put('/api/calificacion/multiplicadores/' + form.id, form);
             message.success('Actualizado correctamente');
         } else {
-            await axios.post('/calificacion/multiplicadores', form);
+            await axios.post('/api/calificacion/multiplicadores', form);
             message.success('Creado correctamente');
         }
         modal.value = false;
@@ -169,7 +169,7 @@ const guardar = async () => {
 
 const eliminar = async (record) => {
     try {
-        await axios.delete('/calificacion/multiplicadores/' + record.id);
+        await axios.delete('/api/calificacion/multiplicadores/' + record.id);
         message.success('Eliminado correctamente');
         await getMultiplicadores();
     } catch (e) {

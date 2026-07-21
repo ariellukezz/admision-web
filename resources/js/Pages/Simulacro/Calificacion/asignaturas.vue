@@ -102,8 +102,8 @@ const filtradas = computed(() => {
 });
 
 const getAsignaturas = async () => {
-    const res = await axios.get('/calificacion/asignaturas-list');
-    asignaturas.value = res.data.datos;
+    const res = await axios.get('/api/calificacion/asignaturas');
+    asignaturas.value = res.data.data;
 };
 
 const abrirCrear = () => {
@@ -129,10 +129,10 @@ const guardar = async () => {
     saving.value = true;
     try {
         if (form.id) {
-            await axios.put('/calificacion/asignaturas/' + form.id, form);
+            await axios.put('/api/calificacion/asignaturas/' + form.id, form);
             message.success('Actualizado correctamente');
         } else {
-            await axios.post('/calificacion/asignaturas', form);
+            await axios.post('/api/calificacion/asignaturas', form);
             message.success('Creado correctamente');
         }
         modal.value = false;
@@ -146,7 +146,7 @@ const guardar = async () => {
 
 const eliminar = async (record) => {
     try {
-        await axios.delete('/calificacion/asignaturas/' + record.id);
+        await axios.delete('/api/calificacion/asignaturas/' + record.id);
         message.success('Eliminado correctamente');
         await getAsignaturas();
     } catch (e) {

@@ -142,7 +142,7 @@
         v-model:fileList="fileList"
         name="file"
         :multiple="true"
-        :action="baseUrl + '/calificacion/carga-pat/'+proceso"
+        :action="baseUrl + '/api/calificacion/lecturas/carga-pat'"
         @change="handleChange"
         @drop="handleDrop"
         list-type="picture"
@@ -290,11 +290,11 @@ const selectCodigo = ref(null);
 const selectUnidad = ref(null);
 
 const getSelect = async () => {
-    axios.get("/calificacion/get-select-puestos/"+props.proceso)
+    axios.get("/api/calificacion/lecturas/get-select-puestos/"+props.proceso)
     .then((response) => {
-        puestos.value = response.data.puestos;
-        codigos_puesto.value = response.data.codigos_puesto;
-        codigos_examen.value = response.data.codigos_examen;
+        puestos.value = response.data.data.puestos;
+        codigos_puesto.value = response.data.data.codigos_puesto;
+        codigos_examen.value = response.data.data.codigos_examen;
     })
     .catch((error) => {
         if (error.response) {
