@@ -6,6 +6,16 @@
                     <a-button @click="visible = true">Calificar</a-button>
                 </div>
                 <div class="flex" style="gap:5px">
+                    <div v-if="selectedDnis.length > 0" class="mt-0 mb-4">
+                        <a-button
+                            style="width: 200px; background: #7c3aed; border:none; color:white;"
+                            :loading="downloadingFichas"
+                            @click="descargarFichasMasivo()"
+                        >
+                            Descargar {{ selectedDnis.length }} Ficha(s)
+                        </a-button>
+                    </div>
+
                     <div v-if="resultados.length > 0" class="mt-0 mb-4">
                         <a-button style="width: 140px; background:crimson; border:none; color:white;" @click="descargar()">Descargar</a-button>
                     </div>
@@ -18,7 +28,14 @@
         </div>
 
 
-        <a-table :dataSource="resultados" :columns="columns" size="small" :pagination="false">
+        <a-table
+            :dataSource="resultados"
+            :columns="columns"
+            size="small"
+            :pagination="false"
+            :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+            rowKey="dni"
+        >
             <template #bodyCell="{ column, index, record }">
                 <template v-if="column.dataIndex === 'nro'">
                     <span>{{ index + 1 }}</span>
@@ -108,6 +125,42 @@ const area = ref("");
 const ponderacion = ref(null);
 const buscarPonderacion = ref("");
 const resultados = ref([]);
+const selectedRowKeys = ref([]);
+const downloadingFichas = ref(false);
+
+const selectedDnis = computed(() => selectedRowKeys.value);
+
+const onSelectChange = (keys) => {
+    selectedRowKeys.value = keys;
+};
+
+const descargarFichasMasivo = async () => {
+    if (selectedRowKeys.value.length === 0) return;
+    downloadingFichas.value = true;
+    try {
+        const response = await axios.post('/api/calificacion/ficha-pdf-masivo', {
+            id_calificacion: props.proceso,
+            dnis: selectedRowKeys.value,
+        }, { responseType: 'blob' });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const fecha = new Date();
+        const formatoFecha = `${fecha.getDate().toString().padStart(2,'0')}-${(fecha.getMonth()+1).toString().padStart(2,'0')}-${fecha.getFullYear()}_${fecha.getHours().toString().padStart(2,'0')}-${fecha.getMinutes().toString().padStart(2,'0')}`;
+        link.setAttribute('download', `${formatoFecha}_fichas_calificacion.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        message.success(`Se descargaron ${selectedRowKeys.value.length} ficha(s)`);
+        selectedRowKeys.value = [];
+    } catch (error) {
+        message.error('Error al descargar las fichas');
+    } finally {
+        downloadingFichas.value = false;
+    }
+};
 
 const onSelectPonderacion = (value, option) => { ponderacion.value = option; };
 const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo, description: mensaje, }); };
@@ -132,15 +185,16 @@ const selectUnidad = ref(null);
 
 
 const getPonderaciones =  async () => {
-    let res = await axios.post("calificacion/get-ponderaciones-select?page=" + pagina.value, {
-         term: buscarPonderacion.value, paginasize: paginasize.value } );
-    ponderaciones.value = res.data.datos.data;
-    totalRegistros.value = res.data.datos.total;
+    let res = await axios.get("/api/calificacion/ponderaciones/select", {
+        params: { term: buscarPonderacion.value, paginasize: paginasize.value, page: pagina.value }
+    });
+    ponderaciones.value = res.data.data.data;
+    totalRegistros.value = res.data.data.total;
 }
 
 const getMultiplicadores = async () => {
-    let res = await axios.get("/calificacion/multiplicadores-list");
-    multiplicadores.value = res.data.datos;
+    let res = await axios.get("/api/calificacion/multiplicadores");
+    multiplicadores.value = res.data.data;
 }
 
 const califar =  async () => {
@@ -148,7 +202,7 @@ const califar =  async () => {
         message.warning('Seleccione un multiplicador');
         return;
     }
-    let res = await axios.post("/calificar-examen",
+    let res = await axios.post("/api/calificacion/calificar",
     {
         id_simulacro: props.proceso,
         id_ponderacion: ponderacion.value.key,
@@ -160,8 +214,8 @@ const califar =  async () => {
 }
 
 const getPuntajes =  async () => {
-    let res = await axios.post("/get-puntajes-examen", { id_simulacro: props.proceso } );
-    resultados.value = res.data.datos;
+    let res = await axios.get("/api/calificacion/resultados", { params: { id_simulacro: props.proceso } });
+    resultados.value = res.data.data;
 }
 
 getPuntajes();
