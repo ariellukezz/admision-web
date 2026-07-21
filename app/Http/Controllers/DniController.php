@@ -57,9 +57,8 @@ class DniController extends Controller
     
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                $fileName = $file->getClientOriginalName();
-                $filePath = $rutaCarpeta . $fileName;
-                $file->move(public_path($rutaCarpeta), $fileName);
+                $filePath = $rutaCarpeta . $dni . '.pdf';
+                $file->move(public_path($rutaCarpeta), $dni . '.pdf');
                 $dni->url = $filePath;
             }
     
