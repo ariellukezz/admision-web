@@ -306,8 +306,6 @@ class IngresoController extends Controller {
 
                 $nuevoCodigo = $registrado->num_mat ?? $prefijo . str_pad($nuevoCodigo, 4, '0', STR_PAD_LEFT);
 
-                $nuevoCodigo = '980001';
-
                 $control = ControlBiometrico::create([
                     'id_proceso' => $re->id_proceso,
                     'id_postulante' => $re->id_postulante,
