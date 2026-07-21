@@ -14,6 +14,11 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'calificacion/carga-ide',
         'calificacion/carga-res',
+        'api/calificacion/lecturas/carga-ide',
+        'api/calificacion/lecturas/carga-res',
+        'api/calificacion/lecturas/carga-pat',
+        'api/calificacion/examenes-tipos-archivo/*',
+        'api/calificacion/examenes-res/*',
         'carpetas/crear-carpeta',
         'subir-pdf/*'
     ];
