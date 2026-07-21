@@ -23,5 +23,8 @@ yarn-error.log
 storage/app/reporte_Educ. Sec.
 storage/app/firebase-credentials.json
 /build
-/.codely-cli
+.codely-cli
 _temp_documentos_service
+storage/app/temp/
+storage/app/backup_*.sql
+storage/app/calificar/
