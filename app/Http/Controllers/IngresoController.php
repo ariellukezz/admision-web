@@ -291,20 +291,20 @@ class IngresoController extends Controller {
                 // $prefijo = $re->id_programa == 38 ? '26' : '25';
                 $prefijo = $re->id_programa == 38 ? '27' : '26';
 
-                $registrado = 0;
-                // $registrado = collect(
-                //     DB::connection($database2)->select(
-                //         "SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ? AND fch_ing = ?",
-                //         [$re->dni, $re->fecha]
-                //     )
-                // )->first();
 
-                // $nuevoCodigo = $registrado->num_mat ?? DB::connection($database2)
-                //     ->table('unapnet.estudiante as e')
-                //     ->whereRaw("LEFT(e.num_mat, 2) = ?", [$prefijo])
-                //     ->max(DB::raw("CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)")) + 1;
+                $registrado = collect(
+                    DB::connection($database2)->select(
+                        "SELECT num_mat FROM unapnet.estudiante WHERE num_doc = ? AND fch_ing = ?",
+                        [$re->dni, $re->fecha]
+                    )
+                )->first();
 
-                // $nuevoCodigo = $registrado->num_mat ?? $prefijo . str_pad($nuevoCodigo, 4, '0', STR_PAD_LEFT);
+                $nuevoCodigo = $registrado->num_mat ?? DB::connection($database2)
+                    ->table('unapnet.estudiante as e')
+                    ->whereRaw("LEFT(e.num_mat, 2) = ?", [$prefijo])
+                    ->max(DB::raw("CAST(SUBSTRING(e.num_mat, 3) AS UNSIGNED)")) + 1;
+
+                $nuevoCodigo = $registrado->num_mat ?? $prefijo . str_pad($nuevoCodigo, 4, '0', STR_PAD_LEFT);
 
                 $nuevoCodigo = '980001';
 
@@ -324,33 +324,33 @@ class IngresoController extends Controller {
                 }
 
                 if (!$registrado) {
-                    // Estudiante::on($database2)->create([
-                    //     'num_mat' => $nuevoCodigo,
-                    //     'cod_car' => $re->programa_oti,
-                    //     'paterno' => mb_strtoupper($re->paterno, 'UTF-8'),
-                    //     'materno' => mb_strtoupper($re->materno, 'UTF-8'),
-                    //     'nombres' => mb_strtoupper($re->nombres, 'UTF-8'),
-                    //     'tip_doc' => $re->tipo_doc_oti,
-                    //     'num_doc' => $re->dni,
-                    //     'num_car' => $request->n_carrera == 1 ? 2 : 1,
-                    //     'fch_nac' => $re->fec_nacimiento,
-                    //     'sexo' => $re->sexo,
-                    //     'ubigeo' => $re->ubigeo_residencia,
-                    //     'mod_ing' => $re->modalidad_oti,
-                    //     'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
-                    //     'fch_ing' => $re->fecha,
-                    //     'direc' => $re->direccion,
-                    //     'email' => $re->email,
-                    //     'emailins' => $control->correo_institucional,
-                    //     'con_est' => 5,
-                    //     'celular' => $re->celular,
-                    //     'cod_esp' => $re->cod_esp,
-                    //     'puntaje' => $re->puntaje,
-                    //     'puesto_escuela' => $re->puesto,
-                    //     'puesto_general' => $re->puesto_general,
-                    //     'ano_ing' => $re->anio,
-                    //     'per_ing' => $re->ciclo_oti
-                    // ]);
+                    Estudiante::on($database2)->create([
+                        'num_mat' => $nuevoCodigo,
+                        'cod_car' => $re->programa_oti,
+                        'paterno' => mb_strtoupper($re->paterno, 'UTF-8'),
+                        'materno' => mb_strtoupper($re->materno, 'UTF-8'),
+                        'nombres' => mb_strtoupper($re->nombres, 'UTF-8'),
+                        'tip_doc' => $re->tipo_doc_oti,
+                        'num_doc' => $re->dni,
+                        'num_car' => $request->n_carrera == 1 ? 2 : 1,
+                        'fch_nac' => $re->fec_nacimiento,
+                        'sexo' => $re->sexo,
+                        'ubigeo' => $re->ubigeo_residencia,
+                        'mod_ing' => $re->modalidad_oti,
+                        'est_civ' => [1 => 2, 2 => 1, 3 => 3, 4 => 6][$re->estado_civil] ?? 1,
+                        'fch_ing' => $re->fecha,
+                        'direc' => $re->direccion,
+                        'email' => $re->email,
+                        'emailins' => $control->correo_institucional,
+                        'con_est' => 5,
+                        'celular' => $re->celular,
+                        'cod_esp' => $re->cod_esp,
+                        'puntaje' => $re->puntaje,
+                        'puesto_escuela' => $re->puesto,
+                        'puesto_general' => $re->puesto_general,
+                        'ano_ing' => $re->anio,
+                        'per_ing' => $re->ciclo_oti
+                    ]);
                 }
             } else {
                 $control->update(['estado' => 2]);
