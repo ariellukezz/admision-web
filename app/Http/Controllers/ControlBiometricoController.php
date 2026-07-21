@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 use App\Models\ControlBiometrico;
+use App\Models\Proceso;
+use App\Exports\ControlBiometricoExport;
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
+use Excel;
+use Mpdf\Mpdf;
 class ControlBiometricoController extends Controller
 {
 
@@ -52,9 +57,242 @@ class ControlBiometricoController extends Controller
 
     }
 
+    /**
+     * Construye la consulta base de control biométrico con filtros.
+     */
+    private function construirConsultaExport($procesoId, $filtros)
+    {
+        $query = DB::table('control_biometrico AS cb')
+            ->join('postulante AS pos', function ($join) use ($procesoId) {
+                $join->on('pos.id', '=', 'cb.id_postulante')
+                    ->where('cb.id_proceso', '=', $procesoId);
+            })
+            ->join('inscripciones AS ins', function ($join) use ($procesoId) {
+                $join->on('ins.id_postulante', '=', 'pos.id')
+                    ->where('ins.id_proceso', '=', $procesoId)
+                    ->where('ins.estado', '=', 0);
+            })
+            ->join('programa AS pro', 'pro.id', '=', 'ins.id_programa')
+            ->join('modalidad AS moda', 'moda.id', '=', 'ins.id_modalidad')
+            ->join('procesos AS proc', 'proc.id', '=', 'ins.id_proceso')
+            ->join('resultados AS re', function ($join) use ($procesoId) {
+                $join->on('re.dni_postulante', '=', 'pos.nro_doc')
+                    ->where('re.id_proceso', '=', $procesoId)
+                    ->where('re.apto', '=', 'SI');
+            })
+            ->leftJoin('ubigeo AS ubi', 'ubi.ubigeo', '=', 'pos.ubigeo_nacimiento')
+            ->leftJoin('departamento AS dep', 'dep.id', '=', 'ubi.id_departamento')
+            ->leftJoin('provincia AS prov', 'prov.id', '=', 'ubi.id_provincia')
+            ->leftJoin('distritos AS dist', 'dist.id', '=', 'ubi.id_distrito')
+            ->leftJoin('colegios AS col', 'col.id', '=', 'pos.id_colegio')
+            ->select(
+                'cb.codigo_ingreso AS codigo',
+                'pos.nro_doc AS dni',
+                'pos.primer_apellido',
+                'pos.segundo_apellido',
+                'pos.nombres',
+                're.puntaje',
+                're.puesto',
+                'pro.nombre AS programa',
+                'pro.area',
+                'moda.nombre AS modalidad',
+                'proc.nombre AS proceso'
+            )
+            ->where('ins.id_proceso', '=', $procesoId);
 
-    
+        if (!empty($filtros['fecha'])) {
+            $query->whereDate('cb.created_at', $filtros['fecha']);
+        }
 
+        if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
+            $query->whereBetween('cb.created_at', [$filtros['fecha_inicio'] . ' 00:00:00', $filtros['fecha_fin'] . ' 23:59:59']);
+        }
 
+        if (!empty($filtros['programa'])) {
+            $query->where('pro.id', $filtros['programa']);
+        }
+
+        if (!empty($filtros['modalidad'])) {
+            $query->where('moda.id', $filtros['modalidad']);
+        }
+
+        if (!empty($filtros['area'])) {
+            $query->where('pro.area', $filtros['area']);
+        }
+
+        $query->orderBy('pro.nombre', 'ASC')->orderBy('re.puesto', 'ASC');
+
+        return $query;
+    }
+
+    /**
+     * Exportar a Excel con filtros.
+     */
+    public function exportarExcel(Request $request)
+    {
+        $procesoId = auth()->user()->id_proceso;
+
+        $filtros = [
+            'fecha' => $request->input('fecha'),
+            'fecha_inicio' => $request->input('fecha_inicio'),
+            'fecha_fin' => $request->input('fecha_fin'),
+            'programa' => $request->input('programa'),
+            'modalidad' => $request->input('modalidad'),
+            'area' => $request->input('area'),
+        ];
+
+        $datos = $this->construirConsultaExport($procesoId, $filtros)->get();
+
+        $collection = collect($datos)->map(function ($item) {
+            return [
+                'codigo' => $item->codigo,
+                'dni' => $item->dni,
+                'primer_apellido' => $item->primer_apellido,
+                'segundo_apellido' => $item->segundo_apellido,
+                'nombres' => $item->nombres,
+                'puntaje' => $item->puntaje,
+                'puesto' => $item->puesto,
+                'programa' => $item->programa,
+                'modalidad' => $item->modalidad,
+                'area' => $item->area,
+                'proceso' => $item->proceso,
+            ];
+        });
+
+        $proceso = Proceso::find($procesoId);
+        $nombreArchivo = 'control_biometrico_' . str_replace(' ', '_', $proceso->nombre ?? 'proceso') . '.xlsx';
+
+        return Excel::download(new ControlBiometricoExport($collection), $nombreArchivo);
+    }
+
+    /**
+     * Exportar a PDF con filtros, una página por cada programa.
+     */
+public function exportarPdf(Request $request)
+{
+    $procesoId = auth()->user()->id_proceso;
+
+    $filtros = [
+        'fecha'         => $request->input('fecha'),
+        'fecha_inicio'  => $request->input('fecha_inicio'),
+        'fecha_fin'     => $request->input('fecha_fin'),
+        'programa'      => $request->input('programa'),
+        'modalidad'     => $request->input('modalidad'),
+        'area'          => $request->input('area'),
+    ];
+
+    $datos = $this->construirConsultaExport($procesoId, $filtros)->get();
+
+    $agrupado = collect($datos)->groupBy('programa');
+
+    $proceso = Proceso::find($procesoId);
+
+    $filtrosTexto = [];
+
+    if (!empty($filtros['fecha'])) {
+        $filtrosTexto[] = 'Fecha: ' . $filtros['fecha'];
+    }
+
+    if (!empty($filtros['fecha_inicio']) && !empty($filtros['fecha_fin'])) {
+        $filtrosTexto[] = 'Desde: ' . $filtros['fecha_inicio'] . ' hasta ' . $filtros['fecha_fin'];
+    }
+
+    if (!empty($filtros['programa'])) {
+        $filtrosTexto[] = 'Programa: ' . ($agrupado->keys()->first() ?? '');
+    }
+
+    if (!empty($filtros['modalidad'])) {
+        $modalidad = DB::table('modalidad')
+            ->where('id', $filtros['modalidad'])
+            ->value('nombre');
+
+        $filtrosTexto[] = 'Modalidad: ' . ($modalidad ?? $filtros['modalidad']);
+    }
+
+    if (empty($filtrosTexto)) {
+        $filtrosTexto[] = 'Todos los registros';
+    }
+
+    $mpdf = new \Mpdf\Mpdf([
+        'mode' => 'utf-8',
+        'format' => 'A4',
+        'orientation' => 'P',
+        'default_font' => 'dejavusanscondensed',
+        'margin_left' => 10,
+        'margin_right' => 10,
+        'margin_top' => 38,
+        'margin_bottom' => 18,
+        'margin_header' => 8,
+        'margin_footer' => 8,
+    ]);
+
+    $mpdf->SetTitle('Control Biométrico - ' . ($proceso->nombre ?? ''));
+    $mpdf->SetAuthor('Sistema de Admisión UNAP');
+    $mpdf->SetDisplayMode('fullpage');
+
+    $headerHtml = View::make('reportes.control_biometrico_header', compact('proceso', 'filtrosTexto'))->render();
+    $footerHtml = View::make('reportes.control_biometrico_footer')->render();
+    $mpdf->SetHTMLHeader($headerHtml);
+    $mpdf->SetHTMLFooter($footerHtml);
+
+    foreach ($agrupado as $programa => $postulantes) {
+        $mpdf->AddPage();
+        $chunk = View::make('reportes.control_biometrico_item', compact('programa', 'postulantes'))->render();
+        $mpdf->WriteHTML($chunk);
+    }
+
+    $filename = 'control_biometrico_' . now()->format('YmdHis') . '.pdf';
+
+    return response(
+        $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+        200,
+        [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]
+    );
+}
+
+    /**
+     * Listado de programas para el filtro (API).
+     */
+    public function getProgramas(Request $request)
+    {
+        $procesoId = auth()->user()->id_proceso;
+
+        $programas = DB::table('programa AS pro')
+            ->join('inscripciones AS ins', function ($join) use ($procesoId) {
+                $join->on('ins.id_programa', '=', 'pro.id')
+                    ->where('ins.id_proceso', '=', $procesoId)
+                    ->where('ins.estado', '=', 0);
+            })
+            ->select('pro.id', 'pro.nombre', 'pro.area')
+            ->distinct()
+            ->orderBy('pro.nombre', 'ASC')
+            ->get();
+
+        return response()->json(['estado' => true, 'datos' => $programas], 200);
+    }
+
+    /**
+     * Listado de modalidades para el filtro (API).
+     */
+    public function getModalidades(Request $request)
+    {
+        $procesoId = auth()->user()->id_proceso;
+
+        $modalidades = DB::table('modalidad AS m')
+            ->join('inscripciones AS ins', function ($join) use ($procesoId) {
+                $join->on('ins.id_modalidad', '=', 'm.id')
+                    ->where('ins.id_proceso', '=', $procesoId)
+                    ->where('ins.estado', '=', 0);
+            })
+            ->select('m.id', 'm.nombre')
+            ->distinct()
+            ->orderBy('m.nombre', 'ASC')
+            ->get();
+
+        return response()->json(['estado' => true, 'datos' => $modalidades], 200);
+    }
 
 }

@@ -19,7 +19,7 @@ class PuntajeController extends Controller
         JOIN puntajes pun  ON maximos.max_puntaje = (pun.puntaje + pun.puntaje_vocacional)  AND pun.area = maximos.area
         WHERE pun.id_proceso = ?  AND pun.apto = 'SI';"
        , [$proceso, $proceso]);
-    
+
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);

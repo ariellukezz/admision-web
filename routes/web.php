@@ -85,6 +85,8 @@ use App\Http\Controllers\Admin\SmtpAccountController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Segundas\IdentidadSegundaController;
 use App\Http\Controllers\Segundas\PostulanteSegundaController;
+use App\Http\Controllers\EstudianteOTIController;
+use App\Http\Controllers\GestorPuntajeController as PuntajeGestorController;
 use Inertia\Inertia;
 
 Route::middleware('auth')->get('/', function () {
@@ -325,6 +327,10 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //CONTROL BIOMETRICO
     Route::get('/control-biometrico', fn () => Inertia::render('Admin/ControlBiometrico/Lista'))->name('admin-control-biometrico');
     Route::post('/get-control-posterior', [ControlBiometricoController::class, 'getControlPosterior']);
+    Route::get('/control-biometrico/programas', [ControlBiometricoController::class, 'getProgramas']);
+    Route::get('/control-biometrico/modalidades', [ControlBiometricoController::class, 'getModalidades']);
+    Route::get('/control-biometrico/exportar-excel', [ControlBiometricoController::class, 'exportarExcel']);
+    Route::get('/control-biometrico/exportar-pdf', [ControlBiometricoController::class, 'exportarPdf']);
 
     //PARTICIPANTES
     Route::get('/participante-docente', fn () => Inertia::render('Admin/Participante/Docente'))->name('admin-participante-docente');
@@ -513,6 +519,20 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     // ── Admin Postulante Registration ────────────────────
     Route::get('/registro-postulante', fn () => Inertia::render('Admin/RegistroPostulante/Index'))->name('admin.registro-postulante');
+
+    // ── Estudiantes OTI (mysql_secondary) ────────────────
+    Route::get('/estudiantes-oti', fn () => Inertia::render('Admin/EstudiantesOTI/Index'))->name('admin.estudiantes-oti');
+    Route::post('/estudiantes-oti/buscar', [EstudianteOTIController::class, 'buscar']);
+
+    // ── Gestión de Puntajes ───────────────────────────────
+    Route::get('/puntajes', fn () => Inertia::render('Admin/Puntajes/Index'))->name('admin.puntajes');
+    Route::get('/puntajes/lista', [PuntajeGestorController::class, 'index']);
+    Route::get('/puntajes/selectores', [PuntajeGestorController::class, 'getSelectores']);
+    Route::post('/puntajes/importar', [PuntajeGestorController::class, 'importar']);
+    Route::get('/puntajes/plantilla', [PuntajeGestorController::class, 'plantilla']);
+    Route::post('/puntajes/eliminar-registro', [PuntajeGestorController::class, 'eliminarRegistro']);
+    Route::post('/puntajes/eliminar-todo', [PuntajeGestorController::class, 'eliminarTodo']);
+    Route::post('/puntajes/guardar', [PuntajeGestorController::class, 'guardar']);
 
     // ── Cultural data routes (for admin RegistroPostulante) ──
     Route::get('/get-condiciones-lengua-segundas', [IdentidadSegundaController::class, 'getCondicionesLengua']);

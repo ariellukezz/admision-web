@@ -460,6 +460,18 @@ const menuItems = [
         label: 'Correos SMTP',
         route: 'admin.smtp-accounts'
       },
+      {
+        key: 'estudiantes-oti',
+        icon: SettingFilled,
+        label: 'Estudiantes OTI',
+        route: 'admin.estudiantes-oti'
+      },
+      {
+        key: 'puntajes',
+        icon: SettingFilled,
+        label: 'Gestión de Puntajes',
+        route: 'admin.puntajes'
+      },
     ]
   },
   {

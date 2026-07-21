@@ -23,6 +23,7 @@ class Ingresante extends Model
         'puntaje',
         'apto',
         'observacion',
+        'programa',
         'id_examen',
         'litho',
         'numlectura',
