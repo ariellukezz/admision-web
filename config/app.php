@@ -200,6 +200,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\TelescopeServiceProvider::class,
+        App\Modules\Calificacion\CalificacionServiceProvider::class,
+        App\Modules\Pruebas\PruebasServiceProvider::class,
         Mccarlosen\LaravelMpdf\LaravelMpdfServiceProvider::class
 
     ],
