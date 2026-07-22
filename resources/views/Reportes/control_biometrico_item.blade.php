@@ -89,7 +89,7 @@
                 <td colspan="7" class="program-header">
                     Programa de Estudios de {{ $programa }}
                     <br>
-                    <small>({{ count($postulantes) }} ingresantes)</small>
+                    {{-- <small>({{ count($postulantes) }} ingresantes)</small> --}}
                 </td>
             </tr>
             <tr>
