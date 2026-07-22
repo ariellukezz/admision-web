@@ -531,6 +531,12 @@ class PreinscripcionController extends Controller
         ->join('modalidad','pre_inscripcion.id_modalidad', 'modalidad.id')
         ->join('procesos','pre_inscripcion.id_proceso', 'procesos.id')
         ->where($query_where)
+        ->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('sancionados')
+                ->whereColumn('sancionados.dni', 'postulante.nro_doc')
+                ->where('sancionados.id_proceso', auth()->user()->id_proceso);
+        })
         ->where(function ($query) use ($request) {
             return $query
               ->orWhere('modalidad.nombre', 'LIKE', '%' . $request->term . '%')

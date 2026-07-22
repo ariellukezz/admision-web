@@ -420,13 +420,15 @@ const handleCerrarVerificacion = async () => {
     loading.value = false
     return
   }
-  // Non-CEPREUNA: if postulante data was already loaded by getCarrerasPrevias flow,
-  // just navigate to step 1. Otherwise, fetch from external API.
-  if (!datospersonales.id) {
-    await getDatosPersonales()
-  } else if (pagina_pre.value === 0) {
-    pagina_pre.value = 1
+  // Non-CEPREUNA: verify existing data before allowing access
+  const tieneDatos = await verificarDatosExistentes()
+  if (tieneDatos) {
+    // "En buena hora" modal shown or data loaded directly (if verification disabled)
+    loading.value = false
+    return
   }
+  // No existing data — fetch from external API
+  await getDatosPersonales()
   loading.value = false
 }
 

@@ -500,36 +500,16 @@ export const usePreinscripcionPregrado = (props) => {
     pagina_pre.value = 1
   }
 
-  const rechazarCargarDatos = () => {
+  const rechazarCargarDatos = async () => {
     resetCodigoVerificacion()
-    const d = datosPrevios.value
-    datospersonales.id = d?.id ?? null
-    datospersonales.primerapellido = ''
-    datospersonales.segundo_apellido = ''
-    datospersonales.nombres = ''
-    datospersonales.estado_civil = null
-    datospersonales.sexo = null
-    datospersonales.correo = ''
-    datospersonales.celular = ''
-    datospersonales.fec_nacimiento = ''
-    datospersonales.ubigeo = ''
-    datospersonales.nacimiento_label = ''
-    datosresidencia.direccion = ''
-    datosresidencia.dep = null
-    datosresidencia.prov = null
-    datosresidencia.dist = null
-    datospersonales.ubigeo_residencia = ''
-    ubigeoNacSeleccionado.value = null
-    ubigeoResSeleccionado.value = null
-    datosresidencia.ubigeo_res = null
     modalCargarDatos.value = false
     if (props.procceso_seleccionado.id_modalidad_proceso == 2 && datacepre.value) {
       // CEPREUNA — eligibility already verified, load CEPREUNA data and show carreras previas
       cargarDatosCepre()
       modalcarrerasprevias.value = true
     } else {
-      pagina_pre.value = 1
-      loading.value = false
+      // Non-CEPREUNA: postulante must use their existing data — cannot fill manually
+      await cargarDatosYNavegar(false)
     }
   }
 
@@ -586,13 +566,6 @@ export const usePreinscripcionPregrado = (props) => {
   const iniciarPostulacion = async () => {
     loading.value = true
     try {
-      if (props.procceso_seleccionado.id_modalidad_proceso != 2) {
-        const tieneDatos = await verificarDatosExistentes()
-        if (tieneDatos) {
-          loading.value = false
-          return
-        }
-      }
       await getPasoRegistrado()
       if (ultimopaso.value) {
         await navegarSegunPaso()
@@ -1372,7 +1345,7 @@ export const usePreinscripcionPregrado = (props) => {
           participa.value = 1
         } else {
           await getDataPrisma()
-          getDatosPersonales2()
+          // Data loading deferred to handleCerrarVerificacion → verificarDatosExistentes
           participa.value = 1
         }
       }
