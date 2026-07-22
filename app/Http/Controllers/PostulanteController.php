@@ -728,6 +728,17 @@ class PostulanteController extends Controller
               );
           }
 
+          if (count($data) >= 2) {
+              return response()->json([
+                  'anteriores' => $data,
+                  'loading' => false,
+                  'modalSancionado' => true,
+                  'confirmacion' => false,
+                  'bloqueado' => true,
+                  'message' => 'No cumple con los requisitos para postular. Ya tiene 2 o más carreras previas registradas.'
+              ]);
+          }
+
           if (count($data) == 1) {
               return response()->json([
                   'anteriores' => [],

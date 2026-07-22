@@ -1390,6 +1390,15 @@ export const usePreinscripcionPregrado = (props) => {
         participante: participante.value,
         formState: formState.dni,
       })
+
+      if (response.data.bloqueado) {
+        loading.value = false
+        anteriores.value = []
+        modalSancionado.value = true
+        confirmacion.value = false
+        return
+      }
+
       if (response.data.mensaje === 'No tiene carreras previas') {
         const data = response.data.anteriores
         anteriores.value = []
