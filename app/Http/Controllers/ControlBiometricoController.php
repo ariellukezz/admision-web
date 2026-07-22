@@ -279,11 +279,18 @@ public function exportarPdf(Request $request)
 
         $validated = $request->validate([
             'codigo_ingreso'     => 'nullable|string|max:8',
-            'estado'             => 'nullable|in:0,1',
+            'estado'             => 'nullable|integer',
             'correo_institucional' => 'nullable|string|max:150',
-            'tiene_correo'       => 'nullable|in:0,1',
+            'tiene_correo'       => 'nullable|integer',
             'segunda_carrera'    => 'nullable|integer',
         ]);
+
+        if (isset($validated['estado'])) {
+            $validated['estado'] = $validated['estado'] ? 1 : 0;
+        }
+        if (isset($validated['tiene_correo'])) {
+            $validated['tiene_correo'] = $validated['tiene_correo'] ? 1 : 0;
+        }
 
         $registro->update($validated);
 
@@ -299,7 +306,6 @@ public function exportarPdf(Request $request)
      */
     public function getProgramas(Request $request)
     {
-        $procesoId = auth()->user()->id_proceso;
 
         $programas = DB::table('programa AS pro')
             ->join('inscripciones AS ins', function ($join) use ($procesoId) {

@@ -195,7 +195,10 @@
             </a-select>
         </a-form-item>
         <a-form-item label="Segunda carrera">
-            <a-input-number v-model:value="registroEditar.segunda_carrera" style="width: 100%;" placeholder="0 = No" />
+            <a-select v-model:value="registroEditar.segunda_carrera">
+                <a-select-option :value="0">No</a-select-option>
+                <a-select-option :value="1">Sí</a-select-option>
+            </a-select>
         </a-form-item>
         <div class="cb-edit-info">
             <p><strong>Postulante:</strong> {{ registroEditar.primer_apellido }} {{ registroEditar.segundo_apellido }}, {{ registroEditar.nombres }}</p>
@@ -377,11 +380,11 @@ const guardarEdicion = async () => {
     guardando.value = true;
     try {
         await axios.put(`control-biometrico/${registroEditar.value.id}`, {
-            codigo_ingreso: registroEditar.value.codigo_ingreso,
+            codigo_ingreso: registroEditar.value.codigo_ingreso || null,
             estado: registroEditar.value.estado,
-            correo_institucional: registroEditar.value.correo_institucional,
+            correo_institucional: registroEditar.value.correo_institucional || null,
             tiene_correo: registroEditar.value.tiene_correo,
-            segunda_carrera: registroEditar.value.segunda_carrera,
+            segunda_carrera: registroEditar.value.segunda_carrera ?? 0,
         });
         message.success('Registro actualizado correctamente');
         modalEditar.value = false;
