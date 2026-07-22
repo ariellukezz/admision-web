@@ -1,30 +1,29 @@
 <template>
 <Head title="Dashboard" />
-<AuthenticatedLayout> 
-<div class="flex" style="background: #f3f3f3;">
-  <div style="width: calc(100% - 300px);">
+<AuthenticatedLayout>
+<div class="dash-wrapper">
+  <div class="dash-main">
     <!-- CARDS-->
     <div class="flex justify-between">
-        <div class="p-4 card-dash" >
+        <div class="p-4 card-dash">
           <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Preinscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
+            <div><span class="dash-label">Preinscritos</span></div>
+            <div class="dash-icon-circle">
               <div style="margin-top: -5px;">
                 <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
               </div>
             </div>
           </div>
           <div style="margin-top: 50px;">
-            <div v-if="preinscritos"> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
+            <div v-if="preinscritos">
+              <span class="dash-number">
                 {{ preinscritos }}
               </span>
             </div>
           </div>
           <div class="flex justify-start">
             <div>
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimopreinscrito.count }} preinscritos <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span>
-              <!-- <span style="color: #00af00;"> preinscritos  {{ (ultimopreinscrito.count / preinscritos ).toFixed(2) }}% <span style="color: gray;">el {{ ultimopreinscrito.date }}</span> </span> -->
+              <span class="dash-success"> {{ ultimopreinscrito.count }} preinscritos <span class="dash-muted">el {{ ultimopreinscrito.date }}</span> </span>
             </div>
           </div>
 
@@ -32,47 +31,46 @@
 
         <div class="p-4 card-dash">
           <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
+            <div><span class="dash-label">Documento</span></div>
+            <div class="dash-icon-circle">
               <div style="margin-top: -5px;">
                 <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
               </div>
             </div>
           </div>
           <div style="margin-top: 50px;">
-            <div> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
+            <div>
+              <span class="dash-number">
                 1369
               </span>
             </div>
           </div>
           <div class="flex justify-start">
-            <div> 
-              <span style="color: #00af00;"> icon  16% <span style="color: gray;">Since las week</span> </span>
+            <div>
+              <span class="dash-success"> icon  16% <span class="dash-muted">Since las week</span> </span>
             </div>
           </div>
 
         </div>
-        <div class="p-4 card-dash" style="background: white; border-radius: 9px; height: 160px;">
+        <div class="p-4 card-dash">
           <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Inscritos</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
+            <div><span class="dash-label">Inscritos</span></div>
+            <div class="dash-icon-circle">
               <div style="margin-top: -5px;">
                 <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
               </div>
             </div>
           </div>
           <div style="margin-top: 50px;">
-            <div> 
-              <span style="font-size: 1.5rem; font-weight: bold;">
+            <div>
+              <span class="dash-number">
                 {{ inscritos }}
               </span>
             </div>
           </div>
           <div class="flex justify-start">
-            <div> 
-              <span style="color: #00af00; font-weight:bold; "> {{ ultimoinscrito.count }} inscritos <span style="color: gray;">el {{ ultimoinscrito.date }}</span> </span>
-              <!-- <span style="color: #00af00;"> Inscritos  {{ (ultimoinscrito.count / inscritos ).toFixed(2) }}% <span style="color: gray;">el último día</span> </span> -->
+            <div>
+              <span class="dash-success"> {{ ultimoinscrito.count }} inscritos <span class="dash-muted">el {{ ultimoinscrito.date }}</span> </span>
             </div>
           </div>
 
@@ -82,10 +80,10 @@
     <div style="height: 16px;" ></div>
 
     <div class="flex justify-between">
-        <div class="p-4 card-dash" style="background: white; width: 49%; height: 240px;">
+        <div class="p-4 card-dash card-chart">
           <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
-            <div class="p-1 pl-2 pr-2" style="background: #6db6e753; border-radius: 50%;">
+            <div><span class="dash-label">Documento</span></div>
+            <div class="dash-icon-circle">
               <div style="margin-top: -5px;">
                 <span style="color: var(--primary-color); font-size: 1.15em;"><team-outlined /></span>
               </div>
@@ -100,25 +98,25 @@
           </div>
         </div>
 
-        <div class="p-4 card-dash" style="background: white; width: 49%; height: 240px;"  >
+        <div class="p-4 card-dash card-chart">
           <div class="flex justify-between">
-            <div><span style="font-weight: bold;">Documento</span></div>
+            <div><span class="dash-label">Documento</span></div>
             </div>
           <div style="margin-top: 0px;">
-            <ChartComponent/>
+            <ChartComponent :isDark="isDark"/>
           </div>
         </div>
     </div>
     <div class="flex" style="height: 16px;"></div>
-    <div style="width: 100%; height: 300px; border-radius: 9px; background: white;">
+    <div class="card-dash card-blank">
 
     </div>
   </div>
-  <div style="width: 300px;  height: 560px; padding-left: 15px;">
-    <div class="p-4" style="background:white; border-radius: 9px; height: 560px;">
+  <div class="dash-sidebar">
+    <div class="p-4 card-sidebar">
       <div class="mb-5">
-        <div class="mb-3 flex justify-between">  
-          <h1 style="font-weight: bold;">Mejores inscriptores</h1>
+        <div class="mb-3 flex justify-between">
+          <h1 class="dash-title">Mejores inscriptores</h1>
           <div style="margin-top: -5px;"> <span style="color: var(--primary-color);"><eye-outlined/></span></div>
         </div>
 
@@ -127,33 +125,29 @@
             <div style="border-radius: 50%; height: 38px; overflow: hidden;">
                 <div v-if="inscriptor.url">
                   <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-                    width="38" height="38"> 
-                </div>             
+                    width="38" height="38">
+                </div>
 
-                <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]"> 
-                  <!-- {{ colores[index] }} -->
+                <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]">
                   <div class="flex justify-center pt-0">
                     <span style="color: white; font-size: 1.7rem;">
-                      {{ inscriptor.paterno[0].toUpperCase() }} 
-                    </span> 
-                    <!-- <span style="color: white; font-weight: bold; font-size:1.5rem;">
-                      {{ inscriptor.paterno[0].toUpperCase() }} 
-                    </span>  -->
+                      {{ inscriptor.paterno[0].toUpperCase() }}
+                    </span>
                   </div>
                 </div>
 
 
             </div>
             <div class="ml-2">
-              <div style="margin-top: 2px;"><span style="font-weight: bold;">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
-              <div style="margin-top: -7px;"><span style="color: gray; font-size: .8rem;">{{ inscriptor.cant }} Inscritos</span></div>
+              <div style="margin-top: 2px;"><span class="dash-inscriptor-name">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
+              <div style="margin-top: -7px;"><span class="dash-muted" style="font-size: .8rem;">{{ inscriptor.cant }} Inscritos</span></div>
             </div>
           </div>
         </div>
       </div>
       <div>
-        <div class="mb-3">  
-          <h1 style="font-weight: bold;">Mejores Revisores del día</h1>
+        <div class="mb-3">
+          <h1 class="dash-title">Mejores Revisores del día</h1>
         </div>
 
         <div v-if="minscriptoresD != null"  >
@@ -161,23 +155,22 @@
             <div style="border-radius: 50%; height: 38px; overflow: hidden;">
                 <div v-if="inscriptor.url">
                   <img src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
-                    width="38" height="38"> 
-                </div>             
+                    width="38" height="38">
+                </div>
 
-                <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]"> 
-                  <!-- {{ colores[index] }} -->
+                <div v-else style="width: 38px; height: 38px;" :style="'background:'+colores[index]">
                   <div class="flex justify-center pt-0">
                     <span style="color: white; font-size: 1.7rem;">
-                      {{ inscriptor.paterno[0].toUpperCase() }} 
-                    </span> 
+                      {{ inscriptor.paterno[0].toUpperCase() }}
+                    </span>
                   </div>
                 </div>
 
 
             </div>
             <div class="ml-2">
-              <div style="margin-top: 2px;"><span style="font-weight: bold;">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
-              <div style="margin-top: -7px;"><span style="color: gray; font-size: .8rem;">{{ inscriptor.cant }} Inscritos</span></div>
+              <div style="margin-top: 2px;"><span class="dash-inscriptor-name">{{ inscriptor.name }} {{ inscriptor.paterno }}</span></div>
+              <div style="margin-top: -7px;"><span class="dash-muted" style="font-size: .8rem;">{{ inscriptor.cant }} Inscritos</span></div>
             </div>
           </div>
         </div>
@@ -196,37 +189,85 @@ import { TeamOutlined, EyeOutlined } from '@ant-design/icons-vue';
 import { Bar } from 'vue-chartjs'
 import ChartComponent from './Dashboard/components/ChartComponent.vue';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { toFixed } from 'ant-design-vue/lib/input-number/src/utils/MiniDecimal';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const barras = {
-    labels: [ 'Lun', 'Mar', 'Mie', 'Jue', 'Vie' ],
-    datasets: [ 
-      { 
-        label: 'Data 1',
-        backgroundColor: '#00aae4',
-        borderColor: '#00aae4',
-        borderWidth: 2,
-        fill: false,
-        data: [20, 39, 50, 60, 70, 89],
-        tension: 0.5,
-        pointRadius: false,
-      },
-      { 
-        label: 'Data 1',
-        backgroundColor: 'blue',
-        borderColor: 'blue',
-        borderWidth: 2,
-        fill: false,
-        data: [70, 89, 10, 90, 35, 89],
-        tension: 0.5,
-        pointRadius: false,
-      }, 
-    ]
+/* ====== THEME DETECTION ====== */
+const currentTheme = ref(localStorage.getItem('sider-theme') || 'light');
+let themeObserver = null;
+
+onMounted(() => {
+  themeObserver = new MutationObserver(() => {
+    const cls = document.body.className;
+    const match = cls.match(/theme-(\w+)/);
+    if (match && match[1] !== currentTheme.value) {
+      currentTheme.value = match[1];
+    }
+  });
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+});
+onUnmounted(() => {
+  if (themeObserver) themeObserver.disconnect();
+});
+
+const isDark = computed(() => currentTheme.value === 'dark');
+const chartTextColor = computed(() => isDark.value ? '#cbd5e1' : '#475569');
+const chartGridColor = computed(() => isDark.value ? 'rgba(148,163,184,0.12)' : 'rgba(0,0,0,0.06)');
+
+/* ====== CHART DATA (reactive to theme) ====== */
+const barras = computed(() => ({
+  labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie'],
+  datasets: [
+    {
+      label: 'Preinscritos',
+      backgroundColor: isDark.value ? 'rgba(59,130,246,0.6)' : '#00aae4',
+      borderColor: '#3b82f6',
+      borderWidth: 2,
+      fill: false,
+      data: [20, 39, 50, 60, 70, 89],
+      tension: 0.5,
+      pointRadius: false,
+    },
+    {
+      label: 'Inscritos',
+      backgroundColor: isDark.value ? 'rgba(139,92,246,0.6)' : 'rgba(139,92,246,0.7)',
+      borderColor: '#8b5cf6',
+      borderWidth: 2,
+      fill: false,
+      data: [70, 89, 10, 90, 35, 89],
+      tension: 0.5,
+      pointRadius: false,
+    },
+  ]
+}));
+
+const barrasOpciones = computed(() => ({
+  responsive: true,
+  plugins: {
+    legend: {
+      labels: { color: chartTextColor.value }
+    },
+    tooltip: {
+      titleColor: isDark.value ? '#e2e8f0' : '#1e293b',
+      bodyColor: isDark.value ? '#cbd5e1' : '#475569',
+      backgroundColor: isDark.value ? '#0f172a' : '#ffffff',
+      borderColor: isDark.value ? '#334155' : '#e2e8f0',
+      borderWidth: 1,
+    }
+  },
+  scales: {
+    x: {
+      ticks: { color: chartTextColor.value },
+      grid: { color: chartGridColor.value }
+    },
+    y: {
+      ticks: { color: chartTextColor.value },
+      grid: { color: chartGridColor.value }
+    }
   }
-const barrasOpciones = { responsive: true }
+}));
 
 const preinscritos = ref(0);
 const ultimopreinscrito = ref({ count:0, date:'0000-00-00' });
@@ -302,11 +343,115 @@ const colores = [
 </script>
 
 <style scoped>
-.card-dash{
-  background: white;  
-  border-radius: 9px; 
-  height: 160px;
-  width: 260px;
+/* ====== LAYOUT ====== */
+.dash-wrapper {
+  display: flex;
+  background: var(--content-bg, #f1f5f9);
+  min-height: 100%;
+}
+.dash-main {
+  width: calc(100% - 300px);
+}
+.dash-sidebar {
+  width: 300px;
+  height: 560px;
+  padding-left: 15px;
 }
 
+/* ====== CARDS ====== */
+.card-dash {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #e2e8f0);
+  color: var(--card-text, #1e293b);
+  border-radius: 9px;
+  height: 160px;
+  width: 260px;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.card-chart {
+  width: 49%;
+  height: 240px;
+}
+.card-blank {
+  width: 100%;
+  height: 300px;
+}
+.card-sidebar {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #e2e8f0);
+  color: var(--card-text, #1e293b);
+  border-radius: 9px;
+  height: 560px;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* ====== TEXT ELEMENTS ====== */
+.dash-label {
+  font-weight: bold;
+  color: var(--card-text, #1e293b);
+}
+.dash-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--card-text, #1e293b);
+}
+.dash-title {
+  font-weight: bold;
+  color: var(--card-text, #1e293b);
+}
+.dash-inscriptor-name {
+  font-weight: bold;
+  color: var(--card-text, #1e293b);
+}
+.dash-muted {
+  color: var(--card-muted, #64748b);
+}
+.dash-success {
+  color: var(--success-color, #16a34a);
+  font-weight: bold;
+}
+.dash-icon-circle {
+  padding: 4px 8px;
+  background: var(--icon-bg, #f1f5f9);
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+</style>
+
+<!-- Non-scoped overrides for dark/hybrid themes -->
+<style>
+.theme-dark .card-dash,
+.theme-dark .card-sidebar {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+.theme-dark .dash-label,
+.theme-dark .dash-number,
+.theme-dark .dash-title,
+.theme-dark .dash-inscriptor-name {
+  color: #e2e8f0 !important;
+}
+.theme-dark .dash-muted {
+  color: #94a3b8 !important;
+}
+.theme-dark .dash-success {
+  color: #4ade80 !important;
+}
+.theme-dark .dash-icon-circle {
+  background: rgba(255,255,255,0.04) !important;
+}
+.theme-dark .dash-wrapper {
+  background: #0f172a !important;
+}
+
+.theme-hybrid .card-dash,
+.theme-hybrid .card-sidebar {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+.theme-hybrid .dash-wrapper {
+  background: #f1f5f9 !important;
+}
 </style>

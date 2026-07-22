@@ -2,10 +2,10 @@
   <Head title="Consulta RENIEC" />
 
   <AppLayout>
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen" style="background: var(--content-bg, #f1f5f9);">
 
       <!-- BUSCADOR -->
-      <div class="bg-white rounded-xl shadow-md p-6 mb-4 border border-gray-200">
+      <div class="rounded-xl shadow-md p-6 mb-4 border border-gray-200" style="background: var(--card-bg, #ffffff); color: var(--card-text);">
         <div class="mb-8">
           <h1 class="text-2xl font-bold text-[#2d3748] flex items-center gap-3">
             <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -64,7 +64,7 @@
 
       <div
         v-if="cargando"
-        class="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-200"
+        class="rounded-xl shadow-sm p-8 text-center border border-gray-200" style="background: var(--card-bg, #ffffff); color: var(--card-text);"
       >
         <a-spin size="large" tip="Consultando información en RENIEC..." />
         <p class="mt-4 text-gray-600">Por favor espere…</p>
@@ -72,7 +72,7 @@
 
       <div v-if="personaConsultada && !cargando" class="space-y-6">
 
-        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+        <div class="rounded-xl shadow-md overflow-hidden border border-gray-200" style="background: var(--card-bg, #ffffff); color: var(--card-text);">
           <div class="bg-[#2d3748] px-6 py-4">
             <h2 class="text-xl font-bold text-white">
               Información del Postulante
@@ -84,7 +84,7 @@
 
               <!-- FOTO -->
               <div class="md:w-1/4">
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
+                <div class="rounded-lg p-4 border border-gray-200 text-center" style="background: var(--content-bg, #f1f5f9);">
                   <h3 class="font-semibold text-gray-700 mb-4">Fotografía</h3>
 
                   <div v-if="persona.foto" class="foto-wrapper">
@@ -180,7 +180,7 @@
       <!-- VACÍO -->
       <div
         v-if="!personaConsultada && !cargando && !error"
-        class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200"
+        class="rounded-xl shadow-sm p-12 text-center border border-gray-200" style="background: var(--card-bg, #ffffff); color: var(--card-text);"
       >
         Ingrese un DNI válido para realizar la consulta
       </div>
@@ -294,24 +294,24 @@ const buscar = async () => {
   max-width: 260px;
   aspect-ratio: 3 / 4;
   margin: 0 auto;
-  background: #e5e7eb;
+  background: var(--icon-bg, #f1f5f9);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: var(--card-muted, #64748b);
 }
 
 /* Datos */
 .dato-box {
-  background: #f9fafb;
+  background: var(--content-bg, #f1f5f9);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   font-weight: 600;
 }
 
 .dato-box-lg {
-  background: #f3f4f6;
+  background: var(--content-bg, #f1f5f9);
   padding: 1rem;
   border-radius: 0.5rem;
   font-size: 1.25rem;
@@ -326,4 +326,32 @@ const buscar = async () => {
   }
 }
 
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>

@@ -244,7 +244,7 @@ const formatearFecha = (fecha) => {
 
 /* Search */
 .oti-search-card {
-  background: #fff;
+  background: var(--card-bg, #ffffff);
   border-radius: 14px;
   padding: 20px 24px;
   margin-bottom: 24px;
@@ -294,7 +294,7 @@ const formatearFecha = (fecha) => {
 
 /* Student Card */
 .oti-student-card {
-  background: #fff;
+  background: var(--card-bg, #ffffff);
   border-radius: 16px;
   padding: 24px 28px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);

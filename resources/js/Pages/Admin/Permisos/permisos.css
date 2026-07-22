@@ -3,7 +3,7 @@
   --rbac-primary-hover: #4338ca;
   --rbac-primary-light: #eef2ff;
   --rbac-border: #e2e8f0;
-  --rbac-bg: #f8fafc;
+  --rbac-bg: var(--content-bg, #f8fafc);
   --rbac-text: #1e293b;
   --rbac-text-muted: #64748b;
   --rbac-radius: 10px;
@@ -22,7 +22,7 @@
   align-items: flex-start;
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--rbac-border);
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-radius: 12px 12px 0 0;
 }
 
@@ -64,7 +64,7 @@
   display: flex;
   gap: 12px;
   padding: 16px 24px;
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-bottom: 1px solid var(--rbac-border);
 }
 
@@ -97,7 +97,7 @@
 /* ── Tabs override ─────────────────────────────── */
 .rbac-tabs {
   padding: 0 24px 20px;
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-radius: 0 0 12px 12px;
 }
 

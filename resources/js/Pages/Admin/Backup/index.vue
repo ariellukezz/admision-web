@@ -2,10 +2,10 @@
 <Head title="Respaldo de Base de Datos" />
 <AuthenticatedLayout>
 
-<div style="background: #f3f3f3; min-height: calc(100vh - 98px); padding-bottom: 24px;">
+<div style="background: var(--content-bg, #f1f5f9); min-height: calc(100vh - 98px); padding-bottom: 24px;">
 
   <!-- HEADER -->
-  <div class="bg-white rounded-xl shadow-md p-6 mb-4 border border-gray-200">
+  <div class="rounded-xl shadow-md p-6 mb-4 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl font-bold text-[#2d3748] flex items-center gap-3">
@@ -45,7 +45,7 @@
   <div class="mb-4">
     <a-row :gutter="[16, 12]">
       <a-col :xs="24" :sm="12" :md="6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+        <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Base de datos</p>
@@ -58,7 +58,7 @@
         </div>
       </a-col>
       <a-col :xs="24" :sm="12" :md="6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+        <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Tamaño BD</p>
@@ -71,7 +71,7 @@
         </div>
       </a-col>
       <a-col :xs="24" :sm="12" :md="6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+        <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Tablas</p>
@@ -84,7 +84,7 @@
         </div>
       </a-col>
       <a-col :xs="24" :sm="12" :md="6">
-        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
+        <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
               <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Espacio en disco</p>
@@ -101,7 +101,7 @@
   </div>
 
   <!-- TABLA RESPALDOS -->
-  <div class="bg-white rounded-xl shadow-md border border-gray-200">
+  <div class="rounded-xl shadow-md border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <div class="p-5 border-b border-gray-100">
       <div class="flex justify-between items-center">
         <h2 class="text-lg font-bold text-gray-800">Historial de Respaldos</h2>
@@ -116,7 +116,7 @@
       :pagination="{ pageSize: 10, showTotal: (total) => `${total} respaldos` }"
       row-key="file"
       size="middle"
-      :scroll="{ x: 800 }"
+      :scroll="{ x: 800, y: 'calc(100vh - 320px)' }"
     >
       <template #bodyCell="{ column, record }">
 
@@ -364,16 +364,44 @@ onMounted(() => {
 
 <style scoped>
 :deep(.ant-table-thead > tr > th) {
-  background-color: #f8fafc;
+  background-color: var(--table-header-bg, #f8fafc);
   font-weight: 600;
-  color: #374151;
+  color: var(--card-text, #374151);
 }
 
 :deep(.ant-table-tbody > tr:hover > td) {
-  background-color: #f3f4f6 !important;
+  background-color: var(--hover-bg, #eff6ff) !important;
 }
 
 :deep(.ant-btn-primary:hover) {
   opacity: 0.9;
+}
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
 }
 </style>

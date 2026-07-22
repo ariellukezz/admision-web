@@ -2,7 +2,7 @@
 <Head title="Resumen inscripciones"/>
 <AuthenticatedLayout>
 
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg pt-4 pl-4 pb-0" style="height: calc(100vh - 103px);">
+<div class="overflow-hidden shadow-sm sm:rounded-lg pt-4 pl-4 pb-0" style="height: calc(100vh - 103px); background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
   <row class="flex justify-end mb-3">
       <div class="mr-3">
           <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
@@ -198,7 +198,7 @@ getResumen();
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 
@@ -215,7 +215,7 @@ getResumen();
 .scroll-container {
   overflow-y: auto;
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
+  scrollbar-color: #888 var(--content-bg, #f1f5f9); /* Firefox */
 }
 
 /* Estilo para el scroll específico en Webkit (Chrome, Safari) */
@@ -225,7 +225,7 @@ getResumen();
 }
 
 .scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 
@@ -250,4 +250,30 @@ getResumen();
   margin-bottom: 8px;    /* espacio entre filas */
 }
 
+
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>

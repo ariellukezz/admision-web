@@ -2,7 +2,7 @@
   <Head title="Tipos de Documento" />
 
   <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
+    <div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b); border: 1px solid var(--card-border, #e2e8f0);">
 
       <div class="flex justify-between mb-4">
         <a-button type="primary" @click="showModal">
@@ -30,13 +30,14 @@
         size="small"
         :loading="loading"
         row-key="id"
+        :scroll="{ y: 'calc(100vh - 320px)' }"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 'acciones'">
             <div class="flex gap-1 justify-center">
               <a-button
                 size="small"
-                style="background:white;border:1px solid #d9d9d9; height: 32px; width: 32px;"
+                style="background: var(--card-bg, #ffffff);border:1px solid #d9d9d9; height: 32px; width: 32px;"
                 @click="abrirEditar(record)"
               >
                 <EditOutlined />
@@ -48,7 +49,7 @@
               >
                 <a-button
                   size="small"
-                  style="background:white;border:1px solid #d9d9d9;color:#ff4d4f; height: 32px; width: 32px;"
+                  style="background: var(--card-bg, #ffffff);border:1px solid #d9d9d9;color:#ff4d4f; height: 32px; width: 32px;"
                 >
                   <DeleteOutlined />
                 </a-button>
@@ -232,3 +233,31 @@ watch(visible, v => {
 
 getTiposDocumento();
 </script>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
 <Head title="Carreras previas"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 102px);">
+<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 102px); background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b); border: 1px solid var(--card-border, #e2e8f0);">
 <row class="flex justify-between mb-4" >
     <div class="mr-3">
         <a-button type="primary" style="border-radius: 5px; background: #476175" @click="showModalPrograma">Agregar</a-button>
@@ -59,7 +59,7 @@
                 <a-button type="" @click="verDetalle(record)" style="border-radius:4px; background: none; color: green" size="small">
                     <template #icon><eye-outlined/></template>
                 </a-button>
-                <a-button type="" @click="abrirEditar(record)" style="border-radius:4px; background: none; color: gray" size="small">
+                <a-button type="" @click="abrirEditar(record)" style="border-radius:4px; background: none; color: var(--card-muted, #64748b)" size="small">
                     <template #icon><form-outlined/></template>
                 </a-button>
                 <a-button class="" @click="eliminar(record.id)" style="border-radius:4px; background: none; color: red;" shape="" size="small">
@@ -428,6 +428,34 @@ border-radius: 10px;
 background: #555; 
 }
 
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>
 
 <!-- <template>

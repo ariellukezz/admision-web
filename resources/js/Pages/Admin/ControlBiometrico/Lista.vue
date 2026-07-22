@@ -1,14 +1,14 @@
 <template>
 <Head title="Control biométrico"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px);">
+<div class="cb-container">
 
 <!-- Botones de exportación + Buscador -->
-<div class="flex justify-between items-center mb-3" style="flex-wrap: wrap; gap: 8px;">
+<div class="cb-toolbar">
     <div class="flex items-center gap-2">
         <a-button
             type="primary"
-            style="border-radius: 5px; background: #27ae60; border: none;"
+            class="cb-btn-excel"
             :loading="exportandoExcel"
             @click="exportarExcel"
         >
@@ -17,7 +17,7 @@
         </a-button>
         <a-button
             type="danger"
-            style="border-radius: 5px; background: #e74c3c; border: none;"
+            class="cb-btn-pdf"
             :loading="exportandoPdf"
             @click="exportarPdf"
         >
@@ -31,7 +31,7 @@
             type="text"
             placeholder="Buscar"
             v-model:value="buscar"
-            style="max-width: 300px; padding-left: 10px;"
+            class="cb-search"
             allow-clear
         >
             <template #prefix>
@@ -42,10 +42,10 @@
 </div>
 
 <!-- Filtros siempre visibles -->
-<div style="margin-bottom: 12px; padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+<div class="cb-filters">
     <div class="flex" style="gap: 12px; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 180px;">
-            <label style="font-size: .75rem; font-weight: 600; color: #555;">FECHA</label>
+            <label class="cb-filter-label">FECHA</label>
             <a-date-picker
                 v-model:value="filtroFecha"
                 style="width: 100%;"
@@ -57,7 +57,7 @@
         </div>
 
         <div style="flex: 2; min-width: 320px;">
-            <label style="font-size: .75rem; font-weight: 600; color: #555;">RANGO DE FECHAS</label>
+            <label class="cb-filter-label">RANGO DE FECHAS</label>
             <a-range-picker
                 v-model:value="filtroRango"
                 style="width: 100%;"
@@ -69,7 +69,7 @@
         </div>
 
         <div style="flex: 1.5; min-width: 220px;">
-            <label style="font-size: .75rem; font-weight: 600; color: #555;">PROGRAMA</label>
+            <label class="cb-filter-label">PROGRAMA</label>
             <a-select
                 v-model:value="filtroPrograma"
                 style="width: 100%;"
@@ -82,7 +82,7 @@
         </div>
 
         <div style="flex: 1; min-width: 160px;">
-            <label style="font-size: .75rem; font-weight: 600; color: #555;">MODALIDAD</label>
+            <label class="cb-filter-label">MODALIDAD</label>
             <a-select
                 v-model:value="filtroModalidad"
                 style="width: 100%;"
@@ -95,7 +95,7 @@
         </div>
 
         <div style="flex: 1; min-width: 140px;">
-            <label style="font-size: .75rem; font-weight: 600; color: #555;">ÁREA</label>
+            <label class="cb-filter-label">ÁREA</label>
             <a-select
                 v-model:value="filtroArea"
                 style="width: 100%;"
@@ -112,24 +112,24 @@
 </div>
 
 <!-- Tabla -->
-<div style="">
+<div class="cb-table-wrapper">
     <a-table
         :columns="columns"
         :data-source="programas"
         :pagination="false"
         size="small"
-        :scroll="{ x: 380, y: 'calc(100vh - 340px)' }"
-        :row-class-name="(_, index) => index % 2 === 1 ? 'fila-par' : ''"
+        :scroll="{ x: 380, y: 'calc(100vh - 380px)' }"
+        :row-class-name="(_, index) => index % 2 === 1 ? 'cb-row-even' : ''"
         >
-        <template #bodyCell="{ column, index, record }">
+        <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'codigo_ingreso'">
-                <div><span style="font-size: .8rem; font-weight: 600;">{{ record.codigo_ingreso }}</span></div>
+                <div><span class="cb-code">{{ record.codigo_ingreso }}</span></div>
             </template>
             <template v-if="column.dataIndex === 'nro_doc'">
-                <div><span style="font-size: .9rem">{{ record.nro_doc }}</span></div>
+                <div><span class="cb-doc">{{ record.nro_doc }}</span></div>
             </template>
             <template v-if="column.dataIndex === 'nombre'">
-                <div><span style="font-size: .9rem;">{{ record.primer_apellido }} {{ record.segundo_apellido }}, {{ record.nombres }}</span></div>
+                <div><span class="cb-name">{{ record.primer_apellido }} {{ record.segundo_apellido }}, {{ record.nombres }}</span></div>
             </template>
             <template v-if="column.dataIndex === 'modalidad'">
                 <div class="flex" style="justify-content: center;">
@@ -142,19 +142,18 @@
             </template>
             <template v-if="column.dataIndex === 'estado'">
                 <div class="flex" style="justify-content: center;">
-                    <div v-if="1 == programas[index].estado">
-                        <a-tag color="green">Si</a-tag>
-                    </div>
-                    <div v-if="programas[index].estado == 0">
-                        <a-tag color="red">No</a-tag>
-                    </div>
+                    <a-tag color="green" v-if="record.estado == 1">Si</a-tag>
+                    <a-tag color="red" v-else>No</a-tag>
                 </div>
             </template>
             <template v-if="column.dataIndex === 'acciones'">
-                <a-button type="" @click="imprimirConstancia(record.url)" style="border-radius:4px; background: none; color: green" size="small">
+                <a-button type="text" @click="abrirEditar(record)" class="cb-action-btn" size="small">
+                    <template #icon><edit-outlined/></template>
+                </a-button>
+                <a-button type="text" @click="imprimirConstancia(record.url)" class="cb-action-btn" style="color: #52c41a;" size="small">
                     <template #icon><printer-outlined/></template>
                 </a-button>
-                <a-button type="" @click="generarConstancia(record.nro_doc)" style="border-radius:4px; background: none; color: gray" size="small">
+                <a-button type="text" @click="generarConstancia(record.nro_doc)" class="cb-action-btn" style="color: #8c8c8c;" size="small">
                     <template #icon><sync-outlined/></template>
                 </a-button>
             </template>
@@ -162,9 +161,49 @@
     </a-table>
 </div>
 
-<div class="flex" style="justify-content: flex-end;">
+<div class="flex" style="justify-content: flex-end; padding-top: 8px;">
     <a-pagination v-model:current="pagina" simple page-size="50" :total="totalpaginas" />
 </div>
+
+<!-- Modal Editar -->
+<a-modal
+    v-model:open="modalEditar"
+    title="Editar registro"
+    @ok="guardarEdicion"
+    :confirm-loading="guardando"
+    ok-text="Guardar"
+    cancel-text="Cancelar"
+    width="520px"
+>
+    <a-form layout="vertical" v-if="registroEditar">
+        <a-form-item label="Código de ingreso">
+            <a-input v-model:value="registroEditar.codigo_ingreso" placeholder="Código" />
+        </a-form-item>
+        <a-form-item label="Estado">
+            <a-select v-model:value="registroEditar.estado">
+                <a-select-option :value="1">Sí</a-select-option>
+                <a-select-option :value="0">No</a-select-option>
+            </a-select>
+        </a-form-item>
+        <a-form-item label="Correo institucional">
+            <a-input v-model:value="registroEditar.correo_institucional" placeholder="correo@unap.edu.pe" />
+        </a-form-item>
+        <a-form-item label="Tiene correo">
+            <a-select v-model:value="registroEditar.tiene_correo">
+                <a-select-option :value="1">Sí</a-select-option>
+                <a-select-option :value="0">No</a-select-option>
+            </a-select>
+        </a-form-item>
+        <a-form-item label="Segunda carrera">
+            <a-input-number v-model:value="registroEditar.segunda_carrera" style="width: 100%;" placeholder="0 = No" />
+        </a-form-item>
+        <div class="cb-edit-info">
+            <p><strong>Postulante:</strong> {{ registroEditar.primer_apellido }} {{ registroEditar.segundo_apellido }}, {{ registroEditar.nombres }}</p>
+            <p><strong>DNI:</strong> {{ registroEditar.nro_doc }}</p>
+            <p><strong>Programa:</strong> {{ registroEditar.programa_estudio }}</p>
+        </div>
+    </a-form>
+</a-modal>
 
 </div>
 </AuthenticatedLayout>
@@ -176,9 +215,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { ref, watch, onMounted } from 'vue';
 import {
     PrinterOutlined, SyncOutlined, SearchOutlined,
-    FileExcelOutlined, FilePdfOutlined
+    FileExcelOutlined, FilePdfOutlined, EditOutlined
 } from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
+import { notification, message } from 'ant-design-vue';
 import axios from 'axios';
 
 const baseUrl = window.location.origin;
@@ -207,6 +246,11 @@ const areasOptions = [
 
 const exportandoExcel = ref(false);
 const exportandoPdf = ref(false);
+
+// Modal editar
+const modalEditar = ref(false);
+const guardando = ref(false);
+const registroEditar = ref(null);
 
 let timeoutId;
 watch(buscar, () => {
@@ -324,6 +368,32 @@ const generarConstancia = (dni) => {
     iframe.contentWindow.print();
 };
 
+const abrirEditar = (record) => {
+    registroEditar.value = { ...record };
+    modalEditar.value = true;
+};
+
+const guardarEdicion = async () => {
+    guardando.value = true;
+    try {
+        await axios.put(`control-biometrico/${registroEditar.value.id}`, {
+            codigo_ingreso: registroEditar.value.codigo_ingreso,
+            estado: registroEditar.value.estado,
+            correo_institucional: registroEditar.value.correo_institucional,
+            tiene_correo: registroEditar.value.tiene_correo,
+            segunda_carrera: registroEditar.value.segunda_carrera,
+        });
+        message.success('Registro actualizado correctamente');
+        modalEditar.value = false;
+        getProgramas();
+    } catch (error) {
+        message.error('Error al actualizar el registro');
+        console.error(error);
+    } finally {
+        guardando.value = false;
+    }
+};
+
 const columns = [
     { title: 'Cod', dataIndex: 'codigo_ingreso', width: '65px', align: 'center', responsive: ['md'] },
     { title: 'N° Doc', dataIndex: 'nro_doc', width: '80px', align: 'center', responsive: ['md'] },
@@ -331,7 +401,7 @@ const columns = [
     { title: 'Programa', dataIndex: 'programa' },
     { title: 'Modalidad', dataIndex: 'modalidad', align: 'center', width: '130px', responsive: ['md'] },
     { title: 'Puntaje', dataIndex: 'puntaje_total', align: 'center', width: '80px', responsive: ['md'] },
-    { title: 'Acciones', dataIndex: 'acciones', width: '90px', align: 'center' },
+    { title: 'Acciones', dataIndex: 'acciones', width: '120px', align: 'center' },
 ];
 
 onMounted(() => {
@@ -341,10 +411,144 @@ onMounted(() => {
 });
 </script>
 
+<style scoped>
+.cb-container {
+    background: var(--content-bg, #f1f5f9);
+    padding: 16px;
+    height: calc(100vh - 98px);
+    overflow-y: auto;
+    border-radius: 8px;
+}
+
+.cb-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.cb-btn-excel {
+    border-radius: 5px;
+    background: #27ae60;
+    border: none;
+}
+.cb-btn-pdf {
+    border-radius: 5px;
+    background: #e74c3c;
+    border: none;
+}
+.cb-search {
+    max-width: 300px;
+    padding-left: 10px;
+}
+
+.cb-filters {
+    margin-bottom: 12px;
+    padding: 12px;
+    background: var(--card-bg, #ffffff);
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e2e8f0);
+}
+.cb-filter-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--card-muted, #555);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.cb-table-wrapper {
+    background: var(--card-bg, #ffffff);
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e2e8f0);
+    padding: 8px;
+}
+.cb-code { font-size: .8rem; font-weight: 600; color: var(--card-text, #1e293b); }
+.cb-doc { font-size: .9rem; color: var(--card-text, #1e293b); }
+.cb-name { font-size: .9rem; color: var(--card-text, #1e293b); }
+.cb-action-btn { border-radius: 4px; }
+
+.cb-edit-info {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--content-bg, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e9ecef);
+}
+.cb-edit-info p {
+    margin: 2px 0;
+    font-size: .82rem;
+    color: var(--card-muted, #555);
+}
+</style>
+
+<!-- Dark/Hybrid theme overrides -->
 <style>
-::-webkit-scrollbar { width: 9px; height: 12px; }
-::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
-.fila-par { background-color: #fafafa; }
+.theme-dark .cb-container,
+.theme-hybrid .cb-container {
+    background: var(--content-bg) !important;
+}
+.theme-dark .cb-filters,
+.theme-dark .cb-table-wrapper {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-hybrid .cb-filters,
+.theme-hybrid .cb-table-wrapper {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-dark .cb-filter-label,
+.theme-hybrid .cb-filter-label {
+    color: var(--card-muted) !important;
+}
+.theme-dark .cb-code,
+.theme-dark .cb-doc,
+.theme-dark .cb-name,
+.theme-hybrid .cb-code,
+.theme-hybrid .cb-doc,
+.theme-hybrid .cb-name {
+    color: var(--card-text) !important;
+}
+.theme-dark .cb-edit-info,
+.theme-hybrid .cb-edit-info {
+    background: var(--hover-bg) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-dark .cb-edit-info p,
+.theme-hybrid .cb-edit-info p {
+    color: var(--card-muted) !important;
+}
+
+/* Table dark overrides */
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .cb-row-even > td,
+.theme-hybrid .cb-row-even > td {
+    background: var(--row-even) !important;
+}
+.theme-dark .cb-row-even:hover > td,
+.theme-hybrid .cb-row-even:hover > td {
+    background: var(--hover-bg) !important;
+}
 </style>

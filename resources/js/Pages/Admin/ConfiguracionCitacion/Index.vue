@@ -2,10 +2,10 @@
   <Head title="Configuración de Citación" />
 
   <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column;">
+    <div class="overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column; background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
 
       <!-- Header -->
-      <div class="border-b border-gray-100 px-8 py-6 bg-white rounded-t-2xl">
+      <div class="border-b border-gray-100 px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Configuración de Citación</h1>
@@ -393,3 +393,31 @@ onMounted(() => {
   getProgramas();
 });
 </script>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+</style>

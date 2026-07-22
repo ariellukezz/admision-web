@@ -444,7 +444,7 @@ onMounted(() => { fetchAll() })
 .dashboard-container { padding: 4px 8px 24px; }
 
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
-.kpi-card { background: white; border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 16px; transition: box-shadow 0.2s; }
+.kpi-card { background: var(--card-bg, #ffffff); border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 16px; transition: box-shadow 0.2s; }
 .kpi-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
 .kpi-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
 .kpi-info { display: flex; flex-direction: column; }
@@ -452,7 +452,7 @@ onMounted(() => { fetchAll() })
 .kpi-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
 .kpi-sub { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
 
-.bio-progress-card { background: white; border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; margin-bottom: 16px; }
+.bio-progress-card { background: var(--card-bg, #ffffff); border-radius: 16px; padding: 20px 24px; border: 1px solid #f1f5f9; margin-bottom: 16px; }
 .bio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .bio-title { font-size: 16px; font-weight: 700; color: #1e293b; margin: 0; }
 .bio-subtitle { font-size: 13px; color: #94a3b8; margin: 4px 0 0; }
@@ -460,12 +460,12 @@ onMounted(() => { fetchAll() })
 .bio-stats { display: flex; gap: 24px; margin-top: 12px; }
 .bio-stat { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; }
 
-.empty-card { background: white; border-radius: 16px; padding: 48px 24px; border: 1px solid #f1f5f9; text-align: center; margin-bottom: 16px; }
+.empty-card { background: var(--card-bg, #ffffff); border-radius: 16px; padding: 48px 24px; border: 1px solid #f1f5f9; text-align: center; margin-bottom: 16px; }
 .empty-card h3 { color: #64748b; font-size: 18px; font-weight: 600; margin: 16px 0 8px; }
 .empty-card p { color: #94a3b8; font-size: 14px; }
 
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.chart-card { background: white; border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; }
+.chart-card { background: var(--card-bg, #ffffff); border-radius: 16px; border: 1px solid #f1f5f9; overflow: hidden; }
 .chart-header { padding: 16px 20px 0; }
 .chart-header h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
 .chart-body { padding: 12px 16px 16px; height: 280px; }

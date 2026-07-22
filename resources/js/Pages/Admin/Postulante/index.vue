@@ -1,7 +1,7 @@
 <template>
 <Head title="Postulantes"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
+<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="background: var(--card-bg); border: 1px solid var(--card-border); color: var(--card-text);">
 <!-- {{ buscar }} -->
 <row class="flex justify-between mb-4" >
     <div class="mr-0 pt-2">
@@ -20,10 +20,11 @@
     :data-source="modalidades"
     :pagination="false"
     size="small"
+    :scroll="{ y: 'calc(100vh - 320px)' }"
     >
     <template #bodyCell="{ column, index, record}">
         <template v-if="column.dataIndex === 'ver_postulante'">
-            <a-button @click="goPostulante(record.nro_doc)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #000080a0; display: flex; align-items: center;">
+            <a-button @click="goPostulante(record.nro_doc)" size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: #000080a0; display: flex; align-items: center;">
                 <EyeOutlined />
             </a-button>
         </template>
@@ -34,7 +35,7 @@
         <template v-if="column.dataIndex === 'acciones'">
 
         <div style="display: flex; gap: 2px;">
-            <a-button @click="abrirEditar(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
+            <a-button @click="abrirEditar(record)" size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
                 <form-outlined />
             </a-button>
             <link-outlined />
@@ -44,7 +45,7 @@
                 title="¿Estas seguro de eliminar?"
                 @confirm="eliminar(modalidades[index])"
                 >
-                <a-button @click="eliminar(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                <a-button @click="eliminar(record)" size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
                     <delete-outlined/>
                 </a-button>
             </a-popconfirm>
@@ -389,5 +390,33 @@ const goPostulante = async (dni) => {
 getModalidades()
 
 </script>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+</style>
 
 

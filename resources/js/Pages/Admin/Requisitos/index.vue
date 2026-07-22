@@ -2,10 +2,10 @@
   <Head title="Requisitos" />
 
   <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column;">
+    <div class="overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--card-text);">
 
       <!-- Header Premium -->
-      <div class="border-b border-gray-100 px-8 py-6 bg-white rounded-t-2xl">
+      <div class="border-b px-8 py-6 rounded-t-2xl" style="border-color: var(--card-border); background: var(--card-bg);">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Requisitos</h1>
@@ -36,7 +36,7 @@
       <!-- Tabla -->
       <div class="flex-1 overflow-auto px-8 py-6">
         <table class="w-full">
-          <thead class="bg-gray-50 rounded-lg sticky top-0">
+          <thead class="rounded-lg sticky top-0" style="background: var(--table-header-bg, #f1f5f9);">
             <tr class="border-b border-gray-200">
               <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Orden</th>
               <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Requisito</th>
@@ -127,7 +127,7 @@
 
     <!-- Modal Crear/Editar Requisito -->
     <div v-if="visible" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" @click.self="visible = false">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
+      <div class="rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden" style="background: var(--card-bg); color: var(--card-text);">
         <div class="px-6 py-5 border-b border-gray-100">
           <h3 class="text-lg font-semibold text-gray-900">{{ requisito.id ? 'Editar requisito' : 'Nuevo requisito' }}</h3>
           <p class="text-sm text-gray-500 mt-1">{{ requisito.id ? 'Modifique la información del requisito' : 'Complete los campos para crear un nuevo requisito' }}</p>
@@ -210,7 +210,7 @@
 
     <!-- Modal Configurar Tipos de Documento -->
     <div v-if="visibleTipos" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" @click.self="visibleTipos = false">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" style="background: var(--card-bg); color: var(--card-text);">
         <div class="px-6 py-5 border-b border-gray-100">
           <h3 class="text-lg font-semibold text-gray-900">Documentos aceptados</h3>
           <p class="text-sm text-gray-500 mt-1">{{ requisitoConfig.nombre }}</p>
@@ -222,7 +222,7 @@
             <select
               v-model="tipoSeleccionado"
               @change="agregarTipo"
-              class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 bg-white"
+              class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300" style="background: var(--card-bg); color: var(--card-text);"
             >
               <option :value="null">Seleccionar tipo</option>
               <option v-for="td in tiposDisponibles" :key="td.value" :value="td.value">
@@ -264,7 +264,7 @@
 
     <!-- Modal Confirmación Eliminar -->
     <div v-if="confirmarEliminarVisible" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" @click.self="confirmarEliminarVisible = false">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div class="rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" style="background: var(--card-bg); color: var(--card-text);">
         <div class="px-6 py-5 border-b border-gray-100">
           <h3 class="text-lg font-semibold text-gray-900">Confirmar eliminación</h3>
         </div>
@@ -300,6 +300,50 @@
 }
 .toggle-label {
   transition: background-color 0.2s ease;
+}
+</style>
+
+<style>
+/* ── Dark / Hybrid theme table overrides ─────────── */
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+/* Plain HTML table overrides for dark/hybrid */
+.theme-dark table thead tr th,
+.theme-hybrid table thead tr th {
+    color: var(--card-muted) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark table tbody tr td,
+.theme-hybrid table tbody tr td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark table tbody tr:hover td,
+.theme-hybrid table tbody tr:hover td {
+    background: var(--hover-bg) !important;
 }
 </style>
 

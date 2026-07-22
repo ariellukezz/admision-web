@@ -2,7 +2,7 @@
 <Head title="Colegios"/>    
 <Layout>
 <div class="mb-4" style="width:100%;">
-<div class="p-6 mb-4"  style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.03) 0px 10px 10px -5px;">
+<div class="p-6 mb-4"  style="background: var(--card-bg, #ffffff); border-radius: 12px; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.03) 0px 10px 10px -5px;">
 
     <div class="flex justify-between">
         <div> 
@@ -96,17 +96,17 @@
     </div>
 </div>  
 
-<div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.03) 0px 10px 10px -5px;">
+<div style="background: var(--card-bg, #ffffff); border-radius: 12px; overflow: hidden; box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.03) 0px 10px 10px -5px;">
     <div>
-        <a-table :dataSource="colegios" size="" :columns="columns" :pagination="false">
+        <a-table :dataSource="colegios" size="" :columns="columns" :pagination="false" :scroll="{ y: 'calc(100vh - 320px)' }">
             <template #bodyCell="{ column, record }">
                 <template v-if="column.dataIndex === 'acciones'">
                     <div style="display: flex; gap: 2px;">
-                    <a-button size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
+                    <a-button size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
                         <EyeOutlined/>
                     </a-button>
 
-                    <a-button size="small" @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
+                    <a-button size="small" @click="abrirEditar(record)" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
                         <form-outlined/>
                     </a-button>
                     <a-popconfirm
@@ -114,7 +114,7 @@
                         @confirm="eliminar(record)"
                         disabled
                         >
-                        <a-button size="small" @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: crimson; display: flex; align-items: center;">
+                        <a-button size="small" @click="abrirEditar(record)" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid #d9d9d9; color: crimson; display: flex; align-items: center;">
                             <delete-outlined disabled/>
                          </a-button>
                     </a-popconfirm>
@@ -481,3 +481,31 @@ const columns= ref([
 
 
 </script>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+</style>

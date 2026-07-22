@@ -1,7 +1,7 @@
 <template>
 <Head title="Procesos"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px);">
+<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px); background: var(--card-bg); border: 1px solid var(--card-border); color: var(--card-text);">
 <row class="flex justify-between mb-4" >
     <div class="mr-3">
         <a-select
@@ -64,10 +64,10 @@
 
             <template v-if="column.dataIndex === 'acciones'">
               <div style="display: flex; gap: 2px;">
-                <a-button @click="abrirEditar(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
+                <a-button @click="abrirEditar(record)" size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid var(--card-border, #d9d9d9); color: #1890ff; display: flex; align-items: center;">
                   <form-outlined />
                 </a-button>
-                <a-button @click="eliminar(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                <a-button @click="eliminar(record)" size="small" style="background: var(--card-bg, #ffffff); height: 28px; border: 1px solid var(--card-border, #d9d9d9); color: #ff4d4f; display: flex; align-items: center;">
                   <delete-outlined />
                 </a-button>
               </div>
@@ -342,6 +342,33 @@ background: #555;
 }
 .editable-cell:hover .editable-cell-icon {
   display: inline-block;
+}
+
+/* ── Dark / Hybrid theme table overrides ─────────── */
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
 }
 
 </style>

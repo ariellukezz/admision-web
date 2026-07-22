@@ -1,17 +1,17 @@
 <template>
     <Head title="Sorteo"/>
     <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">    
+    <div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">    
 
 
   
     <a-row class="flex" :gutter="16" style="height:500px;">
         <a-col :xs="24" :sm="12" :md="12" :lg="12" style=" display:flex;  " class="pb-3">
             <div style="width: 320px; background: #476175; height:500px; position:reactive; border-radius:12px; overflow:hidden; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;">
-                <div style="width: 320px; background:white; height:340px; position:absolute; top:160px; border-radius:20px 20px 10px 10px">
+                <div style="width: 320px; background: var(--card-bg, #ffffff); height:340px; position:absolute; top:160px; border-radius:20px 20px 10px 10px">
 
                 </div>
-                <div style="padding:8px; width: 200px; overflow:hidden; background:white; height:200px; position:absolute; left:66px; top:60px; border-radius:50%; border:s solid #9d9d9d; ">
+                <div style="padding:8px; width: 200px; overflow:hidden; background: var(--card-bg, #ffffff); height:200px; position:absolute; left:66px; top:60px; border-radius:50%; border:s solid #9d9d9d; ">
                     <img src="https://i.pinimg.com/236x/6f/fb/06/6ffb06eaeaace0d90a0596fac6c6377d.jpg" style="width:200px; border-radius:50%;" height:="200px" class="img-fluid" alt="" >
                 </div>
                 <div style="padding:8px; height:245px; width: 320px; position:absolute; top:255px;">
@@ -27,7 +27,7 @@
                         </span>
                     </div>
 
-                    <div class="flex justify-center mt-3" style="font-size:0.8; color:gray;">
+                    <div class="flex justify-center mt-3" style="font-size:0.8; color: var(--card-muted, #64748b);">
                         <table>
                             <tr>
                                 <td align="left" v-align="top">DNI</td><td>:</td><td>70757838</td>
@@ -255,6 +255,7 @@
         :data-source="docentes"
         :pagination="false"
         size="small"
+        :scroll="{ y: 'calc(100vh - 320px)' }"
         > 
         <template #bodyCell="{ column, index, record }">
 
@@ -444,5 +445,33 @@ getDocentes()
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>
 

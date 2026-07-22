@@ -120,7 +120,7 @@
           onChange: (page) => loadResultados(page)
         }"
         size="middle"
-        :scroll="{ x: 'max-content' }"
+        :scroll="{ x: 'max-content', y: 'calc(100vh - 320px)' }"
         row-key="id"
         bordered
       >
@@ -548,7 +548,7 @@ onMounted(() => {
 
 /* Filters */
 .puntajes-filters {
-  background: #fff;
+  background: var(--card-bg, #ffffff);
   border-radius: 14px;
   padding: 20px 24px;
   margin-bottom: 20px;
@@ -558,7 +558,7 @@ onMounted(() => {
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #555;
+  color: var(--card-muted, #64748b);
   margin-bottom: 6px;
 }
 .puntajes-actions {
@@ -626,7 +626,7 @@ onMounted(() => {
 
 /* Table */
 .puntajes-table-card {
-  background: #fff;
+  background: var(--card-bg, #ffffff);
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -674,7 +674,7 @@ onMounted(() => {
 }
 .puntajes-modal-text {
   font-size: 0.95rem;
-  color: #555;
+  color: var(--card-muted, #64748b);
   text-align: center;
   margin: 0;
   line-height: 1.5;
@@ -695,5 +695,33 @@ onMounted(() => {
   .puntajes-actions-row2 button {
     width: 100%;
   }
+}
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
 }
 </style>

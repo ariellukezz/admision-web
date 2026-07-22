@@ -2,10 +2,10 @@
   <Head title="Registro de Postulante" />
 
   <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-xl rounded-2xl" style="min-height: calc(100vh - 103px);">
+    <div class="overflow-hidden shadow-xl rounded-2xl" style="min-height: calc(100vh - 103px); background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
 
       <!-- Header -->
-      <div class="border-b border-gray-100 px-8 py-6 bg-white rounded-t-2xl">
+      <div class="border-b border-gray-100 px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
         <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Registro de Postulante</h1>
         <p class="text-sm text-gray-500 mt-1">Registre o edite un postulante con todos los datos de la preinscripción</p>
       </div>
@@ -50,7 +50,7 @@
         <a-collapse v-model:activeKey="activeTabs" :bordered="false" style="background: transparent;">
 
           <!-- ═══ 1. Datos Personales ═══ -->
-          <a-collapse-panel key="1" :header="panelHeader('1', 'Datos Personales')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="1" :header="panelHeader('1', 'Datos Personales')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datospersonales" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="6">
@@ -133,7 +133,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 2. Datos de Residencia ═══ -->
-          <a-collapse-panel key="2" :header="panelHeader('2', 'Datos de Residencia')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="2" :header="panelHeader('2', 'Datos de Residencia')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datosresidencia" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="8">
@@ -166,7 +166,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 3. Datos del Colegio ═══ -->
-          <a-collapse-panel key="3" :header="panelHeader('3', 'Datos del Colegio')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="3" :header="panelHeader('3', 'Datos del Colegio')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datoscolegio" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="8">
@@ -209,7 +209,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 4. Datos del Padre ═══ -->
-          <a-collapse-panel key="4" :header="panelHeader('4', 'Datos del Padre / Tutor')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="4" :header="panelHeader('4', 'Datos del Padre / Tutor')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datospadre" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="6">
@@ -237,7 +237,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 5. Datos de la Madre ═══ -->
-          <a-collapse-panel key="5" :header="panelHeader('5', 'Datos de la Madre')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="5" :header="panelHeader('5', 'Datos de la Madre')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datosmadre" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="6">
@@ -265,7 +265,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 6. Datos Adicionales (Identidad Cultural) ═══ -->
-          <a-collapse-panel key="6" :header="panelHeader('6', 'Datos Adicionales (SUNEDU)')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="6" :header="panelHeader('6', 'Datos Adicionales (SUNEDU)')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datos_transversales" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="6">
@@ -338,7 +338,7 @@
           </a-collapse-panel>
 
           <!-- ═══ 7. Datos de Postulación ═══ -->
-          <a-collapse-panel key="7" :header="panelHeader('7', 'Datos de Postulación')" style="background: #f9fafb; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
+          <a-collapse-panel key="7" :header="panelHeader('7', 'Datos de Postulación')" style="background: var(--content-bg, #f9fafb); border-radius: 12px; margin-bottom: 12px; border: 1px solid #e5e7eb; overflow: hidden;">
             <a-form :model="datos_preinscripcion" layout="vertical">
               <a-row :gutter="[16, 8]">
                 <a-col :xs="24" :sm="12" :md="8">

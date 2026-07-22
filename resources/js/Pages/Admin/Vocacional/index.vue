@@ -1,6 +1,6 @@
 <template>
 <AuthenticatedLayout>
-<div class="p-4" style="background: white;">
+<div class="p-4" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
   <div class="flex justify-end">
         <div> 
             <!-- <a-button type="primary" @click="modal = true" style="border-radius: 6px; background: #476175; border: none;">Nuevo</a-button> -->
@@ -18,6 +18,7 @@
         :data-source="participantes"
         :pagination="false"
         size="small"
+        :scroll="{ y: 'calc(100vh - 320px)' }"
         > 
         <template #bodyCell="{ column, index, record}">
              <template v-if="column.dataIndex === 'nombres'">
@@ -83,4 +84,32 @@ getParticipantes();
     
 <style scope>
 
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>

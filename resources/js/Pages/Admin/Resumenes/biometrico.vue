@@ -1,7 +1,7 @@
 <template>
 <Head title="Resumen Biometrico"/>
 <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 pr-0">
+    <div class="overflow-hidden shadow-sm sm:rounded-lg p-4 pr-0" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <div class="mb-4">
       <span style="font-size: 1.3rem;">Control biometrico</span>
     </div>
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class=" mt-4 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 245px);">
+  <div class=" mt-4 overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 245px); background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <row class="flex justify-end mb-4" >
         <div class="mr-3">
             <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">Descargar</a-button>
@@ -188,7 +188,7 @@ getResumen();
   height: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb {
@@ -201,14 +201,14 @@ getResumen();
 .scroll-container {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+  scrollbar-color: #888 var(--content-bg, #f1f5f9);
 }
 .scroll-container::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 .scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 .scroll-container::-webkit-scrollbar-thumb {
@@ -233,11 +233,11 @@ getResumen();
   flex-wrap: wrap;
   gap: 8px;
   font-size: 13px;
-  color: #555;
+  color: var(--card-muted, #64748b);
   margin-top: -4px;
 }
 .totales-mini .item {
-  background: #f5f5f5;
+  background: var(--content-bg, #f1f5f9);
   padding: 4px 8px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -250,6 +250,32 @@ getResumen();
 }
 .totales-mini .valor {
   font-weight: 600;
-  color: #333;
+  color: var(--card-text, #1e293b);
+}
+
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
 }
 </style>

@@ -1,11 +1,11 @@
 <template>
     <Head title="Perfil de Postulante" />
     <AuthenticatedLayout>
-        <div style="background: #f0f2f5;">
+        <div style="background: var(--content-bg, #f1f5f9);">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
 
                 <!-- ===== HERO HEADER ===== -->
-                <div class="rounded-3xl overflow-hidden shadow-lg mb-4" style="background: white;">
+                <div class="rounded-3xl overflow-hidden shadow-lg mb-4" style="background: var(--card-bg, #ffffff);">
                     <!-- Cover -->
                     <div class="relative h-28 sm:h-36"
                         style="background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 40%, #6366f1 100%);">
@@ -84,7 +84,7 @@
 
                     <!-- ===== SIDEBAR NAV ===== -->
                     <div class="hidden lg:flex flex-col w-60 shrink-0">
-                        <div class="rounded-2xl shadow-sm sticky top-4 overflow-hidden" style="background: white; border: 1px solid #e2e8f0;">
+                        <div class="rounded-2xl shadow-sm sticky top-4 overflow-hidden" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <button v-for="tab in navTabs" :key="tab.key"
                                 @click="tabActivo = tab.key"
                                 class="w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-colors border-l-[3px]"
@@ -94,7 +94,7 @@
                                 <component :is="tab.icon" :style="tabActivo === tab.key ? 'color: #4f46e5;' : 'color: #94a3b8;'" />
                                 {{ tab.label }}
                                 <span class="ml-auto text-xs px-1.5 py-0.5 rounded-full"
-                                    :style="tabActivo === tab.key ? 'background: #c7d2fe; color: #4338ca;' : 'background: #f1f5f9; color: #94a3b8;'"
+                                    :style="tabActivo === tab.key ? 'background: #c7d2fe; color: #4338ca;' : 'background: var(--content-bg, #f1f5f9); color: #94a3b8;'"
                                     v-if="tab.count !== undefined && tab.count > 0">
                                     {{ tab.count }}
                                 </span>
@@ -102,7 +102,7 @@
                         </div>
 
                         <!-- Quick stats in sidebar -->
-                        <div class="rounded-2xl shadow-sm mt-3 p-4" style="background: white; border: 1px solid #e2e8f0;">
+                        <div class="rounded-2xl shadow-sm mt-3 p-4" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #94a3b8;">Resumen</div>
                             <div class="space-y-2.5">
                                 <div class="flex items-center justify-between text-sm">
@@ -141,12 +141,12 @@
                                 class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors"
                                 :style="tabActivo === tab.key
                                     ? 'background: #4f46e5; color: white;'
-                                    : 'background: white; color: #64748b; border: 1px solid #e2e8f0;'">
+                                    : 'background: var(--card-bg, #ffffff); color: #64748b; border: 1px solid var(--card-border);'">
                                 <component :is="tab.icon" />
                                 {{ tab.label }}
                                 <span v-if="tab.count !== undefined && tab.count > 0"
                                     class="px-1.5 py-0.5 rounded-full text-[10px]"
-                                    :style="tabActivo === tab.key ? 'background: rgba(255,255,255,0.25);' : 'background: #f1f5f9;'">
+                                    :style="tabActivo === tab.key ? 'background: rgba(255,255,255,0.25);' : 'background: var(--content-bg, #f1f5f9);'">
                                     {{ tab.count }}
                                 </span>
                             </button>
@@ -158,7 +158,7 @@
 
                         <!-- ===== PUNTAJES ===== -->
                         <div v-show="tabActivo === 'puntajes'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #fef3c7;">
                                     <TrophyOutlined style="color: #d97706; font-size: 1.1rem;" />
@@ -176,7 +176,7 @@
                                     class="rounded-2xl p-5 transition-shadow hover:shadow-md"
                                     :style="p.apto
                                         ? 'background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 1px solid #bbf7d0;'
-                                        : 'background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid #e2e8f0;'">
+                                        : 'background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 1px solid var(--card-border);'">
                                     <div class="flex items-start justify-between mb-3">
                                         <div>
                                             <div class="text-sm font-semibold" style="color: #334155;">{{ p.modalidad || 'Sin modalidad' }}</div>
@@ -215,7 +215,7 @@
 
                         <!-- ===== PASOS ===== -->
                         <div v-show="tabActivo === 'pasos'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #dbeafe;">
                                     <CheckSquareOutlined style="color: #2563eb; font-size: 1.1rem;" />
@@ -236,17 +236,17 @@
                                         <div class="absolute left-[-30px] w-7 h-7 rounded-full flex items-center justify-center border-2"
                                             :style="paso.avance
                                                 ? 'background: #22c55e; border-color: #16a34a;'
-                                                : 'background: white; border-color: #e2e8f0;'">
+                                                : 'background: var(--card-bg, #ffffff); border-color: var(--card-border);'">
                                             <CheckOutlined v-if="paso.avance" style="color: white; font-size: 0.7rem;" />
                                             <span v-else class="text-xs" style="color: #cbd5e1;">{{ idx + 1 }}</span>
                                         </div>
                                         <div class="flex items-center justify-between p-3 rounded-xl"
-                                            :style="paso.avance ? 'background: #f0fdf4;' : 'background: #f8fafc;'">
+                                            :style="paso.avance ? 'background: #f0fdf4;' : 'background: var(--content-bg, #f1f5f9);'">
                                             <span class="text-sm font-medium" :style="paso.avance ? 'color: #166534;' : 'color: #64748b;'">
                                                 {{ paso.nombre }}
                                             </span>
                                             <span class="text-xs px-2 py-0.5 rounded-full"
-                                                :style="paso.avance ? 'background: #dcfce7; color: #16a34a;' : 'background: #f1f5f9; color: #94a3b8;'">
+                                                :style="paso.avance ? 'background: #dcfce7; color: #16a34a;' : 'background: var(--content-bg, #f1f5f9); color: #94a3b8;'">
                                                 {{ paso.avance ? 'Completado' : 'Pendiente' }}
                                             </span>
                                         </div>
@@ -254,14 +254,14 @@
                                 </div>
 
                                 <!-- Avance por proceso -->
-                                <div v-if="avance.length" class="mt-6 pt-5" style="border-top: 1px solid #f1f5f9;">
+                                <div v-if="avance.length" class="mt-6 pt-5" style="border-top: 1px solid var(--card-border);">
                                     <div class="text-sm font-semibold mb-3" style="color: #475569;">Avance por proceso</div>
                                     <div v-for="av in avance" :key="av.id" class="mb-3">
                                         <div class="flex justify-between text-xs mb-1">
                                             <span style="color: #64748b;">Proceso #{{ av.id_proceso }}</span>
                                             <span class="font-semibold" :style="av.avance >= 100 ? 'color: #16a34a;' : 'color: #6366f1;'">{{ av.avance || 0 }}%</span>
                                         </div>
-                                        <div class="h-2 rounded-full overflow-hidden" style="background: #f1f5f9;">
+                                        <div class="h-2 rounded-full overflow-hidden" style="background: var(--content-bg, #f1f5f9);">
                                             <div class="h-full rounded-full transition-all duration-500"
                                                 :style="`width: ${av.avance || 0}%; background: ${av.avance >= 100 ? '#22c55e' : 'linear-gradient(90deg, #6366f1, #818cf8)'};`">
                                             </div>
@@ -273,7 +273,7 @@
 
                         <!-- ===== DOCUMENTOS ===== -->
                         <div v-show="tabActivo === 'documentos'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #ffedd5;">
                                     <FileTextOutlined style="color: #ea580c; font-size: 1.1rem;" />
@@ -289,7 +289,7 @@
                             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div v-for="doc in documentos" :key="doc.id"
                                     class="rounded-xl p-4 transition-shadow hover:shadow-md"
-                                    style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                    style="background: var(--content-bg, #f1f5f9); border: 1px solid var(--card-border);">
                                     <div class="flex items-start gap-3">
                                         <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                                             :style="doc.verificado === 1 || doc.verificado === 2
@@ -316,7 +316,7 @@
 
                         <!-- ===== PAGOS ===== -->
                         <div v-show="tabActivo === 'pagos'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #d1fae5;">
                                     <DollarOutlined style="color: #059669; font-size: 1.1rem;" />
@@ -332,7 +332,7 @@
                             <div v-else class="space-y-2">
                                 <div v-for="comp in comprobantes" :key="comp.id"
                                     class="flex items-center gap-3 p-4 rounded-xl transition-colors hover:bg-gray-50"
-                                    style="border: 1px solid #e2e8f0;">
+                                    style="border: 1px solid var(--card-border);">
                                     <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                                         :style="comp.verificado ? 'background: #dcfce7;' : 'background: #fef9c3;'">
                                         <CheckCircleFilled v-if="comp.verificado" style="color: #22c55e;" />
@@ -355,7 +355,7 @@
 
                         <!-- ===== INSCRIPCIONES ===== -->
                         <div v-show="tabActivo === 'inscripciones'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #e0e7ff;">
                                     <FormOutlined style="color: #4f46e5; font-size: 1.1rem;" />
@@ -374,7 +374,7 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div v-for="ins in inscripcionesData" :key="ins.id"
                                             class="rounded-xl p-4 transition-shadow hover:shadow-md"
-                                            style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                            style="background: var(--content-bg, #f1f5f9); border: 1px solid var(--card-border);">
                                             <div class="flex items-start justify-between gap-2">
                                                 <div class="flex-1 min-w-0">
                                                     <div class="text-sm font-semibold" style="color: #334155;">
@@ -385,7 +385,7 @@
                                                     </div>
                                                 </div>
                                                 <span class="text-xs px-2 py-0.5 rounded-full shrink-0"
-                                                    :style="ins.estado ? 'background: #dcfce7; color: #16a34a;' : 'background: #f1f5f9; color: #64748b;'">
+                                                    :style="ins.estado ? 'background: #dcfce7; color: #16a34a;' : 'background: var(--content-bg, #f1f5f9); color: #64748b;'">
                                                     {{ ins.estado ? 'Activo' : 'Inactivo' }}
                                                 </span>
                                             </div>
@@ -398,7 +398,7 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div v-for="pre in preinscripcionesData" :key="pre.id"
                                             class="rounded-xl p-4 transition-shadow hover:shadow-md"
-                                            style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                            style="background: var(--content-bg, #f1f5f9); border: 1px solid var(--card-border);">
                                             <div class="flex items-start justify-between gap-2">
                                                 <div class="flex-1 min-w-0">
                                                     <div class="text-sm font-semibold" style="color: #334155;">
@@ -409,7 +409,7 @@
                                                     </div>
                                                 </div>
                                                 <span class="text-xs px-2 py-0.5 rounded-full shrink-0"
-                                                    :style="pre.estado ? 'background: #dcfce7; color: #16a34a;' : 'background: #f1f5f9; color: #64748b;'">
+                                                    :style="pre.estado ? 'background: #dcfce7; color: #16a34a;' : 'background: var(--content-bg, #f1f5f9); color: #64748b;'">
                                                     {{ pre.estado ? 'Activo' : 'Inactivo' }}
                                                 </span>
                                             </div>
@@ -421,7 +421,7 @@
 
                         <!-- ===== REVISIONES ===== -->
                         <div v-show="tabActivo === 'revisiones'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #ede9fe;">
                                     <AuditOutlined style="color: #7c3aed; font-size: 1.1rem;" />
@@ -437,7 +437,7 @@
                             <div v-else class="space-y-2">
                                 <div v-for="rev in revisiones" :key="rev.id"
                                     class="flex flex-wrap items-center gap-3 p-4 rounded-xl"
-                                    style="border: 1px solid #e2e8f0;">
+                                    style="border: 1px solid var(--card-border);">
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-medium" style="color: #334155;">
                                             Solicitud #{{ rev.id }} · Vez {{ rev.veces }}
@@ -461,7 +461,7 @@
 
                         <!-- ===== ACTIVIDAD ===== -->
                         <div v-show="tabActivo === 'actividad'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #fce7f3;">
                                     <HistoryOutlined style="color: #db2777; font-size: 1.1rem;" />
@@ -477,7 +477,7 @@
                             <div v-else class="space-y-2">
                                 <div v-for="(act, idx) in dataSource" :key="idx"
                                     class="flex items-center gap-3 p-3 rounded-xl"
-                                    style="background: #f8fafc;">
+                                    style="background: var(--content-bg, #f1f5f9);">
                                     <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                                         :style="accionBg(act.acciones)">
                                         <component :is="accionIcon(act.acciones)" :style="accionIconStyle(act.acciones)" />
@@ -498,7 +498,7 @@
 
                         <!-- ===== CARRERAS PREVIAS ===== -->
                         <div v-show="tabActivo === 'carreras'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #ccfbf1;">
                                     <BookOutlined style="color: #0d9488; font-size: 1.1rem;" />
@@ -514,7 +514,7 @@
                             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div v-for="cp in carrerasPrevias" :key="cp.id"
                                     class="rounded-xl p-4 transition-shadow hover:shadow-md"
-                                    style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                    style="background: var(--content-bg, #f1f5f9); border: 1px solid var(--card-border);">
                                     <div class="text-sm font-semibold" style="color: #334155;">{{ cp.nombre }}</div>
                                     <div class="text-xs mt-1" style="color: #94a3b8;">
                                         Código: {{ cp.cod_car }}
@@ -530,9 +530,9 @@
 
                         <!-- ===== PROCESOS ===== -->
                         <div v-show="tabActivo === 'procesos'"
-                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: white; border: 1px solid #e2e8f0;">
+                            class="rounded-2xl shadow-sm p-4 sm:p-5" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border);">
                             <div class="flex items-center gap-2 mb-4">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: #f1f5f9;">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--content-bg, #f1f5f9);">
                                     <AppstoreOutlined style="color: #475569; font-size: 1.1rem;" />
                                 </div>
                                 <h2 class="text-lg font-bold" style="color: #1e293b;">Procesos</h2>
@@ -549,7 +549,7 @@
                                     class="text-left p-4 rounded-2xl transition-all"
                                     :style="seleccionado == item.id_proceso
                                         ? 'background: #eef2ff; border: 2px solid #6366f1;'
-                                        : 'background: #f8fafc; border: 1px solid #e2e8f0;'">
+                                        : 'background: var(--content-bg, #f1f5f9); border: 1px solid var(--card-border);'">
                                     <div class="flex items-center justify-between">
                                         <div class="font-medium text-sm" style="color: #334155;">{{ item.proceso }}</div>
                                         <RightOutlined :style="seleccionado == item.id_proceso ? 'color: #6366f1;' : 'color: #cbd5e1;'" />
@@ -759,3 +759,31 @@ const vincularUsuario = async () => {
 
 const dataSource = ref(props.actividades || []);
 </script>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+</style>

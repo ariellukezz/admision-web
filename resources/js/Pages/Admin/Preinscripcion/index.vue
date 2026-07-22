@@ -1,7 +1,7 @@
 <template>
     <Head title="Documentos"/>
     <AuthenticatedLayout>
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">    
+    <div class="pre-container">
 
     <row class="flex justify-between mb-4" >
         <div class="mr-3">
@@ -60,20 +60,21 @@
 
         </div>
         <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 10px;">
+        <a-input type="text" placeholder="Buscar" v-model:value="buscar" class="pre-search" style="max-width: 300px; padding-left: 10px;">
             <template #prefix><search-outlined /></template>
         </a-input>
 
         </div>
     </row>
 
-    <!-- {{ inscripciones }} -->
-    <a-table 
-        :columns="columnsInscripcion" 
+    <div class="pre-table-card">
+    <a-table
+        :columns="columnsInscripcion"
         :data-source="inscripciones"
         :pagination="false"
         size="small"
-        > 
+        :scroll="{ y: 'calc(100vh - 320px)' }"
+        >
         <template #bodyCell="{ column, index, record }">
 
             <template v-if="column.dataIndex === 'dni'" >
@@ -83,26 +84,12 @@
             </template>
 
             <template v-if="column.dataIndex === 'postulante'" >
-                <span style="font-size: 0.95rem;">{{ record.paterno }} {{ record.materno }}, {{ record.nombres }}</span>
+                <span class="pre-name">{{ record.paterno }} {{ record.materno }}, {{ record.nombres }}</span>
             </template>
 
             <template v-if="column.dataIndex === 'programa'" >
-                {{ record.programa }}
+                <span class="pre-programa">{{ record.programa }}</span>
             </template>
-
-            <!-- <template v-if="column.dataIndex === 'sexo'" >
-                <a-select
-                ref="select"
-                v-model:value="record.sexo"
-                placeholder="Seleccionar"
-                style="width: 54px;"
-                >
-                <a-select-option value='1'><span style="color:blue">M</span></a-select-option>
-                <a-select-option value='2'><span style="color:red">F</span></a-select-option>
-                </a-select>
-                <!-- <a-tag v-if="record.sexo === '1'" color="blue">M</a-tag>
-                <a-tag v-if="record.sexo === '2'" color="pink">F</a-tag>
-            </template> -->
 
             <template v-if="column.dataIndex === 'estado'" >
                 <a-tag v-if="record.estado === 0" color="#476175">INSCRITO</a-tag>
@@ -111,30 +98,27 @@
 
             <template v-if="column.dataIndex === 'acciones'">
                 <div style="display: flex; gap: 2px;">
-
-                    <a-button size="small" @click="generarSolicitud(record.dni, record.id_proceso)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: gray; display: flex; align-items: center;">
+                    <a-button size="small" @click="generarSolicitud(record.dni, record.id_proceso)" class="pre-action-btn">
                         <PrinterOutlined/>
                     </a-button>
-                    <!-- <a-button class="mr-1" type="success" style="color: #476175;" @click="cambiarSexo(record.id_postulante, record.sexo )" size="small">
-                        <template #icon><SaveOutlined/></template>
-                    </a-button> -->
-                    <a-button size="small" @click="abrirEditar(record)" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #000080; display: flex; align-items: center;">
+                    <a-button size="small" @click="abrirEditar(record)" class="pre-action-btn" style="color: #000080;">
                         <form-outlined/>
                     </a-button>
-                    <a-button size="small" @click="eliminar(record)"  style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
+                    <a-button size="small" @click="eliminar(record)" class="pre-action-btn" style="color: #ff4d4f;">
                         <delete-outlined/>
-                    </a-button>                                  
+                    </a-button>
                 </div>
             </template>
         </template>
-  
-    </a-table> 
-    <a-pagination v-model:current="pagina" :total="totalRegistros"  v-model:pageSize="pageSize" show-less-items />
-    
+
+    </a-table>
     </div>
-    
+    <a-pagination v-model:current="pagina" :total="totalRegistros" v-model:pageSize="pageSize" show-less-items />
+
+    </div>
+
     </AuthenticatedLayout>
-    
+
     <div>
         <a-modal v-model:open="visible" title="Modificar Pre inscripción" style="margin-top: -40px;">
             <a-form
@@ -227,16 +211,16 @@
                     <a-textarea type="text" v-model:value="inscripcion.observacion" autocomplete="off" />
                 </a-form-item>
             </a-form>
-    
+
         <template #footer>
             <a-button style="margin-left: 10px;" @click="resetForm">Cancelar</a-button>
             <a-button type="primary" @click="guardar()">Guardar</a-button>
         </template>
         </a-modal>
     </div>
-    
+
 </template>
-        
+
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
@@ -253,13 +237,13 @@ const visible = ref(false)
 const pagina = ref(1)
 const totalRegistros = ref(null)
 const pageSize = ref(20)
-const inscripcion = ref({ 
-    id:null, 
-    codigo:"", 
-    id_posulante:"", 
-    id_programa:"", 
+const inscripcion = ref({
+    id:null,
+    codigo:"",
+    id_posulante:"",
+    id_programa:"",
     id_modalidad:"",
-    estado: true, 
+    estado: true,
     observacion:"",
 })
 const postulante = ref({ id:"", nombre:"", dni:""})
@@ -268,26 +252,26 @@ const showModalPrograma = () => { visible.value = true; };
 
 watch(buscar, ( newValue, oldValue ) => { getInscripciones() })
 watch(pageSize, ( newValue, oldValue ) => { getInscripciones() })
-watch(programa, ( newValue, oldValue ) => 
-{ 
+watch(programa, ( newValue, oldValue ) =>
+{
     if(newValue == 0) {
         programa.value = null;
-    } 
+    }
     pagina.value = 1;
-    getInscripciones() 
+    getInscripciones()
 })
 
 watch(visible, ( newValue, oldValue ) => {
     if(visible.value == false &&inscripcion.value.id != null ){
-        inscripcion.value.id = null, 
-        inscripcion.value.id_posulante = "", 
-        inscripcion.value.id_programa = "", 
+        inscripcion.value.id = null,
+        inscripcion.value.id_posulante = "",
+        inscripcion.value.id_programa = "",
         inscripcion.value.id_modalidad = "",
-        inscripcion.value.estado = true, 
+        inscripcion.value.estado = true,
         inscripcion.value.observacion = "",
         postulante.value.nombre = null,
         postulante.value.dni = null,
-        postulante.value.id = null 
+        postulante.value.id = null
     }
 })
 
@@ -348,7 +332,6 @@ const eliminar = (item) => {
 }
 
 const columnsInscripcion = [
-    // { title: 'ID', dataIndex: 'id' },
     { title: 'DNI', dataIndex: 'dni', align:'center'},
     { title: 'Postulante', dataIndex: 'postulante'},
     { title: 'Programa', dataIndex:'programa'},
@@ -357,7 +340,7 @@ const columnsInscripcion = [
     { title: 'Acciones', dataIndex: 'acciones', width:'100px', align:'center'},
 ];
 
-const selectedRowKeys = ref([]); 
+const selectedRowKeys = ref([]);
 
 const onSelectChange = changableRowKeys => {
     console.log('selectedRowKeys changed: ', changableRowKeys);
@@ -381,10 +364,93 @@ const notificacion = (type, titulo, mensaje) => {
 const generarSolicitud =  (dni, pro) => {
     var iframe = document.createElement('iframe');
     iframe.style.display = "none";
-    iframe.src = baseUrl+'/admin/pdf-solicitud/'+dni;   
+    iframe.src = baseUrl+'/admin/pdf-solicitud/'+dni;
     document.body.appendChild(iframe);
     iframe.contentWindow.focus();
     iframe.contentWindow.print();
 }
 getInscripciones()
 </script>
+
+<style scoped>
+.pre-container {
+    background: var(--content-bg, #f1f5f9);
+    padding: 16px;
+    height: calc(100vh - 98px);
+    overflow-y: auto;
+    border-radius: 8px;
+}
+.pre-search {
+    max-width: 300px;
+    padding-left: 10px;
+}
+.pre-table-card {
+    background: var(--card-bg, #ffffff);
+    border-radius: 8px;
+    border: 1px solid var(--card-border, #e2e8f0);
+    padding: 8px;
+    margin-bottom: 12px;
+}
+.pre-name {
+    font-size: 0.95rem;
+    color: var(--card-text, #1e293b);
+}
+.pre-programa {
+    color: var(--card-text, #1e293b);
+}
+.pre-action-btn {
+    background: var(--card-bg, #ffffff) !important;
+    height: 28px;
+    border: 1px solid var(--card-border, #d9d9d9);
+    display: flex;
+    align-items: center;
+    color: gray;
+}
+</style>
+
+<!-- Dark/Hybrid theme overrides -->
+<style>
+.theme-dark .pre-container,
+.theme-hybrid .pre-container {
+    background: var(--content-bg) !important;
+}
+.theme-dark .pre-table-card,
+.theme-hybrid .pre-table-card {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-dark .pre-name,
+.theme-dark .pre-programa,
+.theme-hybrid .pre-name,
+.theme-hybrid .pre-programa {
+    color: var(--card-text) !important;
+}
+.theme-dark .pre-action-btn,
+.theme-hybrid .pre-action-btn {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+}
+
+/* Table dark overrides */
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+</style>

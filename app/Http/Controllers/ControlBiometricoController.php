@@ -17,7 +17,9 @@ class ControlBiometricoController extends Controller
         $procesoId = auth()->user()->id_proceso;
         $pageSize = 50; 
 
-        $result = ControlBiometrico::select('control_biometrico.codigo_ingreso', 'postulante.nro_doc', 'postulante.primer_apellido',
+        $result = ControlBiometrico::select('control_biometrico.id', 'control_biometrico.codigo_ingreso', 'control_biometrico.estado',
+            'control_biometrico.correo_institucional', 'control_biometrico.tiene_correo', 'control_biometrico.segunda_carrera',
+            'postulante.nro_doc', 'postulante.primer_apellido',
             'postulante.segundo_apellido', 'postulante.nombres', 'programa.nombre_corto AS programa', 
             'programa.nombre as programa_estudio', 'modalidad.nombre AS modalidad',
             'puntajes.puntaje AS puntaje', 'puntajes.puntaje_vocacional', 
@@ -267,6 +269,30 @@ public function exportarPdf(Request $request)
         ]
     );
 }
+
+    /**
+     * Actualizar un registro de control biométrico.
+     */
+    public function actualizar(Request $request, $id)
+    {
+        $registro = ControlBiometrico::findOrFail($id);
+
+        $validated = $request->validate([
+            'codigo_ingreso'     => 'nullable|string|max:8',
+            'estado'             => 'nullable|in:0,1',
+            'correo_institucional' => 'nullable|string|max:150',
+            'tiene_correo'       => 'nullable|in:0,1',
+            'segunda_carrera'    => 'nullable|integer',
+        ]);
+
+        $registro->update($validated);
+
+        return response()->json([
+            'estado' => true,
+            'mensaje' => 'Registro actualizado correctamente',
+            'datos' => $registro
+        ], 200);
+    }
 
     /**
      * Listado de programas para el filtro (API).

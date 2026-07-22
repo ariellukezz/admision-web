@@ -411,6 +411,7 @@ watch(proceso, (newVal, oldVal) => {
   --card-border: #e2e8f0;
   --row-even: rgba(0,0,0,0.02);
   --table-header-bg: #f8fafc;
+  --success-color: #16a34a;
 }
 
 .theme-dark {
@@ -439,6 +440,7 @@ watch(proceso, (newVal, oldVal) => {
   --card-border: #334155;
   --row-even: rgba(255,255,255,0.03);
   --table-header-bg: #1e293b;
+  --success-color: #4ade80;
 }
 
 /* Hybrid: dark sidebar + white header/content */
@@ -468,6 +470,7 @@ watch(proceso, (newVal, oldVal) => {
   --card-border: #e2e8f0;
   --row-even: rgba(0,0,0,0.02);
   --table-header-bg: #f8fafc;
+  --success-color: #16a34a;
 }
 
 .custom-scrollbar::-webkit-scrollbar { display: none; }

@@ -331,6 +331,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/control-biometrico/modalidades', [ControlBiometricoController::class, 'getModalidades']);
     Route::get('/control-biometrico/exportar-excel', [ControlBiometricoController::class, 'exportarExcel']);
     Route::get('/control-biometrico/exportar-pdf', [ControlBiometricoController::class, 'exportarPdf']);
+    Route::put('/control-biometrico/{id}', [ControlBiometricoController::class, 'actualizar'])->name('admin-control-biometrico-actualizar');
 
     //PARTICIPANTES
     Route::get('/participante-docente', fn () => Inertia::render('Admin/Participante/Docente'))->name('admin-participante-docente');

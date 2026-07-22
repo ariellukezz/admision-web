@@ -1,7 +1,7 @@
 <template>
 <Head title="Resumen programa diario" />
 <AuthenticatedLayout>
-  <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 pb-0" style="height: calc(100vh - 103px);">
+  <div class="overflow-hidden shadow-sm sm:rounded-lg p-4 pb-0" style="height: calc(100vh - 103px); background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <div class="flex justify-end mb-3 mr-3">
       <a-button type="primary" style="border-radius: 5px; background: #476175; border:none;" @click="descargarDetalle()">
         Descargar
@@ -111,7 +111,7 @@ const columns = computed(() => {
       key: 'name',
       width: 300,
       fixed: 'left',
-      customHeaderCell: () => ({ style: { background: '#e3e3e3' } }),
+      customHeaderCell: () => ({ style: { background: 'var(--table-header-bg, #f8fafc)' } }),
     }
   ];
 
@@ -125,9 +125,9 @@ const columns = computed(() => {
         dataIndex: `${fecha}`,
         key: `${fecha}`,
         width: 30,
-        customHeaderCell: () => ({ style: { background: '#e3e3e3', textAlign:'center', height: '40px', width:'40px', padding: '0 0px' } }),
+        customHeaderCell: () => ({ style: { background: 'var(--table-header-bg, #f8fafc)', textAlign:'center', height: '40px', width:'40px', padding: '0 0px' } }),
       })),
-      customHeaderCell: () => ({ style: { background: '#e3e3e3' } }),
+      customHeaderCell: () => ({ style: { background: 'var(--table-header-bg, #f8fafc)' } }),
     });
   });
 
@@ -138,7 +138,7 @@ const columns = computed(() => {
     width: 40,
     align: 'center',
     fixed: 'right',
-    customHeaderCell: () => ({ style: { background: '#e3e3e3' } }),
+    customHeaderCell: () => ({ style: { background: 'var(--table-header-bg, #f8fafc)' } }),
   });
 
   return base;
@@ -210,7 +210,7 @@ const descargarDetalle = async () => {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 
@@ -227,7 +227,7 @@ const descargarDetalle = async () => {
 .scroll-container {
   overflow-y: auto;
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
+  scrollbar-color: #888 var(--content-bg, #f1f5f9); /* Firefox */
 }
 
 /* Estilo para el scroll específico en Webkit (Chrome, Safari) */
@@ -237,7 +237,7 @@ const descargarDetalle = async () => {
 }
 
 .scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--content-bg, #f1f5f9);
   border-radius: 10px;
 }
 
@@ -263,4 +263,30 @@ const descargarDetalle = async () => {
 }
 
 
+
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
 </style>

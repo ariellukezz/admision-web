@@ -1,7 +1,7 @@
 <template>
 <Head title="Observados"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px);">
+<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px); background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
 
 <div class="">
   <div class="mb-4">
@@ -765,12 +765,40 @@ onMounted(() => {
 
 <style scoped>
 .observados-table :deep(.ant-table-thead > tr > th) {
-  background-color: #f8fafc;
+  background-color: var(--table-header-bg, #f8fafc);
   font-weight: 600;
-  color: #374151;
+  color: var(--card-text, #374151);
 }
 
 .observados-table :deep(.ant-table-tbody > tr:hover > td) {
-  background-color: #f3f4f6 !important;
+  background-color: var(--hover-bg, #eff6ff) !important;
+}
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
 }
 </style>
