@@ -18,8 +18,8 @@
     </tr>
 </table>
 <div style="border-bottom: 1.5px solid #1e293b; margin: 6px 0 0 0;"></div>
-<div style="font-size: 7pt; color: #555; text-align: center; margin-top: 2px;">
+{{-- <div style="font-size: 7pt; color: #555; text-align: center; margin-top: 2px;">
     @foreach ($filtrosTexto as $f)
         <span style="margin: 0 6px;">{{ $f }}</span>
     @endforeach
-</div>
+</div> --}}
