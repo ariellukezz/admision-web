@@ -1,28 +1,61 @@
 <template>
 <Head title="Programas"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4 md:p-6" style="height: calc(100vh - 100px);">
+<div class="prog-container" style="height: calc(100vh - 100px);">
 
-  <div class="flex flex-col sm:flex-row justify-between mb-6 gap-4">
-    <a-button
-      type="primary"
-      style="background: #2563eb; border: none; border-radius: 6px;"
-      @click="showModalPrograma"
-    >
-      <template #icon><PlusOutlined /></template>
-      Nuevo Programa
-    </a-button>
+  <div class="flex flex-col gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row justify-between gap-4">
+      <a-button
+        type="primary"
+        style="background: #2563eb; border: none; border-radius: 6px;"
+        @click="showModalPrograma"
+      >
+        <template #icon><PlusOutlined /></template>
+        Nuevo Programa
+      </a-button>
 
-    <a-input-search
-      v-model:value="buscar"
-      placeholder="Buscar programas..."
-      class="max-w-full sm:max-w-xs"
-      @search="getProgramas"
-    >
-      <template #prefix>
-        <SearchOutlined />
-      </template>
-    </a-input-search>
+      <a-input-search
+        v-model:value="buscar"
+        placeholder="Buscar programas..."
+        class="max-w-full sm:max-w-xs"
+        @search="getProgramas"
+      >
+        <template #prefix>
+          <SearchOutlined />
+        </template>
+      </a-input-search>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <a-select
+        v-model:value="filtroNivel"
+        :options="niveles"
+        placeholder="Filtrar por nivel académico"
+        allow-clear
+        show-search
+        :filter-option="filterOption"
+        @change="getProgramas"
+      />
+      <a-select
+        v-model:value="filtroFacultad"
+        :options="facultades"
+        placeholder="Filtrar por facultad"
+        allow-clear
+        show-search
+        :filter-option="filterOption"
+        @change="getProgramas"
+      />
+      <a-select
+        v-model:value="filtroArea"
+        placeholder="Filtrar por área"
+        allow-clear
+        @change="getProgramas"
+      >
+        <a-select-option value="BIOMÉDICAS">BIOMÉDICAS</a-select-option>
+        <a-select-option value="INGENIERÍAS">INGENIERÍAS</a-select-option>
+        <a-select-option value="SOCIALES">SOCIALES</a-select-option>
+      </a-select>
+    </div>
   </div>
 
   <div class="overflow-x-auto">
@@ -31,7 +64,7 @@
       :data-source="programas"
       :pagination="{ pageSize: 50 }"
       size="small"
-      :scroll="{ x: 'max-content', y: 'calc(100vh - 280px)' }"
+      :scroll="{ x: 'max-content', y: 'calc(100vh - 380px)' }"
     >
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'area'">
@@ -195,10 +228,15 @@ import axios from 'axios';
 
 const buscar = ref('');
 const facultades = ref([]);
+const niveles = ref([]);
 const programas = ref([]);
 const visible = ref(false);
 const guardando = ref(false);
 const formRef = ref(null);
+
+const filtroNivel = ref(undefined);
+const filtroFacultad = ref(undefined);
+const filtroArea = ref(undefined);
 
 const programa = reactive({
   id: null,
@@ -261,10 +299,22 @@ const getFacultades = async () => {
   }
 };
 
+const getNiveles = async () => {
+  try {
+    const res = await axios.get('programas/get-niveles');
+    niveles.value = res.data.datos;
+  } catch (error) {
+    console.error('Error al obtener niveles:', error);
+  }
+};
+
 const getProgramas = async () => {
   try {
     const res = await axios.post('programas/get-programas', {
-      term: buscar.value
+      term: buscar.value,
+      nivel_academico: filtroNivel.value,
+      id_facultad: filtroFacultad.value,
+      area: filtroArea.value,
     });
     programas.value = res.data.datos.data;
   } catch (error) {
@@ -352,10 +402,19 @@ watch(buscar, (newValue) => {
 let timeoutId;
 
 getFacultades();
+getNiveles();
 getProgramas();
 </script>
 
 <style scoped>
+.prog-container {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #e2e8f0);
+  color: var(--card-text, #1e293b);
+  border-radius: 8px;
+  padding: 16px;
+  overflow: hidden;
+}
 :deep(.ant-btn-primary) {
   background: #2563eb !important;
   border-color: #2563eb !important;
@@ -376,5 +435,44 @@ getProgramas();
 }
 :deep(.ant-pagination .ant-pagination-item-active a) {
   color: #2563eb !important;
+}
+</style>
+
+<style>
+.theme-dark .prog-container,
+.theme-hybrid .prog-container {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+  background: transparent !important;
+  color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+  background: var(--table-header-bg) !important;
+  color: var(--card-text) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+  color: var(--card-text) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg) !important;
+}
+.theme-hybrid .ant-table-container .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+  background: var(--row-even) !important;
+}
+.theme-hybrid .ant-table-container .ant-table-tbody > tr:nth-child(even) > td {
+  background: rgba(0, 0, 0, 0.02) !important;
 }
 </style>

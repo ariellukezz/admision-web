@@ -118,7 +118,7 @@
         :data-source="programas"
         :pagination="false"
         size="small"
-        :scroll="{ x: 380, y: 'calc(100vh - 380px)' }"
+        :scroll="{ x: 380, y: 'calc(100vh - 390px)' }"
         :row-class-name="(_, index) => index % 2 === 1 ? 'cb-row-even' : ''"
         >
         <template #bodyCell="{ column, record }">

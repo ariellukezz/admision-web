@@ -31,13 +31,23 @@ class ProgramaController extends Controller
         'programa.programa_oti',
         'programa.nombre',
         'programa.nombre_corto',
+        'programa.nivel_academico',
         'programa.estado AS estado',
         'programa.area AS area',
         'facultad.id AS id_fac',
         'facultad.facultad AS facultad'
       )
-        ->join ('facultad', 'facultad.id', '=','programa.id_facultad')
+        ->join('facultad', 'facultad.id', '=', 'programa.id_facultad')
         ->where($query_where)
+        ->when($request->filled('nivel_academico'), function ($query) use ($request) {
+            $query->where('programa.nivel_academico', $request->nivel_academico);
+        })
+        ->when($request->filled('id_facultad'), function ($query) use ($request) {
+            $query->where('programa.id_facultad', $request->id_facultad);
+        })
+        ->when($request->filled('area'), function ($query) use ($request) {
+            $query->where('programa.area', $request->area);
+        })
         ->where(function ($query) use ($request) {
             return $query
                 ->orWhere('programa.codigo', 'LIKE', '%' . $request->term . '%')
@@ -104,6 +114,20 @@ class ProgramaController extends Controller
     $this->response['mensaje'] = 'Programa '.$p->nombre.' eliminado con exito';
     $this->response['estado'] = true;
     $this->response['datos'] = $p;
+    return response()->json($this->response, 200);
+  }
+
+  public function getNiveles()
+  {
+    $res = Programa::select('nivel_academico as value', 'nivel_academico as label')
+      ->whereNotNull('nivel_academico')
+      ->where('nivel_academico', '!=', '')
+      ->distinct()
+      ->orderBy('nivel_academico', 'ASC')
+      ->get();
+
+    $this->response['estado'] = true;
+    $this->response['datos'] = $res;
     return response()->json($this->response, 200);
   }
 

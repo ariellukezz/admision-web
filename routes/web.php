@@ -17,6 +17,7 @@ use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\FilialController;
 use App\Http\Controllers\VerificacionFotosController;
 use App\Http\Controllers\ModalidadController;
+use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\AnioController;
 use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\ApoderadoController;
@@ -238,6 +239,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/programa', [ProgramaController::class, 'index'])->name('programa-index');
     Route::post('/save-programa', [ProgramaController::class, 'savePrograma']);
     Route::post('/programas/get-programas', [ProgramaController::class, 'getProgramas']);
+    Route::get('/programas/get-niveles', [ProgramaController::class, 'getNiveles']);
     Route::get('/eliminar-programa/{id}', [ProgramaController::class, 'deletePrograma']);
 
     //APODERADOS
@@ -251,6 +253,15 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/cambiar-estado-modalidad/{id}', [ModalidadController::class, 'cambiarEstado']);
     Route::get('/eliminar-modalidad/{id}', [ModalidadController::class, 'deleteModalidad']);
     Route::get('/get-modalidades-activas', [ModalidadController::class, 'getModalidadesActivas']);
+
+    //UBIGEOS
+    Route::get('/ubigeos', [UbigeoController::class, 'index'])->name('admin-ubigeos');
+    Route::post('/ubigeos/get-ubigeos', [UbigeoController::class, 'getUbigeos']);
+    Route::get('/ubigeos/departamentos', [UbigeoController::class, 'getDepartamentos']);
+    Route::get('/ubigeos/provincias/{departamentoId}', [UbigeoController::class, 'getProvincias']);
+    Route::get('/ubigeos/distritos/{provinciaId}', [UbigeoController::class, 'getDistritos']);
+    Route::post('/ubigeos/save', [UbigeoController::class, 'saveUbigeo']);
+    Route::get('/ubigeos/eliminar/{id}', [UbigeoController::class, 'deleteUbigeo']);
 
     // AÑOS
     Route::get('/anios', [AnioController::class, 'index'])->name('anio-index');

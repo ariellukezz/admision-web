@@ -74,10 +74,12 @@
               :key="item.key"
               :class="{ 'menu-item-active': route().current(item.route) }"
             >
-              <Link :href="route(item.route)">
+              <template #icon>
                 <span class="menu-icon-wrapper" :style="{ '--accent': item.color || '#3b82f6' }">
                   <component :is="item.icon" />
                 </span>
+              </template>
+              <Link :href="route(item.route)">
                 <span class="menu-text">{{ item.label }}</span>
               </Link>
             </a-menu-item>
@@ -136,9 +138,9 @@
           <a-tooltip :title="themeLabel">
             <a-button type="text" class="theme-toggle" @click="cycleTheme">
               <template #icon>
-                <BulbOutlined v-if="themeMode === 'light'" />
-                <BulbFilled v-else-if="themeMode === 'dark'" />
-                <BorderOutlined v-else />
+                <svg v-if="themeMode === 'light'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg v-else-if="themeMode === 'dark'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
               </template>
             </a-button>
           </a-tooltip>
@@ -263,7 +265,7 @@ const menuItems = [
       { key: 'programas', icon: SettingFilled, label: 'Programas', route: 'programa-index' },
       { key: 'modalidades', icon: SettingFilled, label: 'Modalidades', route: 'modalidad-index' },
       { key: 'colegios', icon: SettingFilled, label: 'Colegios', route: 'admin-colegios' },
-      { key: 'ubigeo', icon: SettingFilled, label: 'Ubigeos', route: 'programa-index' },
+      { key: 'ubigeo', icon: SettingFilled, label: 'Ubigeos', route: 'admin-ubigeos' },
       { key: 'pagos', icon: SettingFilled, label: 'Pagos', route: 'programa-index' },
       { key: 'reglamentos', icon: SettingFilled, label: 'Reglamentos', route: 'admin-reglamento' },
       { key: 'anios', icon: SettingFilled, label: 'Años', route: 'anio-index' },
@@ -398,7 +400,7 @@ watch(proceso, (newVal, oldVal) => {
   --icon-bg-hover: #e0f2fe;
   --icon-bg-active: #dbeafe;
   --submenu-bg: #f8fafc;
-  --user-card-bg: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  --user-card-bg: linear-gradient(135deg, #e6e9ec6a, #eff4f07b);
   --user-card-border: #dbeafe;
   --avatar-border: #bfdbfe;
   --content-bg: #f1f5f9;
@@ -733,7 +735,6 @@ watch(proceso, (newVal, oldVal) => {
   border-bottom: 1px solid var(--header-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   height: 60px;
-  line-height: 60px;
 }
 .header-left {
   display: flex;
@@ -758,6 +759,10 @@ watch(proceso, (newVal, oldVal) => {
 .theme-toggle {
   color: var(--text-color);
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
 }
 .theme-toggle:hover {
   color: var(--primary-color) !important;
@@ -794,6 +799,36 @@ watch(proceso, (newVal, oldVal) => {
 .custom-sider.ant-layout-sider-collapsed .user-card,
 .custom-sider.ant-layout-sider-collapsed .sider-footer {
   display: none;
+}
+
+/* Collapsed menu: center all icons */
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-item,
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-submenu > .ant-menu-submenu-title {
+  padding: 0 !important;
+  padding-left: 8px !important;
+  margin: 2px 8px !important;
+  text-align: center !important;
+}
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-item .ant-menu-item-icon,
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-submenu-title .ant-menu-item-icon,
+.custom-sider.ant-layout-sider-collapsed .ant-menu .menu-icon-wrapper {
+  margin: 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-item .menu-text,
+.custom-sider.ant-layout-sider-collapsed .ant-menu .ant-menu-submenu-arrow {
+  display: none !important;
+}
+.custom-sider.ant-layout-sider-collapsed .sider-brand {
+  justify-content: center;
+  padding: 18px 0 14px 0;
+}
+.custom-sider.ant-layout-sider-collapsed .brand-logo-wrapper {
+  margin: 0 auto;
 }
 
 /* ====== DARK THEME OVERRIDES ====== */
@@ -959,10 +994,33 @@ watch(proceso, (newVal, oldVal) => {
   border-color: var(--card-border) !important;
 }
 
-/* Table hover fix */
-.theme-dark .ant-table-tbody > tr.ant-table-row:hover > td,
-.theme-hybrid .ant-table-tbody > tr.ant-table-row:hover > td {
+/* Table hover fix - dark mode */
+.theme-dark .ant-table-tbody > tr.ant-table-row:hover > td {
   background: var(--hover-bg) !important;
+}
+/* Table hover fix - hybrid mode (light content, so use light hover) */
+.theme-hybrid .ant-table-container .ant-table-tbody > tr.ant-table-row:hover > td {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Selected row - dark mode */
+.theme-dark .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: rgba(148, 163, 184, 0.25) !important;
+}
+.theme-dark .ant-table-tbody > tr.ant-table-row-selected:hover > td {
+  background: rgba(148, 163, 184, 0.35) !important;
+}
+/* Selected row - hybrid mode (light gray transparent) */
+.theme-hybrid .ant-table-container .ant-table-tbody > tr.ant-table-row-selected > td {
+  background: rgba(100, 116, 139, 0.15) !important;
+}
+.theme-hybrid .ant-table-container .ant-table-tbody > tr.ant-table-row-selected:hover > td {
+  background: rgba(100, 116, 139, 0.25) !important;
+}
+
+/* Even rows - hybrid mode (light) */
+.theme-hybrid .ant-table-container .ant-table-tbody > tr:nth-child(even) > td {
+  background: rgba(0, 0, 0, 0.02) !important;
 }
 
 /* Buttons (text/ghost type) */
@@ -974,18 +1032,23 @@ watch(proceso, (newVal, oldVal) => {
 .theme-hybrid .ant-btn-text {
   background: transparent !important;
 }
-.theme-dark .ant-btn-text:hover,
-.theme-hybrid .ant-btn-text:hover {
+.theme-dark .ant-btn-text:hover {
   background: var(--hover-bg) !important;
+}
+.theme-hybrid .ant-btn-text:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 .theme-dark .ant-btn-default,
 .theme-hybrid .ant-btn-default {
   background: var(--card-bg) !important;
   border-color: var(--card-border) !important;
 }
-.theme-dark .ant-btn-default:hover,
-.theme-hybrid .ant-btn-default:hover {
+.theme-dark .ant-btn-default:hover {
   background: var(--hover-bg) !important;
+  border-color: var(--primary-color) !important;
+}
+.theme-hybrid .ant-btn-default:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
   border-color: var(--primary-color) !important;
 }
 .theme-dark .ant-btn[disabled],

@@ -1,11 +1,11 @@
 <template>
 <Head title="Observados"/>
 <AuthenticatedLayout>
-<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px); background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
+<div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="height: calc(100vh - 98px); background: var(--content-bg, #f1f5f9); color: var(--card-text, #1e293b);">
 
 <div class="">
   <div class="mb-4">
-      <span class="text-xl font-bold text-gray-800">Gestión de Observados</span>
+      <span class="text-xl font-bold" style="color: var(--card-text, #1e293b);">Gestión de Observados</span>
   </div>
   <div class="flex justify-between items-center gap-2">
     <div>
@@ -67,7 +67,7 @@
   </div>
 </div>
 
-<div style="">
+<div style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); border-radius: 8px; padding: 8px;">
   <a-table
     :columns="columnsObservados"
     :data-source="observados"
