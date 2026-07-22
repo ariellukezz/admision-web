@@ -589,35 +589,52 @@ class InscripcionController extends Controller
 
     public function getInscripcionesAdmin(Request $request) {
 
-        $query_where = [];
+        $procesoId = auth()->user()->id_proceso;
 
-        if ($request->programa) array_push($query_where,[DB::raw('inscripciones.id_programa'), '=', $request->programa]);
-        array_push($query_where,[DB::raw('inscripciones.id_proceso'), '=', auth()->user()->id_proceso]);
-
-        $res = Inscripcion::select(
+        $query = Inscripcion::select(
             'inscripciones.id as id', 'procesos.id as id_proceso', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni', 'inscripciones.codigo as codigo', 'postulante.nombres AS nombres',
-            'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno', 'programa.nombre as programa', 'inscripciones.id_programa as id_programa',
+            'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno', 'programa.nombre as programa', 'programa.area as area', 'inscripciones.id_programa as id_programa',
             'modalidad.id as id_modalidad', 'modalidad.nombre as modalidad', 'procesos.nombre AS proceso', 'inscripciones.created_at as fecha', 'inscripciones.estado'
         )
         ->join('postulante','inscripciones.id_postulante', 'postulante.id')
         ->join('programa','inscripciones.id_programa', 'programa.id')
         ->join('modalidad','inscripciones.id_modalidad', 'modalidad.id')
         ->join('procesos','inscripciones.id_proceso', 'procesos.id')
-        ->where($query_where)
-        ->where(function ($query) use ($request) {
-            return $query
-              ->orWhere('modalidad.nombre', 'LIKE', '%' . $request->term . '%')
-              ->orWhere('postulante.nro_doc', 'LIKE', '%' . $request->term . '%')
-              ->orWhere('postulante.nombres', 'LIKE', '%' . $request->term . '%')
-              ->orWhere('postulante.primer_apellido', 'LIKE', '%' . $request->term . '%')
-              ->orWhere('postulante.segundo_apellido', 'LIKE', '%' . $request->term . '%');
-        })
-        ->paginate($request->paginashoja);
+        ->where('inscripciones.id_proceso', $procesoId);
 
-        $this->response['estado'] = true;
-        $this->response['datos'] = $res;
-        return response()->json($this->response, 200);
+        if ($request->filled('programa')) {
+            $query->where('inscripciones.id_programa', $request->programa);
+        }
 
+        if ($request->filled('area')) {
+            $query->where('programa.area', $request->area);
+        }
+
+        if ($request->filled('fecha')) {
+            $query->whereDate('inscripciones.created_at', $request->fecha);
+        }
+
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+            $query->whereBetween('inscripciones.created_at', [$request->fecha_inicio . ' 00:00:00', $request->fecha_fin . ' 23:59:59']);
+        }
+
+        if ($request->filled('term')) {
+            $term = $request->term;
+            $query->where(function ($q) use ($term) {
+                $q->where('modalidad.nombre', 'LIKE', "%{$term}%")
+                  ->orWhere('postulante.nro_doc', 'LIKE', "%{$term}%")
+                  ->orWhere('postulante.nombres', 'LIKE', "%{$term}%")
+                  ->orWhere('postulante.primer_apellido', 'LIKE', "%{$term}%")
+                  ->orWhere('postulante.segundo_apellido', 'LIKE', "%{$term}%");
+            });
+        }
+
+        $res = $query->orderByDesc('inscripciones.created_at')->paginate($request->paginashoja ?? 20);
+
+        return response()->json([
+            'estado' => true,
+            'datos' => $res,
+        ], 200);
     }
 
 

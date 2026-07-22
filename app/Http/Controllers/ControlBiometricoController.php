@@ -48,6 +48,21 @@ class ControlBiometricoController extends Controller
                     ->orWhere(DB::raw("CONCAT(postulante.nombres,' ',postulante.primer_apellido, ' ', postulante.segundo_apellido)"), 'LIKE', "%$request->term%")
                     ->orWhere('modalidad.nombre', 'LIKE', "%$request->term%");
             })
+            ->when($request->filled('fecha'), function ($q) use ($request) {
+                $q->whereDate('control_biometrico.created_at', $request->fecha);
+            })
+            ->when($request->filled('fecha_inicio') && $request->filled('fecha_fin'), function ($q) use ($request) {
+                $q->whereBetween('control_biometrico.created_at', [$request->fecha_inicio . ' 00:00:00', $request->fecha_fin . ' 23:59:59']);
+            })
+            ->when($request->filled('programa'), function ($q) use ($request) {
+                $q->where('programa.id', $request->programa);
+            })
+            ->when($request->filled('modalidad'), function ($q) use ($request) {
+                $q->where('modalidad.id', $request->modalidad);
+            })
+            ->when($request->filled('area'), function ($q) use ($request) {
+                $q->where('programa.area', $request->area);
+            })
             ->orderBy('programa.nombre', 'ASC')
             ->orderBy(DB::raw('(puntajes.puntaje + puntajes.puntaje_vocacional)'), 'DESC')
             ->paginate($pageSize);

@@ -192,11 +192,11 @@ const notificacion = (type, titulo, mensaje) => {
 
 <style scoped>
 .header-avatar {
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-color, #e5e7eb);
   flex-shrink: 0;
 }
 .user-name {
-  color: #1f2937;
+  color: var(--text-active, #1f2937);
   font-weight: 500;
   white-space: nowrap;
 }

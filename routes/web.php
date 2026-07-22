@@ -533,6 +533,8 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/puntajes/eliminar-registro', [PuntajeGestorController::class, 'eliminarRegistro']);
     Route::post('/puntajes/eliminar-todo', [PuntajeGestorController::class, 'eliminarTodo']);
     Route::post('/puntajes/guardar', [PuntajeGestorController::class, 'guardar']);
+    Route::get('/puntajes/exportar-excel', [PuntajeGestorController::class, 'exportarExcel']);
+    Route::get('/puntajes/exportar-pdf', [PuntajeGestorController::class, 'exportarPdf']);
 
     // ── Cultural data routes (for admin RegistroPostulante) ──
     Route::get('/get-condiciones-lengua-segundas', [IdentidadSegundaController::class, 'getCondicionesLengua']);

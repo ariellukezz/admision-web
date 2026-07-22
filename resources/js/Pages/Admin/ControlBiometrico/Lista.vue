@@ -211,14 +211,29 @@ const exportandoPdf = ref(false);
 let timeoutId;
 watch(buscar, () => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => { getProgramas(); }, 500);
+    timeoutId = setTimeout(() => { pagina.value = 1; getProgramas(); }, 500);
 });
 
 watch(pagina, () => { getProgramas(); });
 
+watch([filtroFecha, filtroRango, filtroPrograma, filtroModalidad, filtroArea], () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => { pagina.value = 1; getProgramas(); }, 300);
+});
+
 const getProgramas = async () => {
     try {
-        let res = await axios.post("get-control-posterior?page=" + pagina.value, { term: buscar.value });
+        let payload = { term: buscar.value };
+        if (filtroFecha.value) payload.fecha = filtroFecha.value;
+        if (filtroRango.value && filtroRango.value[0]) {
+            payload.fecha_inicio = filtroRango.value[0];
+            payload.fecha_fin = filtroRango.value[1];
+        }
+        if (filtroPrograma.value) payload.programa = filtroPrograma.value;
+        if (filtroModalidad.value) payload.modalidad = filtroModalidad.value;
+        if (filtroArea.value) payload.area = filtroArea.value;
+
+        let res = await axios.post("get-control-posterior?page=" + pagina.value, payload);
         programas.value = res.data.datos.data;
         totalpaginas.value = res.data.datos.total;
     } catch (error) {
@@ -250,6 +265,8 @@ const limpiarFiltros = () => {
     filtroPrograma.value = null;
     filtroModalidad.value = null;
     filtroArea.value = null;
+    pagina.value = 1;
+    getProgramas();
 };
 
 const construirParams = () => {

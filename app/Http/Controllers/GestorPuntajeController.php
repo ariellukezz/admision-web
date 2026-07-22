@@ -7,13 +7,20 @@ use App\Models\Proceso;
 use App\Models\Programa;
 use App\Models\Modalidad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Mpdf\Mpdf;
 use App\Exports\PuntajePlantillaExport;
+use App\Exports\PuntajeExport;
 use App\Imports\PuntajesImport;
 
 class GestorPuntajeController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Construye la consulta base de puntajes con filtros.
+     */
+    private function construirConsulta(Request $request)
     {
         $query = Puntaje::query();
 
@@ -35,7 +42,12 @@ class GestorPuntajeController extends Controller
             });
         }
 
-        $resultados = $query->orderByDesc('puntaje')->paginate(50);
+        return $query->orderByDesc('puntaje');
+    }
+
+    public function index(Request $request)
+    {
+        $resultados = $this->construirConsulta($request)->paginate(50);
 
         return response()->json([
             'estado' => true,
@@ -43,9 +55,111 @@ class GestorPuntajeController extends Controller
         ]);
     }
 
+    /**
+     * Exportar a Excel con filtros.
+     */
+    public function exportarExcel(Request $request)
+    {
+        $datos = $this->construirConsulta($request)->get();
+
+        $collection = $datos->map(function ($item) {
+            return [
+                'dni'                 => $item->dni,
+                'paterno'             => $item->paterno,
+                'materno'             => $item->materno,
+                'nombres'             => $item->nombres,
+                'programa'            => $item->programa,
+                'modalidad'           => $item->modalidad,
+                'area'                => $item->area,
+                'puntaje'             => $item->puntaje,
+                'puntaje_vocacional'  => $item->puntaje_vocacional,
+                'apto'                => $item->apto,
+                'puesto'              => $item->puesto,
+                'fecha'               => $item->fecha,
+            ];
+        });
+
+        $nombreProceso = '';
+        if ($request->filled('id_proceso')) {
+            $nombreProceso = Proceso::find($request->id_proceso)?->nombre ?? '';
+        }
+
+        $nombreArchivo = 'puntajes_' . str_replace(' ', '_', $nombreProceso ?: 'export') . '.xlsx';
+
+        return Excel::download(new PuntajeExport($collection), $nombreArchivo);
+    }
+
+    /**
+     * Exportar a PDF con filtros, una página por cada programa.
+     */
+    public function exportarPdf(Request $request)
+    {
+        $datos = $this->construirConsulta($request)->get();
+        $agrupado = $datos->groupBy('programa');
+
+        $proceso = $request->filled('id_proceso') ? Proceso::find($request->id_proceso) : null;
+
+        $filtrosTexto = [];
+        if ($proceso) {
+            $filtrosTexto[] = 'Proceso: ' . $proceso->nombre;
+        }
+        if ($request->filled('programa')) {
+            $filtrosTexto[] = 'Programa: ' . $request->programa;
+        }
+        if ($request->filled('modalidad')) {
+            $filtrosTexto[] = 'Modalidad: ' . $request->modalidad;
+        }
+        if (empty($filtrosTexto)) {
+            $filtrosTexto[] = 'Todos los registros';
+        }
+
+        $mpdf = new Mpdf([
+            'mode'           => 'utf-8',
+            'format'         => 'A4',
+            'orientation'    => 'P',
+            'default_font'   => 'dejavusanscondensed',
+            'margin_left'    => 10,
+            'margin_right'   => 10,
+            'margin_top'     => 38,
+            'margin_bottom'  => 18,
+            'margin_header'  => 8,
+            'margin_footer'  => 8,
+        ]);
+
+        $mpdf->SetTitle('Puntajes - ' . ($proceso->nombre ?? ''));
+        $mpdf->SetAuthor('Sistema de Admisión UNAP');
+        $mpdf->SetDisplayMode('fullpage');
+
+        $headerHtml = View::make('Reportes.puntaje_header', compact('proceso', 'filtrosTexto'))->render();
+        $footerHtml = View::make('Reportes.puntaje_footer')->render();
+        $mpdf->SetHTMLHeader($headerHtml);
+        $mpdf->SetHTMLFooter($footerHtml);
+
+        $esPrimero = true;
+        foreach ($agrupado as $programa => $postulantes) {
+            if (!$esPrimero) {
+                $mpdf->AddPage();
+            }
+            $esPrimero = false;
+            $chunk = View::make('Reportes.puntaje_item', compact('programa', 'postulantes'))->render();
+            $mpdf->WriteHTML($chunk);
+        }
+
+        $filename = 'puntajes_' . now()->format('YmdHis') . '.pdf';
+
+        return response(
+            $mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN),
+            200,
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]
+        );
+    }
+
     public function getSelectores()
     {
-        $procesos = Proceso::where('estado', 1)->select('id', 'nombre')->orderByDesc('id')->get();
+        $procesos = Proceso::select('id', 'nombre')->orderByDesc('id')->get();
 
         $programas = Puntaje::whereNotNull('programa')
             ->where('programa', '!=', '')

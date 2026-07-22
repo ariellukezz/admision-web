@@ -2,21 +2,6 @@
 <Head title="Gestión de Puntajes"/>
 <Layout>
   <div class="puntajes-container">
-    <!-- Header -->
-    <div class="puntajes-header">
-      <div class="puntajes-header-content">
-        <div class="puntajes-header-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"/>
-            <path d="M18 17V9M13 17V5M8 17v-3"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="puntajes-title">Gestión de Puntajes</h1>
-          <p class="puntajes-subtitle">Administre los puntajes del proceso de admisión</p>
-        </div>
-      </div>
-    </div>
 
     <!-- Filtros -->
     <div class="puntajes-filters">
@@ -98,6 +83,14 @@
             {{ importing ? 'Importando...' : 'Cargar Excel' }}
           </a-button>
         </a-upload>
+        <a-button size="large" :loading="exportandoExcel" @click="exportarExcel" class="puntajes-btn-excel">
+          <template #icon><FileExcelOutlined/></template>
+          Exportar Excel
+        </a-button>
+        <a-button size="large" :loading="exportandoPdf" @click="exportarPdf" class="puntajes-btn-pdf">
+          <template #icon><FilePdfOutlined/></template>
+          Exportar PDF
+        </a-button>
         <a-popconfirm
           title="¿Eliminar TODOS los puntajes del proceso seleccionado?"
           ok-text="Sí, eliminar todo"
@@ -142,9 +135,6 @@
           </template>
           <template v-if="column.dataIndex === 'puntaje'">
             <span style="font-weight: 700; color: #096dd9;">{{ record.puntaje ?? '—' }}</span>
-          </template>
-          <template v-if="column.dataIndex === 'puntaje_vocacional'">
-            <span style="font-weight: 600; color: #722ed1;">{{ record.puntaje_vocacional ?? '—' }}</span>
           </template>
           <template v-if="column.dataIndex === 'puesto'">
             <span style="font-weight: 600;">{{ record.puesto ?? '—' }}</span>
@@ -229,11 +219,6 @@
             </a-form-item>
           </a-col>
           <a-col :span="6">
-            <a-form-item label="P. Vocacional" name="puntaje_vocacional">
-              <a-input-number v-model:value="form.puntaje_vocacional" style="width: 100%" :precision="3" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="6">
             <a-form-item label="Apto" name="apto">
               <a-select v-model:value="form.apto" :options="[{value:'SI',label:'SI'},{value:'NO',label:'NO'}]" />
             </a-form-item>
@@ -284,7 +269,8 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import {
   SearchOutlined, DownloadOutlined, UploadOutlined, DeleteOutlined,
-  PlusOutlined, EditOutlined, CheckCircleOutlined, CloseCircleOutlined
+  PlusOutlined, EditOutlined, CheckCircleOutlined, CloseCircleOutlined,
+  FileExcelOutlined, FilePdfOutlined
 } from '@ant-design/icons-vue';
 
 const loading = ref(false);
@@ -294,6 +280,9 @@ const modalResultado = ref(false);
 const modalForm = ref(false);
 const formMode = ref('crear');
 const formRef = ref();
+
+const exportandoExcel = ref(false);
+const exportandoPdf = ref(false);
 
 const importResultado = reactive({ estado: false, mensaje: '' });
 
@@ -337,7 +326,6 @@ const columns = [
   { title: 'Modalidad', dataIndex: 'modalidad', width: 110 },
   { title: 'Área', dataIndex: 'area', width: 110 },
   { title: 'Puntaje', dataIndex: 'puntaje', width: 90, align: 'center' },
-  { title: 'P. Vocacional', dataIndex: 'puntaje_vocacional', width: 100, align: 'center' },
   { title: 'Apto', dataIndex: 'apto', width: 70, align: 'center' },
   { title: 'Puesto', dataIndex: 'puesto', width: 70, align: 'center' },
   { title: 'Fecha', dataIndex: 'fecha', width: 100, align: 'center' },
@@ -382,6 +370,29 @@ const loadResultados = async (page = 1) => {
 
 const descargarPlantilla = () => {
   window.open('/admin/puntajes/plantilla', '_blank');
+};
+
+const construirParamsExport = () => {
+  const params = new URLSearchParams();
+  if (filtros.id_proceso) params.append('id_proceso', filtros.id_proceso);
+  if (filtros.programa) params.append('programa', filtros.programa);
+  if (filtros.modalidad) params.append('modalidad', filtros.modalidad);
+  if (filtros.search) params.append('search', filtros.search);
+  return params;
+};
+
+const exportarExcel = () => {
+  exportandoExcel.value = true;
+  const params = construirParamsExport();
+  window.location.href = `/admin/puntajes/exportar-excel?${params.toString()}`;
+  setTimeout(() => { exportandoExcel.value = false; }, 2000);
+};
+
+const exportarPdf = () => {
+  exportandoPdf.value = true;
+  const params = construirParamsExport();
+  window.open(`/admin/puntajes/exportar-pdf?${params.toString()}`, '_blank');
+  setTimeout(() => { exportandoPdf.value = false; }, 2000);
 };
 
 const handleUpload = async (file) => {
@@ -582,11 +593,33 @@ onMounted(() => {
 .puntajes-btn-import {
   border-radius: 10px;
   font-weight: 600;
-  background: linear-gradient(135deg, #096dd9, #0a3d5a);
+  background: linear-gradient(135deg, #082b86, #0a3d5a);
   border: none;
   color: #fff;
 }
 .puntajes-btn-import:hover {
+  filter: brightness(1.1);
+  color: #fff !important;
+}
+.puntajes-btn-excel {
+  border-radius: 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #52c41a, #389e0d);
+  border: none;
+  color: #fff;
+}
+.puntajes-btn-excel:hover {
+  filter: brightness(1.1);
+  color: #fff !important;
+}
+.puntajes-btn-pdf {
+  border-radius: 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff4d4f, #cf1322);
+  border: none;
+  color: #fff;
+}
+.puntajes-btn-pdf:hover {
   filter: brightness(1.1);
   color: #fff !important;
 }
