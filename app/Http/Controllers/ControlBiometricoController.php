@@ -230,14 +230,14 @@ public function exportarPdf(Request $request)
     $mpdf->SetAuthor('Sistema de Admisión UNAP');
     $mpdf->SetDisplayMode('fullpage');
 
-    $headerHtml = View::make('reportes.control_biometrico_header', compact('proceso', 'filtrosTexto'))->render();
-    $footerHtml = View::make('reportes.control_biometrico_footer')->render();
+    $headerHtml = View::make('Reportes.control_biometrico_header', compact('proceso', 'filtrosTexto'))->render();
+    $footerHtml = View::make('Reportes.control_biometrico_footer')->render();
     $mpdf->SetHTMLHeader($headerHtml);
     $mpdf->SetHTMLFooter($footerHtml);
 
     foreach ($agrupado as $programa => $postulantes) {
         $mpdf->AddPage();
-        $chunk = View::make('reportes.control_biometrico_item', compact('programa', 'postulantes'))->render();
+        $chunk = View::make('Reportes.control_biometrico_item', compact('programa', 'postulantes'))->render();
         $mpdf->WriteHTML($chunk);
     }
 
