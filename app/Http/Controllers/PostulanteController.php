@@ -695,7 +695,7 @@ class PostulanteController extends Controller
           ], 400);
       }
 
-      $payload = [ 'doc_' => $formState, 'nom_' => 'DIRECCIÓN', 'app_' => 'ADMISIÓN', 'apm_' => 'UNAP'];
+      $payload = [ 'doc_' => $dni, 'nom_' => 'DIRECCIÓN', 'app_' => 'ADMISIÓN', 'apm_' => 'UNAP'];
 
       try {
           $response = Http::timeout(5)->withHeaders([
