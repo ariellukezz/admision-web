@@ -521,12 +521,16 @@ const descargarExcel = async () => {
 :deep(.ant-table-tbody > tr > td) {
   color: var(--card-text, #1e293b) !important;
   border-bottom: 1px solid var(--card-border, #e2e8f0) !important;
+  background: var(--card-bg, #ffffff) !important;
 }
 :deep(.ant-table-tbody > tr:hover > td) {
   background: var(--hover-bg, #eff6ff) !important;
 }
 :deep(.insc-row-even > td) {
   background: var(--row-even, rgba(0,0,0,0.02)) !important;
+}
+:deep(.insc-row-even:hover > td) {
+  background: var(--hover-bg, #eff6ff) !important;
 }
 
 .insc-table-actions {
