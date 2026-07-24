@@ -51,14 +51,16 @@ class InscripcionController extends Controller
 
     public function getPostulanteByDni($dni){
 
-        $sancionados = DB::table('sancionados')
+        $sancionado = DB::table('sancionados')
             ->where('dni', $dni)
             ->where('id_proceso', auth()->user()->id_proceso)
-            ->exists();
+            ->first();
 
-        if( $sancionados ){
+        if( $sancionado ){
             $this->response['estado'] = true;
             $this->response['mensaje'] = "El postulante está observado";
+            $this->response['motivo'] = $sancionado->motivo ?? 'No especificado';
+            $this->response['observacion'] = $sancionado->observacion ?? null;
             return response()->json($this->response, 200);
         }
         else {

@@ -365,27 +365,57 @@ const getPostulantes = async (term = "", page = 1) => {
 
 const getPostulantesByDni = async () => {
     let res = await axios.get("get-postulante-dni/" + dniseleccionado.value);
-    if(res.data.datos){
-        postulante.value.id = res.data.datos.id_postulante;
-        postulante.value.nombres = res.data.datos.nombres;
-        postulante.value.primer_apellido = res.data.datos.primer_apellido;
-        postulante.value.segundo_apellido = res.data.datos.segundo_apellido;
-        postulante.value.sexo = res.data.datos.sexo;
-        postulante.value.fec_nacimiento = dayjs(res.data.datos.fec_nacimiento)
-        postulante.value.colegio = res.data.datos.colegio;
-        postulante.value.id_gestion = res.data.datos.id_gestion;
-        postulante.value.procedencia = res.data.datos.departamento +' / '+res.data.datos.provincia + ' / '+ res.data.datos.distrito;
-        postulante.value.proceso = res.data.datos.proceso;
-        postulante.value.modalidad = res.data.datos.modalidad;
-        postulante.value.programa = res.data.datos.programa;
-        postulante.value.cod_programa = res.data.datos.cod_programa;
-        postulante.value.id_programa = res.data.datos.id_programa;
-        postulante.value.id_proceso = res.data.datos.id_proceso;
-        postulante.value.id_modalidad = res.data.datos.id_modalidad;
-        postulante.value.dni_temp = res.data.datos.dni;
-        foto_postulante.value = res.data.foto;
-        huellaD_postulante.value = res.data.huellaD;
-        huellaI_postulante.value = res.data.huellaI;
+
+    // Sancionado
+    if (res.data.estado === true && !res.data.datos) {
+        if (res.data.mensaje) {
+            const motivo = res.data.motivo ? ` Motivo: ${res.data.motivo}` : '';
+            notificacion('warning', 'Postulante observado', res.data.mensaje + motivo);
+        } else {
+            notificacion('warning', 'Postulante observado', 'El postulante no reúne las condiciones para participar en este proceso.');
+        }
+        postulante.value.primer_apellido = '';
+        return;
+    }
+
+    // Sin datos (no encontrado)
+    if (!res.data.datos) {
+        notificacion('info', 'Sin resultados', 'No se encontraron datos del postulante.');
+        return;
+    }
+
+    postulante.value.id = res.data.datos.id_postulante;
+    postulante.value.nombres = res.data.datos.nombres;
+    postulante.value.primer_apellido = res.data.datos.primer_apellido;
+    postulante.value.segundo_apellido = res.data.datos.segundo_apellido;
+    postulante.value.sexo = res.data.datos.sexo;
+    postulante.value.fec_nacimiento = dayjs(res.data.datos.fec_nacimiento)
+    postulante.value.colegio = res.data.datos.colegio;
+    postulante.value.id_gestion = res.data.datos.id_gestion;
+    postulante.value.procedencia = res.data.datos.departamento +' / '+res.data.datos.provincia + ' / '+ res.data.datos.distrito;
+    postulante.value.proceso = res.data.datos.proceso;
+    postulante.value.modalidad = res.data.datos.modalidad;
+    postulante.value.programa = res.data.datos.programa;
+    postulante.value.cod_programa = res.data.datos.cod_programa;
+    postulante.value.id_programa = res.data.datos.id_programa;
+    postulante.value.id_proceso = res.data.datos.id_proceso;
+    postulante.value.id_modalidad = res.data.datos.id_modalidad;
+    postulante.value.dni_temp = res.data.datos.dni;
+    foto_postulante.value = res.data.foto;
+    huellaD_postulante.value = res.data.huellaD;
+    huellaI_postulante.value = res.data.huellaI;
+
+    // Verificar huellas faltantes
+    const erroresHuellas = [];
+    if (!res.data.huellaD) erroresHuellas.push('huella derecha');
+    if (!res.data.huellaI) erroresHuellas.push('huella izquierda');
+    if (erroresHuellas.length > 0) {
+        notificacion('error', 'Huellas faltantes', `Falta registrar: ${erroresHuellas.join(' y ')}.`);
+    }
+
+    // Verificar foto faltante
+    if (!res.data.foto) {
+        notificacion('warning', 'Foto faltante', 'El postulante no tiene foto registrada.');
     }
 }
 
@@ -462,10 +492,10 @@ const Inscribir = async () => {
 }
 
 const observados = [
-    '61001464','60068800','60066705','60171563','61320806','61064509','70279455','60324574','60658775','60065685','61094020','61093375',
-    '71154109','73741501','75055639','73810787','74059827','61320079','61063914',
-    '61255036','76333236','60536341','61093328','61152794','61093741','60476909','60558336','60303055','73770883',
-    '60220640','74205408','60836931','60065670','60066325','61255092','60214886','61094388','61063205','60525904'
+    '61063222','60366171','60850199','61466239','60538226','71183349','61244318','60068507','76736034',
+    '60246642','60417118','61514207','60643835','60908363','61194215','61399931','60176425','61320850',
+    '74350941','61458641','61205386','60176468','61816969','60837158','61000844','61143837','60174708',
+    '60617901','61566906','60630212','73798764','61432413','60525925'
 ]
 
 let timeout2;
@@ -514,7 +544,7 @@ const imprimirPDF = (dnni) => {
 }
 
 const notificacion = (type, titulo, mensaje) => {
-    notification[type]({ message: titulo, description: mensaje });
+    notification[type]({ message: titulo, description: mensaje, placement: 'topRight' });
 }
 
 const actualizarPostulante = async () => {
