@@ -1,0 +1,707 @@
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        background: #ffffff;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+    /* =========================================================
+       GRID PRINCIPAL
+       ========================================================= */
+
+    .cred-grid {
+        width: 210mm;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+    .cred-grid > tr > td {
+        width: 70mm;
+        height: 50mm;
+        padding: 0;
+        vertical-align: top;
+    }
+
+    /* =========================================================
+       CREDENCIAL
+       ========================================================= */
+
+    .cred-card {
+        width: 70mm;
+        height: 50mm;
+        background: #ffffff;
+        border: 0.6pt solid #b7c0cc;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+
+    .cred-inner {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .cred-header {
+        background: #10243f;
+        height: 6.2mm;
+        padding: 0.8mm 1.8mm !important;
+        vertical-align: middle;
+    }
+
+    .cred-header-inner {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .cred-header-inner td {
+        padding: 0;
+        vertical-align: middle;
+    }
+
+    .cred-logo-cell {
+        width: 6mm;
+        text-align: center;
+    }
+
+    .cred-logo {
+        width: 4.8mm;
+        height: 4.8mm;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .cred-head-text {
+        text-align: center;
+        padding: 0 1mm !important;
+    }
+
+    .cred-head-main {
+        font-size: 4.15pt;
+        font-weight: 800;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.15pt;
+        line-height: 1.15;
+    }
+
+    .cred-head-sub {
+        margin-top: 0.35mm;
+        font-size: 3.1pt;
+        font-weight: 500;
+        color: #d7b85b;
+        text-transform: uppercase;
+        letter-spacing: 0.5pt;
+        line-height: 1.1;
+    }
+
+    /* =========================================================
+       LINEA DORADA
+       ========================================================= */
+
+    .cred-gold {
+        height: 1.4mm;
+        line-height: 1.4mm;
+        background: #c9a227;
+        font-size: 1pt;
+    }
+
+    /* =========================================================
+       BODY
+       ========================================================= */
+
+    .cred-body {
+        height: 37.5mm;
+        padding: 1.3mm 1.5mm !important;
+        vertical-align: top;
+        background: #ffffff;
+    }
+
+    .cred-body-inner {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    /* =========================================================
+       FOTO
+       ========================================================= */
+
+    .cred-photo-col {
+        width: 15mm;
+        padding-right: 1.7mm !important;
+        vertical-align: top;
+    }
+
+    .cred-photo-box {
+        width: 14mm;
+        height: 18mm;
+        border: 0.8pt solid #10243f;
+        background: #f1f4f7;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
+
+    .cred-photo {
+        width: 14mm;
+        height: 18mm;
+        display: block;
+        object-fit: cover;
+    }
+
+    .cred-photo-empty {
+        width: 14mm;
+        height: 18mm;
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 3.1pt;
+        color: #8792a0;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    /* =========================================================
+       INFORMACION
+       ========================================================= */
+
+    .cred-info-col {
+        vertical-align: top;
+        padding: 0 !important;
+    }
+
+    /* DNI */
+
+    .cred-dni-label {
+        font-size: 2.8pt;
+        color: #8994a3;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.45pt;
+        line-height: 1;
+    }
+
+    .cred-dni-num {
+        margin-top: 0.35mm;
+        font-size: 10.5pt;
+        font-weight: 900;
+        color: #10243f;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.8pt;
+        line-height: 1;
+    }
+
+    /* NOMBRE */
+
+    .cred-nombre {
+        margin-top: 1.1mm;
+        padding-bottom: 0.7mm;
+        border-bottom: 0.7pt solid #c9a227;
+
+        font-size: 5.5pt;
+        font-weight: 800;
+        color: #18283f;
+        line-height: 1.25;
+        text-transform: uppercase;
+    }
+
+    /* CARGO */
+
+    .cred-cargo-wrap {
+        margin-top: 0.9mm;
+        margin-bottom: 1mm;
+    }
+
+    .cred-cargo-badge {
+        background: #10243f;
+        padding: 0.55mm 1.4mm;
+        display: inline-block;
+        box-sizing: border-box;
+    }
+
+    .cred-cargo-text {
+        font-size: 3.8pt;
+        font-weight: 800;
+        color: #d7b85b;
+        text-transform: uppercase;
+        letter-spacing: 0.35pt;
+        line-height: 1;
+    }
+
+    /* =========================================================
+       CAMPOS
+       ========================================================= */
+
+    .cred-fields {
+        font-size: 3.25pt;
+        line-height: 1.45;
+        color: #25344a;
+    }
+
+    .cred-row {
+        margin-bottom: 0.45mm;
+    }
+
+    .cred-label {
+        color: #8a95a4;
+        font-weight: 700;
+        font-size: 2.9pt;
+        text-transform: uppercase;
+        letter-spacing: 0.15pt;
+    }
+
+    .cred-value {
+        color: #24354c;
+        font-weight: 600;
+    }
+
+    /* =========================================================
+       INFORMACION INFERIOR
+       ========================================================= */
+
+    .cred-divider {
+        height: 0.5pt;
+        background: #e0e5eb;
+        margin: 1mm 0 0.8mm 0;
+        font-size: 0;
+        line-height: 0.5pt;
+    }
+
+    .cred-identification {
+        font-size: 2.8pt;
+        color: #8792a0;
+        text-transform: uppercase;
+        letter-spacing: 0.2pt;
+        line-height: 1.2;
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .cred-footer {
+        height: 4.9mm;
+        background: #f3f5f8;
+        border-top: 0.5pt solid #d5dce4;
+        padding: 0.5mm 1.5mm !important;
+        vertical-align: middle;
+    }
+
+    .cred-footer-inner {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    .cred-footer-inner td {
+        padding: 0;
+        vertical-align: middle;
+    }
+
+    .cred-foot-left {
+        font-size: 2.8pt;
+        color: #697789;
+        font-weight: 600;
+        text-transform: uppercase;
+        line-height: 1.15;
+    }
+
+    .cred-dni-foot {
+        font-size: 3.2pt;
+        color: #10243f;
+        font-family: 'Courier New', monospace;
+        font-weight: 800;
+        letter-spacing: 0.3pt;
+    }
+
+    /* =========================================================
+       VACIO
+       ========================================================= */
+
+    .cred-empty {
+        width: 100%;
+        text-align: center;
+        padding: 50mm 0;
+        font-size: 16pt;
+        color: #94a3b8;
+        font-weight: 300;
+    }
+
+    /* =========================================================
+       IMPRESION
+       ========================================================= */
+
+    @media print {
+
+        body {
+            background: #ffffff;
+        }
+
+        .cred-card,
+        .cred-header,
+        .cred-gold,
+        .cred-cargo-badge,
+        .cred-footer {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .cred-header {
+            background: #10243f !important;
+        }
+
+        .cred-gold {
+            background: #c9a227 !important;
+        }
+
+        .cred-cargo-badge {
+            background: #10243f !important;
+        }
+
+        .cred-footer {
+            background: #f3f5f8 !important;
+        }
+
+        .cred-nombre {
+            border-bottom-color: #c9a227 !important;
+        }
+    }
+</style>
+
+
+@if ($seleccionados->isEmpty())
+
+    <div class="cred-empty">
+        No hay participantes seleccionados.
+    </div>
+
+@else
+
+    <table class="cred-grid">
+
+        @php
+            $i = 0;
+        @endphp
+
+        @foreach ($seleccionados as $p)
+
+            @if ($i % 3 === 0)
+
+                @if ($i > 0)
+                    </tr>
+                @endif
+
+                <tr>
+
+            @endif
+
+            <td>
+
+                <div class="cred-card">
+
+                    <table class="cred-inner">
+                        <tr>
+
+                            <td class="cred-header">
+
+                                <table class="cred-header-inner">
+
+                                    <tr>
+
+                                        <td class="cred-logo-cell">
+
+                                            @if (!empty($logo_tiny_base64))
+
+                                                <img
+                                                    class="cred-logo"
+                                                    src="{{ $logo_tiny_base64 }}"
+                                                />
+
+                                            @endif
+
+                                        </td>
+
+
+                                        {{-- TITULO --}}
+                                        <td class="cred-head-text">
+
+                                            <div class="cred-head-main" style="font-size:14pt;">
+                                                UNIVERSIDAD NACIONAL DEL ALTIPLANO
+                                            </div>
+
+                                            <div class="cred-head-sub">
+                                                DIRECCIÓN DE ADMISIÓN
+                                            </div>
+
+                                        </td>
+
+
+                                        {{-- LOGO DERECHO --}}
+                                        <td class="cred-logo-cell">
+
+                                            @if (!empty($logo_dad_base64))
+
+                                                <img
+                                                    class="cred-logo"
+                                                    src="{{ $logo_dad_base64 }}"
+                                                />
+
+                                            @endif
+
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+
+
+                        {{-- =====================================================
+                             LINEA DORADA
+                             ===================================================== --}}
+
+                        <tr>
+                            <td class="cred-gold">&nbsp;</td>
+                        </tr>
+
+
+                        {{-- =====================================================
+                             CUERPO
+                             ===================================================== --}}
+
+                        <tr>
+
+                            <td class="cred-body">
+
+                                <table class="cred-body-inner">
+
+                                    <tr>
+
+                                        {{-- =================================================
+                                             FOTO
+                                             ================================================= --}}
+
+                                        <td class="cred-photo-col">
+
+                                            <div class="cred-photo-box">
+
+                                                @if (!empty($p->foto_base64))
+
+                                                    <img
+                                                        class="cred-photo"
+                                                        src="{{ $p->foto_base64 }}"
+                                                    />
+
+                                                @else
+
+                                                    <div class="cred-photo-empty">
+                                                        SIN FOTO
+                                                    </div>
+
+                                                @endif
+
+                                            </div>
+
+                                        </td>
+
+
+                                        {{-- =================================================
+                                             INFORMACION
+                                             ================================================= --}}
+
+                                        <td class="cred-info-col">
+
+                                            {{-- DNI --}}
+
+                                            <div class="cred-dni-label">
+                                                Documento de identidad
+                                            </div>
+
+                                            <div class="cred-dni-num">
+                                                {{ $p->dni ?? '—' }}
+                                            </div>
+
+
+                                            {{-- NOMBRE --}}
+
+                                            <div class="cred-nombre">
+
+                                                {{ $p->paterno ?? '' }}
+                                                {{ $p->materno ?? '' }},
+                                                {{ $p->nombres ?? '' }}
+
+                                            </div>
+
+
+                                            {{-- CARGO --}}
+
+                                            <div class="cred-cargo-wrap">
+
+                                                <span class="cred-cargo-badge">
+
+                                                    <span class="cred-cargo-text">
+                                                        {{ $p->cargo ?? 'PERSONAL' }}
+                                                    </span>
+
+                                                </span>
+
+                                            </div>
+
+
+                                            {{-- CAMPOS --}}
+
+                                            <div class="cred-fields">
+
+                                                <div class="cred-row">
+
+                                                    <span class="cred-label">
+                                                        Código:
+                                                    </span>
+
+                                                    <span class="cred-value">
+                                                        {{ $p->codigo_trabajador ?? '—' }}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div class="cred-row">
+
+                                                    <span class="cred-label">
+                                                        Tipo:
+                                                    </span>
+
+                                                    <span class="cred-value">
+                                                        {{ $p->tipo_personal ?? '—' }}
+                                                    </span>
+
+                                                    &nbsp;
+
+                                                    <span class="cred-label">
+                                                        Cond:
+                                                    </span>
+
+                                                    <span class="cred-value">
+                                                        {{ $p->condicion ?? '—' }}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <div class="cred-row">
+
+                                                    <span class="cred-label">
+                                                        Dependencia:
+                                                    </span>
+
+                                                    <span class="cred-value">
+                                                        {{ $p->dependencia ?? '—' }}
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+
+                                            {{-- DIVISOR --}}
+
+                                            <div class="cred-divider">
+                                                &nbsp;
+                                            </div>
+
+
+                                            {{-- IDENTIFICACION --}}
+
+                                            <div class="cred-identification">
+                                                Credencial oficial de identificación
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+
+
+                        {{-- =====================================================
+                             FOOTER
+                             ===================================================== --}}
+
+                        <tr>
+
+                            <td class="cred-footer">
+
+                                <table class="cred-footer-inner">
+
+                                    <tr>
+
+                                        <td align="left">
+
+                                            <span class="cred-foot-left">
+
+                                                {{ $proceso->nombre ?? 'ADMISIÓN ' . ($proceso->anio ?? '') }}
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td align="right">
+
+                                            <span class="cred-dni-foot">
+
+                                                DNI: {{ $p->dni ?? '' }}
+
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+
+                                </table>
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </td>
+
+            @php
+                $i++;
+            @endphp
+
+            @if ($i % 3 === 0 || $loop->last)
+
+                </tr>
+
+            @endif
+
+        @endforeach
+
+    </table>
+
+@endif
