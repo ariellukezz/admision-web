@@ -1,477 +1,545 @@
 <template>
-    <Head title="Sorteo"/>
-    <AuthenticatedLayout>
-    <div class="overflow-hidden shadow-sm sm:rounded-lg p-4" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">    
+  <Head title="Selección de Personal" />
+  <AuthenticatedLayout>
+    <div class="overflow-hidden shadow-sm sm:rounded-lg p-6" style="background: var(--card-bg, #ffffff); border: 1px solid var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
 
+      <!-- Header: Selector de sorteo + botón nuevo -->
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3 flex-1 min-w-[300px]">
+          <a-select
+            v-model:value="sorteoSeleccionado"
+            :options="sorteos"
+            placeholder="Seleccionar sorteo"
+            style="min-width: 300px;"
+            show-search
+            option-filter-prop="label"
+            @change="onSorteoChange"
+          />
+          <a-button type="primary" style="background: #2563eb; border: none; border-radius: 6px;" @click="nuevoSorteo = { nombre: '', descripcion: '', tipos: [] }; modalSorteo = true">
+            <template #icon><PlusOutlined /></template>
+            Nuevo Sorteo
+          </a-button>
+        </div>
+        <div v-if="sorteoActual" class="flex items-center gap-3">
+          <div>
+            <span class="font-semibold text-base">{{ sorteoActual.label }}</span>
+            <span v-if="sorteoActual.descripcion" class="text-sm ml-2" style="color: var(--card-muted, #64748b);">{{ sorteoActual.descripcion }}</span>
+          </div>
+          <a-tag :color="sorteoActual.estado ? 'green' : 'default'">{{ sorteoActual.estado ? 'Activo' : 'Inactivo' }}</a-tag>
+          <a-button size="small" type="text" @click="abrirModalEditarSorteo"><EditOutlined /></a-button>
+        </div>
+      </div>
 
-  
-    <a-row class="flex" :gutter="16" style="height:500px;">
-        <a-col :xs="24" :sm="12" :md="12" :lg="12" style=" display:flex;  " class="pb-3">
-            <div style="width: 320px; background: #476175; height:500px; position:reactive; border-radius:12px; overflow:hidden; box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;">
-                <div style="width: 320px; background: var(--card-bg, #ffffff); height:340px; position:absolute; top:160px; border-radius:20px 20px 10px 10px">
+      <template v-if="sorteoSeleccionado">
 
-                </div>
-                <div style="padding:8px; width: 200px; overflow:hidden; background: var(--card-bg, #ffffff); height:200px; position:absolute; left:66px; top:60px; border-radius:50%; border:s solid #9d9d9d; ">
-                    <img src="https://i.pinimg.com/236x/6f/fb/06/6ffb06eaeaace0d90a0596fac6c6377d.jpg" style="width:200px; border-radius:50%;" height:="200px" class="img-fluid" alt="" >
-                </div>
-                <div style="padding:8px; height:245px; width: 320px; position:absolute; top:255px;">
-                    <div class="flex justify-center mt-3">
-                        <span style="font-family: 'Audiowide', sans-serif; font-size:1.5rem; color: #476175">
-                           ARIEL LUQUE
-                        </span>
-                    </div>
-
-                    <div class="flex justify-center mt-3">
-                        <span style="font-family: 'Audiowide', sans-serif; font-size:1.0rem; text-align:center; color: #476175">
-                            VIGILANTE SUPLENTE
-                        </span>
-                    </div>
-
-                    <div class="flex justify-center mt-3" style="font-size:0.8; color: var(--card-muted, #64748b);">
-                        <table>
-                            <tr>
-                                <td align="left" v-align="top">DNI</td><td>:</td><td>70757838</td>
-                            </tr>
-                            <tr>
-                                <td align="left" v-align="top">Proc.</td><td>:</td><td>Facultad de mecánica</td>
-                            </tr>
-                            <tr>
-                                <td align="left" v-align="top">Cond.</td><td>:</td><td>Contratado</td>
-                            </tr>
-                        </table>
-                        <!-- <span style="font-family: sans-serif; font-size:.9rem; text-align:center;">
-                            Facultad de ingenierí mecánica electrica y electrónica
-                        </span> -->
-                    </div>
-
-
-                </div>
+        <!-- Cards de cargos clickeables -->
+        <div class="flex flex-wrap items-stretch gap-3 mb-5">
+          <div
+            v-for="cc in cargosConfig"
+            :key="cc.id"
+            class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md min-w-[180px] flex-1"
+            :style="`border-color: ${modalCargoAbierto === cc.id_cargo ? 'var(--primary-color, #3b82f6)' : 'var(--card-border, #e2e8f0)'}; border-width: 2px; ${cc.disponibles === 0 ? 'opacity: 0.75;' : ''}`"
+            @click="abrirModalCargo(cc)"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xs uppercase tracking-wide font-semibold" style="color: var(--card-muted, #64748b);">{{ cc.cargo }}</div>
+              <a-button size="small" type="text" style="color: var(--primary-color, #3b82f6);"><ArrowRightOutlined /></a-button>
             </div>
-        </a-col>                        
-        <a-col :xs="24" :sm="12" :md="12" :lg="12" style="background:#ff000000;">
-            <div style="width:100%; height:100%; display:flex; align:center; justify-content:center; align-items:center;">
-                <div class="flex justify-between" style="position: relative; width:100%;">
-                    <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="width: 100%; padding-left: 30px;"/>
-                    <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
-                </div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-3xl font-bold">{{ cc.asignados }}</span>
+              <span class="text-sm" style="color: var(--card-muted, #64748b);">/ {{ cc.cantidad }}</span>
             </div>
-        </a-col>
-    </a-row>
+            <a-progress
+              :percent="cc.cantidad > 0 ? Math.round((cc.asignados / cc.cantidad) * 100) : 0"
+              :stroke-color="cc.disponibles === 0 ? '#ef4444' : '#16a34a'"
+              size="small"
+              :show-info="false"
+            />
+            <div class="text-xs mt-1" :style="`color: ${cc.disponibles === 0 ? '#ef4444' : 'var(--card-muted, #64748b)'};`">
+              {{ cc.disponibles }} disponibles
+            </div>
+          </div>
 
-    <row class="flex justify-between mb-4" >
-        <div class="mr-3">
-            <a-button style="background:#476175; color:white;" @click="abrirModal">Nuevo</a-button>
+          <!-- Botón configurar cargos -->
+          <div class="border rounded-lg p-4 flex items-center justify-center min-w-[180px]" style="border-color: var(--card-border, #e2e8f0); border-style: dashed;">
+            <a-button type="primary" style="background: #2563eb; border: none; border-radius: 6px;" @click="modalConfig = true">
+              <template #icon><SettingOutlined /></template>
+              Configurar Cargos
+            </a-button>
+          </div>
         </div>
-        <div class="flex justify-between" style="position: relative;" >
-        <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 30px;"/>
-        <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
+
+        <!-- Lista general -->
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+          <h3 class="font-semibold text-base">Lista General ({{ seleccionados.length }})</h3>
+          <div class="flex flex-wrap gap-2 items-center">
+            <a-select
+              v-model:value="filtroCargoLista"
+              placeholder="Filtrar por cargo"
+              allow-clear
+              style="min-width: 200px;"
+              :options="cargosOptions"
+              @change="getSeleccionados"
+            />
+            <a-select
+              v-model:value="filtroOrigenLista"
+              placeholder="Origen"
+              allow-clear
+              style="min-width: 140px;"
+              :options="origenOptions"
+              @change="getSeleccionados"
+            />
+            <a-checkbox v-model:checked="incluirAnulados" @change="getSeleccionados">Incluir anulados</a-checkbox>
+            <a-button size="small" @click="getSeleccionados"><template #icon><ReloadOutlined /></template></a-button>
+            <a-button size="small" @click="exportExcel"><template #icon><FileExcelOutlined /></template>Excel</a-button>
+            <a-button size="small" @click="exportPdf"><template #icon><FilePdfOutlined /></template>Seleccionados</a-button>
+            <a-button size="small" @click="exportObservadosPdf"><template #icon><FilePdfOutlined /></template>Obs. y Anul.</a-button>
+            <a-button size="small" @click="exportResumenPdf"><template #icon><FilePdfOutlined /></template>Resumen</a-button>
+            <a-button size="small" @click="exportCredencialesPdf"><template #icon><FilePdfOutlined /></template>Credenciales PDF</a-button>
+            <a-button size="small" @click="verCredencialesVue"><template #icon><EyeOutlined /></template>Credenciales Vista</a-button>
+          </div>
         </div>
-    </row>
 
-    <a-modal v-model:visible="modalDocente"  style="margin-top: -40px; width:100%; display:flex; justify-content: center;" :footer="false">
-        <div style="width:100%; margin-top:-5px;">
-            <h1 style="font-weight:bold; font-size:1.2rem;">{{ form.id === null? 'Nuevo docente': 'Editar docente' }}</h1>            
-        </div>
+        <a-table
+          :columns="columnsSimple"
+          :data-source="seleccionados"
+          :pagination="{ pageSize: 50 }"
+          size="small"
+          :loading="loadingLista"
+          row-key="id"
+          :scroll="{ x: 'max-content' }"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'es_manual'">
+              <a-tag :color="record.es_manual ? 'purple' : 'green'">{{ record.es_manual ? 'DESIGNACIÓN' : 'SORTEO' }}</a-tag>
+            </template>
+            <template v-if="column.dataIndex === 'estado'">
+              <a-tag v-if="record.anulado" color="red">ANULADO</a-tag>
+              <a-tag v-else-if="record.observado" color="orange">OBSERVADO</a-tag>
+              <a-tag v-else color="green">ACTIVO</a-tag>
+            </template>
+            <template v-if="column.dataIndex === 'acciones'">
+              <div class="flex gap-1 justify-center">
+                <a-tooltip v-if="!record.observado && !record.anulado" title="Observar">
+                  <a-button size="small" type="text" @click="abrirModalObservar(record)"><EyeOutlined /></a-button>
+                </a-tooltip>
+                <a-tooltip v-if="!record.anulado" title="Anular">
+                  <a-button size="small" type="text" danger @click="abrirModalAnular(record)"><StopOutlined /></a-button>
+                </a-tooltip>
+                <a-tooltip v-if="record.observado || record.anulado" title="Restablecer">
+                  <a-popconfirm title="¿Restablecer?" @confirm="restablecerParticipante(record)">
+                    <a-button size="small" type="text"><CheckCircleOutlined /></a-button>
+                  </a-popconfirm>
+                </a-tooltip>
+                <a-popconfirm title="¿Eliminar?" @confirm="eliminarSeleccionado(record)">
+                  <a-button size="small" type="text" danger><DeleteOutlined /></a-button>
+                </a-popconfirm>
+              </div>
+            </template>
+          </template>
+        </a-table>
+      </template>
 
-        <a-tabs v-model:activeKey="activeKey" type="card" size="small">
-            <a-tab-pane key="1" tab="Datos del Docente">            
-                <a-row style="max-width:1000px; display:flex; justify-content:center;">
-                    <a-col :span="24">
-                        <a-form
-                            ref="formDatos"
-                            name="form"
-                            :model="form" :rules="formRules">
-                            <a-row :gutter="16">
-                            <a-col :xs="24" :sm="12" :md="24" :lg="24">
-                                <div class="flex justify-end" style="">
-                                    <div>
-                                        <label>Estado</label>
-                                        <div><a-switch v-model:checked="form.estado"/></div>
-                                    </div>
-                                    <a-divider type="vertical" style="height:60px;"/>
-                                    <div>
-                                        <label>Sexo</label>
-                                        <div>
-                                            <a-radio-group v-model:value="form.sexo" name="radioGroup">
-                                                <a-radio :value="1">M</a-radio>
-                                                <a-radio :value="2">F</a-radio>
-                                            </a-radio-group>
-                                        </div>
-                                    </div>
-                                    <a-divider type="vertical" style="height:60px" />
-                                    <div>
-                                        <label>Tipo Doc</label>
-                                        <a-form-item
-                                            name="tipo_doc"
-                                            :rules="[{ required: true, message: 'Escoja el tipo', trigger: 'change' },]"
-                                            >
-                                            <div>
-                                                <a-select
-                                                    v-model:value="form.tipo_doc"
-                                                    style="width: 120px">
-                                                    <a-select-option :value="1">DNI</a-select-option>
-                                                    <a-select-option :value="2">Carnet. Ext</a-select-option>    
-                                                </a-select>
+      <a-empty v-else description="Seleccione o cree un sorteo para comenzar" style="padding: 60px 0;" />
+    </div>
 
-                                            </div>
-                                        </a-form-item>
-                                    </div>                                
-                                </div>
+    <!-- ===== MODAL POR CARGO (componente) ===== -->
+    <SorteoModalCargo
+      ref="modalCargoRef"
+      :sorteo-id="sorteoSeleccionado"
+      :sorteo-label="sorteoActual?.label"
+      :sorteo-tipos-label="sorteoTiposLabel"
+      :cargos-config="cargosConfig"
+      @refresh="onModalCargoRefresh"
+      @close="modalCargoAbierto = null"
+      @observar="abrirModalObservar"
+      @anular="abrirModalAnular"
+      @restablecer="restablecerParticipante"
+      @eliminar="eliminarSeleccionado"
+    />
 
-                            </a-col>                        
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label v-if="form.tipo_doc === 1">DNI <span style="color:red;">*</span></label>
-                                <label v-else>N° CARNET EXT.</label>
-                                <a-form-item 
-                                    name="nro_doc" 
-                                    :rules="[{ required: true, message: 'Ingrese el N° de documento'},                                            
-                                    { min: 8, message: 'El dni debe tener 8 digitos', trigger: 'blur'}]"
-                                >
-                                <a-input v-if="form.tipo_doc === 1" v-model:value="form.nro_doc" @input="dniInput" :maxlength="8"/>
-                                <a-input v-else v-model:value="form.nro_doc" @input="dniInput" :maxlength="12"/>
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label>Codigo</label>
-                                <a-form-item>
-                                <a-input v-model:value="form.codigo" />
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label>Nombres <span style="color:red;">*</span></label>
-                                <a-form-item name="nombres" :rules="[{ required: true, message: 'Ingrese los nombres' }]">
-                                <a-input v-model:value="form.nombres" />
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label>Ap. Paterno <span style="color:red;">*</span></label>
-                                <a-form-item name="paterno" :rules="[{ required: true, message: 'Ingrese el primer apellido' }]">
-                                <a-input v-model:value="form.paterno"/>
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label>Ap. Materno</label>
-                                <a-form-item >
-                                <a-input v-model:value="form.materno"/>
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="8">
-                                <label>Condición <span style="color:red;">*</span></label>
-                                <a-form-item name="condicion" :rules="[{ required: true, message: 'Ingrese la condición del docente' }]">
-                                    <a-select
-                                        v-model:value="form.condicion"
-                                        style="width: 100%;">
-                                        <a-select-option :value="1">NOMBRADO</a-select-option>
-                                        <a-select-option :value="2">CONTRATADO</a-select-option>
-                                        <a-select-option :value="3">CAS</a-select-option>
-                                        <a-select-option :value="4">LOCACIÓN</a-select-option>
-                                        <a-select-option :value="5">R. H.</a-select-option>
-                                    </a-select>
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="24" :md="24" :lg="24">
-                                <label>Escuela <span style="color:red;">*</span></label>
-                                <a-form-item name="escuela" :rules="[{ required: true, message: 'Seleccione la escuela' }]">
-                                <a-select v-model:value="form.escuela" placeholder="Seleccionar escuela">
-                                    <a-select-option :value="1">INGENIERIA AGRONOMICA</a-select-option>
-                                    <a-select-option :value="2">INGENIERIA AGROINDUSTRIAL</a-select-option>
-                                    <a-select-option :value="3">INGENIERIA TOPOGRAFICA Y AGRIMENSURA</a-select-option>
-                                    <a-select-option :value="4">MEDICINA VETERINARIA Y ZOOTECNIA</a-select-option>
-                                    <a-select-option :value="5">INGENIERIA ECONOMICA</a-select-option>
-                                    <a-select-option :value="6">CIENCIAS CONTABLES</a-select-option>
-                                    <a-select-option :value="7">ADMINISTRACION</a-select-option>
-                                    <a-select-option :value="8">TRABAJO SOCIAL</a-select-option>
-                                    <a-select-option :value="9">ENFERMERIA</a-select-option>
-                                    <a-select-option :value="10">INGENIERIA DE MINAS</a-select-option>
-                                    <a-select-option :value="11">HUMANIDADES</a-select-option>
-                                    <a-select-option :value="12">SOCIOLOGIA</a-select-option>
-                                    <a-select-option :value="13">TURISMO</a-select-option>
-                                    <a-select-option :value="14">ANTROPOLOGIA</a-select-option>
-                                    <a-select-option :value="15">CIENCIAS DE LA COMUNICACION SOCIAL</a-select-option>
-                                    <a-select-option :value="16">ARTE</a-select-option>
-                                    <a-select-option :value="17">BIOLOGIA</a-select-option>
-                                    <a-select-option :value="18">EDUCACION SECUNDARIA</a-select-option>
-                                    <a-select-option :value="19">EDUCACION PRIMARIA</a-select-option>
-                                    <a-select-option :value="20">EDUCACION INICIAL</a-select-option>
-                                    <a-select-option :value="21">EDUCACION FISICA</a-select-option>
-                                    <a-select-option :value="22">INGENIERIA ESTADISTICA E INFORMATICA</a-select-option>
-                                    <a-select-option :value="23">DERECHO</a-select-option>
-                                    <a-select-option :value="24">INGENIERIA QUIMICA</a-select-option>
-                                    <a-select-option :value="25">ODONTOLOGIA</a-select-option>
-                                    <a-select-option :value="26">NUTRICION HUMANA</a-select-option>
-                                    <a-select-option :value="27">INGENIERIA GEOLOGICA</a-select-option>
-                                    <a-select-option :value="28">INGENIERIA METALURGICA</a-select-option>
-                                    <a-select-option :value="29">INGENIERIA CIVIL</a-select-option>
-                                    <a-select-option :value="30">ARQUITECTURA Y URBANISMO</a-select-option>
-                                    <a-select-option :value="31">CIENCIAS FISICO MATEMATICAS</a-select-option>
-                                    <a-select-option :value="32">INGENIERIA AGRICOLA</a-select-option>
-                                    <a-select-option :value="33">MEDICINA HUMANA</a-select-option>
-                                    <a-select-option :value="34">INGENIERIA MECANICA ELECTRICA</a-select-option>
-                                    <a-select-option :value="35">INGENIERIA ELECTRONICA</a-select-option>
-                                    <a-select-option :value="36">INGENIERIA DE SISTEMAS</a-select-option>
-                                </a-select>
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="16" :lg="18">
-                                <label>Dirección</label>
-                                <a-form-item>
-                                <a-input v-model:value="form.direccion" />
-                                </a-form-item>
-                            </a-col>
-                            <a-col :xs="24" :sm="12" :md="8" :lg="6">
-                                <label>Fec. Nacimiento</label>
-                                <a-form-item>
-                                <a-date-picker style="width:100%;" placeholder="Seleccionar fec. nacimiento" v-model:value="form.fec_nac" format="DD/MM/YYYY"/>
-                                </a-form-item>
-                            </a-col>
-
-                            <a-col :xs="24" :sm="12" :md="24" :lg="24">
-                                <label>Observaciones</label>
-                            <a-form-item>
-                                <a-textarea v-model:value="form.observacion" />
-                                </a-form-item>
-                            </a-col>
-                        </a-row>
-
-                            <a-row>
-                            <a-col :span="24">
-                                <div class="flex justify-end">
-                                    <a-button class="mr-4" @click="Cancelar()"> Cancelar </a-button>                          
-                                    <a-button type="primary" @click="save">Guardar</a-button>
-                                </div>
-                            </a-col>
-                            </a-row>
-                        </a-form>
-                    </a-col>
-                </a-row>
-            </a-tab-pane>
-            <!-- <a-tab-pane key="2" tab="Medios de contacto" force-render>Content of Tab Pane 2</a-tab-pane> -->
-        </a-tabs>
-
+    <!-- ===== MODAL: Nuevo / Editar Sorteo ===== -->
+    <a-modal v-model:open="modalSorteo" :title="nuevoSorteo.id ? 'Editar Sorteo' : 'Nuevo Sorteo'" @ok="saveSorteo" :confirm-loading="savingSorteo" ok-text="Guardar" cancel-text="Cancelar">
+      <a-form layout="vertical">
+        <a-form-item label="Nombre" required>
+          <a-input v-model:value="nuevoSorteo.nombre" placeholder="Ej: Sorteo Aula 1" />
+        </a-form-item>
+        <a-form-item label="Descripción">
+          <a-textarea v-model:value="nuevoSorteo.descripcion" :rows="2" placeholder="Descripción opcional" />
+        </a-form-item>
+        <a-form-item label="Tipos de personal (opcional)">
+          <a-select v-model:value="nuevoSorteo.tipos" mode="multiple" :options="props.tipos" placeholder="Seleccionar tipos" allow-clear />
+        </a-form-item>
+      </a-form>
     </a-modal>
 
-    <a-table 
-        :columns="columnsDocentes" 
-        :data-source="docentes"
-        :pagination="false"
-        size="small"
-        :scroll="{ y: 'calc(100vh - 320px)' }"
-        > 
-        <template #bodyCell="{ column, index, record }">
-
-            <template v-if="column.dataIndex === 'dni'" >
-                <a-tag color="#476175" style="padding-top: 3px;">
-                    <span style="font-size: 1rem; font-weight: bold;">{{ record.dni }}</span>
-                </a-tag>
-            </template>
-
-            <template v-if="column.dataIndex === 'postulante'" >
-                <span style="font-size: 0.95rem;">{{ record.paterno }} {{ record.materno }}, {{ record.nombres }}</span>
-            </template>
-
-            <template v-if="column.dataIndex === 'sexo'" >
-                <a-select
-                ref="select"
-                v-model:value="record.sexo"
-                placeholder="Seleccionar"
-                style="width: 60px;"
-                >
-                <a-select-option value='1'><span style="color:blue">M</span></a-select-option>
-                <a-select-option value='2'><span style="color:red">F</span></a-select-option>
-                </a-select>
-            </template>
-
-             
-            <template v-if="column.dataIndex === 'estado'" >
-                <a-tag v-if="record.estado === 1" color="cyan">Habilitado</a-tag>
-                <a-tag v-else color="purple">Desabilitado</a-tag>
-            </template>
-
-            <template v-if="column.dataIndex === 'acciones'">
-                <a-button class="mr-1" @click="abrirEditar(record)" style="color: #006d89;" size="small">
-                    <template #icon><eye-outlined/></template>
-                </a-button>
-                <a-button type="success" class="mr-1" style="color: #409866;" @click="cambiarSexo(record.id, record.sexo )" size="small">
-                    <template #icon><SaveOutlined/></template>
-                </a-button>
-                <!-- <a-divider type="vertical" /> -->
-                <a-button class="mr-1" @click="abrirEditar(record)" style="color: blue;" size="small">
-                    <template #icon><form-outlined/></template>
-                </a-button>
-                <!-- <a-divider type="vertical"/> -->
-                <a-popconfirm
-                    v-if="docentes.length"
-                    title="¿Seguro de eliminar?"
-                    ok-text="Si"
-                    cancel-text="No"
-                    @confirm="eliminar(record)"
-                    >
-                    <a-button shape="" size="small" style="color: crimson;">
-                        <template #icon><delete-outlined/></template>
-                    </a-button>
-                </a-popconfirm>
-  
-            </template>
+    <!-- ===== MODAL: Configuración de Cargos ===== -->
+    <a-modal v-model:open="modalConfig" title="Configurar Cantidad por Cargo" :footer="null" width="600px">
+      <div class="flex justify-end mb-3">
+        <a-button size="small" @click="exportCargosConfigPdf" :disabled="cargosConfig.length === 0">
+          <template #icon><FilePdfOutlined /></template> PDF
+        </a-button>
+      </div>
+      <div class="mb-4 flex flex-wrap gap-2 items-end">
+        <div class="flex-1 min-w-[200px]">
+          <label class="text-xs block mb-1">Cargo</label>
+          <a-select v-model:value="configCargo" :options="props.cargos" placeholder="Seleccionar cargo" style="width: 100%;" show-search option-filter-prop="label" :disabled="!!configEditId" />
+        </div>
+        <div style="width: 100px;">
+          <label class="text-xs block mb-1">Cantidad</label>
+          <a-input-number v-model:value="configCantidad" :min="1" style="width: 100%;" />
+        </div>
+        <a-button type="primary" style="background: #2563eb; border: none; border-radius: 6px;" :disabled="!configCargo || !configCantidad" @click="saveConfig">
+          {{ configEditId ? 'Actualizar' : 'Agregar' }}
+        </a-button>
+        <a-button v-if="configEditId" @click="cancelarEditConfig">Cancelar</a-button>
+      </div>
+      <a-table :columns="configColumns" :data-source="cargosConfig" size="small" :pagination="false" row-key="id">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'acciones'">
+            <div class="flex gap-1 justify-center">
+              <a-tooltip title="Editar">
+                <a-button size="small" type="text" style="color: #2563eb;" @click="editarConfig(record)"><EditOutlined /></a-button>
+              </a-tooltip>
+              <a-popconfirm title="¿Eliminar?" @confirm="deleteConfig(record)">
+                <a-button size="small" type="text" danger><DeleteOutlined /></a-button>
+              </a-popconfirm>
+            </div>
+          </template>
         </template>
-  
-    </a-table> 
-    <a-pagination v-model:current="pagina" :total="totalRegistros"  v-model:pageSize="pageSize" show-less-items />
-    
-    </div>
-    
-    </AuthenticatedLayout>
-    
+      </a-table>
+    </a-modal>
+
+    <!-- ===== MODAL: Observar ===== -->
+    <a-modal v-model:open="modalObservar" title="Observar Participante" @ok="confirmarObservar" :confirm-loading="savingObservar" ok-text="Guardar" cancel-text="Cancelar">
+      <div class="mb-3">
+        <p v-if="recordObservar" class="text-sm">
+          <strong>{{ recordObservar.paterno }} {{ recordObservar.materno }}, {{ recordObservar.nombres }}</strong>
+          <br>DNI: {{ recordObservar.dni }}
+        </p>
+      </div>
+      <a-textarea v-model:value="observacionTexto" :rows="4" placeholder="Escriba la observación..." />
+    </a-modal>
+
+    <!-- ===== MODAL: Anular ===== -->
+    <a-modal v-model:open="modalAnular" title="Anular Participante" @ok="confirmarAnular" :confirm-loading="savingAnular" ok-text="Anular" cancel-text="Cancelar" ok-type="danger">
+      <div class="mb-3">
+        <p v-if="recordAnular" class="text-sm">
+          <strong>{{ recordAnular.paterno }} {{ recordAnular.materno }}, {{ recordAnular.nombres }}</strong>
+          <br>DNI: {{ recordAnular.dni }}
+        </p>
+      </div>
+      <a-textarea v-model:value="motivoAnulacionTexto" :rows="4" placeholder="Escriba el motivo de anulación..." />
+    </a-modal>
+
+    <!-- ===== MODAL: Credenciales (componente) ===== -->
+    <SorteoCredencialesModal
+      ref="credencialesModalRef"
+      :sorteo-id="sorteoSeleccionado"
+      :filtro-cargo="filtroCargoLista"
+      :filtro-origen="filtroOrigenLista"
+    />
+
+  </AuthenticatedLayout>
 </template>
-        
+
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { watch, computed, ref, unref, reactive } from 'vue';
-import { FormOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, SaveOutlined, EyeOutlined} from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
-import { Form } from 'ant-design-vue';
-import axios from 'axios';
-const baseUrl = window.location.origin;
+import SorteoModalCargo from './components/SorteoModalCargo.vue'
+import SorteoCredencialesModal from './components/SorteoCredencialesModal.vue'
+import { ref, computed } from 'vue'
+import {
+  PlusOutlined, DeleteOutlined, ReloadOutlined,
+  SettingOutlined, EditOutlined, EyeOutlined, StopOutlined, CheckCircleOutlined,
+  FileExcelOutlined, FilePdfOutlined, ArrowRightOutlined,
+} from '@ant-design/icons-vue'
+import { notification } from 'ant-design-vue'
+import axios from 'axios'
 
-const modalDocente = ref(false);
-const activeKey = ref("1")
+const props = defineProps({
+  tipos: { type: Array, default: () => [] },
+  cargos: { type: Array, default: () => [] },
+  sorteos: { type: Array, default: () => [] },
+})
 
-const docentes = ref([]);
-const totalRegistros = ref(null)
-const pageSize = ref(10)
-const buscar = ref("");
-const pagina = ref(1)
+// ─── Component refs ───
+const modalCargoRef = ref(null)
+const credencialesModalRef = ref(null)
 
-const formDatos = ref();
-const form = reactive({ id: null, tipo_doc: 1, nro_doc: '', codigo:'', nombres: '', paterno: '', materno: '', condicion:'', escuela:null, sexo: 1, direccion: '', fec_nac: '', observacion: '', estado:true });
+// ─── Origen filter options ───
+const origenOptions = [
+  { value: 'sorteo', label: 'SORTEO' },
+  { value: 'manual', label: 'DESIGNACIÓN' },
+]
+// ─── Sorteo ───
+const sorteos = ref([...props.sorteos])
+const sorteoSeleccionado = ref(null)
+const sorteoActual = computed(() => sorteos.value.find(s => s.value === sorteoSeleccionado.value) || null)
+const sorteoTiposLabel = computed(() => {
+  if (!sorteoActual.value?.tipos?.length) return null
+  return sorteoActual.value.tipos.map(id => props.tipos.find(t => t.value === id)?.label).filter(Boolean).join(', ')
+})
 
-const dniInput = (event) => { form.nro_doc = event.target.value.replace(/\D/g, ''); };
+// ─── Cargo config ───
+const cargosConfig = ref([])
+const cargosOptions = computed(() => cargosConfig.value.map(cc => ({ value: cc.id_cargo, label: cc.cargo })))
 
-const save = async () => {
-    try {
-        const values = await formDatos.value.validateFields();
-        const response = await axios.post('save-docente', form);
-        if (response.status === 202) {
-            console.log(response.data.errors);
-        } else {
-            getDocentes();
-            notificacion('success', response.data.titulo, response.data.mensaje); // Cambia los valores aquí
-            modalDocente.value = false;
-            limpiar()
-        }
-    } catch (error) {
-        console.error(error);
+// ─── Lista general ───
+const seleccionados = ref([])
+const loadingLista = ref(false)
+const filtroCargoLista = ref(null)
+const filtroOrigenLista = ref(null)
+const incluirAnulados = ref(false)
+
+// ─── Modal por cargo (tracking for highlight) ───
+const modalCargoAbierto = ref(null)
+
+// ─── Otros modales ───
+const modalSorteo = ref(false)
+const modalConfig = ref(false)
+const modalObservar = ref(false)
+const modalAnular = ref(false)
+
+// ─── Forms ───
+const nuevoSorteo = ref({ nombre: '', descripcion: '', tipos: [] })
+const savingSorteo = ref(false)
+const configCargo = ref(null)
+const configCantidad = ref(null)
+const configEditId = ref(null)
+const recordObservar = ref(null)
+const observacionTexto = ref('')
+const savingObservar = ref(false)
+const recordAnular = ref(null)
+const motivoAnulacionTexto = ref('')
+const savingAnular = ref(false)
+
+// ─── Columns ───
+const columnsSimple = [
+  { title: 'DNI', dataIndex: 'dni', key: 'dni', width: 100 },
+  { title: 'Nombres', key: 'nombre_completo', ellipsis: true, customRender: ({ record }) => `${record.paterno} ${record.materno}, ${record.nombres}` },
+  { title: 'Cargo', dataIndex: 'cargo', key: 'cargo', ellipsis: true },
+  { title: 'Origen', dataIndex: 'es_manual', key: 'es_manual', width: 90, align: 'center' },
+  { title: 'Estado', dataIndex: 'estado', key: 'estado', width: 110, align: 'center' },
+  { title: 'Acciones', dataIndex: 'acciones', key: 'acciones', width: 170, align: 'center' },
+]
+
+const configColumns = [
+  { title: 'Cargo', dataIndex: 'cargo', key: 'cargo' },
+  { title: 'Cantidad', dataIndex: 'cantidad', key: 'cantidad', width: 100, align: 'center' },
+  { title: 'Asignados', dataIndex: 'asignados', key: 'asignados', width: 100, align: 'center' },
+  { title: 'Disponibles', dataIndex: 'disponibles', key: 'disponibles', width: 110, align: 'center' },
+  { title: '', dataIndex: 'acciones', key: 'acciones', width: 90, align: 'center' },
+]
+
+// ─── Methods ───
+const notif = (type, titulo, mensaje) => notification[type]({ message: titulo, description: mensaje, placement: 'topRight' })
+
+const onSorteoChange = async (val) => {
+  if (!val) { cargosConfig.value = []; seleccionados.value = []; return }
+  await Promise.all([getConfigCargos(), getSeleccionados()])
+}
+
+const getConfigCargos = async () => {
+  if (!sorteoSeleccionado.value) return
+  try {
+    const res = await axios.get(`sorteo/get-config-cargos/${sorteoSeleccionado.value}`)
+    cargosConfig.value = res.data.datos
+  } catch { notif('error', 'Error', 'No se pudo cargar la configuración') }
+}
+
+// ─── Modal por cargo ───
+const abrirModalCargo = async (cc) => {
+  modalCargoAbierto.value = cc.id_cargo
+  await modalCargoRef.value?.abrir(cc.id_cargo)
+}
+
+const onModalCargoRefresh = async () => {
+  await Promise.all([getConfigCargos(), getSeleccionados()])
+  modalCargoRef.value?.reloadLista()
+}
+
+// ─── Lista general ───
+const getSeleccionados = async () => {
+  if (!sorteoSeleccionado.value) return
+  loadingLista.value = true
+  try {
+    const res = await axios.post('sorteo/get-seleccionados', {
+      id_sorteo: sorteoSeleccionado.value,
+      id_cargo: filtroCargoLista.value || null,
+      incluir_anulados: incluirAnulados.value,
+      filtro_origen: filtroOrigenLista.value || null,
+    })
+    seleccionados.value = res.data.datos
+  } catch { notif('error', 'Error', 'No se pudo cargar la lista') }
+  finally { loadingLista.value = false }
+}
+
+const eliminarSeleccionado = async (item) => {
+  try {
+    const res = await axios.get(`sorteo/eliminar-seleccionado/${item.id}`)
+    notif('warning', res.data.titulo, res.data.mensaje)
+    await Promise.all([getConfigCargos(), getSeleccionados()])
+    modalCargoRef.value?.reloadLista()
+  } catch { notif('error', 'Error', 'No se pudo eliminar') }
+}
+
+// ─── Sorteo CRUD ───
+const abrirModalEditarSorteo = () => {
+  if (!sorteoActual.value) return
+  nuevoSorteo.value = {
+    id: sorteoActual.value.value,
+    nombre: sorteoActual.value.label,
+    descripcion: sorteoActual.value.descripcion || '',
+    tipos: sorteoActual.value.tipos || [],
+  }
+  modalSorteo.value = true
+}
+
+const saveSorteo = async () => {
+  if (!nuevoSorteo.value.nombre) { notif('warning', 'Nombre requerido', 'Ingrese un nombre'); return }
+  savingSorteo.value = true
+  try {
+    const payload = {
+      nombre: nuevoSorteo.value.nombre,
+      descripcion: nuevoSorteo.value.descripcion,
+      tipos: nuevoSorteo.value.tipos.length > 0 ? nuevoSorteo.value.tipos : null,
     }
+    if (nuevoSorteo.value.id) payload.id = nuevoSorteo.value.id
+    const res = await axios.post('sorteo/save-sorteo', payload)
+    if (res.data.estado === true) {
+      notif('success', nuevoSorteo.value.id ? 'Sorteo actualizado' : 'Sorteo creado', res.data.mensaje)
+      if (nuevoSorteo.value.id) {
+        const idx = sorteos.value.findIndex(s => s.value === nuevoSorteo.value.id)
+        if (idx !== -1) sorteos.value[idx] = { value: res.data.datos.id, label: res.data.datos.nombre, estado: res.data.datos.estado, descripcion: res.data.datos.descripcion, tipos: res.data.datos.tipos || [] }
+      } else {
+        sorteos.value.push({ value: res.data.datos.id, label: res.data.datos.nombre, estado: res.data.datos.estado, descripcion: res.data.datos.descripcion, tipos: res.data.datos.tipos || [] })
+        sorteoSeleccionado.value = res.data.datos.id
+      }
+      modalSorteo.value = false
+      const wasEditing = !!nuevoSorteo.value.id
+      nuevoSorteo.value = { nombre: '', descripcion: '', tipos: [] }
+      if (!wasEditing) await onSorteoChange(res.data.datos.id)
+    }
+  } catch { notif('error', 'Error', 'No se pudo guardar') }
+  finally { savingSorteo.value = false }
 }
 
-
-const getDocentes =  async ( ) => {
-    let res = await axios.post( "get-docentes?page="+pagina.value , { term: buscar.value, paginashoja: pageSize.value } );
-    docentes.value = res.data.datos.data;
-    totalRegistros.value = res.data.datos.total;
+// ─── Config ───
+const saveConfig = async () => {
+  if (!configCargo.value || !configCantidad.value || !sorteoSeleccionado.value) return
+  try {
+    const res = await axios.post('sorteo/save-config-cantidad', { id_sorteo: sorteoSeleccionado.value, id_cargo: configCargo.value, cantidad: configCantidad.value })
+    notif('success', 'Configuración', res.data.mensaje)
+    cancelarEditConfig()
+    await getConfigCargos()
+  } catch { notif('error', 'Error', 'No se pudo guardar') }
 }
 
-const eliminar = (item) => { axios.post("eliminar-docente", {"id":item.id}).then((result) => { getDocentes(); notificacion('warning', result.data.titulo, result.data.mensaje ); }); }
-
-const inscripcion = ref({  id:null,  codigo:"",  id_posulante:"",  id_programa:"",  id_modalidad:"", estado: true,  observacion:"",})
-
-
-const cambiarSexo = (docente, sexo) => {
-    let post = { id_postulante: docente, sexo: sexo };
-    axios.post("actualizar-sexo-docente", post).then((result) => {
-        getDocentes()
-        limpiar()
-        notificacion('success',result.data.titulo, result.data.mensaje);
-    });
+const editarConfig = (record) => {
+  configEditId.value = record.id
+  configCargo.value = record.id_cargo
+  configCantidad.value = record.cantidad
 }
 
-const notificacion = (type, titulo, mensaje) => { notification[type]({ message: titulo,description: mensaje});};
-const abrirModal = () => { limpiar(); modalDocente.value = true; }
-const Cancelar = () => { modalDocente.value = false;  limpiar(); }
-const abrirEditar = (item) => {
-    form.id =  item.id,
-    form.tipo_doc = 1, 
-    form.nro_doc = item.dni, 
-    form.codigo = item.codigo, 
-    form.nombres = item.nombres, 
-    form.paterno = item.paterno, 
-    form.materno = item.materno, 
-    form.condicion = item.condicion, 
-    form.escuela = item.escuela, 
-    form.sexo = parseInt(item.sexo) 
-    form.direccion = item.direccion 
-    form.fec_nac = item.fec_nac
-    form.observacion = item.observacion
-    if(item.estado === 1){ form.estado = true } else { form.estado = false } 
-    modalDocente.value = true;
-
+const cancelarEditConfig = () => {
+  configEditId.value = null
+  configCargo.value = null
+  configCantidad.value = null
 }
 
-const limpiar = () => {
-    form.id = null,
-    form.tipo_doc = 1, 
-    form.nro_doc = null, 
-    form.codigo = null, 
-    form.nombres = null, 
-    form.paterno = null, 
-    form.materno = null, 
-    form.condicion = null, 
-    form.escuela = null, 
-    form.sexo = 1, 
-    form.direccion = null 
-    form.fec_nac = null
-    form.observacion = null
-    form.estado = true
+const deleteConfig = async (item) => {
+  try {
+    const res = await axios.get(`sorteo/eliminar-config-cantidad/${item.id}`)
+    notif('success', 'Eliminado', res.data.mensaje)
+    await getConfigCargos()
+  } catch { notif('error', 'Error', 'No se pudo eliminar') }
 }
 
-watch(pagina, ( newValue, oldValue ) => { getDocentes(); })
-watch(buscar, ( newValue, oldValue ) => { getDocentes() })
-watch(pageSize, ( newValue, oldValue ) => { getDocentes() })
+// ─── Observar / Anular / Restablecer ───
+const abrirModalObservar = (record) => { recordObservar.value = record; observacionTexto.value = ''; modalObservar.value = true }
 
-const columnsDocentes = [
-    { title: 'DNI', dataIndex: 'dni', align:'center', width:'90px'},
-    { title: 'Codigo', dataIndex: 'codigo'},
-    { title: 'Docente', dataIndex: 'postulante'},
-    { title: 'Sexo', dataIndex: 'sexo', align:'center' },
-    { title: 'Escuela', dataIndex:'escuela_name'},
-    { title: 'Condición', dataIndex: 'tipo_empleo', align:'center'},
-    { title: 'Estado', dataIndex: 'estado', align:'center'},
-    // { title: 'Observación', dataIndex: 'observacion'},
-    { title: 'Acciones', dataIndex: 'acciones', width:'160px', align:'center'},
-];
+const confirmarObservar = async () => {
+  if (!observacionTexto.value) { notif('warning', 'Observación requerida', 'Escriba una observación'); return }
+  savingObservar.value = true
+  try {
+    const res = await axios.post('sorteo/observar-participante', { id: recordObservar.value.id, observacion: observacionTexto.value })
+    notif('success', 'Observado', res.data.mensaje)
+    modalObservar.value = false
+    await getSeleccionados()
+    modalCargoRef.value?.reloadLista()
+  } catch { notif('error', 'Error', 'No se pudo observar') }
+  finally { savingObservar.value = false }
+}
 
-getDocentes()
+const abrirModalAnular = (record) => { recordAnular.value = record; motivoAnulacionTexto.value = ''; modalAnular.value = true }
+
+const confirmarAnular = async () => {
+  if (!motivoAnulacionTexto.value) { notif('warning', 'Motivo requerido', 'Escriba el motivo'); return }
+  savingAnular.value = true
+  try {
+    const res = await axios.post('sorteo/anular-participante', { id: recordAnular.value.id, motivo_anulacion: motivoAnulacionTexto.value })
+    notif('warning', 'Anulado', res.data.mensaje)
+    modalAnular.value = false
+    await Promise.all([getConfigCargos(), getSeleccionados()])
+    modalCargoRef.value?.reloadLista()
+  } catch { notif('error', 'Error', 'No se pudo anular') }
+  finally { savingAnular.value = false }
+}
+
+const restablecerParticipante = async (record) => {
+  try {
+    const res = await axios.post('sorteo/restablecer-participante', { id: record.id })
+    if (res.data.estado === true) {
+      notif('success', 'Restablecido', res.data.mensaje)
+      await Promise.all([getConfigCargos(), getSeleccionados()])
+      modalCargoRef.value?.reloadLista()
+    } else { notif('warning', 'No restablecido', res.data.mensaje) }
+  } catch { notif('error', 'Error', 'No se pudo restablecer') }
+}
+
+// ─── Exports ───
+const exportExcel = () => {
+  if (!sorteoSeleccionado.value) return
+  let url = `sorteo/export-excel?id_sorteo=${sorteoSeleccionado.value}`
+  if (filtroCargoLista.value) url += `&id_cargo=${filtroCargoLista.value}`
+  if (filtroOrigenLista.value) url += `&filtro_origen=${filtroOrigenLista.value}`
+  window.open(url, '_blank')
+}
+const exportPdf = () => {
+  if (!sorteoSeleccionado.value) return
+  let url = `sorteo/export-pdf?id_sorteo=${sorteoSeleccionado.value}`
+  if (filtroCargoLista.value) url += `&id_cargo=${filtroCargoLista.value}`
+  if (filtroOrigenLista.value) url += `&filtro_origen=${filtroOrigenLista.value}`
+  window.open(url, '_blank')
+}
+const exportCargosConfigPdf = () => { if (sorteoSeleccionado.value) window.open(`sorteo/export-cargos-config-pdf?id_sorteo=${sorteoSeleccionado.value}`, '_blank') }
+const exportResumenPdf = () => { if (sorteoSeleccionado.value) window.open(`sorteo/export-resumen-pdf?id_sorteo=${sorteoSeleccionado.value}`, '_blank') }
+const exportObservadosPdf = () => { if (sorteoSeleccionado.value) window.open(`sorteo/export-observados-pdf?id_sorteo=${sorteoSeleccionado.value}`, '_blank') }
+const exportCredencialesPdf = () => {
+  if (!sorteoSeleccionado.value) return
+  let url = `sorteo/export-credenciales-pdf?id_sorteo=${sorteoSeleccionado.value}`
+  if (filtroCargoLista.value) url += `&id_cargo=${filtroCargoLista.value}`
+  if (filtroOrigenLista.value) url += `&filtro_origen=${filtroOrigenLista.value}`
+  window.open(url, '_blank')
+}
+const verCredencialesVue = () => { credencialesModalRef.value?.open() }
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
-</style>
-
 <style>
-.theme-dark .ant-table,
-.theme-hybrid .ant-table {
-    background: transparent !important;
-    color: var(--card-text) !important;
-}
-.theme-dark .ant-table-thead > tr > th,
-.theme-hybrid .ant-table-thead > tr > th {
-    background: var(--table-header-bg) !important;
-    color: var(--card-text) !important;
-    border-bottom: 1px solid var(--card-border) !important;
-}
-.theme-dark .ant-table-tbody > tr > td,
-.theme-hybrid .ant-table-tbody > tr > td {
-    color: var(--card-text) !important;
-    border-bottom: 1px solid var(--card-border) !important;
-    background: var(--card-bg) !important;
-}
-.theme-dark .ant-table-tbody > tr:hover > td,
-.theme-hybrid .ant-table-tbody > tr:hover > td {
-    background: var(--hover-bg) !important;
-}
-.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
-.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
-    background: var(--row-even) !important;
-}
+body.theme-dark .ant-modal-content, body.theme-hybrid .ant-modal-content { background: var(--card-bg) !important; }
+body.theme-dark .ant-modal-header, body.theme-hybrid .ant-modal-header { background: var(--card-bg) !important; }
+body.theme-dark .ant-modal-title, body.theme-hybrid .ant-modal-title { color: var(--card-text) !important; }
+body.theme-dark .ant-modal-close-icon, body.theme-hybrid .ant-modal-close-icon { color: var(--card-muted) !important; }
+body.theme-dark .ant-modal-body, body.theme-hybrid .ant-modal-body { color: var(--card-text) !important; }
+body.theme-dark .ant-modal-footer, body.theme-hybrid .ant-modal-footer { background: var(--card-bg) !important; }
+body.theme-dark .ant-form-item-label > label, body.theme-hybrid .ant-form-item-label > label { color: var(--card-text) !important; }
+body.theme-dark .ant-table, body.theme-hybrid .ant-table { background: transparent !important; color: var(--card-text) !important; }
+body.theme-dark .ant-table-thead > tr > th, body.theme-hybrid .ant-table-thead > tr > th { background: var(--table-header-bg) !important; color: var(--card-text) !important; border-bottom: 1px solid var(--card-border) !important; }
+body.theme-dark .ant-table-tbody > tr > td, body.theme-hybrid .ant-table-tbody > tr > td { color: var(--card-text) !important; border-bottom: 1px solid var(--card-border) !important; background: var(--card-bg) !important; }
+body.theme-dark .ant-table-tbody > tr:hover > td, body.theme-hybrid .ant-table-tbody > tr:hover > td { background: var(--hover-bg) !important; }
+body.theme-dark .ant-input-number, body.theme-hybrid .ant-input-number { background: var(--card-bg) !important; border-color: var(--card-border) !important; color: var(--card-text) !important; }
+body.theme-dark .ant-input-number-input, body.theme-hybrid .ant-input-number-input { background: var(--card-bg) !important; color: var(--card-text) !important; }
+body.theme-dark .ant-alert, body.theme-hybrid .ant-alert { background: var(--card-bg) !important; }
+body.theme-dark .ant-empty-description, body.theme-hybrid .ant-empty-description { color: var(--card-muted) !important; }
 </style>
-
