@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Pabellon extends Model
+class Ambiente extends Model
 {
-    protected $table = 'pabellones';
+    protected $table = 'ambientes';
 
     public $timestamps = true;
 
@@ -26,15 +26,15 @@ class Pabellon extends Model
 
     public function aulas(): HasMany
     {
-        return $this->hasMany(AulaGestion::class, 'id_pabellon');
+        return $this->hasMany(AulaGestion::class, 'id_ambiente');
     }
 
     public function programas(): BelongsToMany
     {
         return $this->belongsToMany(
             \App\Models\Programa::class,
-            'pabellon_programa',
-            'id_pabellon',
+            'ambiente_programa',
+            'id_ambiente',
             'id_programa'
         )->withTimestamps();
     }

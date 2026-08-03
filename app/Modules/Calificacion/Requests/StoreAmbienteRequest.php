@@ -3,9 +3,8 @@
 namespace App\Modules\Calificacion\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdatePabellonRequest extends FormRequest
+class StoreAmbienteRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,10 +13,9 @@ class UpdatePabellonRequest extends FormRequest
 
     public function rules(): array
     {
-        $id = $this->route('id');
         return [
-            'codigo' => ['sometimes', 'string', 'max:20', Rule::unique('pabellones', 'codigo')->ignore($id)],
-            'nombre' => 'sometimes|string|max:100',
+            'codigo' => 'required|string|max:20|unique:ambientes,codigo',
+            'nombre' => 'required|string|max:100',
             'descripcion' => 'nullable|string',
             'ubicacion' => 'nullable|string|max:255',
             'estado' => 'nullable|boolean',
