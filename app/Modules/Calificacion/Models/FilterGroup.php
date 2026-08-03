@@ -42,4 +42,9 @@ class FilterGroup extends Model
     {
         return $this->hasMany(FilterCondition::class, 'grupo_filtro_id', 'id');
     }
+
+    public function aulas(): HasMany
+    {
+        return $this->hasMany(Classroom::class, 'grupo_filtro_id');
+    }
 }

@@ -14,7 +14,7 @@ class UpdateAulaGestionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_pabellon' => 'sometimes|integer|exists:pabellones,id',
+            'id_ambiente' => 'sometimes|integer|exists:ambientes,id',
             'codigo' => 'sometimes|string|max:20',
             'piso' => 'nullable|integer|min:0|max:50',
             'capacidad' => 'nullable|integer|min:1|max:9999',

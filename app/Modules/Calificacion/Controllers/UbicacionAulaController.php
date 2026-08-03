@@ -17,8 +17,13 @@ class UbicacionAulaController extends BaseCalificacionController
             $query->where('area', $request->input('area'));
         }
 
+        if ($request->has('ambiente') && $request->input('ambiente') !== '') {
+            $query->where('ambiente', 'like', '%' . $request->input('ambiente') . '%');
+        }
+
+        // Compatibilidad: aceptar parámetro legacy "pabellon"
         if ($request->has('pabellon') && $request->input('pabellon') !== '') {
-            $query->where('pabellon', 'like', '%' . $request->input('pabellon') . '%');
+            $query->where('ambiente', 'like', '%' . $request->input('pabellon') . '%');
         }
 
         $aulas = $query->orderBy('area')->orderBy('codigo')->get();
@@ -30,7 +35,7 @@ class UbicacionAulaController extends BaseCalificacionController
     {
         $data = $request->validate([
             'codigo' => 'required|string|max:50|unique:ubicacion_aula,codigo',
-            'pabellon' => 'required|string|max:100',
+            'ambiente' => 'required|string|max:100',
             'piso' => 'required|string|max:10',
             'capacidad' => 'required|integer|min:1|max:500',
             'area' => 'nullable|string|max:50',
@@ -51,7 +56,7 @@ class UbicacionAulaController extends BaseCalificacionController
 
         $data = $request->validate([
             'codigo' => 'sometimes|string|max:50|unique:ubicacion_aula,codigo,' . $id,
-            'pabellon' => 'sometimes|string|max:100',
+            'ambiente' => 'sometimes|string|max:100',
             'piso' => 'sometimes|string|max:10',
             'capacidad' => 'sometimes|integer|min:1|max:500',
             'area' => 'nullable|string|max:50',
@@ -95,7 +100,7 @@ class UbicacionAulaController extends BaseCalificacionController
             $line = trim($line);
             if (empty($line)) continue;
 
-            // Parsear: codigo pabellon... piso capacidad
+            // Parsear: codigo ambiente... piso capacidad
             $parts = preg_split('/\s+/', $line);
             if (count($parts) < 4) {
                 $errors[] = "Línea " . ($i + 1) . ": formato inválido - '{$line}'";
@@ -105,7 +110,7 @@ class UbicacionAulaController extends BaseCalificacionController
             $codigo = $parts[0];
             $capacidad = (int) $parts[count($parts) - 1];
             $piso = $parts[count($parts) - 2];
-            $pabellon = implode(' ', array_slice($parts, 1, count($parts) - 3));
+            $ambiente = implode(' ', array_slice($parts, 1, count($parts) - 3));
 
             // Normalizar piso
             $pisoLower = strtolower($piso);
@@ -113,7 +118,7 @@ class UbicacionAulaController extends BaseCalificacionController
                 // Si el penúltimo no es piso, asumir que el último es piso y no hay capacidad
                 $piso = $parts[count($parts) - 1];
                 $capacidad = 40;
-                $pabellon = implode(' ', array_slice($parts, 1, count($parts) - 2));
+                $ambiente = implode(' ', array_slice($parts, 1, count($parts) - 2));
             }
 
             $pisoNorm = $this->normalizePiso($piso);
@@ -122,7 +127,7 @@ class UbicacionAulaController extends BaseCalificacionController
                 $existing = UbicacionAula::where('codigo', $codigo)->first();
                 if ($existing) {
                     $existing->update([
-                        'pabellon' => trim($pabellon),
+                        'ambiente' => trim($ambiente),
                         'piso' => $pisoNorm,
                         'capacidad' => $capacidad,
                         'area' => $area ?? $existing->area,
@@ -131,7 +136,7 @@ class UbicacionAulaController extends BaseCalificacionController
                 } else {
                     UbicacionAula::create([
                         'codigo' => $codigo,
-                        'pabellon' => trim($pabellon),
+                        'ambiente' => trim($ambiente),
                         'piso' => $pisoNorm,
                         'capacidad' => $capacidad,
                         'area' => $area,

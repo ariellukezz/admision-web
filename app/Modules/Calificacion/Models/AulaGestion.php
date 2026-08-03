@@ -12,7 +12,7 @@ class AulaGestion extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'id_pabellon',
+        'id_ambiente',
         'codigo',
         'piso',
         'capacidad',
@@ -26,8 +26,8 @@ class AulaGestion extends Model
         'estado' => 'boolean',
     ];
 
-    public function pabellon(): BelongsTo
+    public function ambiente(): BelongsTo
     {
-        return $this->belongsTo(Pabellon::class, 'id_pabellon');
+        return $this->belongsTo(Ambiente::class, 'id_ambiente');
     }
 }

@@ -12,13 +12,13 @@ class AulaGestionController extends BaseCalificacionController
 {
     public function index(Request $request): JsonResponse
     {
-        $query = AulaGestion::with('pabellon:id,nombre,codigo');
+        $query = AulaGestion::with('ambiente:id,nombre,codigo');
 
-        if ($request->has('id_pabellon')) {
-            $query->where('id_pabellon', $request->integer('id_pabellon'));
+        if ($request->has('id_ambiente')) {
+            $query->where('id_ambiente', $request->integer('id_ambiente'));
         }
 
-        $aulas = $query->orderBy('id_pabellon')->orderBy('piso')->orderBy('codigo')->get();
+        $aulas = $query->orderBy('id_ambiente')->orderBy('piso')->orderBy('codigo')->get();
 
         return $this->successResponse($aulas);
     }
@@ -26,7 +26,7 @@ class AulaGestionController extends BaseCalificacionController
     public function store(StoreAulaGestionRequest $request): JsonResponse
     {
         $aula = AulaGestion::create($request->validated());
-        $aula->load('pabellon:id,nombre,codigo');
+        $aula->load('ambiente:id,nombre,codigo');
 
         return $this->successResponse($aula, 'Aula creada correctamente', 201);
     }
@@ -40,7 +40,7 @@ class AulaGestionController extends BaseCalificacionController
         }
 
         $aula->update($request->validated());
-        $aula->load('pabellon:id,nombre,codigo');
+        $aula->load('ambiente:id,nombre,codigo');
 
         return $this->successResponse($aula, 'Aula actualizada correctamente');
     }

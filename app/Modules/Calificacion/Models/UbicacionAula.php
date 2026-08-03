@@ -10,7 +10,7 @@ class UbicacionAula extends Model
 
     protected $fillable = [
         'codigo',
-        'pabellon',
+        'ambiente',
         'piso',
         'capacidad',
         'area',

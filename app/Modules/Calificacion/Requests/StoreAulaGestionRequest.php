@@ -14,7 +14,7 @@ class StoreAulaGestionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_pabellon' => 'required|integer|exists:pabellones,id',
+            'id_ambiente' => 'required|integer|exists:ambientes,id',
             'codigo' => 'required|string|max:20',
             'piso' => 'nullable|integer|min:0|max:50',
             'capacidad' => 'nullable|integer|min:1|max:9999',
