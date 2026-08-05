@@ -1,6 +1,6 @@
 @php
     $logoIzq = public_path('imagenes/logotiny.png');
-    $logoDer = public_path('imagenes/logoDAD.jpg');
+    $logoDer = public_path('imagenes/logoDAD.png');
     $ordenLabel = $orderBy === 'alfabetico' ? 'Orden Alfabético' : 'Orden de Asiento';
 @endphp
 <!DOCTYPE html>

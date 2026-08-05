@@ -1,6 +1,6 @@
 @php
     $logoIzq = public_path('imagenes/logotiny.png');
-    $logoDer = public_path('imagenes/logoDAD.jpg');
+    $logoDer = public_path('imagenes/logoDAD.png');
     $izqWidth = $logoWidth ?? 65;
     $derWidth = $izqWidth + 10;
     $izqTdWidth = $izqWidth + 5;

@@ -1,6 +1,6 @@
 @php
     $logoIzq = public_path('imagenes/logotiny.png');
-    $logoDer = public_path('imagenes/logoDAD.jpg');
+    $logoDer = public_path('imagenes/logoDAD.png');
     $correcta = $multiplicador ? (float) $multiplicador->correcta : null;
 
     $totalPreguntas = 0;

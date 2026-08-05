@@ -3,7 +3,7 @@
     set_time_limit(300);
     ini_set('max_execution_time', 300);
     $logoIzq = public_path('imagenes/logotiny.png');
-    $logoDer = public_path('imagenes/logoDAD.jpg');
+    $logoDer = public_path('imagenes/logoDAD.png');
 @endphp
 <!DOCTYPE html>
 <html>
