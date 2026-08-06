@@ -167,4 +167,52 @@ class UbigeoController extends Controller
             ], 500);
         }
     }
+
+    public function saveDistrito(Request $request)
+    {
+        $request->validate([
+            'nombre'      => 'required|string|max:40',
+            'id_provincia' => 'required|integer',
+        ]);
+
+        try {
+            $exists = DB::table('distritos')
+                ->where('nombre', $request->nombre)
+                ->where('id_prov', $request->id_provincia)
+                ->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'estado'  => false,
+                    'titulo'  => 'ERROR',
+                    'mensaje' => 'El distrito ya existe en esta provincia'
+                ], 400);
+            }
+
+            $count = DB::table('distritos')->where('id_prov', $request->id_provincia)->count();
+            $codigo = str_pad($count + 1, 2, '0', STR_PAD_LEFT);
+
+            $id = DB::table('distritos')->insertGetId([
+                'codigo'      => $codigo,
+                'nombre'      => $request->nombre,
+                'id_prov'     => $request->id_provincia,
+                'created_at'  => now(),
+                'updated_at'  => now(),
+            ]);
+
+            return response()->json([
+                'estado'  => true,
+                'titulo'  => 'DISTRITO CREADO',
+                'mensaje' => 'Distrito creado con éxito',
+                'datos'   => ['id' => $id, 'nombre' => $request->nombre]
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'estado'  => false,
+                'titulo'  => 'ERROR',
+                'mensaje' => 'Ocurrió un error al guardar el distrito',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
 }

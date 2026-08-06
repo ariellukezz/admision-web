@@ -160,17 +160,37 @@ Route::post('participantes', 'ParticipanteController@store');
 Route::put('participantes/{id}', 'ParticipanteController@update');
 Route::delete('participantes/{id}', 'ParticipanteController@destroy');
 
-// Pabellones y Aulas
-Route::get('pabellones', 'PabellonController@index');
-Route::post('pabellones', 'PabellonController@store');
-Route::get('pabellones/{id}', 'PabellonController@show');
-Route::put('pabellones/{id}', 'PabellonController@update');
-Route::delete('pabellones/{id}', 'PabellonController@destroy');
-Route::get('pabellones/{id}/aulas', 'PabellonController@aulas');
+// Resumen de Distribuciones por Proceso
+Route::get('distribucion-summary', 'DistribucionSummaryController@index');
+
+// Ambientes y Aulas
+Route::get('ambientes', 'AmbienteController@index');
+Route::post('ambientes', 'AmbienteController@store');
+Route::get('ambientes/{id}', 'AmbienteController@show');
+Route::put('ambientes/{id}', 'AmbienteController@update');
+Route::delete('ambientes/{id}', 'AmbienteController@destroy');
+Route::get('ambientes/{id}/aulas', 'AmbienteController@aulas');
 Route::get('aulas-gestion', 'AulaGestionController@index');
 Route::post('aulas-gestion', 'AulaGestionController@store');
 Route::put('aulas-gestion/{id}', 'AulaGestionController@update');
 Route::delete('aulas-gestion/{id}', 'AulaGestionController@destroy');
+
+// Distribución de Ambientes
+Route::get('distribucion-ambientes', 'DistribucionAmbienteController@index');
+Route::get('distribucion-ambientes/grupos-filtro', 'DistribucionAmbienteController@gruposFiltro');
+Route::post('distribucion-ambientes', 'DistribucionAmbienteController@store');
+Route::put('distribucion-ambientes/{id}', 'DistribucionAmbienteController@update');
+Route::get('distribucion-ambientes/{id}', 'DistribucionAmbienteController@show');
+Route::delete('distribucion-ambientes/{id}', 'DistribucionAmbienteController@destroy');
+
+// Asignación de Personal a Distribución
+Route::get('asignacion-personal/cargos', 'AsignacionPersonalController@cargos');
+Route::get('distribucion-ambientes/{idDistribucion}/personal', 'AsignacionPersonalController@index');
+Route::post('distribucion-ambientes/{idDistribucion}/personal/asignar-aleatorio', 'AsignacionPersonalController@asignarAleatorio');
+Route::get('distribucion-ambientes/{idDistribucion}/personal/disponibles', 'AsignacionPersonalController@disponibles');
+Route::post('distribucion-ambientes/{idDistribucion}/personal', 'AsignacionPersonalController@store');
+Route::put('distribucion-ambientes/{idDistribucion}/personal/{id}', 'AsignacionPersonalController@update');
+Route::delete('distribucion-ambientes/{idDistribucion}/personal/{id}', 'AsignacionPersonalController@destroy');
 
 // Ubicación de Aulas (tabla temporal para asignación física)
 Route::get('ubicacion-aula', 'UbicacionAulaController@index');
@@ -180,3 +200,9 @@ Route::delete('ubicacion-aula/{id}', 'UbicacionAulaController@destroy');
 Route::post('ubicacion-aula/import', 'UbicacionAulaController@import');
 Route::delete('ubicacion-aula/all', 'UbicacionAulaController@destroyAll');
 Route::get('ubicacion-aula/areas', 'UbicacionAulaController@areas');
+
+// Simulación Manual (PDFs con mPDF y Excel con Laravel Excel)
+Route::post('simulacion/grid-pdf', 'SimulacionPdfController@gridPdf');
+Route::post('simulacion/mapeo-pdf', 'SimulacionPdfController@mapeoPdf');
+Route::post('simulacion/grid-excel', 'SimulacionPdfController@gridExcel');
+Route::post('simulacion/mapeo-excel', 'SimulacionPdfController@mapeoExcel');

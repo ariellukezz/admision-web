@@ -12,6 +12,10 @@ use App\Http\Controllers\HuellaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\VacantesController;
 use App\Http\Controllers\TarifaController;
+use App\Http\Controllers\CargoController;
+use App\Http\Controllers\TipoPersonalController;
+use App\Http\Controllers\ParticipantePersonalController;
+use App\Http\Controllers\SorteoController;
 use App\Http\Controllers\InscripcionController;
 use App\Http\Controllers\ProcesoController;
 use App\Http\Controllers\FilialController;
@@ -261,6 +265,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/ubigeos/provincias/{departamentoId}', [UbigeoController::class, 'getProvincias']);
     Route::get('/ubigeos/distritos/{provinciaId}', [UbigeoController::class, 'getDistritos']);
     Route::post('/ubigeos/save', [UbigeoController::class, 'saveUbigeo']);
+    Route::post('/ubigeos/save-distrito', [UbigeoController::class, 'saveDistrito']);
     Route::get('/ubigeos/eliminar/{id}', [UbigeoController::class, 'deleteUbigeo']);
 
     // AÑOS
@@ -345,19 +350,37 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::put('/control-biometrico/{id}', [ControlBiometricoController::class, 'actualizar'])->name('admin-control-biometrico-actualizar');
 
     //PARTICIPANTES
-    Route::get('/participante-docente', fn () => Inertia::render('Admin/Participante/Docente'))->name('admin-participante-docente');
-    Route::get('/participante-administrativo', fn () => Inertia::render('Admin/Participante/Administrativo'))->name('admin-participante-administrativo');
-    Route::get('/participante-sorteo', fn () => Inertia::render('Admin/Participante/Sorteo'))->name('admin-participante-sorteo');
+    Route::get('/participantes', fn () => Inertia::render('Participantes/index', ['tipos' => \App\Models\TipoPersonal::select('id as value', 'nombre as label')->orderBy('nombre')->get()]))->name('admin-participantes');
+    Route::post('/participantes/get-participantes', [ParticipantePersonalController::class, 'getParticipantes']);
+    Route::get('/participantes/buscar-reniec/{dni}', [ParticipantePersonalController::class, 'buscarReniec']);
+    Route::post('/participantes/subir-foto', [ParticipantePersonalController::class, 'subirFoto']);
+    Route::post('/save-participante', [ParticipantePersonalController::class, 'saveParticipante']);
+    Route::post('/cambiar-estado-participante/{id}', [ParticipantePersonalController::class, 'cambiarEstado']);
+    Route::get('/eliminar-participante/{id}', [ParticipantePersonalController::class, 'deleteParticipante']);
 
-    Route::post('/save-docente', [DocenteController::class, 'saveDocente']);
-    Route::post('/get-docentes', [DocenteController::class, 'getDocentes']);
-    Route::post('/eliminar-docente', [DocenteController::class, 'deleteDocente']);
-    Route::post('/actualizar-sexo-docente', [DocenteController::class, 'actualizarSexo']);
-
-    Route::post('/save-administrativo', [AdministrativoController::class, 'saveAdministrativo']);
-    Route::post('/get-administrativos', [AdministrativoController::class, 'getAdministrativos']);
-    Route::post('/eliminar-administrativo', [AdministrativoController::class, 'deleteAdministrativo']);
-    Route::post('/actualizar-sexo-administrativo', [AdministrativoController::class, 'actualizarSexo']);
+    Route::get('/participante-sorteo', [SorteoController::class, 'index'])->name('admin-participante-sorteo');
+    Route::get('/sorteo/get-sorteos', [SorteoController::class, 'getSorteos']);
+    Route::post('/sorteo/save-sorteo', [SorteoController::class, 'saveSorteo']);
+    Route::post('/sorteo/cambiar-estado-sorteo/{id}', [SorteoController::class, 'cambiarEstadoSorteo']);
+    Route::get('/sorteo/eliminar-sorteo/{id}', [SorteoController::class, 'deleteSorteo']);
+    Route::get('/sorteo/get-config-cargos/{id_sorteo}', [SorteoController::class, 'getConfigCargos']);
+    Route::post('/sorteo/save-config-cantidad', [SorteoController::class, 'saveConfigCantidad']);
+    Route::get('/sorteo/eliminar-config-cantidad/{id}', [SorteoController::class, 'deleteConfigCantidad']);
+    Route::post('/sorteo/buscar-participante', [SorteoController::class, 'buscarParticipante']);
+    Route::post('/sorteo/registrar-seleccion', [SorteoController::class, 'registrarSeleccion']);
+    Route::post('/sorteo/registrar-manual', [SorteoController::class, 'registrarManual']);
+    Route::post('/sorteo/get-seleccionados', [SorteoController::class, 'getSeleccionados']);
+    Route::post('/sorteo/observar-participante', [SorteoController::class, 'observarParticipante']);
+    Route::post('/sorteo/anular-participante', [SorteoController::class, 'anularParticipante']);
+    Route::post('/sorteo/restablecer-participante', [SorteoController::class, 'restablecerParticipante']);
+    Route::get('/sorteo/eliminar-seleccionado/{id}', [SorteoController::class, 'deleteSeleccionado']);
+    Route::get('/sorteo/export-excel', [SorteoController::class, 'exportExcel']);
+    Route::get('/sorteo/export-pdf', [SorteoController::class, 'exportPdf']);
+    Route::get('/sorteo/export-observados-pdf', [SorteoController::class, 'exportObservadosPdf']);
+    Route::get('/sorteo/export-resumen-pdf', [SorteoController::class, 'exportResumenPdf']);
+    Route::get('/sorteo/export-cargos-config-pdf', [SorteoController::class, 'exportCargosConfigPdf']);
+    Route::get('/sorteo/export-credenciales-pdf', [SorteoController::class, 'exportCredencialesPdf']);
+    Route::post('/sorteo/credenciales-data', [SorteoController::class, 'getCredencialesData']);
 
     Route::get('/colegios', fn () => Inertia::render('Admin/Colegios/index'))->name('admin-colegios');
     Route::post('/get-colegios', [ColegioController::class, 'getColegios']);
@@ -392,6 +415,19 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/save-tarifa', [TarifaController::class, 'saveTarifa']);
     Route::post('/cambiar-estado-tarifa/{id}', [TarifaController::class, 'cambiarEstado']);
     Route::get('/eliminar-tarifa/{id}', [TarifaController::class, 'deleteTarifa']);
+
+    //CARGOS
+    Route::get('/cargos', fn () => Inertia::render('Cargos/index'))->name('cargo-index');
+    Route::post('/cargos/get-cargos', [CargoController::class, 'getCargos']);
+    Route::post('/save-cargo', [CargoController::class, 'saveCargo']);
+    Route::post('/cambiar-estado-cargo/{id}', [CargoController::class, 'cambiarEstado']);
+    Route::get('/eliminar-cargo/{id}', [CargoController::class, 'deleteCargo']);
+
+    //TIPO DE PERSONAL
+    Route::get('/tipo-personal', fn () => Inertia::render('TipoPersonal/index'))->name('tipo-personal-index');
+    Route::post('/tipo-personal/get-tipos', [TipoPersonalController::class, 'getTipos']);
+    Route::post('/save-tipo-personal', [TipoPersonalController::class, 'saveTipo']);
+    Route::get('/eliminar-tipo-personal/{id}', [TipoPersonalController::class, 'deleteTipo']);
 
     //RENIEC
     Route::get('/consulta-reniec', fn () => Inertia::render('Admin/Reniec/index'))->name('admin-consulta-reniec');
