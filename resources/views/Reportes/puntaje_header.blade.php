@@ -13,7 +13,7 @@
             </div>
         </td>
         <td style="width: 70px; text-align: right; border: none; padding: 4px 6px;">
-            <img src="{{ public_path('imagenes/logoDAD.jpg') }}" width="60">
+            <img src="{{ public_path('imagenes/logoDAD.png') }}" width="60">
         </td>
     </tr>
 </table>
