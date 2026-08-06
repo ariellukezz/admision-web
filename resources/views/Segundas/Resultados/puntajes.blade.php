@@ -91,7 +91,7 @@
             </td>
 
             <td style="border:none; text-align:right;" width="80">
-                {{-- <img src="{{ public_path('imagenes/logoDAD.jpg') }}" width="70"> --}}
+                {{-- <img src="{{ public_path('imagenes/logoDAD.png') }}" width="70"> --}}
             </td>
         </tr>
     </table>

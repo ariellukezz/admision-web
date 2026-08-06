@@ -68,7 +68,7 @@
                     </td>
                     <td v-align="top" align="right" style="text-align:right; border:none;">
                         {{-- <div style="margin-top: 5px">
-                            <img src="{{ public_path('imagenes/logoDAD.jpg')}}"  width="75">
+                            <img src="{{ public_path('imagenes/logoDAD.png')}}"  width="75">
                         </div> --}}
                     </td>
                 </tr>

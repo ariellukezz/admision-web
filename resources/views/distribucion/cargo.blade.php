@@ -58,7 +58,7 @@
                         </div>
                     </td>
                     <td v-align="top" align="left">
-                        <img src="{{ public_path('imagenes/logoDAD.jpg')}}"  width="65">
+                        <img src="{{ public_path('imagenes/logoDAD.png')}}"  width="65">
                     </td>
                 </tr>
                 <tr>

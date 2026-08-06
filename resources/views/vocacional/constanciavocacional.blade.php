@@ -32,7 +32,7 @@
                         <div>VICERECTORADO ACADÉMICO</div>
                         <div>DIRECCIÓN DE ADMISIÓN</div>
                     </td>
-                    {{-- <td align="center" rowspan="1"> <img src="{{ public_path('imagenes/logoDAD.jpg')}}"  width="85"></td> --}}
+                    {{-- <td align="center" rowspan="1"> <img src="{{ public_path('imagenes/logoDAD.png')}}"  width="85"></td> --}}
                 </tr>
             </table>    
         </div>
