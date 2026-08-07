@@ -277,10 +277,10 @@ const menuItems = [
     label: 'Gestión de participantes',
     color: '#ec4899',
     children: [
-      { key: 'docentes', icon: SettingFilled, label: 'Docentes', route: 'admin-participante-docente' },
-      { key: 'administrativos', icon: SettingFilled, label: 'Administrativos', route: 'admin-participante-administrativo' },
-      { key: 'sorteo', icon: SettingFilled, label: 'Sorteo', route: 'admin-participante-sorteo' },
-      { key: 'participantes', icon: SettingFilled, label: 'Participantes', route: 'modalidad-index' },
+      { key: 'participantes', icon: SettingFilled, label: 'Participantes', route: 'admin-participantes' },
+      { key: 'cargos', icon: SettingFilled, label: 'Cargos', route: 'cargo-index' },
+      { key: 'tipo-personal', icon: SettingFilled, label: 'Tipo de Personal', route: 'tipo-personal-index' },
+      { key: 'sorteo', icon: SettingFilled, label: 'Selección', route: 'admin-participante-sorteo' },
     ]
   },
   {
@@ -1024,8 +1024,8 @@ watch(proceso, (newVal, oldVal) => {
 }
 
 /* Buttons (text/ghost type) */
-.theme-dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous),
-.theme-hybrid .ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous) {
+.theme-dark .ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous):not(.ant-btn-default),
+.theme-hybrid .ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous):not(.ant-btn-default) {
   background: transparent !important;
 }
 .theme-dark .ant-btn-text,
@@ -1042,14 +1042,20 @@ watch(proceso, (newVal, oldVal) => {
 .theme-hybrid .ant-btn-default {
   background: var(--card-bg) !important;
   border-color: var(--card-border) !important;
+  color: var(--card-text) !important;
 }
 .theme-dark .ant-btn-default:hover {
   background: var(--hover-bg) !important;
   border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
 }
 .theme-hybrid .ant-btn-default:hover {
   background: rgba(0, 0, 0, 0.04) !important;
   border-color: var(--primary-color) !important;
+}
+.theme-dark .ant-btn-text,
+.theme-hybrid .ant-btn-text {
+  color: var(--card-text) !important;
 }
 .theme-dark .ant-btn[disabled],
 .theme-hybrid .ant-btn[disabled] {

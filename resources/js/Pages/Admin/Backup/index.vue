@@ -8,11 +8,11 @@
   <div class="rounded-xl shadow-md p-6 mb-4 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-[#2d3748] flex items-center gap-3">
+        <h1 class="text-2xl font-bold flex items-center gap-3" style="color: var(--card-text, #2d3748);">
           <DatabaseOutlined style="font-size: 28px;" />
           Respaldo de Base de Datos
         </h1>
-        <p class="text-gray-500 mt-1 text-sm">Gestión de respaldos y restauración del sistema</p>
+        <p class="mt-1 text-sm" style="color: var(--card-muted, #6b7280);">Gestión de respaldos y restauración del sistema</p>
       </div>
       <div class="flex gap-2">
         <a-button
@@ -48,8 +48,8 @@
         <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Base de datos</p>
-              <p class="text-lg font-bold text-gray-800 mt-1">{{ dbInfo.database || '-' }}</p>
+              <p class="text-xs uppercase tracking-wide font-semibold" style="color: var(--card-muted, #6b7280);">Base de datos</p>
+              <p class="text-lg font-bold mt-1" style="color: var(--card-text, #1e293b);">{{ dbInfo.database || '-' }}</p>
             </div>
             <div class="p-2 rounded-lg" style="background: #dbeafe;">
               <DatabaseOutlined style="color: #3b82f6; font-size: 20px;" />
@@ -61,8 +61,8 @@
         <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Tamaño BD</p>
-              <p class="text-lg font-bold text-gray-800 mt-1">{{ dbInfo.size_mb }} MB</p>
+              <p class="text-xs uppercase tracking-wide font-semibold" style="color: var(--card-muted, #6b7280);">Tamaño BD</p>
+              <p class="text-lg font-bold mt-1" style="color: var(--card-text, #1e293b);">{{ dbInfo.size_mb }} MB</p>
             </div>
             <div class="p-2 rounded-lg" style="background: #dcfce7;">
               <CloudOutlined style="color: #22c55e; font-size: 20px;" />
@@ -74,8 +74,8 @@
         <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Tablas</p>
-              <p class="text-lg font-bold text-gray-800 mt-1">{{ dbInfo.tables }}</p>
+              <p class="text-xs uppercase tracking-wide font-semibold" style="color: var(--card-muted, #6b7280);">Tablas</p>
+              <p class="text-lg font-bold mt-1" style="color: var(--card-text, #1e293b);">{{ dbInfo.tables }}</p>
             </div>
             <div class="p-2 rounded-lg" style="background: #fef3c7;">
               <TableOutlined style="color: #f59e0b; font-size: 20px;" />
@@ -87,9 +87,9 @@
         <div class="rounded-xl shadow-sm p-5 border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
           <div class="flex justify-between items-start">
             <div>
-              <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Espacio en disco</p>
-              <p class="text-lg font-bold text-gray-800 mt-1">{{ diskFree }}</p>
-              <p class="text-xs text-gray-400">de {{ diskTotal }}</p>
+              <p class="text-xs uppercase tracking-wide font-semibold" style="color: var(--card-muted, #6b7280);">Espacio en disco</p>
+              <p class="text-lg font-bold mt-1" style="color: var(--card-text, #1e293b);">{{ diskFree }}</p>
+              <p class="text-xs" style="color: var(--card-muted, #9ca3af);">de {{ diskTotal }}</p>
             </div>
             <div class="p-2 rounded-lg" style="background: #f3e8ff;">
               <HddOutlined style="color: #a855f7; font-size: 20px;" />
@@ -102,9 +102,9 @@
 
   <!-- TABLA RESPALDOS -->
   <div class="rounded-xl shadow-md border" style="background: var(--card-bg, #ffffff); border-color: var(--card-border, #e2e8f0); color: var(--card-text, #1e293b);">
-    <div class="p-5 border-b border-gray-100">
+    <div class="p-5" style="border-bottom: 1px solid var(--card-border, #e2e8f0);">
       <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold text-gray-800">Historial de Respaldos</h2>
+        <h2 class="text-lg font-bold" style="color: var(--card-text, #1e293b);">Historial de Respaldos</h2>
         <a-badge :count="backups.length" :number-style="{ backgroundColor: '#3b82f6' }" />
       </div>
     </div>
@@ -125,8 +125,8 @@
             <component :is="record.compressed ? CompressOutlined : FileTextOutlined"
               :style="{ color: record.compressed ? '#3b82f6' : '#6b7280', fontSize: '18px' }" />
             <div>
-              <div class="font-semibold text-gray-800 text-sm">{{ record.file }}</div>
-              <div class="text-xs text-gray-400">{{ record.compressed ? 'Comprimido (.gz)' : 'SQL plano' }}</div>
+              <div class="font-semibold text-sm" style="color: var(--card-text, #1e293b);">{{ record.file }}</div>
+              <div class="text-xs" style="color: var(--card-muted, #9ca3af);">{{ record.compressed ? 'Comprimido (.gz)' : 'SQL plano' }}</div>
             </div>
           </div>
         </template>
@@ -138,7 +138,7 @@
         </template>
 
         <template v-if="column.key === 'date'">
-          <div class="text-sm text-gray-700">{{ record.date }}</div>
+          <div class="text-sm" style="color: var(--card-text, #374151);">{{ record.date }}</div>
         </template>
 
         <template v-if="column.key === 'acciones'">

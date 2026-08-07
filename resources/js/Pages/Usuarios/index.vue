@@ -359,12 +359,14 @@ getProcesos()
 
 <style scoped>
 .mac-card {
-  background: rgba(255,255,255,.92);
+  background: var(--card-bg, rgba(255,255,255,.92));
   backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border, #e2e8f0);
   border-radius: 20px;
   box-shadow: 0 20px 45px rgba(0,0,0,.06);
   padding: 18px;
   transition: all .3s ease;
+  color: var(--card-text, #1e293b);
 }
 
 .header {
@@ -380,6 +382,7 @@ getProcesos()
   font-size: 20px;
   font-weight: 600;
   margin: 0;
+  color: var(--card-text, #1e293b);
 }
 
 .header-actions {
@@ -411,11 +414,12 @@ getProcesos()
 .user-name {
   font-weight: 500;
   font-size: 14px;
+  color: var(--card-text, #1e293b);
 }
 
 .user-dni {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--card-muted, #6b7280);
 }
 
 .mac-table {
@@ -427,15 +431,15 @@ getProcesos()
 }
 
 .mac-table :deep(.ant-table-thead th) {
-  background: #f8fafc;
+  background: var(--table-header-bg, #f8fafc);
   font-size: 12px;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--card-muted, #64748b);
   font-weight: 600;
 }
 
 .mac-table :deep(.ant-table-tbody tr:hover) {
-  background: #f1f5f9;
+  background: var(--hover-bg, #f1f5f9);
   transition: .2s;
 }
 
@@ -457,7 +461,7 @@ getProcesos()
 
 :deep(.ant-form-item-label > label) {
   font-weight: 500;
-  color: #334155;
+  color: var(--card-muted, #334155);
 }
 
 :deep(.ant-input),
@@ -529,5 +533,63 @@ getProcesos()
   .user-dni {
     font-size: 11px;
   }
+}
+</style>
+
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+.theme-dark .ant-modal-content,
+.theme-hybrid .ant-modal-content {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-header,
+.theme-hybrid .ant-modal-header {
+    background: var(--card-bg) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-modal-title,
+.theme-hybrid .ant-modal-title {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-close,
+.theme-hybrid .ant-modal-close {
+    color: var(--card-muted) !important;
+}
+.theme-dark .ant-input,
+.theme-hybrid .ant-input,
+.theme-dark .ant-select-selector,
+.theme-hybrid .ant-select-selector {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-form-item-label > label,
+.theme-hybrid .ant-form-item-label > label {
+    color: var(--card-muted) !important;
 }
 </style>

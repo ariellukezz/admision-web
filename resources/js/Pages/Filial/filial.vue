@@ -1,7 +1,7 @@
 <template>
 <Head title="Filiales"/>
 <AuthenticatedLayout>
-<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-4" style="border-radius: 10px; min-height: calc(100vh - 92px);">
+<div class="filial-container">
 
 <div class="flex justify-between mb-2" >
     <div class="mr-3">
@@ -302,5 +302,89 @@ const columnsFiliales = [
 
 </script>
 <style scoped>
+.filial-container {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #e2e8f0);
+  color: var(--card-text, #1e293b);
+  border-radius: 10px;
+  min-height: calc(100vh - 92px);
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+</style>
 
+<style>
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+    background: transparent !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+    background: var(--table-header-bg) !important;
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+    color: var(--card-text) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+    background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+    background: var(--hover-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:nth-child(even) > td,
+.theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
+    background: var(--row-even) !important;
+}
+.theme-dark .ant-pagination,
+.theme-hybrid .ant-pagination {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-pagination .ant-pagination-item,
+.theme-hybrid .ant-pagination .ant-pagination-item {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-pagination .ant-pagination-item a,
+.theme-hybrid .ant-pagination .ant-pagination-item a {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-select-selector,
+.theme-hybrid .ant-select-selector {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-input,
+.theme-hybrid .ant-input {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-content,
+.theme-hybrid .ant-modal-content {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-header,
+.theme-hybrid .ant-modal-header {
+    background: var(--card-bg) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-modal-title,
+.theme-hybrid .ant-modal-title {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-form-item-label > label,
+.theme-hybrid .ant-form-item-label > label {
+    color: var(--card-muted) !important;
+}
+.theme-dark .ant-modal-close,
+.theme-hybrid .ant-modal-close {
+    color: var(--card-muted) !important;
+}
 </style>

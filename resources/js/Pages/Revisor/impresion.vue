@@ -466,28 +466,39 @@ const CambiarCodigo = async () => {
 }
 
 const Inscribir = async () => {
-    let res = await axios.post("inscribir", { postulante: postulante.value });
-    imprimirPDF(dniseleccionado.value)
-    dniseleccionado.value = "";
-    dni.value = "";
-    postulante.value = {
-        id:"",
-        nombres:"",
-        postulante_foto: null,
-        primer_apellido:"",
-        segundo_apellido:"",
-        sexo:'1',
-        fec_nacimiento:"",
-        colegio: "",
-        id_gestion:"",
-        procedencia: "",
-        proceso: "",
-        id_proceso:"",
-        modalidad: "",
-        id_modalidad:"",
-        programa:"",
-        id_programa:"",
-        dni_temp:""
+    try {
+        let res = await axios.post("inscribir", { postulante: postulante.value });
+        if (res.data.estado === true) {
+            imprimirPDF(dniseleccionado.value);
+            notificacion('success', 'Inscrito', 'Postulante inscrito correctamente.');
+        } else if (res.data.mensaje) {
+            notificacion('error', 'Error', res.data.mensaje);
+            return;
+        }
+        dniseleccionado.value = "";
+        dni.value = "";
+        postulante.value = {
+            id:"",
+            nombres:"",
+            postulante_foto: null,
+            primer_apellido:"",
+            segundo_apellido:"",
+            sexo:'1',
+            fec_nacimiento:"",
+            colegio: "",
+            id_gestion:"",
+            procedencia: "",
+            proceso: "",
+            id_proceso:"",
+            modalidad: "",
+            id_modalidad:"",
+            programa:"",
+            id_programa:"",
+            dni_temp:""
+        }
+    } catch (error) {
+        const msg = error.response?.data?.mensaje || 'Ocurrió un error durante la inscripción.';
+        notificacion('error', 'Error', msg);
     }
 }
 
@@ -535,12 +546,28 @@ const onSearch = (value) => {
 }
 
 const imprimirPDF = (dnni) => {
-    var iframe = document.createElement('iframe');
-    iframe.style.display = "none";
-    iframe.src = baseUrl+'/documentos/'+postulante.value.id_proceso+'/inscripciones/constancias/'+dnni+'.pdf';
-    document.body.appendChild(iframe);
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
+    const url = baseUrl+'/documentos/'+postulante.value.id_proceso+'/inscripciones/constancias/'+dnni+'.pdf';
+
+    fetch(url, { method: 'HEAD' })
+        .then(response => {
+            if (!response.ok) {
+                notificacion('error', 'Error', 'No se encontró la constancia. Verifique que el postulante esté inscrito.');
+                return;
+            }
+            var iframe = document.createElement('iframe');
+            iframe.style.display = "none";
+            iframe.src = url;
+            iframe.onload = function() {
+                setTimeout(function() {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                }, 500);
+            };
+            document.body.appendChild(iframe);
+        })
+        .catch(() => {
+            notificacion('error', 'Error', 'No se pudo cargar el PDF para impresión.');
+        });
 }
 
 const notificacion = (type, titulo, mensaje) => {

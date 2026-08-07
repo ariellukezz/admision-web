@@ -5,17 +5,17 @@
     <div class="overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column; background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
 
       <!-- Header -->
-      <div class="border-b border-gray-100 px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
+      <div class="border-b px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b); border-color: var(--card-border, #f3f4f6);">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Correos SMTP</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione las cuentas de correo para el envío de códigos de verificación</p>
+            <h1 class="text-2xl font-semibold tracking-tight" style="color: var(--card-text, #111827);">Correos SMTP</h1>
+            <p class="text-sm mt-1" style="color: var(--card-muted, #6b7280);">Gestione las cuentas de correo para el envío de códigos de verificación</p>
           </div>
 
           <div class="flex items-center gap-4">
             <!-- Toggle email verification -->
-            <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
-              <span class="text-sm font-medium text-gray-700">Verificación de preinscripción</span>
+            <div class="flex items-center gap-2 px-4 py-2 rounded-lg border" style="background: var(--table-header-bg, #f9fafb); border-color: var(--card-border, #e5e7eb);">
+              <span class="text-sm font-medium" style="color: var(--card-muted, #374151);">Verificación de preinscripción</span>
               <a-switch
                 :checked="emailVerificationEnabled"
                 @change="toggleEmailVerification"
@@ -37,32 +37,32 @@
       <div class="flex-1 overflow-auto pl-4 pb-4">
         <table class="w-full border-collapse">
           <thead class="sticky top-0 z-10 mt-0" style="margin-top:20px; background: var(--content-bg, #f9fafb); box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);">
-            <tr class="bg-gray-100 border-b-2 border-gray-300">
-              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Nombre</th>
-              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Host:Port</th>
-              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Usuario</th>
-              <th class="text-left py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Remitente</th>
-              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Estado</th>
-              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Activo</th>
-              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Predet.</th>
-              <th class="text-center py-3 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap w-40">Acciones</th>
+            <tr class="border-b-2" style="border-color: var(--card-border, #d1d5db);">
+              <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Nombre</th>
+              <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Host:Port</th>
+              <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Usuario</th>
+              <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Remitente</th>
+              <th class="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Estado</th>
+              <th class="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Activo</th>
+              <th class="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap" style="color: var(--card-muted, #4b5563);">Predet.</th>
+              <th class="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider whitespace-nowrap w-40" style="color: var(--card-muted, #4b5563);">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in cuentas" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+            <tr v-for="item in cuentas" :key="item.id" class="border-b transition-colors" style="border-color: var(--card-border, #f3f4f6);">
               <td class="py-3 px-4">
-                <span class="text-sm font-medium text-gray-900">{{ item.name }}</span>
+                <span class="text-sm font-medium" style="color: var(--card-text, #111827);">{{ item.name }}</span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-600">{{ item.host }}:{{ item.port }}</span>
-                <span v-if="item.encryption" class="ml-1 text-xs text-gray-400">({{ item.encryption }})</span>
+                <span class="text-sm" style="color: var(--card-text, #4b5563);">{{ item.host }}:{{ item.port }}</span>
+                <span v-if="item.encryption" class="ml-1 text-xs" style="color: var(--card-muted, #9ca3af);">({{ item.encryption }})</span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-600">{{ item.username }}</span>
+                <span class="text-sm" style="color: var(--card-text, #4b5563);">{{ item.username }}</span>
               </td>
               <td class="py-3 px-4">
-                <div class="text-sm text-gray-900 font-medium">{{ item.from_name }}</div>
-                <div class="text-xs text-gray-500">{{ item.from_address }}</div>
+                <div class="text-sm font-medium" style="color: var(--card-text, #111827);">{{ item.from_name }}</div>
+                <div class="text-xs" style="color: var(--card-muted, #6b7280);">{{ item.from_address }}</div>
               </td>
               <td class="py-3 px-4 text-center">
                 <a-tooltip v-if="item.error_message" :title="item.error_message">
@@ -431,5 +431,56 @@ onMounted(() => {
 .theme-dark .ant-table-tbody > tr:nth-child(even) > td,
 .theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
     background: var(--row-even) !important;
+}
+/* Native table dark mode */
+.theme-dark table thead,
+.theme-hybrid table thead {
+    background: var(--table-header-bg) !important;
+}
+.theme-dark table thead th,
+.theme-hybrid table thead th {
+    color: var(--card-muted) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-dark table tbody tr,
+.theme-hybrid table tbody tr {
+    border-color: var(--card-border) !important;
+}
+.theme-dark table tbody tr:hover td,
+.theme-hybrid table tbody tr:hover td {
+    background: var(--hover-bg) !important;
+}
+/* Modal form dark mode */
+.theme-dark .ant-modal-content,
+.theme-hybrid .ant-modal-content {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-header,
+.theme-hybrid .ant-modal-header {
+    background: var(--card-bg) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-modal-title,
+.theme-hybrid .ant-modal-title {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-close,
+.theme-hybrid .ant-modal-close {
+    color: var(--card-muted) !important;
+}
+.theme-dark input,
+.theme-hybrid input,
+.theme-dark select,
+.theme-hybrid select,
+.theme-dark textarea,
+.theme-hybrid textarea {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark label,
+.theme-hybrid label {
+    color: var(--card-muted) !important;
 }
 </style>

@@ -5,11 +5,11 @@
     <div class="overflow-hidden shadow-xl rounded-2xl" style="height: calc(100vh - 103px); display: flex; flex-direction: column; background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
 
       <!-- Header -->
-      <div class="border-b border-gray-100 px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b);">
+      <div class="border-b px-8 py-6 rounded-t-2xl" style="background: var(--card-bg, #ffffff); color: var(--card-text, #1e293b); border-color: var(--card-border, #f3f4f6);">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Configuración de Citación</h1>
-            <p class="text-sm text-gray-500 mt-1">Define fechas y criterios de citación presencial por proceso de admisión</p>
+            <h1 class="text-2xl font-semibold tracking-tight" style="color: var(--card-text, #111827);">Configuración de Citación</h1>
+            <p class="text-sm mt-1" style="color: var(--card-muted, #6b7280);">Define fechas y criterios de citación presencial por proceso de admisión</p>
           </div>
 
           <button
@@ -24,22 +24,22 @@
       <!-- Table -->
       <div class="flex-1 overflow-auto px-8 py-6">
         <table class="w-full">
-          <thead class="bg-gray-50 rounded-lg sticky top-0">
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Proceso</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Criterio</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Horario</th>
-              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Lugar</th>
-              <th class="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-              <th class="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">Acciones</th>
+          <thead class="rounded-lg sticky top-0" style="background: var(--table-header-bg, #f9fafb);">
+            <tr class="border-b" style="border-color: var(--card-border, #e5e7eb);">
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Proceso</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Criterio</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Valor</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Fecha</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Horario</th>
+              <th class="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Lugar</th>
+              <th class="text-center py-3 px-4 text-xs font-semibold uppercase tracking-wider" style="color: var(--card-muted, #6b7280);">Estado</th>
+              <th class="text-center py-3 px-4 text-xs font-semibold uppercase tracking-wider w-28" style="color: var(--card-muted, #6b7280);">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in configuraciones" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+            <tr v-for="item in configuraciones" :key="item.id" class="border-b transition-colors" style="border-color: var(--card-border, #f3f4f6);">
               <td class="py-3 px-4">
-                <span class="text-sm font-medium text-gray-900">{{ item.proceso_nombre }}</span>
+                <span class="text-sm font-medium" style="color: var(--card-text, #111827);">{{ item.proceso_nombre }}</span>
               </td>
               <td class="py-3 px-4">
                 <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold"
@@ -48,16 +48,16 @@
                 </span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-600">{{ item.valor || '—' }}</span>
+                <span class="text-sm" style="color: var(--card-text, #4b5563);">{{ item.valor || '—' }}</span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-900 font-medium">{{ formatDate(item.fecha) }}</span>
+                <span class="text-sm font-medium" style="color: var(--card-text, #111827);">{{ formatDate(item.fecha) }}</span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-600">{{ item.hora_inicio }} - {{ item.hora_fin }}</span>
+                <span class="text-sm" style="color: var(--card-text, #4b5563);">{{ item.hora_inicio }} - {{ item.hora_fin }}</span>
               </td>
               <td class="py-3 px-4">
-                <span class="text-sm text-gray-600">{{ item.lugar }}</span>
+                <span class="text-sm" style="color: var(--card-text, #4b5563);">{{ item.lugar }}</span>
               </td>
               <td class="py-3 px-4 text-center">
                 <span v-if="item.estado" class="inline-block w-2 h-2 rounded-full bg-green-500" title="Activo"></span>
@@ -69,7 +69,7 @@
               </td>
             </tr>
             <tr v-if="configuraciones.length === 0">
-              <td colspan="8" class="py-8 text-center text-gray-400 text-sm">No hay configuraciones de citación registradas.</td>
+              <td colspan="8" class="py-8 text-center text-sm" style="color: var(--card-muted, #9ca3af);">No hay configuraciones de citación registradas.</td>
             </tr>
           </tbody>
         </table>
@@ -419,5 +419,56 @@ onMounted(() => {
 .theme-dark .ant-table-tbody > tr:nth-child(even) > td,
 .theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
     background: var(--row-even) !important;
+}
+/* Native table dark mode */
+.theme-dark table thead,
+.theme-hybrid table thead {
+    background: var(--table-header-bg) !important;
+}
+.theme-dark table thead th,
+.theme-hybrid table thead th {
+    color: var(--card-muted) !important;
+    border-color: var(--card-border) !important;
+}
+.theme-dark table tbody tr,
+.theme-hybrid table tbody tr {
+    border-color: var(--card-border) !important;
+}
+.theme-dark table tbody tr:hover td,
+.theme-hybrid table tbody tr:hover td {
+    background: var(--hover-bg) !important;
+}
+/* Modal form dark mode */
+.theme-dark .ant-modal-content,
+.theme-hybrid .ant-modal-content {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-header,
+.theme-hybrid .ant-modal-header {
+    background: var(--card-bg) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-modal-title,
+.theme-hybrid .ant-modal-title {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-close,
+.theme-hybrid .ant-modal-close {
+    color: var(--card-muted) !important;
+}
+.theme-dark input,
+.theme-hybrid input,
+.theme-dark select,
+.theme-hybrid select,
+.theme-dark textarea,
+.theme-hybrid textarea {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark label,
+.theme-hybrid label {
+    color: var(--card-muted) !important;
 }
 </style>

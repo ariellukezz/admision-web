@@ -103,7 +103,24 @@
           :options="distritos"
           :disabled="!form.id_provincia"
           :filter-option="(input, option) => option.label.toLowerCase().includes(input.toLowerCase())"
-        />
+        >
+          <template #dropdownRender="{ menuNode }">
+            <component :is="menuNode" v-if="distritos.length" />
+            <a-divider v-if="distritos.length" style="margin: 4px 0" />
+            <div style="display: flex; gap: 4px; padding: 4px 8px;">
+              <a-input
+                v-model:value="nuevoDistrito"
+                placeholder="Nuevo distrito"
+                :maxlength="40"
+                style="flex: 1"
+                @press-enter="crearDistrito"
+              />
+              <a-button type="primary" size="small" :loading="creandoDistrito" :disabled="!nuevoDistrito.trim()" @click="crearDistrito">
+                <template #icon><PlusOutlined /></template>
+              </a-button>
+            </div>
+          </template>
+        </a-select>
       </a-form-item>
       <div class="ubi-modal-footer">
         <a-button @click="visible = false">Cancelar</a-button>
@@ -140,6 +157,8 @@ const form = ref({
 const departamentos = ref([])
 const provincias = ref([])
 const distritos = ref([])
+const nuevoDistrito = ref('')
+const creandoDistrito = ref(false)
 
 const getUbigeos = async () => {
   loading.value = true
@@ -177,9 +196,31 @@ const onDepartamentoChange = async (val) => {
 const onProvinciaChange = async (val) => {
   form.value.id_distrito = null
   distritos.value = []
+  nuevoDistrito.value = ''
   if (val) {
     const res = await axios.get(`ubigeos/distritos/${val}`)
     distritos.value = res.data.datos.map(d => ({ value: d.id, label: d.nombre }))
+  }
+}
+
+const crearDistrito = async () => {
+  if (!nuevoDistrito.value.trim() || !form.value.id_provincia) return
+  creandoDistrito.value = true
+  try {
+    const res = await axios.post('ubigeos/save-distrito', {
+      nombre: nuevoDistrito.value.trim(),
+      id_provincia: form.value.id_provincia
+    })
+    const data = res.data.datos
+    distritos.value.push({ value: data.id, label: data.nombre })
+    form.value.id_distrito = data.id
+    nuevoDistrito.value = ''
+    notify('success', res.data.titulo, res.data.mensaje)
+  } catch (e) {
+    const msg = e.response?.data?.mensaje || 'No se pudo crear el distrito'
+    notify('error', 'Error', msg)
+  } finally {
+    creandoDistrito.value = false
   }
 }
 
@@ -187,6 +228,7 @@ const abrirNuevo = () => {
   form.value = { id: null, ubigeo: '', id_departamento: null, id_provincia: null, id_distrito: null }
   provincias.value = []
   distritos.value = []
+  nuevoDistrito.value = ''
   visible.value = true
 }
 

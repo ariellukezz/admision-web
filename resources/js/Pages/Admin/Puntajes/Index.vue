@@ -575,7 +575,7 @@ onMounted(() => {
   flex-wrap: wrap;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--card-border, #f0f0f0);
 }
 .puntajes-btn-search, .puntajes-btn-template {
   border-radius: 10px;
@@ -644,7 +644,7 @@ onMounted(() => {
   gap: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--card-border, #f0f0f0);
 }
 
 /* Modal Result */
@@ -723,5 +723,35 @@ onMounted(() => {
 .theme-dark .ant-table-tbody > tr:nth-child(even) > td,
 .theme-hybrid .ant-table-tbody > tr:nth-child(even) > td {
     background: var(--row-even) !important;
+}
+.theme-dark .ant-modal-content,
+.theme-hybrid .ant-modal-content {
+    background: var(--card-bg) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-header,
+.theme-hybrid .ant-modal-header {
+    background: var(--card-bg) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-modal-title,
+.theme-hybrid .ant-modal-title {
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-modal-close,
+.theme-hybrid .ant-modal-close {
+    color: var(--card-muted) !important;
+}
+.theme-dark .ant-input,
+.theme-hybrid .ant-input,
+.theme-dark .ant-select-selector,
+.theme-hybrid .ant-select-selector {
+    background: var(--card-bg) !important;
+    border-color: var(--card-border) !important;
+    color: var(--card-text) !important;
+}
+.theme-dark .ant-form-item-label > label,
+.theme-hybrid .ant-form-item-label > label {
+    color: var(--card-muted) !important;
 }
 </style>

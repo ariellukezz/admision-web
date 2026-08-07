@@ -3,6 +3,24 @@
 <AuthenticatedLayout>
 <div class="insc-container">
 
+<!-- Header -->
+<div class="insc-header">
+  <div class="insc-header-content">
+    <div class="insc-header-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="8.5" cy="7" r="4"/>
+        <line x1="20" y1="8" x2="20" y2="14"/>
+        <line x1="23" y1="11" x2="17" y2="11"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="insc-title">Inscripciones</h1>
+      <p class="insc-subtitle">Gestión de inscripciones del proceso de admisión</p>
+    </div>
+  </div>
+</div>
+
 <!-- Botones + Buscador -->
 <div class="insc-toolbar">
   <div class="insc-toolbar-left">
@@ -15,11 +33,12 @@
     <a-input
       v-model:value="buscar"
       placeholder="Buscar por DNI, nombres o apellidos"
+      class="insc-search"
       allow-clear
       @pressEnter="() => { pagina = 1; getInscripciones(); }"
     >
       <template #prefix>
-        <SearchOutlined style="color: var(--card-muted, #bbb)"/>
+        <SearchOutlined style="color: #bbb"/>
       </template>
     </a-input>
   </div>
@@ -31,7 +50,7 @@
     <div class="insc-filter-item" style="flex: 2; min-width: 280px;">
       <label class="insc-label">Programa</label>
       <a-select
-        v-model:value="filtroPrograma"
+        v-model:value="programa"
         style="width: 100%"
         placeholder="Todos los programas"
         size="large"
@@ -42,44 +61,6 @@
         :filter-option="(input, option) => option.label.toLowerCase().includes(input.toLowerCase())"
       />
     </div>
-    <div class="insc-filter-item" style="flex: 1; min-width: 160px;">
-      <label class="insc-label">Área</label>
-      <a-select
-        v-model:value="filtroArea"
-        style="width: 100%"
-        placeholder="Todas"
-        size="large"
-        allow-clear
-        @change="() => { pagina = 1; getInscripciones(); }"
-        :options="areasOptions"
-      />
-    </div>
-    <div class="insc-filter-item" style="flex: 1; min-width: 180px;">
-      <label class="insc-label">Fecha</label>
-      <a-date-picker
-        v-model:value="filtroFecha"
-        style="width: 100%"
-        size="large"
-        format="DD-MM-YYYY"
-        value-format="YYYY-MM-DD"
-        placeholder="Fecha específica"
-        allow-clear
-        @change="() => { pagina = 1; getInscripciones(); }"
-      />
-    </div>
-    <div class="insc-filter-item" style="flex: 2; min-width: 280px;">
-      <label class="insc-label">Rango de fechas</label>
-      <a-range-picker
-        v-model:value="filtroRango"
-        style="width: 100%"
-        size="large"
-        format="DD-MM-YYYY"
-        value-format="YYYY-MM-DD"
-        :placeholder="['Desde', 'Hasta']"
-        allow-clear
-        @change="() => { pagina = 1; getInscripciones(); }"
-      />
-    </div>
     <div class="insc-filter-item" style="flex: 1; min-width: 120px;">
       <label class="insc-label">Mostrar</label>
       <a-select v-model:value="pageSize" size="large" style="width: 100%" @change="() => { pagina = 1; getInscripciones(); }">
@@ -87,9 +68,6 @@
         <a-select-option :value="50">50</a-select-option>
         <a-select-option :value="100">100</a-select-option>
       </a-select>
-    </div>
-    <div class="insc-filter-item" style="display: flex; align-items: flex-end;">
-      <a-button size="large" @click="limpiarFiltros">Limpiar</a-button>
     </div>
   </div>
 </div>
@@ -101,7 +79,7 @@
     :data-source="inscripciones"
     :pagination="false"
     size="middle"
-    :scroll="{ x: 900, y: 'calc(100vh - 420px)' }"
+    :scroll="{ x: 900, y: 'calc(100vh - 380px)' }"
     row-key="id"
     :row-class-name="(_, index) => index % 2 === 1 ? 'insc-row-even' : ''"
   >
@@ -112,7 +90,7 @@
         </a-tag>
       </template>
       <template v-if="column.dataIndex === 'postulante'">
-        <span style="font-weight: 600; color: var(--card-text, #1e293b);">{{ record.paterno }} {{ record.materno }}, {{ record.nombres }}</span>
+        <span style="font-weight: 600;">{{ record.paterno }} {{ record.materno }}, {{ record.nombres }}</span>
       </template>
       <template v-if="column.dataIndex === 'estado'">
         <a-tag v-if="record.estado === 0" color="green" style="border-radius: 6px;">INSCRITO</a-tag>
@@ -122,9 +100,6 @@
         <a-tag style="border-radius: 6px; font-size: .75rem;" :color="record.modalidad === 'EXAMEN GENERAL' ? 'blue' : 'orange'">
           {{ record.modalidad }}
         </a-tag>
-      </template>
-      <template v-if="column.dataIndex === 'fecha'">
-        <span style="font-size: .8rem; color: var(--card-muted, #64748b);">{{ formatearFecha(record.fecha) }}</span>
       </template>
       <template v-if="column.dataIndex === 'acciones'">
         <div class="insc-table-actions">
@@ -169,29 +144,22 @@
   v-model:open="visible"
   title="Modificar Inscripción"
   centered
-  width="680px"
+  width="640px"
   :footer="false"
-  class="insc-modal"
 >
   <a-form ref="formRef" :model="inscripcion" layout="vertical">
     <a-row :gutter="[16, 0]">
-      <a-col :span="8">
+      <a-col :span="12">
         <a-form-item label="Código">
           <a-input v-model:value="inscripcion.codigo" disabled />
         </a-form-item>
       </a-col>
-      <a-col :span="8">
-        <a-form-item label="DNI">
-          <a-input :value="postulante.dni" disabled />
-        </a-form-item>
-      </a-col>
-      <a-col :span="8">
+      <a-col :span="12">
         <a-form-item label="Estado">
           <a-switch
             v-model:checked="estadoSwitch"
             checked-children="Activo"
             un-checked-children="Anulado"
-            style="margin-top: 6px;"
           />
         </a-form-item>
       </a-col>
@@ -207,8 +175,6 @@
             placeholder="Seleccionar programa"
             :options="programas"
             allow-clear
-            show-search
-            :filter-option="(input, option) => option.label.toLowerCase().includes(input.toLowerCase())"
           />
         </a-form-item>
       </a-col>
@@ -240,17 +206,17 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import {
   RedoOutlined, FormOutlined, PrinterOutlined,
   DeleteOutlined, SearchOutlined, DownloadOutlined
 } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
-import dayjs from 'dayjs';
 
 const baseUrl = window.location.origin;
 
+const programa = ref(null);
 const buscar = ref("");
 const inscripciones = ref([]);
 const visible = ref(false);
@@ -258,19 +224,6 @@ const pagina = ref(1);
 const totalRegistros = ref(0);
 const pageSize = ref(20);
 const estadoSwitch = ref(true);
-
-const filtroPrograma = ref(null);
-const filtroArea = ref(null);
-const filtroFecha = ref(null);
-const filtroRango = ref(null);
-
-const areasOptions = [
-  { value: 'BIOMEDICAS', label: 'Biomédicas' },
-  { value: 'BIOMÉDICAS', label: 'Biomédicas' },
-  { value: 'INGENIERIAS', label: 'Ingenierías' },
-  { value: 'INGENIERÍAS', label: 'Ingenierías' },
-  { value: 'SOCIALES', label: 'Sociales' },
-];
 
 const inscripcion = ref({
   id: null,
@@ -294,19 +247,11 @@ watch(pagina, () => { getInscripciones(); });
 
 const getInscripciones = async () => {
   try {
-    let payload = {
+    let res = await axios.post("get-inscripciones-admin?page=" + pagina.value, {
       term: buscar.value,
       paginashoja: pageSize.value,
-      programa: filtroPrograma.value,
-      area: filtroArea.value,
-      fecha: filtroFecha.value,
-    };
-    if (filtroRango.value && filtroRango.value[0]) {
-      payload.fecha_inicio = filtroRango.value[0];
-      payload.fecha_fin = filtroRango.value[1];
-    }
-
-    let res = await axios.post("get-inscripciones-admin?page=" + pagina.value, payload);
+      programa: programa.value,
+    });
     inscripciones.value = res.data.datos.data;
     totalRegistros.value = res.data.datos.total;
   } catch (e) {
@@ -326,20 +271,6 @@ const getProgramas = async () => {
 
 getProgramas();
 getInscripciones();
-
-const limpiarFiltros = () => {
-  filtroPrograma.value = null;
-  filtroArea.value = null;
-  filtroFecha.value = null;
-  filtroRango.value = null;
-  pagina.value = 1;
-  getInscripciones();
-};
-
-const formatearFecha = (fecha) => {
-  if (!fecha) return '';
-  return dayjs(fecha).format('DD/MM/YYYY HH:mm');
-};
 
 const abrirEditar = (item) => {
   inscripcion.value.id = item.id;
@@ -389,12 +320,11 @@ const eliminar = (item) => {
 const columnsInscripcion = [
   { title: 'Código', dataIndex: 'codigo', width: 120, align: 'center' },
   { title: 'DNI', dataIndex: 'dni', width: 90, align: 'center' },
-  { title: 'Postulante', dataIndex: 'postulante', width: 240 },
+  { title: 'Postulante', dataIndex: 'postulante', width: 250 },
   { title: 'Programa', dataIndex: 'programa', width: 180 },
-  { title: 'Modalidad', dataIndex: 'modalidad', width: 130, align: 'center' },
+  { title: 'Modalidad', dataIndex: 'modalidad', width: 140, align: 'center' },
   { title: 'Estado', dataIndex: 'estado', width: 100, align: 'center' },
-  { title: 'Fecha', dataIndex: 'fecha', width: 130, align: 'center' },
-  { title: 'Acciones', dataIndex: 'acciones', width: 120, align: 'center', fixed: 'right' },
+  { title: 'Acciones', dataIndex: 'acciones', width: 110, align: 'center', fixed: 'right' },
 ];
 
 const imprimirPDF = (dni, proc) => {
@@ -441,8 +371,42 @@ const descargarExcel = async () => {
 
 <style scoped>
 .insc-container {
-  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+/* Header */
+.insc-header {
+  background: linear-gradient(135deg, #0a3d5a 0%, #096dd9 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(9, 109, 217, 0.15);
+}
+.insc-header-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.insc-header-icon {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insc-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.insc-subtitle {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 2px 0 0 0;
 }
 
 /* Toolbar */
@@ -451,7 +415,7 @@ const descargarExcel = async () => {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 .insc-toolbar-left {
@@ -479,9 +443,8 @@ const descargarExcel = async () => {
   background: var(--card-bg, #fff);
   border-radius: 14px;
   padding: 16px 20px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--card-border, #e2e8f0);
 }
 .insc-filters-row {
   display: flex;
@@ -495,7 +458,7 @@ const descargarExcel = async () => {
 .insc-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--card-muted, #555);
+  color: var(--text-color, #555);
   margin-bottom: 6px;
 }
 
@@ -505,34 +468,7 @@ const descargarExcel = async () => {
   border-radius: 14px;
   padding: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--card-border, #e2e8f0);
 }
-
-/* Table header dark fix */
-:deep(.ant-table) {
-  background: transparent !important;
-  color: var(--card-text, #1e293b) !important;
-}
-:deep(.ant-table-thead > tr > th) {
-  background: var(--table-header-bg, #f8fafc) !important;
-  color: var(--card-text, #1e293b) !important;
-  border-bottom: 1px solid var(--card-border, #e2e8f0) !important;
-}
-:deep(.ant-table-tbody > tr > td) {
-  color: var(--card-text, #1e293b) !important;
-  border-bottom: 1px solid var(--card-border, #e2e8f0) !important;
-  background: var(--card-bg, #ffffff) !important;
-}
-:deep(.ant-table-tbody > tr:hover > td) {
-  background: var(--hover-bg, #eff6ff) !important;
-}
-:deep(.insc-row-even > td) {
-  background: var(--row-even, rgba(0,0,0,0.02)) !important;
-}
-:deep(.insc-row-even:hover > td) {
-  background: var(--hover-bg, #eff6ff) !important;
-}
-
 .insc-table-actions {
   display: flex;
   gap: 4px;
@@ -546,7 +482,7 @@ const descargarExcel = async () => {
   margin-top: 14px;
 }
 
-/* Modal */
+/* Modal footer */
 .insc-modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -554,6 +490,11 @@ const descargarExcel = async () => {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid #f0f0f0;
+}
+
+/* Dark/Hybrid theme support */
+:deep(.insc-row-even) {
+  background-color: rgba(0, 0, 0, 0.02) !important;
 }
 
 /* Responsive */
