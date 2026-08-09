@@ -576,6 +576,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/puntajes', fn () => Inertia::render('Admin/Puntajes/Index'))->name('admin.puntajes');
     Route::get('/puntajes/lista', [PuntajeGestorController::class, 'index']);
     Route::get('/puntajes/selectores', [PuntajeGestorController::class, 'getSelectores']);
+    Route::post('/puntajes/previsualizar', [PuntajeGestorController::class, 'previsualizar']);
     Route::post('/puntajes/importar', [PuntajeGestorController::class, 'importar']);
     Route::get('/puntajes/plantilla', [PuntajeGestorController::class, 'plantilla']);
     Route::post('/puntajes/eliminar-registro', [PuntajeGestorController::class, 'eliminarRegistro']);

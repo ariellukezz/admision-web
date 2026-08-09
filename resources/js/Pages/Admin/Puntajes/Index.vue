@@ -78,9 +78,9 @@
           Plantilla Excel
         </a-button>
         <a-upload :show-upload-list="false" :before-upload="handleUpload" accept=".xlsx,.xls,.csv">
-          <a-button size="large" :loading="importing" class="puntajes-btn-import">
+          <a-button size="large" :loading="previewing" class="puntajes-btn-import">
             <template #icon><UploadOutlined/></template>
-            {{ importing ? 'Importando...' : 'Cargar Excel' }}
+            {{ previewing ? 'Leyendo Excel...' : 'Cargar Excel' }}
           </a-button>
         </a-upload>
         <a-button size="large" :loading="exportandoExcel" @click="exportarExcel" class="puntajes-btn-excel">
@@ -244,6 +244,59 @@
       </a-form>
     </a-modal>
 
+    <!-- Modal Previsualización de Importación -->
+    <a-modal
+      v-model:open="modalPreview"
+      title="Previsualización de Importación"
+      :closable="true"
+      :mask-closable="false"
+      centered
+      width="1100px"
+      :footer="null"
+    >
+      <div v-if="previewData.length" class="preview-summary">
+        <a-alert
+          :message="`Total: ${previewData.length} registros — Sin inscripción: ${previewNoEncontrados}`"
+          :type="previewNoEncontrados > 0 ? 'warning' : 'success'"
+          show-icon
+          style="margin-bottom: 12px;"
+        />
+        <a-table
+          :columns="previewColumns"
+          :data-source="previewData"
+          size="small"
+          :scroll="{ x: 'max-content', y: 400 }"
+          :pagination="{ pageSize: 50, showSizeChanger: false }"
+          row-key="dni"
+          bordered
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'tiene_inscripcion'">
+              <a-tag :color="record.tiene_inscripcion ? 'green' : 'red'">
+                {{ record.tiene_inscripcion ? 'Sí' : 'No' }}
+              </a-tag>
+            </template>
+            <template v-if="column.dataIndex === 'apto'">
+              <a-tag :color="record.apto === 'SI' ? 'green' : 'orange'">
+                {{ record.apto || '—' }}
+              </a-tag>
+            </template>
+          </template>
+        </a-table>
+        <div class="preview-footer">
+          <a-button size="large" @click="cancelarPreview">Cancelar</a-button>
+          <a-button size="large" type="primary" :loading="importing" @click="confirmarImportacion">
+            <template #icon><CheckOutlined/></template>
+            Confirmar e Importar
+          </a-button>
+        </div>
+      </div>
+      <div v-else style="text-align: center; padding: 40px;">
+        <a-spin v-if="previewing" tip="Leyendo archivo..."/>
+        <span v-else>No hay datos para previsualizar</span>
+      </div>
+    </a-modal>
+
     <!-- Modal Import Result -->
     <a-modal v-model:open="modalResultado" :closable="true" :footer="false" centered title="Resultado de Importación" width="480px">
       <div class="puntajes-modal-result">
@@ -270,14 +323,17 @@ import dayjs from 'dayjs';
 import {
   SearchOutlined, DownloadOutlined, UploadOutlined, DeleteOutlined,
   PlusOutlined, EditOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  FileExcelOutlined, FilePdfOutlined
+  FileExcelOutlined, FilePdfOutlined, CheckOutlined
 } from '@ant-design/icons-vue';
 
 const loading = ref(false);
+const previewing = ref(false);
 const importing = ref(false);
 const saving = ref(false);
 const modalResultado = ref(false);
 const modalForm = ref(false);
+const modalPreview = ref(false);
+const pendingFile = ref(null);
 const formMode = ref('crear');
 const formRef = ref();
 
@@ -395,15 +451,65 @@ const exportarPdf = () => {
   setTimeout(() => { exportandoPdf.value = false; }, 2000);
 };
 
+const previewData = ref([]);
+const previewNoEncontrados = ref(0);
+
+const previewColumns = [
+  { title: 'DNI', dataIndex: 'dni', width: 90, align: 'center' },
+  { title: 'Paterno', dataIndex: 'paterno', width: 100 },
+  { title: 'Materno', dataIndex: 'materno', width: 100 },
+  { title: 'Nombres', dataIndex: 'nombres', width: 150 },
+  { title: 'Programa', dataIndex: 'programa', width: 130 },
+  { title: 'Modalidad', dataIndex: 'modalidad', width: 100 },
+  { title: 'Área', dataIndex: 'area', width: 100 },
+  { title: 'Puntaje', dataIndex: 'puntaje', width: 80, align: 'center' },
+  { title: 'Apto', dataIndex: 'apto', width: 60, align: 'center' },
+  { title: 'Inscr.', dataIndex: 'tiene_inscripcion', width: 70, align: 'center' },
+];
+
 const handleUpload = async (file) => {
   if (!filtros.id_proceso) {
     notification.warning({ message: 'Seleccione un proceso primero' });
     return false;
   }
 
-  importing.value = true;
+  pendingFile.value = file;
+  previewing.value = true;
+  modalPreview.value = true;
+  previewData.value = [];
+
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('id_proceso', filtros.id_proceso);
+
+  try {
+    const res = await axios.post('/admin/puntajes/previsualizar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
+    });
+    previewData.value = res.data.datos || [];
+    previewNoEncontrados.value = res.data.no_encontrados || 0;
+  } catch (e) {
+    notification.error({ message: 'Error', description: e.response?.data?.mensaje || 'No se pudo leer el archivo' });
+    modalPreview.value = false;
+  } finally {
+    previewing.value = false;
+  }
+  return false;
+};
+
+const cancelarPreview = () => {
+  modalPreview.value = false;
+  pendingFile.value = null;
+  previewData.value = [];
+};
+
+const confirmarImportacion = async () => {
+  if (!pendingFile.value) return;
+
+  importing.value = true;
+  const formData = new FormData();
+  formData.append('file', pendingFile.value);
   formData.append('id_proceso', filtros.id_proceso);
 
   try {
@@ -413,16 +519,19 @@ const handleUpload = async (file) => {
     });
     importResultado.estado = res.data.estado;
     importResultado.mensaje = res.data.mensaje;
+    modalPreview.value = false;
     modalResultado.value = true;
     loadResultados();
   } catch (e) {
     importResultado.estado = false;
     importResultado.mensaje = e.response?.data?.mensaje || 'Error al importar el archivo';
+    modalPreview.value = false;
     modalResultado.value = true;
   } finally {
     importing.value = false;
+    pendingFile.value = null;
+    previewData.value = [];
   }
-  return false;
 };
 
 const eliminarRegistro = async (id) => {
@@ -639,6 +748,15 @@ onMounted(() => {
 
 /* Modal Form */
 .puntajes-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--card-border, #f0f0f0);
+}
+
+.preview-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;

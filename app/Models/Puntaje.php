@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Puntaje extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'puntajes';
 
     protected $fillable = [

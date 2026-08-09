@@ -183,6 +183,72 @@ class GestorPuntajeController extends Controller
         ]);
     }
 
+    public function previsualizar(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'id_proceso' => 'required|integer',
+        ]);
+
+        try {
+            $collection = Excel::toCollection(new class implements \Maatwebsite\Excel\Concerns\ToCollection, \Maatwebsite\Excel\Concerns\WithHeadingRow {
+                public function collection(\Illuminate\Support\Collection $rows) {}
+            }, $request->file('file'));
+
+            $rows = $collection->first();
+            $preview = [];
+            $noEncontrados = 0;
+
+            foreach ($rows as $row) {
+                $dni = trim($row['dni'] ?? '');
+                if (!$dni) continue;
+
+                $inscripcion = DB::table('inscripciones as i')
+                    ->join('postulante as p', 'p.id', '=', 'i.id_postulante')
+                    ->leftJoin('programa as prog', 'prog.id', '=', 'i.id_programa')
+                    ->leftJoin('modalidad as mod', 'mod.id', '=', 'i.id_modalidad')
+                    ->where('p.nro_doc', $dni)
+                    ->where('i.id_proceso', $request->id_proceso)
+                    ->where('i.estado', 0)
+                    ->select('i.id', 'prog.nombre as programa', 'prog.area', 'mod.nombre as modalidad')
+                    ->first();
+
+                if (!$inscripcion) {
+                    $noEncontrados++;
+                }
+
+                $preview[] = [
+                    'fecha'              => $row['fecha'] ?? null,
+                    'dni'                => $dni,
+                    'paterno'            => trim($row['paterno'] ?? ''),
+                    'materno'            => trim($row['materno'] ?? ''),
+                    'nombres'            => trim($row['nombres'] ?? ''),
+                    'puntaje'            => $row['puntaje'] ?? null,
+                    'puntaje_vocacional' => $row['puntaje_vocacional'] ?? null,
+                    'apto'               => strtoupper(trim($row['apto'] ?? '')),
+                    'programa'           => $inscripcion?->programa,
+                    'area'               => $inscripcion?->area,
+                    'modalidad'          => $inscripcion?->modalidad,
+                    'id_inscripcion'     => $inscripcion?->id,
+                    'puesto'             => $row['puesto'] ?? null,
+                    'tiene_inscripcion'  => (bool) $inscripcion,
+                ];
+            }
+
+            return response()->json([
+                'estado' => true,
+                'datos' => $preview,
+                'total' => count($preview),
+                'no_encontrados' => $noEncontrados,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'estado' => false,
+                'mensaje' => 'Error al previsualizar: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function importar(Request $request)
     {
         $request->validate([
@@ -196,7 +262,7 @@ class GestorPuntajeController extends Controller
 
             return response()->json([
                 'estado' => true,
-                'mensaje' => "Importación completada. Procesados: {$import->getTotal()}. Nuevos: {$import->getInsertados()}. Actualizados: {$import->getActualizados()}.",
+                'mensaje' => "Importación completada. Procesados: {$import->getTotal()}. Nuevos: {$import->getInsertados()}. Actualizados: {$import->getActualizados()}. Sin inscripción: {$import->getNoEncontrados()}.",
             ]);
         } catch (\Throwable $e) {
             return response()->json([
