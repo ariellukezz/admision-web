@@ -63,6 +63,7 @@ use App\Http\Controllers\PuntajeController;
 use App\Http\Controllers\ControlBiometricoController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\PeriodoMatriculaController;
 use App\Http\Controllers\DniController;
 use App\Http\Controllers\DocumentoSegundaController;
 use App\Http\Controllers\ExcelController;
@@ -464,6 +465,25 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::get('/resumenes-biometrico', fn () => Inertia::render('Admin/Resumenes/biometrico'))->name('admin-resumenes-biometrico');
     Route::post('/resumen-biometrico', [ResumenBiometricoController::class, 'resumenBiometrico']);
+
+    // REPORTE SUNEDU
+    Route::get('/reporte-sunedu', fn () => Inertia::render('Admin/Resumenes/reporteSunedu'))->name('admin-reporte-sunedu');
+    Route::post('/reporte-sunedu', [ReporteController::class, 'reporteSunedu']);
+    Route::get('/reporte-sunedu/exportar-excel', [ReporteController::class, 'descargarExcelSunedu'])->name('admin-reporte-sunedu-excel');
+
+    // REPORTE DE ERRORES DE DATOS
+    Route::get('/errores-datos', fn () => Inertia::render('Admin/Resumenes/erroresDatos'))->name('admin-errores-datos');
+    Route::post('/errores-datos', [ReporteController::class, 'erroresDatos']);
+    Route::get('/errores-datos/pagos/{dni}', [ReporteController::class, 'buscarPagosDNI']);
+
+    // GESTIÓN DE PERIODOS DE MATRÍCULA
+    Route::get('/periodos-matricula', fn () => Inertia::render('Admin/Periodos/index'))->name('admin-periodos-matricula');
+    Route::get('/periodos-matricula/lista', [PeriodoMatriculaController::class, 'getPeriodos']);
+    Route::post('/periodos-matricula/save', [PeriodoMatriculaController::class, 'savePeriodo']);
+    Route::post('/periodos-matricula/toggle-activo/{id}', [PeriodoMatriculaController::class, 'toggleActivo']);
+    Route::get('/periodos-matricula/delete/{id}', [PeriodoMatriculaController::class, 'deletePeriodo']);
+    Route::get('/periodos-matricula/procesos/{id}', [PeriodoMatriculaController::class, 'getProcesosPeriodo']);
+    Route::post('/periodos-matricula/procesos/save', [PeriodoMatriculaController::class, 'saveProcesos']);
 
 
     Route::get('/descargar-documentos', fn () => Inertia::render('Procesos/temp'));
