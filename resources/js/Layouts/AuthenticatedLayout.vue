@@ -330,7 +330,9 @@ const menuItems = [
       { key: 'res_usuarios_diario', icon: SettingFilled, label: 'Rep usuarios diario', route: 'admin-resumenes-usuario-diario' },
       { key: 'ratio', icon: SettingFilled, label: 'Ratio', route: 'admin-ratio' },
       { key: 'resumenbiometrico', icon: SettingFilled, label: 'Res. biométrico', route: 'admin-resumenes-biometrico' },
-      { key: 'errores', icon: SettingFilled, label: 'Rep errores', route: 'programa-index' },
+      { key: 'reporte-sunedu', icon: SettingFilled, label: 'Reporte SUNEDU', route: 'admin-reporte-sunedu' },
+      { key: 'errores', icon: SettingFilled, label: 'Errores de datos', route: 'admin-errores-datos' },
+      { key: 'periodos-matricula', icon: SettingFilled, label: 'Periodos de matrícula', route: 'admin-periodos-matricula' },
     ]
   },
   {
