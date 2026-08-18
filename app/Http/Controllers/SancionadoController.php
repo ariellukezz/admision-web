@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sancionado;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use DB;
 
 class SancionadoController extends Controller
@@ -137,8 +139,24 @@ class SancionadoController extends Controller
         return response()->json($this->response, 200);
     }
 
+    public function exportarExcel(Request $request)
+    {
+        $datos = Sancionado::select('sancionados.id','sancionados.dni','sancionados.nombres','sancionados.paterno','sancionados.materno','sancionados.motivo','procesos.nombre as nombre_proceso','procesos.id as id_proceso')
+            ->join('procesos', 'procesos.id', '=', 'sancionados.id_proceso')
+            ->where('procesos.id', '=', auth()->user()->id_proceso)
+            ->where(function ($query) use ($request) {
+                if ($request->filled('term')) {
+                    $query->orWhere('sancionados.dni', 'LIKE', '%' . $request->term . '%')
+                        ->orWhere('sancionados.nombres', 'LIKE', '%' . $request->term . '%')
+                        ->orWhere('sancionados.paterno', 'LIKE', '%' . $request->term . '%')
+                        ->orWhere('sancionados.materno', 'LIKE', '%' . $request->term . '%');
+                }
+            })
+            ->orderBy('sancionados.id', 'DESC')
+            ->get();
 
-
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'DNI', 'Nombres', 'Paterno', 'Materno', 'Motivo', 'Proceso']), 'observados.xlsx');
+    }
 
 
 }

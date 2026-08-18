@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TipoDocumento;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use Inertia\Inertia;
 
 class TipoDocumentoController extends Controller
@@ -86,5 +88,21 @@ class TipoDocumentoController extends Controller
         $this->response['mensaje'] = 'TIPO DE DOCUMENTO ' . $nombre . ' ELIMINADO CON EXITO';
         $this->response['estado'] = true;
         return response()->json($this->response, 200);
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $query = TipoDocumento::select('id', 'nombre', 'codigo');
+
+        if ($request->filled('term')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('codigo', 'LIKE', '%' . $request->term . '%');
+            });
+        }
+
+        $datos = $query->orderBy('id', 'asc')->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Nombre', 'Código']), 'tipos-documento.xlsx');
     }
 }

@@ -8,6 +8,8 @@ use App\Models\Programa;
 use App\Models\Proceso;
 use App\Models\Vacante;
 use App\Services\AuditService;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use DB;
 
 class VacantesController extends Controller
@@ -116,6 +118,36 @@ class VacantesController extends Controller
         $this->response['estado'] = true;
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $proceso = Proceso::find(auth()->user()->id_proceso);
+
+        $datos = Programa::select(
+            'programa.id as id_programa',
+            'programa.codigo_sunedu',
+            'programa.nombre as programa',
+            'vacantes.id as id_vacante',
+            'vacantes.vacantes',
+            'vacantes.estado'
+        )
+        ->leftJoin('vacantes', function($join) use($proceso, $request) {
+            $join->on('vacantes.id_programa', '=', 'programa.id')
+                ->where('vacantes.id_proceso', auth()->user()->id_proceso)
+                ->where('vacantes.id_modalidad', $request->modalidad);
+        })
+        ->where('programa.nivel', $proceso->nivel)
+        ->where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->where('programa.codigo_sunedu', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('programa.nombre', 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->orderBy('programa.id', 'ASC')
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID Programa', 'Código SUNEDU', 'Programa', 'ID Vacante', 'Vacantes', 'Estado']), 'vacantes.xlsx');
     }
 
 

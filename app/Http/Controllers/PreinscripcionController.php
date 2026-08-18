@@ -9,6 +9,7 @@ use App\Models\Documento;
 use App\Models\Postulante;
 use App\Models\AvancePostulante;
 use App\Models\Paso;
+use App\Exports\TablaGenericaExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -16,6 +17,7 @@ use Illuminate\Support\Str;
 use Carbon\CarbonInterface;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Excel;
 
 use setasign\Fpdi\Fpdi;
 
@@ -729,7 +731,52 @@ class PreinscripcionController extends Controller
 
 
 
+    public function exportarExcel(Request $request)
+    {
+        $query_where = [];
+        if ($request->programa) array_push($query_where, [DB::raw('pre_inscripcion.id_programa'), '=', $request->programa]);
+        array_push($query_where, [DB::raw('pre_inscripcion.id_proceso'), '=', auth()->user()->id_proceso]);
 
+        $datos = Preinscripcion::select(
+            'pre_inscripcion.id as id', 'postulante.id as id_postulante', 'postulante.nro_doc AS dni',
+            'postulante.nombres AS nombres', 'procesos.id as id_proceso',
+            'postulante.primer_apellido AS paterno', 'postulante.segundo_apellido AS materno',
+            'programa.nombre as programa', 'pre_inscripcion.id_programa as id_programa',
+            'modalidad.id as id_modalidad', 'modalidad.nombre as modalidad', 'procesos.nombre AS proceso',
+            'pre_inscripcion.created_at as fecha', 'postulante.sexo',
+            'inscripciones.estado'
+        )
+        ->join('postulante','pre_inscripcion.id_postulante', 'postulante.id')
+        ->leftJoin('inscripciones', function($join) {
+            $join->on('inscripciones.id_postulante', '=', 'postulante.id')
+                 ->where('inscripciones.id_proceso', '=', auth()->user()->id_proceso);
+        })
+        ->join('programa','pre_inscripcion.id_programa', 'programa.id')
+        ->join('modalidad','pre_inscripcion.id_modalidad', 'modalidad.id')
+        ->join('procesos','pre_inscripcion.id_proceso', 'procesos.id')
+        ->where($query_where)
+        ->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('sancionados')
+                ->whereColumn('sancionados.dni', 'postulante.nro_doc')
+                ->where('sancionados.id_proceso', auth()->user()->id_proceso);
+        })
+        ->where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->orWhere('modalidad.nombre', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.nro_doc', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.nombres', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.primer_apellido', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.segundo_apellido', 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->orderBy('programa.nombre')
+        ->orderBy('postulante.primer_apellido')
+        ->orderBy('postulante.segundo_apellido')
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'ID Postulante', 'DNI', 'Nombres', 'ID Proceso', 'Paterno', 'Materno', 'Programa', 'ID Programa', 'ID Modalidad', 'Modalidad', 'Proceso', 'Fecha', 'Sexo', 'Estado Inscripción']), 'preinscripciones.xlsx');
+    }
 
 
 }
