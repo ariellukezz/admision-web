@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use App\Models\Filial;
 use App\Models\Dataversion;
 use App\Models\Programa;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use DB;
 
 class ProgramaController extends Controller
@@ -150,7 +152,40 @@ class ProgramaController extends Controller
     return response()->json($this->response, 200);
   }
 
+  public function exportarExcel(Request $request)
+  {
+    $query_where = [];
 
+    $datos = Programa::select(
+      'programa.id', 'programa.codigo', 'programa.codigo_sunedu', 'programa.programa_oti',
+      'programa.nombre', 'programa.nombre_corto', 'programa.nivel_academico',
+      'programa.estado AS estado', 'programa.area AS area',
+      'facultad.id AS id_fac', 'facultad.facultad AS facultad'
+    )
+      ->join('facultad', 'facultad.id', '=', 'programa.id_facultad')
+      ->where($query_where)
+      ->when($request->filled('nivel_academico'), function ($query) use ($request) {
+          $query->where('programa.nivel_academico', $request->nivel_academico);
+      })
+      ->when($request->filled('id_facultad'), function ($query) use ($request) {
+          $query->where('programa.id_facultad', $request->id_facultad);
+      })
+      ->when($request->filled('area'), function ($query) use ($request) {
+          $query->where('programa.area', $request->area);
+      })
+      ->where(function ($query) use ($request) {
+          if ($request->filled('term')) {
+              $query->orWhere('programa.codigo', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('programa.nombre', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('facultad.facultad', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('programa.area', 'LIKE', '%' . $request->term . '%');
+          }
+      })
+      ->orderBy('programa.id', 'DESC')
+      ->get();
+
+    return Excel::download(new TablaGenericaExport($datos, ['ID', 'Código', 'Código SUNEDU', 'Programa OTI', 'Nombre', 'Nombre Corto', 'Nivel Académico', 'Estado', 'Área', 'ID Facultad', 'Facultad']), 'programas.xlsx');
+  }
 
 
 }

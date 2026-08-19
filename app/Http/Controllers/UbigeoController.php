@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use App\Exports\TablaGenericaExport;
+use Excel;
 
 class UbigeoController extends Controller
 {
@@ -214,5 +216,31 @@ class UbigeoController extends Controller
                 'error'   => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $term = $request->term ?? '';
+
+        $datos = DB::table('ubigeo AS u')
+            ->leftJoin('departamento AS d', 'd.id', '=', 'u.id_departamento')
+            ->leftJoin('provincia AS p', 'p.id', '=', 'u.id_provincia')
+            ->leftJoin('distritos AS di', 'di.id', '=', 'u.id_distrito')
+            ->select(
+                'u.id', 'u.ubigeo',
+                'd.nombre AS departamento', 'p.nombre AS provincia', 'di.nombre AS distrito'
+            )
+            ->when($term, function ($q) use ($term) {
+                $q->where('u.ubigeo', 'LIKE', "%{$term}%")
+                  ->orWhere('d.nombre', 'LIKE', "%{$term}%")
+                  ->orWhere('p.nombre', 'LIKE', "%{$term}%")
+                  ->orWhere('di.nombre', 'LIKE', "%{$term}%");
+            })
+            ->orderBy('d.nombre')
+            ->orderBy('p.nombre')
+            ->orderBy('di.nombre')
+            ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Ubigeo', 'Departamento', 'Provincia', 'Distrito']), 'ubigeos.xlsx');
     }
 }

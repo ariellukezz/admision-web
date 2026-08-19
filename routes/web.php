@@ -188,6 +188,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::post('/get-inscripciones-admin', [InscripcionController::class, 'getInscripcionesAdmin']);
     Route::post('/get-preinscripciones-admin', [PreinscripcionController::class, 'getPreinscripcionesAdmin']);
+    Route::get('/preinscripciones/exportar-excel', [PreinscripcionController::class, 'exportarExcel']);
     Route::post('/actualizar-sexo-postulante', [PreinscripcionController::class, 'actualizarSexo']);
     Route::post('/actualizar-preinscripcion', [PreinscripcionController::class, 'Actualizar']);
     Route::post('/eliminar-preinscripcion', [PreinscripcionController::class, 'Eliminar']);
@@ -197,6 +198,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/procesos/get-tipos', [ProcesoController::class, 'getTipoProceso']);
     Route::get('/procesos/get-modalidades', [ProcesoController::class, 'getModalidades']);
     Route::post('/procesos/get-procesos', [ProcesoController::class, 'getProcesos']);
+    Route::get('/procesos/exportar-excel', [ProcesoController::class, 'exportarExcel']);
     Route::post('/save-proceso', [ProcesoController::class, 'saveProceso']);
     Route::get('/get-select-procesos', [ProcesoController::class, 'getSelectProceso']);
     Route::post('/cambiar_proceso', [ProcesoController::class, 'cambiarProceso']);
@@ -218,6 +220,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     // TIPOS DE DOCUMENTO
     Route::get('/tipos-documento', [TipoDocumentoController::class, 'index'])->name('tipos-documento-index');
     Route::post('/tipos-documento/get-tipos-documento', [TipoDocumentoController::class, 'getTiposDocumento']);
+    Route::get('/tipos-documento/exportar-excel', [TipoDocumentoController::class, 'exportarExcel']);
     Route::post('/tipos-documento/save', [TipoDocumentoController::class, 'save']);
     Route::get('/tipos-documento/delete/{id}', [TipoDocumentoController::class, 'delete']);
 
@@ -237,6 +240,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //fILIAL
     Route::get('/filial', [FilialController::class, 'index'])->name('filial-index');
     Route::post('/filiales/get-filiales', [FilialController::class, 'getFiliales']);
+    Route::get('/filiales/exportar-excel', [FilialController::class, 'exportarExcel']);
     Route::post('/save-filial', [FilialController::class, 'saveFilial']);
     Route::get('/eliminar-filial/{id}', [FilialController::class, 'deleteFilial']);
 
@@ -244,11 +248,13 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/programa', [ProgramaController::class, 'index'])->name('programa-index');
     Route::post('/save-programa', [ProgramaController::class, 'savePrograma']);
     Route::post('/programas/get-programas', [ProgramaController::class, 'getProgramas']);
+    Route::get('/programas/exportar-excel', [ProgramaController::class, 'exportarExcel']);
     Route::get('/programas/get-niveles', [ProgramaController::class, 'getNiveles']);
     Route::get('/eliminar-programa/{id}', [ProgramaController::class, 'deletePrograma']);
 
     //APODERADOS
     Route::post('/get-apoderados-admin', [ApoderadoController::class, 'getApoderadoAdmin']);
+    Route::get('/apoderados/exportar-excel', [ApoderadoController::class, 'exportarExcel']);
     Route::post('/save-apoderados-admin', [ApoderadoController::class, 'saveApoderadoAdmin']);
 
     //MODALIDAD
@@ -262,6 +268,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //UBIGEOS
     Route::get('/ubigeos', [UbigeoController::class, 'index'])->name('admin-ubigeos');
     Route::post('/ubigeos/get-ubigeos', [UbigeoController::class, 'getUbigeos']);
+    Route::get('/ubigeos/exportar-excel', [UbigeoController::class, 'exportarExcel']);
     Route::get('/ubigeos/departamentos', [UbigeoController::class, 'getDepartamentos']);
     Route::get('/ubigeos/provincias/{departamentoId}', [UbigeoController::class, 'getProvincias']);
     Route::get('/ubigeos/distritos/{provinciaId}', [UbigeoController::class, 'getDistritos']);
@@ -272,6 +279,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     // AÑOS
     Route::get('/anios', [AnioController::class, 'index'])->name('anio-index');
     Route::post('/anio/get-anios', [AnioController::class, 'getAnios']);
+    Route::get('/anios/exportar-excel', [AnioController::class, 'exportarExcel']);
     Route::post('/save-anios', [AnioController::class, 'saveAnio']);
     Route::get('/eliminar-anio/{id}', [AnioController::class, 'deleteAnio']);
 
@@ -314,6 +322,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::delete('/documento/delete/{id}', [DocumentoController::class, 'deleteDocumento']);
 
     Route::post('/get-postulantes-admin', [PostulanteController::class, 'getPostulantesAdmin']);
+    Route::get('/postulantes/exportar-excel', [PostulanteController::class, 'exportarExcel']);
   #  Route::post('/get-participantes-vocacional', [vocacionalController::class, 'participantesVocacional']);
 
     Route::post('/save-postulante-admin', [PostulanteController::class, 'savePostulanteAdmin']);
@@ -385,6 +394,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::get('/colegios', fn () => Inertia::render('Admin/Colegios/index'))->name('admin-colegios');
     Route::post('/get-colegios', [ColegioController::class, 'getColegios']);
+    Route::get('/colegios/exportar-excel', [ColegioController::class, 'exportarExcel']);
     Route::post('/save', [ColegioController::class, 'save']);
 
     //Configuracion programa
@@ -395,6 +405,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //OBSERVADOS
     Route::get('/observados', fn () => Inertia::render('Admin/Observados/index'))->name('admin-observados');
     Route::post('/get-observados-lista', [SancionadoController::class, 'getObservadosLista']);
+    Route::get('/observados/exportar-excel', [SancionadoController::class, 'exportarExcel']);
     Route::post('/save-observado', [SancionadoController::class, 'save']);
 
     //PAGOS
@@ -407,6 +418,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     //VACANTES
     Route::get('/vacantes', fn () => Inertia::render('Admin/Vacantes/index'))->name('admin-vacantes');
     Route::post('/get-vacantes-admin', [VacantesController::class, 'getVacantes']);
+    Route::get('/vacantes/exportar-excel', [VacantesController::class, 'exportarExcel']);
     Route::post('/save-numero-vacantes', [VacantesController::class, 'saveNumeroVacantes']);
     Route::post('/delete-vacante', [VacantesController::class, 'eliminar']);
 
@@ -449,6 +461,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::get('/reglamentos', fn () => Inertia::render('Admin/Reglamento/index'))->name('admin-reglamento');
     Route::get('/get-select-reglamentos', [ReglamentoController::class, 'getSelectReglamentos']);
     Route::post('/get-reglamentos', [ReglamentoController::class, 'getReglamentos']);
+    Route::get('/reglamentos/exportar-excel', [ReglamentoController::class, 'exportarExcel']);
     Route::post('/save-reglamento', [ReglamentoController::class, 'saveReglamento']);
     Route::get('/eliminar-reglamento/{id}', [ReglamentoController::class, 'eliminarReglamento']);
 

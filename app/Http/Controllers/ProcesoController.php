@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Proceso;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use Inertia\Inertia;
 
 class ProcesoController extends Controller
@@ -197,6 +199,40 @@ class ProcesoController extends Controller
     $this->response['estado'] = true;
     $this->response['datos'] = $res;
     return response()->json($this->response, 200);
+  }
+
+  public function exportarExcel(Request $request)
+  {
+    $query_where = [];
+    if ($request->filled('nivel')) {
+      $query_where[] = ['procesos.nivel', '=', $request->nivel];
+    }
+    $datos = Proceso::select(
+      'procesos.id', 'procesos.nombre','procesos.estado','procesos.anio',
+      'procesos.url', 'procesos.fecha_examen', 'procesos.ciclo', 'procesos.slug',
+      'procesos.nro_convocatoria as convocatoria', 'procesos.fec_inicio', 'procesos.fec_fin',
+      'procesos.fecha_examen as fec_examen', 'procesos.observaciones as observacion',
+      'filial.id as id_sede', 'filial.nombre as sede','procesos.nivel',
+      'tipo_proceso.id as id_tipo', 'tipo_proceso.nombre as tipo',
+      'codigo_proceso','fec_1','fec_2','id_reglamento',
+      'modalidad_proceso.id as id_modalidad', 'modalidad_proceso.nombre as modalidad'
+    )
+      ->join('filial', 'filial.id', '=', 'procesos.id_sede_filial')
+      ->join('tipo_proceso', 'tipo_proceso.id', '=', 'procesos.id_tipo_proceso')
+      ->join('modalidad_proceso', 'modalidad_proceso.id', '=', 'procesos.id_modalidad_proceso')
+      ->where($query_where)
+      ->where(function ($query) use ($request) {
+          if ($request->filled('term')) {
+              $query->orWhere('procesos.nombre', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('filial.nombre', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('modalidad_proceso.nombre', 'LIKE', '%' . $request->term . '%')
+                  ->orWhere('procesos.anio', 'LIKE', '%' . $request->term . '%');
+          }
+      })
+      ->orderBy('procesos.id', 'DESC')
+      ->get();
+
+    return Excel::download(new TablaGenericaExport($datos, ['ID', 'Nombre', 'Estado', 'Año', 'URL', 'Fecha Examen', 'Ciclo', 'Slug', 'Convocatoria', 'Fec Inicio', 'Fec Fin', 'Fec Examen', 'Observación', 'ID Sede', 'Sede', 'Nivel', 'ID Tipo', 'Tipo', 'Código Proceso', 'Fec 1', 'Fec 2', 'ID Reglamento', 'ID Modalidad', 'Modalidad']), 'procesos.xlsx');
   }
 
   public function cambiarProceso(Request $request) {

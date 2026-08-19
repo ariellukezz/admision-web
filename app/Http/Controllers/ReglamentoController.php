@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reglamento;
 use Illuminate\Support\Facades\File;
+use App\Exports\TablaGenericaExport;
+use Excel;
 
 class ReglamentoController extends Controller
 {
@@ -108,6 +110,15 @@ class ReglamentoController extends Controller
     ]);
   }
 
+  public function exportarExcel(Request $request)
+  {
+    $datos = Reglamento::select('reglamento.*')
+    ->when($request->term, fn($q, $term) => $q->where('reglamento.nombre', 'LIKE', "%{$term}%"))
+    ->orderByDesc('reglamento.id')
+    ->get();
+
+    return Excel::download(new TablaGenericaExport($datos, ['ID', 'Nombre', 'Estado', 'Inicio Vigencia', 'Fin Vigencia']), 'reglamentos.xlsx');
+  }
 
 
 }

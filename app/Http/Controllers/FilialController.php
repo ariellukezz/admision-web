@@ -8,6 +8,8 @@ use App\Models\Filial;
 use App\Models\Carpeta;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Dataversion;
+use App\Exports\TablaGenericaExport;
+use Excel;
 
 class FilialController extends Controller
 {
@@ -106,6 +108,30 @@ class FilialController extends Controller
     $this->response['datos'] = $p;
     return response()->json($this->response, 200);
   }
-  
+
+    public function exportarExcel(Request $request)
+    {
+        $datos = Filial::select('filial.id', 'filial.codigo','filial.nombre', 'filial.ubigeo',
+            'filial.estado AS estado','filial.efi', 'filial.direccion',
+            DB::raw("CONCAT(departamento.nombre,'/',provincia.nombre,'/',distritos.nombre) AS lugar")
+        )
+        ->leftjoin('ubigeo','ubigeo.ubigeo','filial.ubigeo')
+        ->leftjoin('departamento','departamento.id','ubigeo.id_departamento')
+        ->leftjoin('provincia','provincia.id','ubigeo.id_provincia')
+        ->leftjoin('distritos','distritos.id','ubigeo.id_distrito')
+        ->where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->orWhere('filial.codigo', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('filial.nombre', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('departamento.nombre', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('provincia.nombre', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('distritos.nombre', 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->orderBy('filial.id', 'DESC')
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Código', 'Nombre', 'Ubigeo', 'Estado', 'EFI', 'Dirección', 'Lugar']), 'filiales.xlsx');
+    }
 
 }
