@@ -400,9 +400,7 @@ class PdfReportService
                 ->join('postulante', 'asignaciones_aulas.id_postulante', '=', 'postulante.id')
                 ->join('inscripciones', function ($join) use ($filterGroupId) {
                     $join->on('postulante.id', '=', 'inscripciones.id_postulante')
-                        ->where('inscripciones.id_proceso', '=', function ($query) use ($filterGroupId) {
-                            $query->select('id_proceso')->from('grupos_filtro')->where('id', $filterGroupId)->limit(1);
-                        })
+                        ->where('inscripciones.grupo_filtro_id', '=', $filterGroupId)
                         ->where('inscripciones.estado', 0);
                 })
                 ->join('programa', 'inscripciones.id_programa', '=', 'programa.id')
@@ -482,7 +480,7 @@ class PdfReportService
             JOIN programa pr ON i.id_programa = pr.id
             LEFT JOIN areas a ON pr.id_area = a.id
             WHERE c.grupo_filtro_id = ?
-            AND i.id_proceso = (SELECT id_proceso FROM grupos_filtro WHERE id = ?)
+            AND i.grupo_filtro_id = ?
             AND i.estado = 0
             GROUP BY a.nombre ORDER BY num_students DESC
         ", [$filterGroupId, $filterGroupId]);

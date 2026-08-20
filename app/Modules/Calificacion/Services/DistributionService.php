@@ -278,11 +278,15 @@ class DistributionService
         DB::commit();
     }
 
-    public function getFilterGroups()
+    public function getFilterGroups(?int $idProceso = null)
     {
-        $groups = FilterGroup::with(['conditions'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = FilterGroup::with(['conditions']);
+
+        if ($idProceso) {
+            $query->where('id_proceso', $idProceso);
+        }
+
+        $groups = $query->orderBy('created_at', 'desc')->get();
 
         return $groups->map(function ($g) {
             $count = DB::table('inscripciones')

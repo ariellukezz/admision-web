@@ -7,14 +7,19 @@ use App\Modules\Calificacion\Requests\StoreCalificacionRequest;
 use App\Modules\Calificacion\Requests\UpdateCalificacionRequest;
 use App\Modules\Calificacion\Resources\CalificacionResource;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CalificacionConfigController extends BaseCalificacionController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $calificaciones = Calificacion::with(['proceso', 'multiplicador', 'ponderacion'])
-            ->orderBy('id', 'DESC')
-            ->get();
+        $query = Calificacion::with(['proceso', 'multiplicador', 'ponderacion']);
+
+        if ($request->has('id_proceso')) {
+            $query->where('id_proceso', $request->query('id_proceso'));
+        }
+
+        $calificaciones = $query->orderBy('id', 'DESC')->get();
 
         return $this->successResponse(CalificacionResource::collection($calificaciones));
     }

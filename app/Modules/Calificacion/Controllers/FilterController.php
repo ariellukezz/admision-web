@@ -119,10 +119,12 @@ class FilterController extends BaseCalificacionController
     }
 
 
-    public function groups(): JsonResponse
+    public function groups(Request $request): JsonResponse
     {
         try {
-            return $this->successResponse($this->distributionService->getFilterGroups());
+            return $this->successResponse(
+                $this->distributionService->getFilterGroups($request->query('id_proceso'))
+            );
         } catch (\Exception $e) {
             Log::error('Error en getFilterGroups: ' . $e->getMessage());
             return $this->errorResponse('Error al obtener grupos: ' . $e->getMessage(), 500);

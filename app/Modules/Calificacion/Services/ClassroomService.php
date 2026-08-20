@@ -314,12 +314,7 @@ class ClassroomService
             ->leftJoin('colegios', 'postulante.id_colegio', '=', 'colegios.id')
             ->join('inscripciones', function ($join) use ($filterGroupId) {
                 $join->on('postulante.id', '=', 'inscripciones.id_postulante')
-                    ->where('inscripciones.id_proceso', '=', function ($query) use ($filterGroupId) {
-                        $query->select('id_proceso')
-                            ->from('grupos_filtro')
-                            ->where('id', $filterGroupId)
-                            ->limit(1);
-                    })
+                    ->where('inscripciones.grupo_filtro_id', '=', $filterGroupId)
                     ->where('inscripciones.estado', 0);
             })
             ->join('programa', 'inscripciones.id_programa', '=', 'programa.id')

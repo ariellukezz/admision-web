@@ -43,12 +43,7 @@ class ConflictDetectionService
             ->leftJoin('colegios as col', 'p.id_colegio', '=', 'col.id')
             ->join('inscripciones as i', function ($join) use ($filterGroupId) {
                 $join->on('p.id', '=', 'i.id_postulante')
-                    ->where('i.id_proceso', '=', function ($query) use ($filterGroupId) {
-                        $query->select('id_proceso')
-                            ->from('grupos_filtro')
-                            ->where('id', $filterGroupId)
-                            ->limit(1);
-                    })
+                    ->where('i.grupo_filtro_id', '=', $filterGroupId)
                     ->where('i.estado', 0);
             })
             ->join('programa as prog', 'i.id_programa', '=', 'prog.id')

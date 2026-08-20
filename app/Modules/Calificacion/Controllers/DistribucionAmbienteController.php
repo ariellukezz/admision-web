@@ -16,13 +16,18 @@ class DistribucionAmbienteController extends BaseCalificacionController
     /**
      * Listar distribuciones guardadas.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $distribuciones = DistribucionAmbiente::query()
+        $query = DistribucionAmbiente::query()
             ->with(['grupoFiltro:id,descripcion,id_proceso,postulantes_count'])
             ->withCount('detalles')
-            ->orderByDesc('id')
-            ->get();
+            ->orderByDesc('id');
+
+        if ($request->has('id_proceso')) {
+            $query->where('id_proceso', $request->input('id_proceso'));
+        }
+
+        $distribuciones = $query->get();
 
         return $this->successResponse($distribuciones);
     }
@@ -42,8 +47,12 @@ class DistribucionAmbienteController extends BaseCalificacionController
 
         $grupos = $query->get(['id', 'descripcion', 'id_proceso', 'postulantes_count', 'orden_procesamiento']);
 
-        // IDs de grupos que ya tienen distribución
-        $gruposConDistribucion = DistribucionAmbiente::pluck('id_grupo_filtro')
+        // IDs de grupos que ya tienen distribución (filtrado por proceso)
+        $distQuery = DistribucionAmbiente::query();
+        if ($request->has('id_proceso')) {
+            $distQuery->where('id_proceso', $request->input('id_proceso'));
+        }
+        $gruposConDistribucion = $distQuery->pluck('id_grupo_filtro')
             ->filter()
             ->toArray();
 
