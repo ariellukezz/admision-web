@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Models\Colegio; 
 use App\Models\Dataversion;
+use App\Exports\TablaGenericaExport;
+use Excel;
 
 class ColegioController extends Controller
 {
@@ -138,6 +140,32 @@ class ColegioController extends Controller
         $this->response['datos'] = $res;
         return response()->json($this->response, 200);
 
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $query_where = [];
+        if($request->dep && !$request->prov && !$request->dist){ array_push($query_where, [DB::raw('SUBSTRING(colegios.ubigeo,1,2)'), '=', $request->dep]);}
+        if($request->prov && !$request->dist){ array_push($query_where, [DB::raw('SUBSTRING(colegios.ubigeo,1,4)'), '=', $request->dep.$request->prov]);}
+        if($request->dist){ array_push($query_where, [DB::raw('SUBSTRING(colegios.ubigeo,1,6)'), '=', $request->dep.$request->prov.$request->dist]);}
+        if($request->ges){ array_push($query_where, ['colegios.gestion', '=', $request->ges]);}
+
+        $datos = Colegio::select('colegios.id', 'distritos.nombre as distrito', 'colegios.cod_modular', 'colegios.cod_local', 'colegios.nombre', 'colegios.nivel', 'colegios.gestion', 'colegios.direccion', 'colegios.ubigeo', DB::raw("CONCAT(departamento.nombre, '/', provincia.nombre, '/', distritos.nombre) AS lugar"))
+            ->join('ubigeo', 'ubigeo.ubigeo', '=', 'colegios.ubigeo')
+            ->join('departamento', 'ubigeo.id_departamento', '=', 'departamento.id')
+            ->join('provincia', 'ubigeo.id_provincia', '=', 'provincia.id')
+            ->join('distritos', 'ubigeo.id_distrito', '=', 'distritos.id')
+            ->where($query_where)
+            ->where(function ($query) use ($request) {
+                if ($request->filled('term')) {
+                    $query->orWhere('colegios.nombre', 'LIKE', '%' . $request->term . '%')
+                        ->orWhere('colegios.cod_modular', 'LIKE', '%' . $request->term . '%')
+                        ->orWhere(DB::raw('CONCAT(departamento.nombre, "/", provincia.nombre, "/", distritos.nombre)'), 'LIKE', '%' . $request->term . '%');
+                }
+            })
+            ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Distrito', 'Cód. Modular', 'Cód. Local', 'Nombre', 'Nivel', 'Gestión', 'Dirección', 'Ubigeo', 'Lugar']), 'colegios.xlsx');
     }
     
 }

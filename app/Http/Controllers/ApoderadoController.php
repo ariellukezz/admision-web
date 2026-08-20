@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use App\Models\Apoderado;
 use App\Models\Paso;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use Illuminate\Support\Str;
 
 class ApoderadoController extends Controller {
@@ -230,6 +232,32 @@ class ApoderadoController extends Controller {
       return response()->json($this->response, 200);
     }
 
+    public function exportarExcel(Request $request)
+    {
+        $datos = Apoderado::select(
+            'apoderado.id', 'apoderado.nro_documento as dni', 'apoderado.paterno', 'apoderado.materno',
+            'apoderado.nombres', 'apoderado.tipo_apoderado',
+            'postulante.id AS id_postulante', 'postulante.nombres as postulante', 'postulante.nro_doc as dni_postulante',
+            'postulante.primer_apellido', 'postulante.segundo_apellido'
+        )
+        ->leftjoin('postulante','apoderado.id_postulante','postulante.id')
+        ->where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->orWhere('apoderado.nro_documento', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('apoderado.nombres', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('apoderado.paterno', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('apoderado.materno', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.nro_doc', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.nombres', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.primer_apellido', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('postulante.segundo_apellido', 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->orderBy('apoderado.id', 'DESC')
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'DNI', 'Paterno', 'Materno', 'Nombres', 'Tipo Apoderado', 'ID Postulante', 'Postulante', 'DNI Postulante', 'Paterno Postulante', 'Materno Postulante']), 'apoderados.xlsx');
+    }
 
 
 }

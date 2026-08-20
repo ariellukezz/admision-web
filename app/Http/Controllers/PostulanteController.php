@@ -13,6 +13,8 @@ use App\Models\Postulante;
 use App\Models\Apoderado;
 use App\Models\Paso;
 use App\Models\Cambio;
+use App\Exports\TablaGenericaExport;
+use Excel;
 use App\Models\Documento;
 use App\Mail\CodigoVerificacionDatos;
 use App\Models\Setting;
@@ -930,6 +932,27 @@ class PostulanteController extends Controller
             'estado' => true,
             'mensaje' => 'Postulante vinculado correctamente con ' . $user->getFullNameAttribute() . ' (DNI: ' . $postulante->nro_doc . ')',
         ]);
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $datos = Postulante::select(
+            'id', 'tipo_doc', 'nro_doc', 'primer_apellido', 'segundo_apellido', 'apellido_casada', 'nombres', 'sexo', 'fec_nacimiento',
+            'ubigeo_nacimiento', 'ubigeo_residencia', 'celular', 'email', 'estado_civil','direccion','anio_egreso',
+            'correo_institucional', 'cod_orcid', 'observaciones', 'id_colegio'
+        )
+        ->where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->orWhere('nro_doc', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('email', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere('celular', 'LIKE', '%' . $request->term . '%')
+                    ->orWhere(DB::raw("CONCAT(nombres, ' ', primer_apellido, ' ', segundo_apellido)"), 'LIKE', '%' . $request->term . '%')
+                    ->orWhere(DB::raw("CONCAT(primer_apellido, ' ', segundo_apellido, ' ', nombres)"), 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Tipo Doc', 'Nro Doc', 'Paterno', 'Materno', 'Apellido Casada', 'Nombres', 'Sexo', 'F. Nacimiento', 'Ubigeo Nac.', 'Ubigeo Res.', 'Celular', 'Email', 'Estado Civil', 'Dirección', 'Año Egreso', 'Correo Inst.', 'ORCID', 'Observaciones', 'ID Colegio']), 'postulantes.xlsx');
     }
 
 }

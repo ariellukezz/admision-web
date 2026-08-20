@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Anio;
+use App\Exports\TablaGenericaExport;
+use Excel;
 
 class AnioController extends Controller
 {
@@ -75,5 +77,19 @@ class AnioController extends Controller
             'mensaje' => "AÑO {$anio->anio} ELIMINADO CON ÉXITO",
             'datos' => $anio
         ]);
+    }
+
+    public function exportarExcel(Request $request)
+    {
+        $datos = Anio::where(function ($query) use ($request) {
+            if ($request->filled('term')) {
+                $query->where('anio', 'LIKE', '%' . $request->term . '%')
+                      ->orWhere('nombre', 'LIKE', '%' . $request->term . '%');
+            }
+        })
+        ->orderBy('anio', 'DESC')
+        ->get();
+
+        return Excel::download(new TablaGenericaExport($datos, ['ID', 'Año', 'Nombre']), 'anios.xlsx');
     }
 }
