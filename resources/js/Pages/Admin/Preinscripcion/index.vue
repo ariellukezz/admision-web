@@ -63,6 +63,10 @@
         <a-input type="text" placeholder="Buscar" v-model:value="buscar" class="pre-search" style="max-width: 300px; padding-left: 10px;">
             <template #prefix><search-outlined /></template>
         </a-input>
+        <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+            <template #icon><FileExcelOutlined /></template>
+            Exportar Excel
+        </a-button>
 
         </div>
     </row>
@@ -225,7 +229,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, unref } from 'vue';
-import { FormOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, SaveOutlined} from '@ant-design/icons-vue';
+import { FormOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, SaveOutlined, FileExcelOutlined} from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 const baseUrl = window.location.origin;
@@ -294,6 +298,19 @@ const getInscripciones =  async ( ) => {
     inscripciones.value = res.data.datos.data;
     totalRegistros.value = res.data.datos.total;
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    if (programa.value) params.append('programa', programa.value);
+    window.location.href = '/admin/preinscripciones/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const guardar = () => {
     let post = {

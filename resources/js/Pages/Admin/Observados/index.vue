@@ -10,6 +10,10 @@
       <div class="flex justify-between" style="position: relative;" >
       <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; padding-left: 30px;"/>
       <div class="mr-2" style="position: absolute; left: 8px; top: 3px; "><search-outlined /></div>
+      <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+          <template #icon><FileExcelOutlined /></template>
+          Exportar Excel
+      </a-button>
       </div>
   </row>
 
@@ -173,7 +177,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, unref, reactive } from 'vue';
-import { EyeOutlined, FormOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { EyeOutlined, FormOutlined, DeleteOutlined, SearchOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -247,6 +251,18 @@ const getProgramas =  async (term = "") => {
     programas.value = res.data.datos.data;
     totalpaginas.value = res.data.datos.total;
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    window.location.href = '/admin/observados/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const guardar = async () => {
     const values = await formObservados.value.validateFields();

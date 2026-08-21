@@ -19,6 +19,10 @@
 
         <template #prefix> <search-outlined /> </template>
     </a-input>
+    <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+        <template #icon><FileExcelOutlined /></template>
+        Exportar Excel
+    </a-button>
     </div>
 </row>
 
@@ -89,7 +93,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, unref, reactive } from 'vue';
-import { EyeOutlined, FormOutlined, EditOutlined, DeleteOutlined, SearchOutlined, CheckOutlined } from '@ant-design/icons-vue';
+import { EyeOutlined, FormOutlined, EditOutlined, DeleteOutlined, SearchOutlined, CheckOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -158,6 +162,19 @@ const getProgramas =  async (term = "") => {
     programas.value = res.data.datos.data;
     totalpaginas.value = res.data.datos.total;
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    if (modalidad.value) params.append('modalidad', modalidad.value);
+    window.location.href = '/admin/vacantes/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const eliminar = (item) => {
     axios.post("delete-vacante",{id_vacante:item.id_vacante }).then((result) => {

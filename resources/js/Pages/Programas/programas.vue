@@ -13,6 +13,14 @@
         <template #icon><PlusOutlined /></template>
         Nuevo Programa
       </a-button>
+      <a-button
+        :loading="exportandoExcel"
+        @click="exportarExcel"
+        style="margin-left: 8px;"
+      >
+        <template #icon><FileExcelOutlined /></template>
+        Exportar Excel
+      </a-button>
 
       <a-input-search
         v-model:value="buscar"
@@ -222,7 +230,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, ref, reactive } from 'vue';
-import { FormOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, PlusOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -320,6 +328,21 @@ const getProgramas = async () => {
   } catch (error) {
     console.error('Error al obtener programas:', error);
   }
+};
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+  exportandoExcel.value = true;
+  const params = new URLSearchParams();
+  if (buscar.value) params.append('term', buscar.value);
+  if (filtroNivel.value) params.append('nivel_academico', filtroNivel.value);
+  if (filtroFacultad.value) params.append('id_facultad', filtroFacultad.value);
+  if (filtroArea.value) params.append('area', filtroArea.value);
+  window.location.href = '/admin/programas/exportar-excel?' + params.toString();
+  setTimeout(() => {
+    exportandoExcel.value = false;
+  }, 2000);
 };
 
 const guardar = async () => {

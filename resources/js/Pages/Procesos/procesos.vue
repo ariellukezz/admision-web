@@ -13,6 +13,14 @@
       >
         Nuevo Proceso
       </a-button>
+      <a-button
+        :loading="exportandoExcel"
+        @click="exportarExcel"
+        style="margin-left: 8px;"
+      >
+        <template #icon><FileExcelOutlined /></template>
+        Exportar Excel
+      </a-button>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -508,7 +516,8 @@ import { watch, ref, reactive } from 'vue';
 import {
   FormOutlined,
   LinkOutlined,
-  DeleteOutlined
+  DeleteOutlined,
+  FileExcelOutlined
 } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
@@ -706,6 +715,19 @@ const getProcesos = async () => {
   } catch (error) {
     console.error("Error al obtener procesos:", error);
   }
+};
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+  exportandoExcel.value = true;
+  const params = new URLSearchParams();
+  if (buscar.value) params.append('term', buscar.value);
+  if (nivel.value) params.append('nivel', nivel.value);
+  window.location.href = '/admin/procesos/exportar-excel?' + params.toString();
+  setTimeout(() => {
+    exportandoExcel.value = false;
+  }, 2000);
 };
 
 const getSedes = async () => {

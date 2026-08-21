@@ -11,6 +11,12 @@
           </template>
           Nuevo
         </a-button>
+        <a-button :loading="exportandoExcel" @click="exportarExcel">
+          <template #icon>
+            <FileExcelOutlined />
+          </template>
+          Exportar Excel
+        </a-button>
 
         <a-input
           v-model:value="buscar"
@@ -107,7 +113,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { ref, computed, watch } from 'vue';
-import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
 
@@ -119,6 +125,18 @@ const guardando = ref(false);
 const pagina = ref(1);
 const totalRegistros = ref(0);
 const formRef = ref();
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+  exportandoExcel.value = true;
+  const params = new URLSearchParams();
+  if (buscar.value) params.append('term', buscar.value);
+  window.location.href = '/admin/tipos-documento/exportar-excel?' + params.toString();
+  setTimeout(() => {
+    exportandoExcel.value = false;
+  }, 2000);
+};
 
 const tipoDocumento = ref({
   id: null,

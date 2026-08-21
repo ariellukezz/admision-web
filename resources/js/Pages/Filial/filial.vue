@@ -6,6 +6,10 @@
 <div class="flex justify-between mb-2" >
     <div class="mr-3">
     <a-button type="primary" @click="showModalFilial" style="background: #476175; border: none; border-radius: 5px;">Nuevo</a-button>
+    <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+        <template #icon><FileExcelOutlined /></template>
+        Exportar Excel
+    </a-button>
     </div>
     <div class="flex justify-between" style="position: relative;" >
         <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; border-radius:6px; padding-left: 30px;"/>
@@ -164,7 +168,7 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, onMounted, reactive } from 'vue';
-import { FormOutlined, DeleteOutlined, SearchOutlined, DownOutlined, SaveOutlined } from '@ant-design/icons-vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, DownOutlined, SaveOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 
 import axios from 'axios';
@@ -256,6 +260,18 @@ const getFiliales =  async () => {
     filiales.value = res.data.datos.data;
     totalRegistros.value = res.data.datos.total;
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    window.location.href = '/admin/filiales/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const eliminar = (item) => {
     axios.get("eliminar-filial/"+item.id).then((result) => {
