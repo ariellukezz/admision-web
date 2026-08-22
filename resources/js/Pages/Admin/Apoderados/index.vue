@@ -5,6 +5,10 @@
     <div class="mb-4">
         <div class="flex justify-end">
             <a-button style="display:none;" type="primary" @click="showModal()">Abrir</a-button>
+            <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-right: 8px;">
+                <template #icon><FileExcelOutlined /></template>
+                Exportar Excel
+            </a-button>
             <a-input placeholder="Buscar" v-model:value="buscar"  style="max-width: 300px;">
                 <template #suffix>
                 <search-outlined />
@@ -157,7 +161,7 @@
 import { ref, watch } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { FormOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 
 
@@ -249,6 +253,18 @@ const getApoderados = () => {
 };
 
 getApoderados()
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    window.location.href = '/admin/apoderados/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const modal = ref(false);
 const showModal = () => {

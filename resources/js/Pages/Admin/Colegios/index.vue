@@ -7,6 +7,10 @@
     <div class="flex justify-between">
         <div> 
             <a-button type="primary" @click="modal = true" style="border-radius: 6px; background: #476175; border: none;">Nuevo</a-button>
+            <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+                <template #icon><FileExcelOutlined /></template>
+                Exportar Excel
+            </a-button>
         </div>
         <div class="flex justify-between" style="position: relative;">
             <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px; border-radius: 6px;">
@@ -274,7 +278,7 @@
 import { Head } from '@inertiajs/vue3';
 import Layout from '@/Layouts/AuthenticatedLayout.vue'
 import { watch, computed, ref, reactive } from 'vue';
-import { TeamOutlined, FormOutlined, DownOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons-vue';
+import { TeamOutlined, FormOutlined, DownOutlined, PrinterOutlined, DeleteOutlined, SearchOutlined, EyeOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import axios from 'axios';
     
@@ -362,6 +366,22 @@ const getColegios = async () => {
             } else { console.error('Error de configuración:', error.message); }
   });
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    if (dep.value) params.append('dep', dep.value);
+    if (prov.value) params.append('prov', prov.value);
+    if (dist.value) params.append('dist', dist.value);
+    if (gestion.value) params.append('ges', gestion.value);
+    window.location.href = '/admin/colegios/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const getUbigeosResidencia = async () => {
     axios.post("/get-ubigeo",{"term": buscarResidencia.value})

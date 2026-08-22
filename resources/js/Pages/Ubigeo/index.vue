@@ -8,6 +8,10 @@
           <template #icon><PlusOutlined /></template>
           Nuevo Ubigeo
         </a-button>
+        <a-button :loading="exportandoExcel" @click="exportarExcel">
+          <template #icon><FileExcelOutlined /></template>
+          Exportar Excel
+        </a-button>
 
         <a-input-search
           v-model:value="buscar"
@@ -134,7 +138,7 @@
 import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { ref, watch } from 'vue'
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, FileExcelOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import axios from 'axios'
 
@@ -171,6 +175,18 @@ const getUbigeos = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const exportandoExcel = ref(false)
+
+const exportarExcel = () => {
+  exportandoExcel.value = true
+  const params = new URLSearchParams()
+  if (buscar.value) params.append('term', buscar.value)
+  window.location.href = '/admin/ubigeos/exportar-excel?' + params.toString()
+  setTimeout(() => {
+    exportandoExcel.value = false
+  }, 2000)
 }
 
 const cargarDepartamentos = async () => {

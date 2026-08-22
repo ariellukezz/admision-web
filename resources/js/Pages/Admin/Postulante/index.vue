@@ -12,6 +12,10 @@
         <a-input type="text" placeholder="Buscar" v-model:value="buscar" style="max-width: 300px;">
             <template #prefix> <search-outlined /> </template>
         </a-input>
+        <a-button :loading="exportandoExcel" @click="exportarExcel" style="margin-left: 8px;">
+            <template #icon><FileExcelOutlined /></template>
+            Exportar Excel
+        </a-button>
     </div>
 </row>
 
@@ -231,7 +235,7 @@ import { reactive, ref, onMounted, watch } from 'vue';
 import { message } from 'ant-design-vue';
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { FormOutlined, DeleteOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons-vue';
+import { FormOutlined, DeleteOutlined, SearchOutlined, EyeOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { notification } from 'ant-design-vue';
 import dayjs from 'dayjs';
 import { format } from 'date-fns';
@@ -355,6 +359,18 @@ const getModalidades =  async ( ) => {
     modalidades.value = res.data.datos.data;
     totalRegistros.value = res.data.datos.total;
 }
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+    exportandoExcel.value = true;
+    const params = new URLSearchParams();
+    if (buscar.value) params.append('term', buscar.value);
+    window.location.href = '/admin/postulantes/exportar-excel?' + params.toString();
+    setTimeout(() => {
+        exportandoExcel.value = false;
+    }, 2000);
+};
 
 const columnsProgramas = [
     { title: 'Ver', dataIndex: 'ver_postulante' },

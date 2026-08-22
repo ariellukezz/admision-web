@@ -11,6 +11,10 @@
         >
           Nuevo
         </a-button>
+        <a-button :loading="exportandoExcel" @click="exportarExcel">
+          <template #icon><FileExcelOutlined /></template>
+          Exportar Excel
+        </a-button>
 
         <div class="w-full md:w-auto relative flex-1 max-w-[300px]">
           <a-input v-model:value="searchTerm" placeholder="Buscar" class="w-full pl-3">
@@ -178,7 +182,7 @@
 import { ref, computed, watch } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { LinkOutlined, FormOutlined, DeleteOutlined, SearchOutlined, FileOutlined, UploadOutlined } from '@ant-design/icons-vue';
+import { LinkOutlined, FormOutlined, DeleteOutlined, SearchOutlined, FileOutlined, UploadOutlined, FileExcelOutlined } from '@ant-design/icons-vue';
 import { message, notification } from 'ant-design-vue';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -245,6 +249,18 @@ const getReglamentos = async () => {
       description: 'No se pudo cargar la lista de reglamentos'
     });
   }
+};
+
+const exportandoExcel = ref(false);
+
+const exportarExcel = () => {
+  exportandoExcel.value = true;
+  const params = new URLSearchParams();
+  if (searchTerm.value) params.append('term', searchTerm.value);
+  window.location.href = '/admin/reglamentos/exportar-excel?' + params.toString();
+  setTimeout(() => {
+    exportandoExcel.value = false;
+  }, 2000);
 };
 
 const showModal = () => {

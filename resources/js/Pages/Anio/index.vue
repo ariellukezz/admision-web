@@ -15,6 +15,14 @@
           </template>
           Nuevo
         </a-button>
+        <a-button
+          :loading="exportandoExcel"
+          @click="exportarExcel"
+          style="margin-left: 8px;"
+        >
+          <template #icon><FileExcelOutlined /></template>
+          Exportar Excel
+        </a-button>
 
         <a-input-search
           v-model:value="buscar"
@@ -124,7 +132,7 @@
 import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { ref, watch } from 'vue'
-import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, DeleteOutlined, SearchOutlined, PlusOutlined, FileExcelOutlined } from '@ant-design/icons-vue'
 import { notification } from 'ant-design-vue'
 import axios from 'axios'
 
@@ -156,6 +164,18 @@ const getAnios = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const exportandoExcel = ref(false)
+
+const exportarExcel = () => {
+  exportandoExcel.value = true
+  const params = new URLSearchParams()
+  if (buscar.value) params.append('term', buscar.value)
+  window.location.href = '/admin/anios/exportar-excel?' + params.toString()
+  setTimeout(() => {
+    exportandoExcel.value = false
+  }, 2000)
 }
 
 const showModal = () => {
