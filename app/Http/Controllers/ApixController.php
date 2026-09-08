@@ -391,7 +391,12 @@ class ApixController extends Controller {
     public function getSelectProgramasAdmision()
     {
         try {
-            $res = Programa::select('programa.id', 'programa.codigo_sunedu as siu', 'programa.nombre')
+            $res = Programa::select(
+                    'programa.id',
+                    DB::raw("LPAD(programa.codigo_sunedu, 3, '0') AS siu"),
+                    'programa.nombre'
+                )
+                ->where('programa.nivel', 1)
                 ->orderBy('programa.nombre')
                 ->get();
 
