@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-postulante-pago/{dni}/{proceso}', [ApixController::class, 'getPostulantePago']);
     Route::get('/v1/get-postulante-inscrito/{dni}', [ApixController::class, 'getPostulanteProcesos']);
     Route::post('/get-procesos', [ProcesoController::class, 'getProcesos']);
+    Route::get('/v1/get-postulantes-proceso/{id_proceso}/{programa}', [ApixController::class, 'getPostulantesProceso']);
 });
 Route::middleware('throttle:50,1')->post('/v1/postulante-cepre-inscrito', [CepreController::class, 'getVerInscripcion']);
 

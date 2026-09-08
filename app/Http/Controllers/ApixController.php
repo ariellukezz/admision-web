@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Postulante;
 use App\Models\ControlBiometrico;
+use App\Models\Inscripcion;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
@@ -306,5 +307,84 @@ class ApixController extends Controller {
 
     }
 
+
+    public function getPostulantesProceso($id_proceso, $programa)
+    {
+        try {
+            $validator = \Validator::make([
+                'id_proceso' => $id_proceso,
+                'programa' => $programa
+            ], [
+                'id_proceso' => 'required|integer|exists:procesos,id',
+                'programa' => 'required|integer|exists:programa,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'errors' => $validator->errors()->all()
+                ], 400);
+            }
+
+            $res = Inscripcion::join('postulante', 'postulante.id', '=', 'inscripciones.id_postulante')
+                ->leftJoin('control_biometrico', function ($join) use ($id_proceso) {
+                    $join->on('control_biometrico.id_postulante', '=', 'postulante.id')
+                        ->where('control_biometrico.id_proceso', '=', $id_proceso);
+                })
+                ->join('resultados', function ($join) use ($id_proceso) {
+                    $join->on('resultados.dni_postulante', '=', 'postulante.nro_doc')
+                        ->where('resultados.id_proceso', '=', $id_proceso);
+                })
+                ->join('ubigeo', 'postulante.ubigeo_nacimiento', '=', 'ubigeo.ubigeo')
+                ->join('departamento', 'ubigeo.id_departamento', '=', 'departamento.id')
+                ->join('provincia', 'ubigeo.id_provincia', '=', 'provincia.id')
+                ->join('distritos', 'ubigeo.id_distrito', '=', 'distritos.id')
+                ->join('modalidad', 'inscripciones.id_modalidad', '=', 'modalidad.id')
+                ->join('programa', 'programa.id', '=', 'inscripciones.id_programa')
+                ->join('procesos', 'procesos.id', '=', 'inscripciones.id_proceso')
+                ->join('colegios', 'colegios.id', '=', 'postulante.id_colegio')
+                ->where('inscripciones.estado', '=', 0)
+                ->where('inscripciones.id_proceso', '=', $id_proceso)
+                ->where('inscripciones.id_programa', '=', $programa)
+                ->select(
+                    'control_biometrico.codigo_ingreso AS codigo',
+                    'postulante.nro_doc AS DNI',
+                    'postulante.primer_apellido',
+                    'postulante.segundo_apellido',
+                    'postulante.nombres',
+                    DB::raw("IF(postulante.sexo = 1, 'M', 'F') AS sexo"),
+                    'postulante.email',
+                    'postulante.fec_nacimiento',
+                    'postulante.ubigeo_nacimiento',
+                    'postulante.estado_civil',
+                    'postulante.anio_egreso',
+                    'colegios.gestion',
+                    'colegios.nombre',
+                    'colegios.ubigeo AS c_ubigeo',
+                    'postulante.direccion',
+                    'postulante.celular',
+                    'resultados.fecha AS f_examen',
+                    'modalidad.nombre AS modalidad',
+                    'resultados.puntaje',
+                    'procesos.nombre AS proceso',
+                    'programa.id AS id_programa',
+                    'programa.nombre AS programa',
+                    'departamento.nombre AS departamento',
+                    'provincia.nombre AS provincia',
+                    'distritos.nombre AS distrito'
+                )
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'mensaje' => 'Consulta exitosa',
+                'total' => $res->count(),
+                'data' => $res
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'mensaje' => $th->getMessage()], 500);
+        }
+    }
 
 }
