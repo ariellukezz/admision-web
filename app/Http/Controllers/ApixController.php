@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\Postulante;
 use App\Models\ControlBiometrico;
 use App\Models\Inscripcion;
+use App\Models\Programa;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
@@ -373,6 +374,25 @@ class ApixController extends Controller {
                     'provincia.nombre AS provincia',
                     'distritos.nombre AS distrito'
                 )
+                ->get();
+
+            return response()->json([
+                'status' => true,
+                'mensaje' => 'Consulta exitosa',
+                'total' => $res->count(),
+                'data' => $res
+            ], 200);
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'mensaje' => $th->getMessage()], 500);
+        }
+    }
+
+    public function getSelectProgramasAdmision()
+    {
+        try {
+            $res = Programa::select('programa.id', 'programa.siu', 'programa.nombre')
+                ->orderBy('programa.nombre')
                 ->get();
 
             return response()->json([
