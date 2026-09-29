@@ -62,6 +62,7 @@ use App\Http\Controllers\DocumentosResultadoController;
 use App\Http\Controllers\PuntajeController;
 use App\Http\Controllers\ControlBiometricoController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\DniAuthController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\PeriodoMatriculaController;
 use App\Http\Controllers\DniController;
@@ -1022,6 +1023,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
     Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
 });
+
+// DNIe Login Routes
+Route::post('/auth/dnie/callback', [DniAuthController::class, 'callback'])
+    ->middleware(['web', 'throttle:10,1'])   // 'web' aporta sesión y verificación CSRF
+    ->name('dnie.callback');
 
 // Postulante Routes
 Route::prefix('postulante')->name('postulante.')->middleware('auth')->group(function () {

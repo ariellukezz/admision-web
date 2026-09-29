@@ -826,265 +826,195 @@ const colAnteriores = ref([
 
 
 <style scoped>
-.btn-actualizar{
-  background:#224464;
-  color:white;
-  width:100%;
-  height: 38px;
-  /* color:#1c1c8a;  */
-  border-radius:5px;
-  border:none;
-}
-.btn-actualizar:active{
-  border:none;
-  animation-duration: 1.5s;
-  background:#2e5c85c9;
-  width:100%;
-  height: 38px;
-  color:white;
-  border-radius:5px;
-}
-.fondo-biometrico{
-  background-image: url("../../../assets/imagenes/fondo-biometrico.jpg");
+/* ============================================================================
+   Revisión biométrica — cabecera de identificación + ficha editable + cotejo
+   de fotografías. La cabecera con imagen es deliberadamente la única pieza
+   "ilustrada" del módulo: cumple la función de identificar de un vistazo al
+   postulante frente a la persona que tiene delante.
+   ========================================================================== */
+
+/* Cabecera de identificación ---------------------------------------------- */
+.fondo-biometrico {
+  position: relative;
+  width: 100%; height: 300px;
+  background-image:
+    linear-gradient(90deg, rgba(10,18,32,.72) 0%, rgba(10,18,32,.34) 52%, rgba(10,18,32,.06) 100%),
+    url("../../../assets/imagenes/fondo-biometrico.jpg");
   background-repeat: no-repeat;
   background-size: cover;
-  height:320px; width: 100%; position: relative; border:solid #d9d9d9 1px;
+  background-position: center;
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
+  overflow: hidden;
 }
+.header-biometrico-container-foto {
+  position: absolute; top: 46px; left: 24px;
+  border: 3px solid rgba(255,255,255,.92);
+  border-radius: var(--rev-r-md);
+  overflow: hidden;
+  box-shadow: var(--rev-sh-lg);
+  background: var(--rev-n-200);
+}
+.biometrico-foto-imagen { width: 170px; display: block; aspect-ratio: 3 / 4; object-fit: cover; }
 
-.header-biometrico-nombre{
-  font-size: 3rem;
-  font-family: 'Helvetica';
-  color:white;
-  font-weight: bold;
-}
-.header-biometrico-2da{
-  font-size: 1.2rem;
-  font-family: 'Helvetica';
-  color:white;
-  letter-spacing: .22rem;
-}
-.header-biometrico-programa{
-  font-size: 1.2rem;
-  font-family: 'Helvetica';
-  color:#0a3d5a ;
-  font-weight: bold;
-  letter-spacing: .12rem;
-}
-.header-biometrico-modalidad{
-  font-size: .9rem;
-  font-family: 'Helvetica';
-  color:black;
-  letter-spacing: .22rem;
-}
+.header-biometrico-letras-bot { position: absolute; top: 22px; left: 226px; right: 24px; }
+.header-biometrico-letras-top { position: absolute; bottom: 26px; left: 226px; right: 24px; }
 
-.header-biometrico-container-foto{
-  position: absolute;
-  top:60px;
-  left: 20px;
-  border: solid 5px #e7e7e7;
+.header-biometrico-nombre {
+  font-family: var(--rev-font);
+  font-size: 2.35rem; font-weight: 700;
+  letter-spacing: -.022em; line-height: 1.08;
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(10,18,32,.4);
 }
-.biometrico-foto-imagen{
-  width: 180px;
+.header-biometrico-2da {
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-md); font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(255,255,255,.82);
 }
-.header-biometrico-letras-top{
-  position: absolute; bottom:30px; left: 230px;
+.header-biometrico-programa {
+  display: inline-block;
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-md); font-weight: 650;
+  letter-spacing: .05em; text-transform: uppercase;
+  color: #fff;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: var(--rev-r-sm);
+  padding: 3px 9px;
+  backdrop-filter: blur(3px);
 }
-
-.header-biometrico-letras-bot{
-  position: absolute; top:10px; left: 230px;
+.header-biometrico-modalidad {
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-sm); font-weight: 560;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(255,255,255,.7);
 }
+.header-modalidad { color: rgba(255,255,255,.7); }
 
-.header-modalidad{
-  color: black;
-}
-
-
-@media screen and (max-width: 600px) {
-  .header-biometrico-nombre{ font-size: 1.5rem; }
-  .header-biometrico-2da{
-    font-size: .7rem;
-  }
-  .header-biometrico-programa{
-    font-size: .7rem;
-  }
-  .header-biometrico-modalidad{
-    font-size: .5rem;
-  }
-  .header-biometrico-container-foto{
-    top:60px; left: 10px;  border: solid 2px #e7e7e7;
-  }
-  .biometrico-foto-imagen{
-    width: 100px;
-  }
-
-  .fondo-biometrico{
-    height:200px; width: 100%; position: relative; border:solid #d9d9d9 1px;
-  }
-  .header-biometrico-letras-top{
-    position: absolute; bottom:10px; left: 125px;
-  }
-  .header-biometrico-letras-bot{
-    position: absolute; top:5px; left: 125px;
-  }
-  .header-modalidad{
-    display: none;
-  }
-
-}
-
-/* Estilos generales */
+/* Ficha ------------------------------------------------------------------- */
 .elegant-profile-card {
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  border: none;
-  padding: 24px;
-  background: linear-gradient(to bottom right, #fafafa, #ffffff);
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-xs);
+  padding: 0;
 }
-
-/* Sección de datos */
-.profile-data-section {
-  padding: 16px;
-}
-
+.profile-data-section { padding: var(--rev-s-6); }
 .header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--rev-s-5);
+  margin-bottom: var(--rev-s-6);
+  padding-bottom: var(--rev-s-5);
+  border-bottom: 1px solid var(--rev-line);
 }
-
 .section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
   margin: 0;
+  font-size: var(--rev-fs-lg); font-weight: 650;
+  letter-spacing: var(--rev-track-tight); color: var(--rev-ink);
 }
-
 .dni-badge {
-  background: #1890ff;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
+  font-family: var(--rev-mono);
+  font-size: var(--rev-fs-sm); font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--rev-primary-700);
+  background: var(--rev-primary-50);
+  border: 1px solid var(--rev-primary-200);
+  border-radius: var(--rev-r-sm);
+  padding: 3px 9px;
 }
 
-/* Formulario */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.elegant-form-item :deep(.ant-form-item-label) {
-  font-weight: 500;
-  color: #666;
-  padding-bottom: 4px;
-}
-
+/* Formulario --------------------------------------------------------------- */
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--rev-s-5) var(--rev-s-6); }
+.elegant-form-item :deep(.ant-form-item-label) { padding-bottom: 3px; }
 .elegant-form-item :deep(.ant-form-item-label label) {
-  font-size: 13px;
+  font-size: var(--rev-fs-sm); font-weight: 600; color: var(--rev-ink-3); height: auto;
 }
+.elegant-form-item :deep(.ant-form-item-label label::after) { display: none; }
 
-.elegant-input {
-  border-radius: 8px;
-  height: 42px;
-  border: 1px solid #e0e0e0;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  background-color: #f9f9f9;
-}
-
-.elegant-input:hover {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-}
-
-.elegant-input:focus {
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-}
-
-.input-icon {
-  color: #888;
-  font-size: 15px;
-}
-
+.elegant-input,
 .elegant-select,
 .elegant-date-picker {
   width: 100%;
-  height: 42px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border-radius: var(--rev-r-md) !important;
+  border-color: var(--rev-line-strong) !important;
+  background: var(--rev-surface) !important;
+  transition: border-color var(--rev-t-fast) var(--rev-ease), box-shadow var(--rev-t-fast) var(--rev-ease);
 }
-
-/* Botón de actualizar */
-.update-button {
-  margin-top: 24px;
-  height: 42px;
-  border-radius: 8px;
-  padding: 0 32px;
-  font-weight: 500;
-  background: linear-gradient(to right, #1890ff, #096dd9);
-  border: none;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
-  transition: all 0.3s;
+.elegant-input { height: 34px; }
+.elegant-select :deep(.ant-select-selector),
+.elegant-date-picker { height: 34px !important; }
+.elegant-input:hover,
+.elegant-date-picker:hover { border-color: var(--rev-n-300) !important; }
+.elegant-input:focus,
+.elegant-input:focus-within {
+  border-color: var(--rev-primary-500) !important;
+  box-shadow: var(--rev-ring) !important;
 }
+.input-icon { color: var(--rev-ink-4); font-size: 14px; }
 
-.update-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+/* Acciones ----------------------------------------------------------------- */
+.update-button,
+.btn-actualizar {
+  height: 34px;
+  border: 1px solid var(--rev-primary-600);
+  border-radius: var(--rev-r-md);
+  padding: 0 16px;
+  background: var(--rev-primary-600);
+  color: #fff;
+  font-family: var(--rev-font); font-size: var(--rev-fs-md); font-weight: 580;
+  box-shadow: none;
+  transition: background var(--rev-t-fast) var(--rev-ease), border-color var(--rev-t-fast) var(--rev-ease);
 }
+.update-button { margin-top: var(--rev-s-6); }
+.btn-actualizar { width: 100%; }
+.update-button:hover,
+.btn-actualizar:hover { background: var(--rev-primary-700); border-color: var(--rev-primary-700); color: #fff; transform: none; }
+.update-button:active,
+.btn-actualizar:active { background: var(--rev-primary-800); border-color: var(--rev-primary-800); }
 
-.photo-comparison-section {
-  display: flex;
-  gap: 24px;
-  height: 100%;
-  padding: 16px;
-}
-
+/* Cotejo de fotografías ---------------------------------------------------- */
+.photo-comparison-section { display: flex; gap: var(--rev-s-6); padding: var(--rev-s-6); height: 100%; }
 .photo-card {
-  flex: 1;
-  border-radius: 12px;
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  box-shadow: var(--rev-sh-xs);
 }
-
 .photo-header {
-  background: #f5f5f5;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  color: #555;
-  font-size: 14px;
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px var(--rev-s-5);
+  background: var(--rev-surface-2);
+  border-bottom: 1px solid var(--rev-line);
+  font-size: var(--rev-fs-2xs); font-weight: 680;
+  letter-spacing: var(--rev-track-caps); text-transform: uppercase;
+  color: var(--rev-ink-3);
 }
-
-.photo-icon {
-  color: #1890ff;
-}
-
+.photo-icon { color: var(--rev-primary-600); }
 .profile-photo {
-  width: 100%;
-  aspect-ratio: 6 / 9;
-  object-fit: cover;
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
+  width: 100%; aspect-ratio: 6 / 9; object-fit: cover;
+  background: var(--rev-n-100);
+  display: block;
 }
 
-/* Responsive */
+/* Responsivo --------------------------------------------------------------- */
 @media (max-width: 992px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .photo-comparison-section {
-    flex-direction: column;
-  }
-
-  .profile-photo {
-    height: 200px;
-  }
+  .form-grid { grid-template-columns: 1fr; }
+  .photo-comparison-section { flex-direction: column; }
+}
+@media (max-width: 720px) {
+  .fondo-biometrico { height: 210px; }
+  .header-biometrico-container-foto { top: 44px; left: 12px; border-width: 2px; }
+  .biometrico-foto-imagen { width: 104px; }
+  .header-biometrico-letras-bot { top: 14px; left: 128px; right: 12px; }
+  .header-biometrico-letras-top { bottom: 14px; left: 128px; right: 12px; }
+  .header-biometrico-nombre { font-size: 1.32rem; }
+  .header-biometrico-2da { font-size: var(--rev-fs-xs); letter-spacing: .12em; }
+  .header-biometrico-programa { font-size: var(--rev-fs-xs); padding: 2px 6px; }
+  .header-biometrico-modalidad { font-size: var(--rev-fs-2xs); }
+  .header-modalidad { display: none; }
 }
 </style>

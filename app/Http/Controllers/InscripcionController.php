@@ -147,6 +147,26 @@ class InscripcionController extends Controller
                     }
                 }
 
+                // Adjuntar estado real de revisión (pre_inscripcion no lo tiene).
+                // Fuente: revision_solicitudes, para que el revisor no vea "No hay revisión activa" por error.
+                $sol = DB::table('revision_solicitudes')
+                    ->where('id_postulante', $res[0]->id_postulante)
+                    ->where('estado', '!=', 'completada')
+                    ->whereNull('finalizada_at')
+                    ->latest('id')
+                    ->first();
+                if (!$sol) {
+                    $sol = DB::table('revision_solicitudes')
+                        ->where('id_postulante', $res[0]->id_postulante)
+                        ->latest('id')
+                        ->first();
+                }
+                $res[0]->revision_solicitada = $sol && $sol->estado !== 'completada';
+                $res[0]->revision_iniciada_at = $sol?->iniciada_at;
+                $res[0]->revision_finalizada_at = $sol?->finalizada_at;
+                $res[0]->revision_revisor_id = $sol?->revisor_id;
+                $res[0]->revision_estado = $sol?->estado;
+
                 $this->response['estado'] = true;
                 $this->response['foto'] = 'documentos/'.auth()->user()->id_proceso.'/inscripciones/fotos/'.$dni.'.jpg';
                 $this->response['huellaD'] = 'documentos/'.auth()->user()->id_proceso.'/inscripciones/huellas/'.$dni.'.jpg';

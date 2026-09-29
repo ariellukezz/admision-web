@@ -1,240 +1,312 @@
+<!--
+  ============================================================================
+  Revisión de documentos por requisitos (vista clásica).
+  ----------------------------------------------------------------------------
+  Vista dividida: a la izquierda el checklist de requisitos —lo que se decide—,
+  a la derecha el documento —lo que se mira—. Antes ambos competían por el
+  mismo ancho; ahora el visor manda, porque leer el documento es el trabajo.
+  La barra de acción es fija: guardar nunca obliga a desplazarse.
+  ============================================================================
+-->
 <template>
-<Head title="Revisión de documentos"/>
-<AuthenticatedLayout>
-  <div>
-    <a-card style="background: white; height: calc(100vh - 90px); overflow: hidden;" class="mb-0 p-0" >
-      <a-row :gutter="16" class="mb-3">
-        <a-col :span="24" :sm="24" :md="24" :lg="24" style="display:flex; justify-content: end; align-items: end;" >
-          <div>
-            <!-- {{ dniseleccionado }}
-            {{ postulante }} -->
-          <label style="margin-right: 10px;"> Buscar:</label>
-          <a-auto-complete
-            v-model:value="dniseleccionado"
-            :options="postulantes"
-            style="width: 300px"
-            @select="onSelect"
-            @search="onSearch"
-          >
-          <a-input
-            ref="dniInput"
-            placeholder="Buscar"
-            v-model:value="dni"
-            @keypress="handleKeyPress"
+  <Head title="Revisión de documentos" />
+  <AuthenticatedLayout pagina="Revisión de documentos">
+    <div class="doc">
+
+      <!-- Búsqueda -------------------------------------------------------- -->
+      <RevToolbar>
+        <template #lead>
+          <span class="rev-label doc-lead"><RevIcon name="search" size="sm" /> Postulante</span>
+        </template>
+
+        <a-auto-complete
+          v-model:value="dniseleccionado"
+          :options="postulantes"
+          class="doc-auto"
+          @select="onSelect"
+          @search="onSearch"
+        >
+          <a-input ref="dniInput" v-model:value="dni" placeholder="Buscar por DNI o nombre…" allow-clear />
+          <template #option="{ value: val, label: lab }">
+            <div class="doc-option">
+              <span class="doc-option-dni rev-mono">{{ val }}</span>
+              <span class="doc-option-name">{{ lab }}</span>
+            </div>
+          </template>
+        </a-auto-complete>
+
+        <template #trail>
+          <RevBadge v-if="dniSeleccionadoValido" tone="accent" icon="user">
+            DNI {{ dniseleccionado }}
+          </RevBadge>
+        </template>
+      </RevToolbar>
+
+      <!-- Sin selección --------------------------------------------------- -->
+      <RevPanel v-if="!dniSeleccionadoValido" flush>
+        <RevEmptyState
+          icon="user"
+          title="Selecciona un postulante"
+          description="Busca por DNI o por nombre para cargar sus requisitos y revisar los documentos presentados."
+        />
+      </RevPanel>
+
+      <!-- Vista dividida --------------------------------------------------- -->
+      <div v-else class="doc-split">
+
+        <!-- Checklist -->
+        <RevPanel
+          title="Requisitos"
+          :description="`${checkedList.length} de ${requisitos.length} marcados`"
+          class="doc-check"
+        >
+          <template #actions>
+            <RevButton variant="ghost" size="sm" @click="onCheckAllChange({ target: { checked: !checkAll } })">
+              {{ checkAll ? 'Desmarcar todo' : 'Marcar todo' }}
+            </RevButton>
+          </template>
+
+          <RevMeter
+            :value="checkedList.length"
+            :max="requisitos.length || 1"
+            :tone="checkedList.length === requisitos.length && requisitos.length > 0 ? 'success' : 'accent'"
+            class="doc-check-meter"
           />
-          <template #suffix>
-            <credit-card-outlined />
+
+          <ul class="doc-check-list">
+            <li v-for="option in requisitos" :key="option.value">
+              <label class="doc-check-item" :class="{ 'is-on': checkedList.includes(option.value) }">
+                <input
+                  type="checkbox"
+                  :value="option.value"
+                  :checked="checkedList.includes(option.value)"
+                  @change="toggleRequisito(option.value)"
+                />
+                <span class="doc-check-box"><RevIcon name="check" size="xs" /></span>
+                <span class="doc-check-label">{{ option.label }}</span>
+              </label>
+            </li>
+          </ul>
+
+          <RevEmptyState v-if="!requisitos.length" compact title="Sin requisitos configurados" />
+
+          <template #footer>
+            <span class="rev-meta">Los cambios se aplican al guardar</span>
+            <RevButton variant="primary" icon="check" :loading="guardando" @click="save">Guardar requisitos</RevButton>
           </template>
-          <template #option="{ value: val, label:lab }" style="background-color: blue;">
-            <div style="height: 34px;">
-              <div><span style="font-weight: 700; color: black; font-size: .7rem;">{{ val }}</span></div>
-              <div style="margin-top: -10px;"><span style="font-size: .8rem; text-transform: uppercase;">{{ lab }}</span></div>
+        </RevPanel>
+
+        <!-- Visor -->
+        <RevPanel flush class="doc-viewer">
+          <template #header>
+            <div class="doc-tabs" role="tablist">
+              <button
+                v-for="t in tabs"
+                :key="t.key"
+                type="button"
+                role="tab"
+                class="doc-tab"
+                :class="{ 'is-active': activeKey === t.key }"
+                :aria-selected="activeKey === t.key"
+                @click="activeKey = t.key"
+              >
+                <RevIcon :name="t.icon" size="sm" />{{ t.label }}
+              </button>
             </div>
           </template>
-          </a-auto-complete>
-        </div>
-        </a-col>
-      </a-row>
 
-      <!-- <a-row :gutter="16">
-        <a-col :span="24" :sm="24" :md="24" :lg="24" style="display:flex; justify-content: end; align-items: end;" >
-          <div class="flex justify-between" style="background: #d9d9d9; width: 100%; margin-right: -8px;">
-            <div v-for="(option, index) in options" :key="option.value">
-              <div class="flex justify-center" style="font-size: 44px;">
-                <img src="data:image/png;base64,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" width="60"/>
-              </div>
-              {{ option.label }}
-            </div>
-
+          <div class="doc-frame">
+            <Vouchers v-if="activeKey === '2'" :dni="dniseleccionado" class="doc-vouchers" />
+            <iframe
+              v-else
+              :key="activeKey"
+              :src="urlActual"
+              title="Documento del postulante"
+              @load="frameLoading = false"
+            />
           </div>
-        </a-col>
-      </a-row> -->
-      <a-row :gutter="16">
-        <a-col :span="24" :sm="24" :md="8" :lg="6">
-          <div style="height: 240px;">
-            <!-- {{ dniseleccionado }} -->
-            <h1 style="font-weight: bold;">Requisitos</h1>
-            <a-checkbox v-model:checked="checkAll" class="first-item" @change="onCheckAllChange">Todo</a-checkbox>
-            <a-checkbox-group v-model:value="checkedList" class="checkbox-group-vertical">
-              <a-checkbox v-for="(option, index) in requisitos" :key="option.value" :value="option.value" :class="{ 'first-item': index === 0 }" class="checkbox-item">
-                {{ option.label }}
-              </a-checkbox>
-            </a-checkbox-group>            
-          </div>
-          <!-- <div>
-            <h1 style="font-weight: bold;">Observación</h1>
-            <a-textarea type="text" style="height: 180px;" />
-          </div> -->
-        </a-col>
-        <a-col :span="24" :sm="24" :md="16" :lg="18" style="border: 1px solid #d9d9d9; min-width: 600px;" class="m-0 p-0">
-          <div style="margin-right: -8px; margin-left: -8px; min-width: 600px;">
-
-            <a-tabs v-model:activeKey="activeKey" type="card" style="">
-              <a-tab-pane key="1" tab="Solicitud" class="pl-2 pr-2">
-                <div>
-                  <div style="width:100%; height:380px; position:relative; overflow:hidden">
-                    <div v-if="dniseleccionado !== null && dniseleccionado.length === 8">
-                      <iframe :src="baseUrl+'/documentos/cepre2023-II/'+dniseleccionado+'/solicitud-1.pdf'" style="top:-54px; position:absolute" width="100%" height="100%" scrolling="yes" frameborder="1" ></iframe>
-                    </div>
-                </div>
-                </div>
-              </a-tab-pane>
-              <a-tab-pane key="2" tab="Voucher" class="pl-2 pr-2">
-                <div class="" style="width: 100%; height: 380px;">
-                  <div v-if="dniseleccionado !== null && dniseleccionado.length === 8">
-                    <Vouchers :dni="dniseleccionado"/>
-                  </div>
-                </div>
-              </a-tab-pane>
-              <a-tab-pane key="3" tab="Certificado">
-                <div style="height:380px;">
-                  <div style="width:100%; height:380px; position:relative; overflow:hidden">
-                    <div v-if="dniseleccionado !== null && dniseleccionado.length === 8">
-                      <iframe :src="baseUrl+'/documentos/cepre2023-II/'+dniseleccionado+'/certificado-1.pdf'" style="top:-54px; position:absolute" width="100%" height="470px"   scrolling="yes" frameborder="1" ></iframe>
-                    </div>
-                  </div>
-                </div>
-              </a-tab-pane>
-              <a-tab-pane key="4" tab="Ex vocacional">
-                <div>
-                  <div style="width:100%; height:380px; position:relative; overflow:hidden">
-                    <div v-if="dniseleccionado !== null && dniseleccionado.length === 8">
-                      <iframe :src="baseUrl+'/documentos/cepre2023-II/'+dniseleccionado+'/constancia%20vocacional-1.pdf'" style="top:-54px; position:absolute" width="100%" height="470px"   scrolling="yes" frameborder="1" ></iframe>
-                    </div>
-                  </div>
-                </div>
-              </a-tab-pane>
-              <a-tab-pane key="5" tab="Cert Cepre">
-                <div>
-                  <div style="width:100%; height:380px; position:relative; overflow:hidden">
-                    <div v-if="dniseleccionado !== null && dniseleccionado.length === 8">
-                      <iframe :src="baseUrl+'/documentos/cepre2023-II/'+dniseleccionado+'/constancia%20vocacional-1.pdf'" style="top:-54px; position:absolute" width="100%" height="470px"   scrolling="yes" frameborder="1" ></iframe>
-                    </div>
-                  </div>
-                </div>  
-              </a-tab-pane>
-            </a-tabs>
-
-          </div>
-        </a-col>
-      </a-row>
-      <div class="mt-4 flex justify-end" style="margin-right: -10px;">
-        <a-button type="primary"  @click="save()">Enviar</a-button>
+        </RevPanel>
       </div>
-
-    </a-card>
-  </div>
-</AuthenticatedLayout>
+    </div>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/LayoutDocente.vue'
-import { watch, computed, ref, unref } from 'vue';
-import { FormOutlined, DeleteOutlined, CreditCardOutlined } from '@ant-design/icons-vue';
-import { notification } from 'ant-design-vue';
-import axios from 'axios';
+import { watch, computed, ref } from 'vue'
+import { notification, message } from 'ant-design-vue'
+import axios from 'axios'
 import Vouchers from './components/voucher.vue'
-const baseUrl = window.location.origin;
+import RevToolbar from '@/Components/Revisor/RevToolbar.vue'
+import RevPanel from '@/Components/Revisor/RevPanel.vue'
+import RevButton from '@/Components/Revisor/RevButton.vue'
+import RevBadge from '@/Components/Revisor/RevBadge.vue'
+import RevMeter from '@/Components/Revisor/RevMeter.vue'
+import RevIcon from '@/Components/Revisor/RevIcon.vue'
+import RevEmptyState from '@/Components/Revisor/RevEmptyState.vue'
 
-const dni = ref(null);
+const baseUrl = window.location.origin
+
+const dni = ref(null)
 const dniseleccionado = ref(null)
+const dniInput = ref(null)
+const postulantes = ref([])
+const requisitos = ref([])
+const checkedList = ref([])
+const checkAll = ref(false)
+const guardando = ref(false)
+const activeKey = ref('1')
+const frameLoading = ref(false)
 
-const postulantes = ref([]) 
+const dniSeleccionadoValido = computed(() => !!dniseleccionado.value && String(dniseleccionado.value).length === 8)
 
-function focusInput() {
-  save()
+/* Las pestañas describen el documento, no el orden del formulario antiguo. */
+const tabs = [
+  { key: '1', label: 'Solicitud',       icon: 'file',        path: 'solicitud-1.pdf' },
+  { key: '2', label: 'Comprobantes',    icon: 'credit-card', path: null },
+  { key: '3', label: 'Certificado',     icon: 'shield-check', path: 'certificado-1.pdf' },
+  { key: '4', label: 'Ex. vocacional',  icon: 'file-check',  path: 'constancia%20vocacional-1.pdf' },
+  { key: '5', label: 'Cert. Cepreuna',  icon: 'award',       path: 'constancia%20vocacional-1.pdf' },
+]
 
-}
-const checkedList = ref([]);
-const options = [
-  { label: 'Solicitud', value: 1 },
-  { label: 'Vouchers', value: 2 },
-  { label: 'Certificado', value: 3 },
-  { label: 'Ex vocacional', value: 4 },
-  { label: 'C. Cepreuna', value: 5 },
-];
-
-const checkAll = ref(false);
+const urlActual = computed(() => {
+  const tab = tabs.find((t) => t.key === activeKey.value)
+  if (!tab?.path || !dniSeleccionadoValido.value) return ''
+  return `${baseUrl}/documentos/cepre2023-II/${dniseleccionado.value}/${tab.path}`
+})
 
 const onCheckAllChange = (e) => {
-  checkAll.value = e.target.checked;
-  checkedList.value = e.target.checked ? options.map((option) => option.value) : [];
-};
+  checkAll.value = e.target.checked
+  checkedList.value = e.target.checked ? requisitos.value.map((o) => o.value) : []
+}
 
-const onCheckboxChange = (checkedValues) => {
-  checkedList.value = checkedValues;
-  checkAll.value = checkedValues.length === options.length;
-};
+const toggleRequisito = (value) => {
+  const i = checkedList.value.indexOf(value)
+  if (i === -1) checkedList.value.push(value)
+  else checkedList.value.splice(i, 1)
+  checkAll.value = checkedList.value.length === requisitos.value.length && requisitos.value.length > 0
+}
 
-const requisitos = ref([]);
 const getRequisitos = async () => {
-  let res = await axios.get('get-requisitos');
-  requisitos.value = res.data.datos;
-}
-
-const dniInput = ref(null)
-const save = async () => {
-  dniInput.value.focus()
-  let res = await axios.post('save-requisito',{
-    dni: dniseleccionado.value, requisitos: checkedList.value 
-  });
-  dniseleccionado.value = null
-  checkedList.value = []
-}
-
-const getPostulantes =  async (term = "", page = 1) => {
-  let res = await axios.post(
-      "get-postulantes?page=" + page,
-      { term: dni.value }
-  );
-  postulantes.value = res.data.datos.data;
-}
-
-const getPostulanteRequisitos = async () => {
-  checkedList.value = [];
-  let res = await axios.post("get-postulante-requisitos",{ dni: dniseleccionado.value });
-  if(res.data.estado === true ){
-    checkedList.value = JSON.parse(res.data.datos.requisitos);
+  try {
+    const res = await axios.get('get-requisitos')
+    requisitos.value = res.data.datos
+  } catch {
+    notification.error({ message: 'Error', description: 'No se pudieron cargar los requisitos.' })
   }
 }
 
-getPostulanteRequisitos()
-
-const getPostulantesByDni = async () => {
-  let res = await axios.post("get-postulante-dni",{ dni: dniseleccionado.value });
-  postulante.value.id = res.data.datos.id_postulante;   
-  postulante.value.dni_temp = res.data.datos.dni
+const save = async () => {
+  guardando.value = true
+  try {
+    await axios.post('save-requisito', { dni: dniseleccionado.value, requisitos: checkedList.value })
+    message.success('Requisitos guardados')
+    dniseleccionado.value = null
+    dni.value = null
+    checkedList.value = []
+    checkAll.value = false
+    dniInput.value?.focus?.()
+  } catch {
+    notification.error({ message: 'Error', description: 'No se pudieron guardar los requisitos.' })
+  } finally {
+    guardando.value = false
+  }
 }
 
-watch(dni, (newValue, oldValue ) => {
-  getPostulantes();
-})
+const getPostulantes = async () => {
+  try {
+    const res = await axios.post('get-postulantes?page=1', { term: dni.value })
+    postulantes.value = res.data.datos.data
+  } catch { /* la búsqueda no debe romper la pantalla */ }
+}
 
-watch(dniseleccionado, (newValue, oldValue ) => {
-    getPostulanteRequisitos();
-})
+const getPostulanteRequisitos = async () => {
+  checkedList.value = []
+  checkAll.value = false
+  if (!dniSeleccionadoValido.value) return
+  try {
+    const res = await axios.post('get-postulante-requisitos', { dni: dniseleccionado.value })
+    if (res.data.estado === true) {
+      checkedList.value = JSON.parse(res.data.datos.requisitos) || []
+      checkAll.value = checkedList.value.length === requisitos.value.length && requisitos.value.length > 0
+    }
+  } catch { /* un postulante sin requisitos previos es un caso normal */ }
+}
 
+const onSelect = () => { activeKey.value = '1' }
+const onSearch = () => getPostulantes()
+
+watch(dni, getPostulantes)
+watch(dniseleccionado, getPostulanteRequisitos)
 
 getRequisitos()
-
-
 </script>
 
-
 <style scoped>
-.checkbox-group-vertical {
-  display: flex;
-  flex-wrap: wrap;
+.doc { display: flex; flex-direction: column; gap: var(--rev-s-6); min-height: 0; }
+.doc-lead { display: inline-flex; align-items: center; gap: 5px; color: var(--rev-ink-4); }
+.doc-auto { width: 340px; max-width: 100%; }
+
+.doc-option { display: flex; flex-direction: column; line-height: 1.3; padding: 2px 0; }
+.doc-option-dni { font-size: var(--rev-fs-sm); font-weight: 680; color: var(--rev-ink); }
+.doc-option-name { font-size: var(--rev-fs-sm); color: var(--rev-ink-3); text-transform: capitalize; }
+
+/* Vista dividida: el visor pesa más que el checklist, a propósito --------- */
+.doc-split { display: grid; grid-template-columns: 320px 1fr; gap: var(--rev-s-5); align-items: start; }
+
+.doc-check-meter { margin-bottom: var(--rev-s-5); }
+.doc-check-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.doc-check-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 8px; margin: 0 -8px;
+  border-radius: var(--rev-r-md);
+  cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.doc-check-item:hover { background: var(--rev-n-50); }
+.doc-check-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+.doc-check-box {
+  flex: none; display: grid; place-items: center;
+  width: 17px; height: 17px; border-radius: var(--rev-r-xs);
+  border: 1px solid var(--rev-n-300); background: var(--rev-surface);
+  color: transparent;
+  transition: background var(--rev-t-fast) var(--rev-ease), border-color var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease);
+}
+.doc-check-item.is-on .doc-check-box { background: var(--rev-primary-600); border-color: var(--rev-primary-600); color: #fff; }
+.doc-check-item input:focus-visible + .doc-check-box { box-shadow: var(--rev-ring); }
+.doc-check-label { font-size: var(--rev-fs-md); color: var(--rev-ink-2); line-height: 1.4; }
+.doc-check-item.is-on .doc-check-label { color: var(--rev-ink); font-weight: 560; }
+
+/* Visor -------------------------------------------------------------------- */
+.doc-viewer :deep(.rev-panel-head) { padding: 0 var(--rev-s-5); min-height: 42px; }
+.doc-tabs { display: flex; align-items: center; gap: 2px; overflow-x: auto; }
+.doc-tab {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 41px; padding: 0 12px;
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--rev-font); font-size: var(--rev-fs-md); font-weight: 560;
+  color: var(--rev-ink-3); white-space: nowrap;
+  transition: color var(--rev-t-fast) var(--rev-ease);
+}
+.doc-tab:hover { color: var(--rev-ink); }
+.doc-tab:focus-visible { outline: none; box-shadow: var(--rev-ring); border-radius: var(--rev-r-sm); }
+.doc-tab.is-active { color: var(--rev-primary-700); font-weight: 620; }
+.doc-tab.is-active::after {
+  content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px;
+  height: 2px; background: var(--rev-primary-600); border-radius: 2px 2px 0 0;
 }
 
-.checkbox-item {
-  flex: 0 0 100%;
-  margin-bottom: 8px;
-}
+.doc-frame { height: min(68vh, 660px); background: var(--rev-n-100); }
+.doc-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.doc-vouchers { height: 100%; overflow: auto; background: var(--rev-surface); padding: var(--rev-s-5); }
 
-.first-item {
-  margin-left: 8px;
-  margin-bottom: 8px;
+@media (max-width: 1100px) {
+  .doc-split { grid-template-columns: 1fr; }
+  .doc-frame { height: 56vh; }
+}
+@media (max-width: 640px) {
+  .doc-auto { width: 100%; }
 }
 </style>

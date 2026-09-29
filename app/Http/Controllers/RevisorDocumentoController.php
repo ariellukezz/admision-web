@@ -18,6 +18,13 @@ class RevisorDocumentoController extends Controller
         private RevisorDocumentoService $service,
     ) {}
 
+    private function flatSuccess(array $result)
+    {
+        // Compat: el Vue lee res.data.mensaje / res.data.iniciada_at en plano.
+        // Se manda plano + anidado para el código nuevo y viejo.
+        return response()->json(array_merge(['success' => true], $result, ['data' => $result]));
+    }
+
     public function iniciarRevision(IniciarRevisionRequest $request, string $dni)
     {
         $result = $this->service->iniciarRevision($dni, $request->input('solicitud_id'));
@@ -26,7 +33,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function marcarApto(Request $request, string $dni)
@@ -37,7 +44,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function finalizarRevision(FinalizarRevisionRequest $request, string $dni)
@@ -52,7 +59,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function renotificarPostulante(Request $request, string $dni)
@@ -63,7 +70,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function revisionRapida(Request $request, string $dni)
@@ -74,7 +81,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function cambiarEstadoDocumento(CambiarEstadoDocumentoRequest $request)
@@ -83,14 +90,15 @@ class RevisorDocumentoController extends Controller
             $request->input('id_documento'),
             $request->input('accion'),
             $request->input('fecha_caducidad'),
-            $request->input('observacion')
+            $request->input('observacion'),
+            $request->input('solicitud_id') ? (int) $request->input('solicitud_id') : null
         );
 
         if (isset($result['error'])) {
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result['datos'] ?? $result, $result['mensaje'] ?? 'OK');
+        return response()->json(array_merge(['success' => true, 'message' => $result['mensaje'] ?? 'OK', 'data' => $result['datos'] ?? $result, 'datos' => $result['datos'] ?? $result], $result['datos'] ?? []));
     }
 
     public function observarDocumento(ObservarDocumentoRequest $request)
@@ -105,7 +113,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result['datos'] ?? $result, $result['mensaje'] ?? 'OK');
+        return response()->json(array_merge(['success' => true, 'message' => $result['mensaje'] ?? 'OK', 'data' => $result['datos'] ?? $result, 'datos' => $result['datos'] ?? $result], $result['datos'] ?? []));
     }
 
     public function citacionSugerida(Request $request, string $dni)
@@ -117,7 +125,7 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        return $this->flatSuccess($result);
     }
 
     public function documentosPorRequisitos(Request $request, string $dni)
@@ -128,6 +136,12 @@ class RevisorDocumentoController extends Controller
             return $this->error($result['error'], $result['status']);
         }
 
-        return $this->success($result);
+        // Compat: el Vue viejo lee `.datos`, ApiResponse usa `.data`. Mandar ambos.
+        return response()->json([
+            'success' => true,
+            'message' => 'OK',
+            'data' => $result,
+            'datos' => $result,
+        ]);
     }
 }

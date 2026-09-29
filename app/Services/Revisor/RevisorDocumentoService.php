@@ -411,7 +411,7 @@ class RevisorDocumentoService
         ];
     }
 
-    public function cambiarEstadoDocumento(int $documentoId, string $accion, ?string $fechaCaducidad = null, ?string $observacion = null): array
+    public function cambiarEstadoDocumento(int $documentoId, string $accion, ?string $fechaCaducidad = null, ?string $observacion = null, ?int $solicitudId = null): array
     {
         $documento = Documento::find($documentoId);
 
@@ -425,11 +425,30 @@ class RevisorDocumentoService
             return ['error' => 'Postulante no encontrado', 'status' => 404];
         }
 
-        $solicitud = RevisionSolicitud::where('id_postulante', $postulante->id)
-            ->where('estado', '!=', 'completada')
-            ->whereNull('finalizada_at')
-            ->latest('id')
-            ->first();
+        // Si viene solicitud_id, usarla; si no, preferir la que está en curso
+        // (iniciada y no finalizada) antes que la última creada. Sin esto,
+        // con 2 solicitudes (ej. id 1 iniciada, id 2 pendiente) validaba la 2 y daba
+        // "Debe iniciar la revisión primero" aunque la 1 sí estaba iniciada.
+        if ($solicitudId) {
+            $solicitud = RevisionSolicitud::where('id_postulante', $postulante->id)
+                ->where('id', $solicitudId)
+                ->first();
+        } else {
+            $solicitud = RevisionSolicitud::where('id_postulante', $postulante->id)
+                ->where('estado', '!=', 'completada')
+                ->whereNotNull('iniciada_at')
+                ->whereNull('finalizada_at')
+                ->latest('id')
+                ->first();
+
+            if (!$solicitud) {
+                $solicitud = RevisionSolicitud::where('id_postulante', $postulante->id)
+                    ->where('estado', '!=', 'completada')
+                    ->whereNull('finalizada_at')
+                    ->latest('id')
+                    ->first();
+            }
+        }
 
         if (!$solicitud || !$solicitud->iniciada_at) {
             return ['error' => 'Debe iniciar la revisión primero', 'status' => 400];
@@ -675,6 +694,18 @@ class RevisorDocumentoService
             if ($req->modalidades->isEmpty()) return true;
             return $req->modalidades->contains('id', $idModalidadPostulante);
         });
+
+        // Fallback: si el filtro por modalidad deja vacío (mala configuración,
+        // ej. solicitud modalidad 7/8 pero requisitos solo en 1/4), mostrar
+        // todos para que el revisor nunca vea lista vacía.
+        if ($requisitosFiltrados->isEmpty() && $requisitos->isNotEmpty()) {
+            Log::warning('documentosPorRequisitos sin match por modalidad', [
+                'dni' => $dni,
+                'solicitud' => $solicitudId,
+                'id_modalidad' => $idModalidadPostulante,
+            ]);
+            $requisitosFiltrados = $requisitos;
+        }
 
         $requisitosData = $requisitosFiltrados->map(function ($req) use ($documentosSubidos, $idProgramaPostulante) {
             $tiposData = $req->tiposDocumento->map(function ($td) use ($documentosSubidos) {

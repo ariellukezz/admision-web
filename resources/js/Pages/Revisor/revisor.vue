@@ -1,205 +1,219 @@
+<!--
+  ============================================================================
+  Panel general del revisor.
+  ----------------------------------------------------------------------------
+  Un panel para quien revisa no es un escaparate de cifras: es un parte de
+  situación. Por eso el orden no es «total de inscritos» primero, sino:
+    1. Carga de trabajo pendiente (lo que exige acción hoy)
+    2. Cobertura del proceso (cuánto falta para cerrar)
+    3. Composición y tendencia (contexto, no urgencia)
+  Las distribuciones largas se dibujan como barras horizontales de una sola
+  tinta con valor al extremo: se comparan mejor que un anillo y evitan
+  repartir siete colores sin significado.
+  ============================================================================
+-->
 <template>
-<Head title="Dashboard Revisor" />
-<AuthenticatedLayout pagina="Dashboard">
+  <Head title="Panel del revisor" />
+  <AuthenticatedLayout pagina="Panel general">
+    <div class="dash">
 
-<div class="dashboard-container">
+      <RevPageHeader
+        title="Panel general"
+        description="Estado del proceso activo y carga de trabajo pendiente de verificación."
+      >
+        <template #actions>
+          <RevButton variant="secondary" icon="refresh" :loading="loading" @click="fetchAll">Actualizar</RevButton>
+        </template>
+      </RevPageHeader>
 
-  <!-- KPI CARDS -->
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #dbeafe;">
-        <UserAddOutlined style="color: #3b82f6;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Preinscritos</span>
-        <span class="kpi-value">{{ resumen.preinscritos }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.preinscritos_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
+      <!-- ── 1. Carga pendiente ─────────────────────────────────────────── -->
+      <section class="dash-section">
+        <div class="rev-divider-labeled">Pendiente de verificación</div>
+        <div class="dash-grid-4">
+          <RevStat
+            label="Documentos por verificar"
+            :value="resumen.documentos_pendientes"
+            :loading="loading"
+            icon="file-alert"
+            :hint="`${fmt(resumen.documentos_verificados)} ya verificados`"
+            href="/revisor/solicitudes-revision"
+          />
+          <RevStat
+            label="Comprobantes por verificar"
+            :value="resumen.comprobantes_pendientes"
+            :loading="loading"
+            icon="credit-card"
+            :hint="`${fmt(resumen.comprobantes_verificados)} ya verificados`"
+          />
+          <RevStat
+            label="Sin control biométrico"
+            :value="biometrico.sin_biometrico"
+            :loading="loading"
+            icon="fingerprint"
+            :hint="`de ${fmt(biometrico.total_inscritos)} inscritos`"
+          />
+          <RevStat
+            label="Inscritos hoy"
+            :value="resumen.inscritos_hoy"
+            :loading="loading"
+            icon="user"
+            hint="registrados en la jornada"
+          />
+        </div>
+      </section>
 
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #dcfce7;">
-        <SolutionOutlined style="color: #22c55e;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Inscritos</span>
-        <span class="kpi-value">{{ resumen.inscritos }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.inscritos_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
+      <!-- ── 2. Cobertura ───────────────────────────────────────────────── -->
+      <section class="dash-section">
+        <div class="rev-divider-labeled">Cobertura del proceso</div>
+        <div class="dash-grid-3">
+          <RevPanel title="Control biométrico" :description="`${fmt(biometrico.con_biometrico)} de ${fmt(biometrico.total_inscritos)} inscritos registrados`">
+            <template #actions>
+              <RevBadge :tone="biometrico.porcentaje >= 90 ? 'success' : biometrico.porcentaje >= 60 ? 'warning' : 'danger'">
+                {{ biometrico.porcentaje }}%
+              </RevBadge>
+            </template>
+            <RevMeter
+              size="lg"
+              :value="biometrico.porcentaje"
+              :tone="biometrico.porcentaje >= 90 ? 'success' : 'accent'"
+            />
+            <div class="dash-legend">
+              <span class="dash-legend-item"><i class="dot is-ok" />Registrados <strong class="rev-num">{{ fmt(biometrico.con_biometrico) }}</strong></span>
+              <span class="dash-legend-item"><i class="dot is-off" />Pendientes <strong class="rev-num">{{ fmt(biometrico.sin_biometrico) }}</strong></span>
+            </div>
+          </RevPanel>
 
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #fef3c7;">
-        <SafetyOutlined style="color: #f59e0b;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Ctrl. Biométrico</span>
-        <span class="kpi-value">{{ resumen.biometricos }}</span>
-        <span class="kpi-sub">
-          <span style="color: #3b82f6; font-weight: 600;">{{ biometrico.porcentaje }}%</span>
-          <span style="color: #94a3b8;">del total</span>
-        </span>
-      </div>
-    </div>
+          <RevPanel title="Comprobantes de pago" :description="`${comprobantePercent}% verificados`">
+            <RevMeter
+              size="lg"
+              :value="resumen.comprobantes_verificados"
+              :max="(resumen.comprobantes_verificados + resumen.comprobantes_pendientes) || 1"
+              :tone="comprobantePercent >= 90 ? 'success' : 'accent'"
+            />
+            <div class="dash-legend">
+              <span class="dash-legend-item"><i class="dot is-ok" />Verificados <strong class="rev-num">{{ fmt(resumen.comprobantes_verificados) }}</strong></span>
+              <span class="dash-legend-item"><i class="dot is-off" />Pendientes <strong class="rev-num">{{ fmt(resumen.comprobantes_pendientes) }}</strong></span>
+            </div>
+          </RevPanel>
 
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #fee2e2;">
-        <FileProtectOutlined style="color: #ef4444;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Docs. por Verificar</span>
-        <span class="kpi-value">{{ resumen.documentos_pendientes }}</span>
-        <span class="kpi-sub">
-          <CheckCircleOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.documentos_verificados }}</span>
-          <span style="color: #94a3b8;">verificados</span>
-        </span>
-      </div>
-    </div>
-  </div>
+          <RevPanel title="Embudo de admisión" description="Del registro inicial a la inscripción formal">
+            <div class="dash-funnel">
+              <div class="dash-funnel-row">
+                <span class="dash-funnel-label">Preinscritos</span>
+                <RevMeter :value="resumen.preinscritos" :max="maxEmbudo" tone="neutral" />
+                <span class="dash-funnel-num rev-num">{{ fmt(resumen.preinscritos) }}</span>
+              </div>
+              <div class="dash-funnel-row">
+                <span class="dash-funnel-label">Inscritos</span>
+                <RevMeter :value="resumen.inscritos" :max="maxEmbudo" tone="accent" />
+                <span class="dash-funnel-num rev-num">{{ fmt(resumen.inscritos) }}</span>
+              </div>
+              <div class="dash-funnel-row">
+                <span class="dash-funnel-label">Con biométrico</span>
+                <RevMeter :value="resumen.biometricos" :max="maxEmbudo" tone="success" />
+                <span class="dash-funnel-num rev-num">{{ fmt(resumen.biometricos) }}</span>
+              </div>
+            </div>
+          </RevPanel>
+        </div>
+      </section>
 
-  <!-- SECONDARY KPI ROW -->
-  <div class="kpi-row">
-    <div class="kpi-card kpi-card-sm">
-      <div class="kpi-info">
-        <span class="kpi-label">Comprobantes Pendientes</span>
-        <span class="kpi-value-sm">{{ resumen.comprobantes_pendientes }}</span>
-      </div>
-      <a-progress :percent="comprobantePercent" :show-info="false" stroke-color="#3b82f6" size="small" />
-    </div>
-    <div class="kpi-card kpi-card-sm">
-      <div class="kpi-info">
-        <span class="kpi-label">Comprobantes Verificados</span>
-        <span class="kpi-value-sm">{{ resumen.comprobantes_verificados }}</span>
-      </div>
-      <a-progress :percent="comprobantePercent" :show-info="false" stroke-color="#22c55e" size="small" />
-    </div>
-    <div class="kpi-card kpi-card-sm">
-      <div class="kpi-info">
-        <span class="kpi-label">Biométrico Hoy</span>
-        <span class="kpi-value-sm">{{ resumen.biometricos_hoy }}</span>
-      </div>
-    </div>
-    <div class="kpi-card kpi-card-sm">
-      <div class="kpi-info">
-        <span class="kpi-label">Inscritos Hoy</span>
-        <span class="kpi-value-sm">{{ resumen.inscritos_hoy }}</span>
-      </div>
-    </div>
-  </div>
+      <!-- ── Sin datos ──────────────────────────────────────────────────── -->
+      <RevPanel v-if="sinDatos && !loading" flush>
+        <RevEmptyState
+          title="Sin datos para el proceso activo"
+          description="Los indicadores y gráficos aparecerán cuando existan preinscripciones o inscripciones registradas en este proceso."
+        />
+      </RevPanel>
 
-  <!-- BIOMETRICO PROGRESS -->
-  <div class="bio-progress-card" v-if="biometrico.total_inscritos > 0">
-    <div class="bio-header">
-      <div>
-        <h3 class="bio-title">Control Biométrico</h3>
-        <p class="bio-subtitle">{{ biometrico.con_biometrico }} de {{ biometrico.total_inscritos }} inscritos registrados</p>
-      </div>
-      <div class="bio-badge">
-        <SafetyOutlined />
-        {{ biometrico.porcentaje }}%
-      </div>
-    </div>
-    <a-progress :percent="biometrico.porcentaje" :stroke-color="{ '0%': '#3b82f6', '100%': '#8b5cf6' }" :show-info="false" stroke-linecap="round" size="large" />
-    <div class="bio-stats">
-      <div class="bio-stat"><CheckCircleOutlined style="color: #22c55e;" /><span>Registrados: <strong>{{ biometrico.con_biometrico }}</strong></span></div>
-      <div class="bio-stat"><CloseCircleOutlined style="color: #ef4444;" /><span>Pendientes: <strong>{{ biometrico.sin_biometrico }}</strong></span></div>
-    </div>
-  </div>
+      <!-- ── 3. Composición y tendencia ─────────────────────────────────── -->
+      <template v-else-if="!sinDatos">
+        <section class="dash-section">
+          <div class="rev-divider-labeled">Composición y tendencia</div>
 
-  <!-- EMPTY STATE -->
-  <div class="empty-card" v-if="resumen.inscritos === 0 && resumen.preinscritos === 0">
-    <div class="empty-icon"><InboxOutlined style="font-size: 48px; color: #cbd5e1;" /></div>
-    <h3>Sin datos para el proceso actual</h3>
-    <p>Los gráficos se mostrarán cuando existan preinscripciones o inscripciones para este proceso.</p>
-  </div>
+          <div class="dash-grid-2-1">
+            <RevPanel title="Inscripciones" description="Últimos 30 días">
+              <div class="dash-chart" style="height: 250px">
+                <Line v-if="timeline.length" :data="timelineData" :options="lineOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin inscripciones" description="No hay registros en los últimos 30 días." />
+              </div>
+            </RevPanel>
 
-  <!-- TIMELINE + GENERO POR AREA -->
-  <div class="charts-row" v-if="resumen.inscritos > 0">
-    <div class="chart-card chart-card-lg">
-      <div class="chart-header"><h3>Inscripciones últimos 30 días</h3></div>
-      <div class="chart-body">
-        <Line v-if="timeline.length > 0" :data="timelineData" :options="timelineOptions" />
-        <div v-else class="chart-empty">Sin inscripciones en los últimos 30 días</div>
-      </div>
-    </div>
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Género por Área</h3></div>
-      <div class="chart-body">
-        <Bar v-if="generoArea.length > 0" :data="generoAreaData" :options="barOptions" />
-        <div v-else class="chart-empty">Sin datos de género</div>
-      </div>
-    </div>
-  </div>
+            <RevPanel title="Distribución por sexo" description="Inscritos por área">
+              <div class="dash-chart" style="height: 250px">
+                <Bar v-if="generoArea.length" :data="generoAreaData" :options="stackedOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin datos" description="No hay información de sexo por área." />
+              </div>
+            </RevPanel>
+          </div>
 
-  <!-- AREA + MODALIDAD -->
-  <div class="charts-row" v-if="resumen.inscritos > 0">
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Inscritos por Área</h3></div>
-      <div class="chart-body">
-        <Doughnut v-if="areas.length > 0" :data="areaData" :options="doughnutOptions" />
-        <div v-else class="chart-empty">Sin datos de áreas</div>
-      </div>
-    </div>
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Distribución por Modalidad</h3></div>
-      <div class="chart-body">
-        <Doughnut v-if="modalidades.length > 0" :data="modalidadData" :options="doughnutOptions" />
-        <div v-else class="chart-empty">Sin datos de modalidades</div>
-      </div>
-    </div>
-  </div>
+          <div class="dash-grid-2">
+            <RevPanel title="Inscritos por área" :description="`${areas.length} áreas`">
+              <div class="dash-chart" :style="{ height: barHeight(areas.length) }">
+                <Bar v-if="areas.length" :data="areaData" :options="barHOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin datos de áreas" />
+              </div>
+            </RevPanel>
 
-  <!-- TOP PROGRAMAS + BIOMETRICO POR AREA -->
-  <div class="charts-row" v-if="resumen.inscritos > 0">
-    <div class="chart-card chart-card-lg">
-      <div class="chart-header"><h3>Top Programas con más Inscritos</h3></div>
-      <div class="chart-body" style="height: 360px;">
-        <Bar v-if="programas.length > 0" :data="programaData" :options="programaBarOptions" />
-        <div v-else class="chart-empty">Sin datos de programas</div>
-      </div>
-    </div>
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Biométrico por Área</h3></div>
-      <div class="chart-body">
-        <Bar v-if="biometrico.por_area && biometrico.por_area.length > 0" :data="biometricoAreaData" :options="barOptions" />
-        <div v-else class="chart-empty">Sin datos biométricos</div>
-      </div>
-    </div>
-  </div>
+            <RevPanel title="Inscritos por modalidad" :description="`${modalidades.length} modalidades`">
+              <div class="dash-chart" :style="{ height: barHeight(modalidades.length) }">
+                <Bar v-if="modalidades.length" :data="modalidadData" :options="barHOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin datos de modalidades" />
+              </div>
+            </RevPanel>
+          </div>
 
-</div>
+          <div class="dash-grid-2-1">
+            <RevPanel title="Programas con más inscritos" description="Top 10">
+              <div class="dash-chart" :style="{ height: barHeight(programasTop.length, 340) }">
+                <Bar v-if="programasTop.length" :data="programaData" :options="barHOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin datos de programas" />
+              </div>
+            </RevPanel>
 
-</AuthenticatedLayout>
+            <RevPanel title="Control biométrico por área">
+              <div class="dash-chart" :style="{ height: barHeight((biometrico.por_area || []).length) }">
+                <Bar v-if="(biometrico.por_area || []).length" :data="biometricoAreaData" :options="barHOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin datos biométricos" />
+              </div>
+            </RevPanel>
+          </div>
+        </section>
+      </template>
+    </div>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutDocente.vue'
 import { Head } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
-import {
-  UserAddOutlined, SolutionOutlined, SafetyOutlined,
-  ArrowUpOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  InboxOutlined, FileProtectOutlined
-} from '@ant-design/icons-vue'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale, Title, LinearScale, PointElement, LineElement, Filler } from 'chart.js'
-import { Pie, Bar, Line, Doughnut } from 'vue-chartjs'
 import axios from 'axios'
+import {
+  Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale,
+  Title, LinearScale, PointElement, LineElement, Filler,
+} from 'chart.js'
+import { Bar, Line } from 'vue-chartjs'
+import RevPageHeader from '@/Components/Revisor/RevPageHeader.vue'
+import RevPanel from '@/Components/Revisor/RevPanel.vue'
+import RevStat from '@/Components/Revisor/RevStat.vue'
+import RevMeter from '@/Components/Revisor/RevMeter.vue'
+import RevBadge from '@/Components/Revisor/RevBadge.vue'
+import RevButton from '@/Components/Revisor/RevButton.vue'
+import RevEmptyState from '@/Components/Revisor/RevEmptyState.vue'
+import {
+  REV_SERIES, REV_SEMANTIC, revBar, revBarH, revLine,
+  revBarOptions, revBarHOptions, revLineOptions, foldOther,
+} from '@/Components/Revisor/charts.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ArcElement, Tooltip, Legend, PointElement, LineElement, Filler)
 
-const COLORS = { blue: '#3b82f6', green: '#22c55e', amber: '#f59e0b', purple: '#a855f7', red: '#ef4444', cyan: '#06b6d4', pink: '#ec4899', indigo: '#6366f1', orange: '#f97316', teal: '#14b8a6' }
-const PALETTE = [COLORS.blue, COLORS.green, COLORS.amber, COLORS.purple, COLORS.red, COLORS.cyan, COLORS.pink, COLORS.indigo, COLORS.orange, COLORS.teal]
-
-const resumen = ref({ inscritos: 0, inscritos_hoy: 0, preinscritos: 0, preinscritos_hoy: 0, biometricos: 0, biometricos_hoy: 0, documentos_pendientes: 0, documentos_verificados: 0, comprobantes_pendientes: 0, comprobantes_verificados: 0 })
+const loading = ref(true)
+const resumen = ref({
+  inscritos: 0, inscritos_hoy: 0, preinscritos: 0, preinscritos_hoy: 0,
+  biometricos: 0, biometricos_hoy: 0, documentos_pendientes: 0,
+  documentos_verificados: 0, comprobantes_pendientes: 0, comprobantes_verificados: 0,
+})
 const biometrico = ref({ total_inscritos: 0, con_biometrico: 0, sin_biometrico: 0, porcentaje: 0, por_area: [] })
 const generoArea = ref([])
 const areas = ref([])
@@ -207,51 +221,87 @@ const programas = ref([])
 const timeline = ref([])
 const modalidades = ref([])
 
+const fmt = (n) => Number(n || 0).toLocaleString('es-PE')
+
 const comprobantePercent = computed(() => {
   const total = resumen.value.comprobantes_pendientes + resumen.value.comprobantes_verificados
   return total > 0 ? Math.round((resumen.value.comprobantes_verificados / total) * 100) : 0
 })
 
+const maxEmbudo = computed(() => Math.max(resumen.value.preinscritos, resumen.value.inscritos, resumen.value.biometricos, 1))
+const sinDatos = computed(() => resumen.value.inscritos === 0 && resumen.value.preinscritos === 0)
+
+/* Altura proporcional al número de barras: evita barras gordas con 3 categorías
+   y apretujadas con 15. 26px por barra + margen del eje. */
+const barHeight = (n, min = 200) => `${Math.max(min, (n || 1) * 26 + 56)}px`
+
+const programasTop = computed(() => (programas.value || []).slice(0, 10))
+
+/* ── Datos de los gráficos ─────────────────────────────────────────────── */
+const truncar = (s, n = 34) => (s && s.length > n ? s.slice(0, n) + '…' : s || 'Sin dato')
+
+const areaOrdenada = computed(() =>
+  foldOther(
+    [...areas.value].sort((a, b) => b.cant - a.cant).map((d) => ({ label: d.area || 'Sin área', value: d.cant })),
+    9
+  )
+)
 const areaData = computed(() => ({
-  labels: areas.value.map(d => d.area || 'Sin área'),
-  datasets: [{ data: areas.value.map(d => d.cant), backgroundColor: PALETTE.slice(0, areas.value.length), borderWidth: 0 }]
+  labels: areaOrdenada.value.map((d) => truncar(d.label)),
+  datasets: [revBarH(areaOrdenada.value.map((d) => d.value), REV_SEMANTIC.accent, 'Inscritos')],
 }))
 
-const generoAreaData = computed(() => {
-  const areaLabels = [...new Set(generoArea.value.map(d => d.area || 'Sin área'))].sort()
-  const hombres = areaLabels.map(a => generoArea.value.find(d => (d.area || 'Sin área') === a && d.sexo === 'M')?.cant || 0)
-  const mujeres = areaLabels.map(a => generoArea.value.find(d => (d.area || 'Sin área') === a && d.sexo === 'F')?.cant || 0)
-  return { labels: areaLabels, datasets: [{ label: 'Varones', data: hombres, backgroundColor: COLORS.blue, borderRadius: 6 }, { label: 'Mujeres', data: mujeres, backgroundColor: COLORS.pink, borderRadius: 6 }] }
-})
+const modalidadOrdenada = computed(() =>
+  foldOther(
+    [...modalidades.value].sort((a, b) => b.cant - a.cant).map((d) => ({ label: d.nombre || 'Sin modalidad', value: d.cant })),
+    9
+  )
+)
+const modalidadData = computed(() => ({
+  labels: modalidadOrdenada.value.map((d) => truncar(d.label)),
+  datasets: [revBarH(modalidadOrdenada.value.map((d) => d.value), REV_SERIES[0], 'Inscritos')],
+}))
 
 const programaData = computed(() => ({
-  labels: programas.value.map(d => d.nombre?.length > 30 ? d.nombre.substring(0, 30) + '…' : d.nombre),
-  datasets: [{ data: programas.value.map(d => d.cant), backgroundColor: programas.value.map(d => d.area === 'INGENIERÍAS' ? COLORS.blue : d.area === 'BIOMÉDICAS' ? COLORS.green : COLORS.purple), borderRadius: 6 }]
+  labels: programasTop.value.map((d) => truncar(d.nombre, 40)),
+  datasets: [revBarH(programasTop.value.map((d) => d.cant), REV_SEMANTIC.accent, 'Inscritos')],
 }))
+
+const biometricoAreaData = computed(() => {
+  const rows = (biometrico.value.por_area || []).map((d) => ({ label: d.area || 'Sin área', value: d.cant }))
+  return {
+    labels: rows.map((d) => truncar(d.label)),
+    datasets: [revBarH(rows.map((d) => d.value), REV_SERIES[2], 'Con biométrico')],
+  }
+})
+
+/* Dos series → leyenda obligatoria; dos slots categóricos validados. */
+const generoAreaData = computed(() => {
+  const labels = [...new Set(generoArea.value.map((d) => d.area || 'Sin área'))].sort()
+  const get = (a, sexo) => generoArea.value.find((d) => (d.area || 'Sin área') === a && d.sexo === sexo)?.cant || 0
+  return {
+    labels: labels.map((a) => truncar(a, 18)),
+    datasets: [
+      revBar(labels.map((a) => get(a, 'M')), REV_SERIES[0], 'Varones'),
+      revBar(labels.map((a) => get(a, 'F')), REV_SERIES[1], 'Mujeres'),
+    ],
+  }
+})
 
 const timelineData = computed(() => ({
-  labels: timeline.value.map(d => d.fecha?.substring(5) || ''),
-  datasets: [{ label: 'Inscritos', data: timeline.value.map(d => d.cant), borderColor: COLORS.blue, backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: COLORS.blue }]
+  labels: timeline.value.map((d) => (d.fecha || '').substring(5)),
+  datasets: [revLine(timeline.value.map((d) => d.cant), REV_SEMANTIC.accent, 'Inscritos')],
 }))
 
-const modalidadData = computed(() => ({
-  labels: modalidades.value.map(d => d.nombre || 'Sin modalidad'),
-  datasets: [{ data: modalidades.value.map(d => d.cant), backgroundColor: PALETTE.slice(0, modalidades.value.length), borderWidth: 0 }]
-}))
+const lineOptions = revLineOptions()
+const barHOptions = revBarHOptions()
+const stackedOptions = revBarOptions({ legend: true, stacked: true })
 
-const biometricoAreaData = computed(() => ({
-  labels: (biometrico.value.por_area || []).map(d => d.area || 'Sin área'),
-  datasets: [{ data: (biometrico.value.por_area || []).map(d => d.cant), backgroundColor: PALETTE.slice(0, (biometrico.value.por_area || []).length), borderRadius: 6 }]
-}))
-
-const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-const programaBarOptions = { ...barOptions, indexAxis: 'y', plugins: { legend: { display: false } } }
-const doughnutOptions = { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } } }
-const timelineOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-
+/* ── Carga ──────────────────────────────────────────────────────────────── */
 const fetchAll = async () => {
+  loading.value = true
   try {
-    const [r1, r2, r3, r4, r5, r6, r7, r8] = await Promise.all([
+    const [r1, r2, r3, r4, r5, r6, r7] = await Promise.all([
       axios.get('/revisor/dashboard/resumen').catch(() => null),
       axios.get('/revisor/dashboard/biometrico-resumen').catch(() => null),
       axios.get('/revisor/dashboard/inscripciones-por-area').catch(() => null),
@@ -259,7 +309,6 @@ const fetchAll = async () => {
       axios.get('/revisor/dashboard/inscritos-por-programa').catch(() => null),
       axios.get('/revisor/dashboard/timeline-inscripciones').catch(() => null),
       axios.get('/revisor/dashboard/modalidad-distribucion').catch(() => null),
-      axios.get('/revisor/dashboard/verificaciones-pendientes').catch(() => null),
     ])
     if (r1?.data?.success) resumen.value = r1.data.datos
     if (r2?.data?.success) biometrico.value = r2.data.datos
@@ -268,47 +317,52 @@ const fetchAll = async () => {
     if (r5?.data?.success) programas.value = r5.data.datos
     if (r6?.data?.success) timeline.value = r6.data.datos
     if (r7?.data?.success) modalidades.value = r7.data.datos
-  } catch (e) { console.error('Error cargando dashboard:', e) }
+  } catch (e) {
+    console.error('Error cargando el panel:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-onMounted(() => { fetchAll() })
+onMounted(fetchAll)
 </script>
 
 <style scoped>
-.dashboard-container { padding: 16px; }
+.dash { display: flex; flex-direction: column; gap: var(--rev-s-8); }
+.dash-section { display: flex; flex-direction: column; gap: var(--rev-s-5); }
 
-.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
-.kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s; }
-.kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
-.kpi-card-sm { flex-direction: column; align-items: flex-start; gap: 8px; }
-.kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.kpi-info { display: flex; flex-direction: column; width: 100%; }
-.kpi-label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 26px; font-weight: 700; color: #1e293b; line-height: 1.2; }
-.kpi-value-sm { font-size: 22px; font-weight: 700; color: #1e293b; line-height: 1.2; }
-.kpi-sub { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.dash-grid-4   { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--rev-s-5); }
+.dash-grid-3   { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--rev-s-5); }
+.dash-grid-2   { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--rev-s-5); }
+.dash-grid-2-1 { display: grid; grid-template-columns: 1.62fr 1fr; gap: var(--rev-s-5); }
+.dash-section > * + .dash-grid-2,
+.dash-section > * + .dash-grid-2-1 { margin-top: 0; }
+.dash-section .dash-grid-2, .dash-section .dash-grid-2-1 { margin-top: var(--rev-s-5); }
+.dash-section .rev-divider-labeled + .dash-grid-4,
+.dash-section .rev-divider-labeled + .dash-grid-3,
+.dash-section .rev-divider-labeled + .dash-grid-2-1 { margin-top: 0; }
 
-.bio-progress-card { background: white; border-radius: 14px; padding: 18px 20px; border: 1px solid #f1f5f9; margin-bottom: 14px; }
-.bio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.bio-title { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
-.bio-subtitle { font-size: 12px; color: #94a3b8; margin: 3px 0 0; }
-.bio-badge { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 5px 12px; border-radius: 18px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 5px; }
-.bio-stats { display: flex; gap: 20px; margin-top: 10px; }
-.bio-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #64748b; }
+.dash-chart { position: relative; width: 100%; }
 
-.empty-card { background: white; border-radius: 14px; padding: 40px 20px; border: 1px solid #f1f5f9; text-align: center; margin-bottom: 14px; }
-.empty-card h3 { color: #64748b; font-size: 16px; font-weight: 600; margin: 14px 0 6px; }
-.empty-card p { color: #94a3b8; font-size: 13px; }
+.dash-legend { display: flex; align-items: center; gap: var(--rev-s-6); margin-top: var(--rev-s-5); flex-wrap: wrap; }
+.dash-legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: var(--rev-fs-sm); color: var(--rev-ink-3); }
+.dash-legend-item strong { color: var(--rev-ink); font-weight: 680; }
+.dash-legend .dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.dash-legend .dot.is-ok  { background: var(--rev-success); }
+.dash-legend .dot.is-off { background: var(--rev-n-300); }
 
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.chart-card { background: white; border-radius: 14px; border: 1px solid #f1f5f9; overflow: hidden; }
-.chart-header { padding: 14px 18px 0; }
-.chart-header h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0; }
-.chart-body { padding: 10px 14px 14px; height: 270px; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 13px; }
+.dash-funnel { display: flex; flex-direction: column; gap: var(--rev-s-5); }
+.dash-funnel-row { display: grid; grid-template-columns: 108px 1fr 62px; align-items: center; gap: var(--rev-s-5); }
+.dash-funnel-label { font-size: var(--rev-fs-sm); color: var(--rev-ink-3); }
+.dash-funnel-num { font-size: var(--rev-fs-md); font-weight: 680; color: var(--rev-ink); text-align: right; }
 
-@media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .charts-row { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .kpi-row { grid-template-columns: 1fr; } }
-
-:deep(.ant-progress-bg) { border-radius: 8px !important; }
+@media (max-width: 1280px) {
+  .dash-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid-3 { grid-template-columns: 1fr; }
+  .dash-grid-2-1 { grid-template-columns: 1fr; }
+}
+@media (max-width: 820px) {
+  .dash-grid-4, .dash-grid-2 { grid-template-columns: 1fr; }
+  .dash-funnel-row { grid-template-columns: 92px 1fr 54px; }
+}
 </style>

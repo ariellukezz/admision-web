@@ -293,51 +293,25 @@
     
 </script>
 
-<style >
-::-webkit-scrollbar {
-  width: 9px;
-  height: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1; 
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888; 
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555; 
-}
-
-/* Estilo para un scroll específico */
+<style scoped>
+/* Desplazamiento discreto y acotado a este componente.
+   Antes esta hoja era global y reescribía la barra de toda la aplicación. */
 .scroll-container {
   overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--rev-n-200) transparent;
 }
 
-/* Estilo para el scroll específico en Webkit (Chrome, Safari) */
-.scroll-container::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
-
-.scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1; 
-  border-radius: 10px;
-}
-
+.scroll-container::-webkit-scrollbar { width: 9px; height: 9px; }
+.scroll-container::-webkit-scrollbar-track { background: transparent; }
 .scroll-container::-webkit-scrollbar-thumb {
-  background: #888; 
-  border-radius: 10px;
+  background: var(--rev-n-200);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--rev-r-pill);
 }
-
 .scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: var(--rev-n-300);
+  background-clip: content-box;
 }
-    
 </style>

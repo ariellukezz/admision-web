@@ -18,6 +18,7 @@ class CambiarEstadoDocumentoRequest extends FormRequest
             'accion'           => 'required|string|in:apto_revision,valido,desmarcar',
             'fecha_caducidad' => 'nullable|date',
             'observacion'      => 'nullable|string|max:1000',
+            'solicitud_id'     => 'nullable|integer',
         ];
     }
 

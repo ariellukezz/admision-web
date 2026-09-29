@@ -8,6 +8,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 
 import '../css/custom-theme.css';
+import '../css/revisor-ds.css';
 import Antd from 'ant-design-vue';
 
 import { useNotificaciones } from '@/composables/useFcm.js';

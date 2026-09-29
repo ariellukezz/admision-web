@@ -1,227 +1,269 @@
+<!--
+  ============================================================================
+  MESA DE REVISIÓN · Shell del Rol 2 (Revisor)
+  ----------------------------------------------------------------------------
+  Tres zonas con una responsabilidad cada una:
+    · Panel lateral  → dónde puedo ir (navegación estable, agrupada por tarea)
+    · Barra superior → dónde estoy y bajo qué contexto (proceso activo, alertas)
+    · Lienzo         → en qué estoy trabajando
+  El proceso activo vive arriba porque condiciona TODO lo que se ve debajo:
+  es contexto global, no un ajuste de menú.
+  ============================================================================
+-->
 <template>
-  <a-layout class="reviewer-layout">
-    <a-layout-sider
-      v-model:collapsed="collapsed"
-      :width="265"
-      :collapsed-width="74"
-      :trigger="null"
-      breakpoint="lg"
-      class="reviewer-sider"
-      @breakpoint="isMobile = $event"
-    >
-      <div class="sider-shell">
-        <div class="brand-block">
-          <div class="brand-mark">
-            <img src="../../assets/imagenes/logotiny.png" class="brand-logo" alt="Logo" />
-          </div>
-          <transition name="fade-slide">
-            <div v-if="!collapsed" class="brand-copy">
-              <span class="brand-kicker">UNA PUNO</span>
-              <strong>Dirección de Admisión</strong>
-            </div>
-          </transition>
-        </div>
+  <div class="rev-shell rev-scope" :class="{ 'is-collapsed': collapsed, 'is-mobile-open': mobileOpen }">
 
-        <div class="sider-scroll">
-          <div class="profile-card" :class="{ compact: collapsed }">
-            <a-avatar :src="userAvatar" :size="collapsed ? 32 : 58" class="profile-avatar">
-              <span style="font-size: 1.4rem;">{{ userInitials }}</span>
-            </a-avatar>
-            <transition name="fade-slide">
-              <div v-if="!collapsed" class="profile-copy">
-                <span class="profile-label">Panel de revisor</span>
-                <strong>{{ userFullName }}</strong>
-                <span class="profile-meta">DNI {{ userDni }}</span>
-              </div>
-            </transition>
-          </div>
+    <!-- ══════════════════════════════ PANEL LATERAL ══════════════════════ -->
+    <aside class="rev-nav" :aria-hidden="isMobile && !mobileOpen ? 'true' : 'false'">
 
-          <transition name="fade-slide">
-            <div v-if="!collapsed" class="process-card">
-              <div class="process-heading">
-                <span>Proceso activo</span>
-                <check-circle-filled />
-              </div>
-              <a-select
-                v-model:value="proceso"
-                show-search
-                placeholder="Seleccionar proceso"
-                option-filter-prop="label"
-                :options="procesos"
-                class="process-select"
-                @change="cambiarProceso"
-              />
-            </div>
-          </transition>
+      <div class="rev-nav-brand">
+        <span class="rev-nav-mark"><img :src="logoSrc" alt="" /></span>
+        <span v-if="!collapsed" class="rev-nav-wordmark">
+          <small>UNA PUNO</small>
+          <strong>Dirección de Admisión</strong>
+        </span>
+      </div>
 
-          <div class="menu-section" :class="{ compact: collapsed }">
-            <transition name="fade-slide">
-              <div v-if="!collapsed" class="menu-label">Operacion</div>
-            </transition>
+      <nav class="rev-nav-scroll" aria-label="Navegación principal">
+        <template v-for="group in navGroups" :key="group.label">
+          <div v-if="group.items.length" class="rev-nav-group">
+            <div v-if="!collapsed" class="rev-nav-group-label">{{ group.label }}</div>
 
-            <a-menu
-              v-model:selectedKeys="selectedKeys"
-              v-model:openKeys="openKeys"
-              theme="dark"
-              mode="inline"
-              class="reviewer-menu"
-            >
-              <template v-for="item in filteredMenuItems" :key="item.key">
-                <a-menu-item v-if="!item.children" :key="item.key">
-                  <Link :href="item.route" class="menu-link">
-                    <component :is="item.icon" class="menu-icon" />
-                    <span class="menu-text">{{ item.label }}</span>
-                  </Link>
-                </a-menu-item>
+            <template v-for="item in group.items" :key="item.key">
+              <!-- Enlace simple -->
+              <a-tooltip v-if="!item.children" :title="collapsed ? item.label : ''" placement="right">
+                <Link
+                  :href="item.route"
+                  class="rev-nav-item"
+                  :class="{ 'is-active': selectedKey === item.key }"
+                  @click="mobileOpen = false"
+                >
+                  <RevIcon :name="item.icon" size="lg" class="rev-nav-icon" />
+                  <span v-if="!collapsed" class="rev-nav-text">{{ item.label }}</span>
+                  <span v-if="!collapsed && item.badge" class="rev-nav-badge rev-num">{{ item.badge }}</span>
+                </Link>
+              </a-tooltip>
 
-                <a-sub-menu v-else :key="item.key">
-                  <template #icon>
-                    <component :is="item.icon" class="menu-icon" />
-                  </template>
-                  <template #title>
-                    <span class="menu-text">{{ item.label }}</span>
-                  </template>
-                  <a-menu-item v-for="child in item.children" :key="child.key">
-                    <Link :href="child.route" class="menu-link child-link">
-                      <span class="child-dot" />
-                      <span class="menu-text">{{ child.label }}</span>
+              <!-- Grupo desplegable -->
+              <div v-else class="rev-nav-sub">
+                <a-tooltip :title="collapsed ? item.label : ''" placement="right">
+                  <button
+                    type="button"
+                    class="rev-nav-item is-parent"
+                    :class="{ 'is-open': openKey === item.key, 'is-active-branch': isBranchActive(item) }"
+                    :aria-expanded="openKey === item.key ? 'true' : 'false'"
+                    @click="toggleBranch(item.key)"
+                  >
+                    <RevIcon :name="item.icon" size="lg" class="rev-nav-icon" />
+                    <span v-if="!collapsed" class="rev-nav-text">{{ item.label }}</span>
+                    <RevIcon v-if="!collapsed" name="chevron-down" size="xs" class="rev-nav-caret" />
+                  </button>
+                </a-tooltip>
+
+                <transition name="rev-expand">
+                  <div v-if="openKey === item.key && !collapsed" class="rev-nav-children">
+                    <Link
+                      v-for="child in item.children"
+                      :key="child.key"
+                      :href="child.route"
+                      class="rev-nav-child"
+                      :class="{ 'is-active': selectedKey === child.key }"
+                      @click="mobileOpen = false"
+                    >
+                      <span class="rev-nav-child-tick" />
+                      <span class="rev-nav-text">{{ child.label }}</span>
                     </Link>
-                  </a-menu-item>
-                </a-sub-menu>
-              </template>
-            </a-menu>
+                  </div>
+                </transition>
+              </div>
+            </template>
           </div>
-        </div>
+        </template>
+      </nav>
 
-        <button class="collapse-action" type="button" @click="collapsed = !collapsed">
-          <menu-unfold-outlined v-if="collapsed" />
-          <menu-fold-outlined v-else />
-          <transition name="fade-slide">
-            <span v-if="!collapsed">Contraer panel</span>
-          </transition>
+      <div class="rev-nav-foot">
+        <a-dropdown :trigger="['click']" placement="topRight" overlay-class-name="rev-overlay">
+          <button type="button" class="rev-nav-user" :class="{ 'is-compact': collapsed }">
+            <RevAvatar :name="userFullName" :src="userAvatar" size="sm" tone="accent" />
+            <span v-if="!collapsed" class="rev-nav-user-copy">
+              <strong>{{ userFullName }}</strong>
+              <small>DNI {{ userDni }}</small>
+            </span>
+            <RevIcon v-if="!collapsed" name="chevron-up" size="xs" class="rev-nav-user-caret" />
+          </button>
+          <template #overlay>
+            <a-menu class="rev-account-menu">
+              <a-menu-item key="role" disabled>
+                <div class="rev-account-head">
+                  <span class="rev-eyebrow">Sesión activa</span>
+                  <strong>{{ userFullName }}</strong>
+                  <small>Rol · Revisor</small>
+                </div>
+              </a-menu-item>
+              <a-menu-divider />
+              <a-menu-item key="logout" danger @click="handleLogout">
+                <span class="rev-account-action"><RevIcon name="logout" size="sm" /> Cerrar sesión</span>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+
+        <button class="rev-nav-collapse" type="button" :aria-label="collapsed ? 'Expandir panel' : 'Contraer panel'" @click="collapsed = !collapsed">
+          <RevIcon :name="collapsed ? 'chevron-right' : 'chevron-left'" size="sm" />
+          <span v-if="!collapsed">Contraer</span>
         </button>
       </div>
-    </a-layout-sider>
+    </aside>
 
-    <a-layout class="workspace">
-      <a-layout-header class="topbar">
-        <div class="topbar-left">
-          <button class="icon-button" type="button" aria-label="Alternar menu" @click="collapsed = !collapsed">
-            <menu-unfold-outlined v-if="collapsed" />
-            <menu-fold-outlined v-else />
+    <!-- Velo para móvil -->
+    <div v-if="mobileOpen" class="rev-nav-scrim" @click="mobileOpen = false" />
+
+    <!-- ══════════════════════════════ ÁREA DE TRABAJO ════════════════════ -->
+    <div class="rev-work">
+
+      <header class="rev-topbar">
+        <div class="rev-topbar-left">
+          <button class="rev-icon-btn is-menu" type="button" aria-label="Abrir navegación" @click="mobileOpen = !mobileOpen">
+            <RevIcon name="menu" size="lg" />
           </button>
-          <div class="title-stack">
-            <span class="eyebrow">Mesa de revision</span>
-            <h1>{{ pageTitle }}</h1>
-          </div>
+          <h1 class="rev-topbar-title">{{ pageTitle }}</h1>
         </div>
 
-        <div class="topbar-right">
-          <a-popover v-model:open="notifOpen" trigger="click" placement="bottomRight" overlay-class-name="notif-popover">
+        <div class="rev-topbar-right">
+          <!-- Contexto global: proceso activo -->
+          <div class="rev-context" :class="{ 'is-empty': !proceso }">
+            <span class="rev-context-label">Proceso</span>
+            <a-select
+              v-model:value="proceso"
+              show-search
+              :loading="procesosLoading"
+              placeholder="Seleccionar"
+              option-filter-prop="label"
+              :options="procesos"
+              class="rev-context-select"
+              :bordered="false"
+              @change="cambiarProceso"
+            />
+          </div>
+
+          <span class="rev-divider-v" aria-hidden="true" />
+
+          <!-- Tema: junto al contexto global, no escondido en un menu -->
+          <div class="rev-theme-switch" role="group" aria-label="Tema de la interfaz">
+            <button
+              type="button"
+              class="rev-theme-btn"
+              :class="{ 'is-on': !isDark }"
+              :aria-pressed="!isDark"
+              aria-label="Modo claro"
+              @click="setTheme('light')"
+            >
+              <RevIcon name="sun" size="sm" />
+            </button>
+            <button
+              type="button"
+              class="rev-theme-btn"
+              :class="{ 'is-on': isDark }"
+              :aria-pressed="isDark"
+              aria-label="Modo oscuro"
+              @click="setTheme('dark')"
+            >
+              <RevIcon name="moon" size="sm" />
+            </button>
+          </div>
+
+          <!-- Alertas -->
+          <a-popover v-model:open="notifOpen" trigger="click" placement="bottomRight" overlay-class-name="rev-overlay rev-notif-overlay">
             <template #content>
-              <div class="notif-dropdown">
-                <div class="notif-head">
+              <div class="rev-notif">
+                <div class="rev-notif-head">
                   <div>
-                    <span class="notif-kicker">Centro de alertas</span>
-                    <strong>Notificaciones</strong>
+                    <span class="rev-eyebrow">Centro de alertas</span>
+                    <strong class="rev-title-sm">Notificaciones</strong>
                   </div>
-                  <span class="notif-count">{{ noLeidas }}</span>
+                  <RevBadge v-if="noLeidas" tone="danger" solid size="sm">{{ noLeidas }} sin leer</RevBadge>
                 </div>
 
-                <button v-if="notificaciones.length > 0" class="mark-read" type="button" @click="marcarTodasLeidas">
-                  Marcar todas como leidas
-                </button>
-
-                <div v-if="notificaciones.length > 0" class="notif-list">
+                <div v-if="notificaciones.length" class="rev-notif-list">
                   <button
                     v-for="n in notificaciones"
                     :key="n.id"
                     type="button"
-                    class="notif-item"
-                    :class="{ unread: !n.leida }"
+                    class="rev-notif-item"
+                    :class="{ 'is-unread': !n.leida }"
                     @click="clickNotificacion(n)"
                   >
-                    <span class="notif-icon"><bell-outlined /></span>
-                    <span class="notif-body">
-                      <strong>{{ n.mensaje }}</strong>
+                    <span class="rev-notif-mark"><RevIcon name="file-alert" size="sm" /></span>
+                    <span class="rev-notif-copy">
+                      <span class="rev-notif-msg">{{ n.mensaje }}</span>
                       <small>{{ n.created_at_diff }}</small>
                     </span>
+                    <span v-if="!n.leida" class="rev-notif-dot" aria-label="Sin leer" />
                   </button>
                 </div>
 
-                <div v-else class="notif-empty">
-                  <bell-outlined />
-                  <span>No hay notificaciones pendientes</span>
-                </div>
+                <RevEmptyState
+                  v-else
+                  compact
+                  icon="bell"
+                  title="Todo al día"
+                  description="No hay solicitudes de revisión sin atender."
+                />
 
-                <Link href="/revisor/solicitudes-revision" class="notif-link" @click="notifOpen = false">
-                  Ver solicitudes
-                </Link>
+                <div class="rev-notif-foot">
+                  <button v-if="notificaciones.length && noLeidas" class="rev-link-btn" type="button" @click="marcarTodasLeidas">
+                    Marcar todas como leídas
+                  </button>
+                  <Link href="/revisor/solicitudes-revision" class="rev-link-btn is-strong" @click="notifOpen = false">
+                    Ver solicitudes <RevIcon name="arrow-right" size="xs" />
+                  </Link>
+                </div>
               </div>
             </template>
 
-            <button class="icon-button bell-button" :class="{ active: noLeidas > 0 }" type="button" aria-label="Notificaciones">
-              <bell-outlined />
-              <span v-if="noLeidas > 0" class="bell-badge">{{ noLeidas > 9 ? '9+' : noLeidas }}</span>
+            <button class="rev-icon-btn" :class="{ 'has-alert': noLeidas > 0 }" type="button" :aria-label="`Notificaciones${noLeidas ? ', ' + noLeidas + ' sin leer' : ''}`">
+              <RevIcon name="bell" size="lg" />
+              <span v-if="noLeidas > 0" class="rev-icon-btn-dot rev-num">{{ noLeidas > 9 ? '9+' : noLeidas }}</span>
             </button>
           </a-popover>
-
-          <a-dropdown :trigger="['click']" placement="bottomRight">
-            <button class="user-menu" type="button">
-              <a-avatar :src="userAvatar" :size="34" class="user-avatar">{{ userInitials }}</a-avatar>
-              <span>{{ userName }}</span>
-              <down-outlined />
-            </button>
-            <template #overlay>
-              <a-menu class="account-menu">
-                <a-menu-item key="logout" @click="handleLogout">
-                  <template #icon><logout-outlined /></template>
-                  Cerrar sesion
-                </a-menu-item>
-              </a-menu>
-            </template>
-          </a-dropdown>
         </div>
-      </a-layout-header>
+      </header>
 
-      <a-layout-content class="main-content">
-        <div class="content-inner">
-          <div v-if="showNotifBanner" class="notif-banner">
-            <div class="notif-banner-text">
-              <bell-outlined />
-              <span>Activa las notificaciones push para recibir alertas cuando un postulante solicite revisión de documentos.</span>
-            </div>
-            <div class="notif-banner-actions">
-              <button class="notif-banner-btn primary" type="button" @click="activarNotificaciones">Activar</button>
-              <button class="notif-banner-btn ghost" type="button" @click="dismissNotifBanner">Cerrar</button>
-            </div>
-          </div>
+      <main class="rev-canvas">
+        <div class="rev-canvas-inner">
+          <RevBanner
+            v-if="showNotifBanner"
+            tone="info"
+            icon="bell"
+            title="Activa las notificaciones de escritorio"
+            description="Recibirás un aviso en el momento en que un postulante solicite la revisión de sus documentos."
+            class="rev-canvas-banner"
+          >
+            <template #actions>
+              <RevButton variant="primary" size="sm" @click="activarNotificaciones">Activar</RevButton>
+              <RevButton variant="ghost" size="sm" @click="dismissNotifBanner">Ahora no</RevButton>
+            </template>
+          </RevBanner>
+
           <slot />
         </div>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+      </main>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { message, notification } from 'ant-design-vue'
-import {
-  AppstoreFilled,
-  AuditOutlined,
-  BellOutlined,
-  CameraOutlined,
-  CheckCircleFilled,
-  DashboardOutlined,
-  DownOutlined,
-  FileDoneOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  SafetyCertificateOutlined,
-} from '@ant-design/icons-vue'
 import { useNotificaciones } from '@/composables/useFcm.js'
+import RevIcon from '@/Components/Revisor/RevIcon.vue'
+import RevAvatar from '@/Components/Revisor/RevAvatar.vue'
+import RevBadge from '@/Components/Revisor/RevBadge.vue'
+import RevBanner from '@/Components/Revisor/RevBanner.vue'
+import RevButton from '@/Components/Revisor/RevButton.vue'
+import RevEmptyState from '@/Components/Revisor/RevEmptyState.vue'
+import logoSrc from '../../assets/imagenes/logotiny.png'
 
 const page = usePage()
 
@@ -230,12 +272,15 @@ const props = defineProps({
   title: { type: [String, Number], default: '' },
 })
 
+/* ───────────────────────────────── estado del shell ───────────────────── */
 const collapsed = ref(false)
 const isMobile = ref(false)
-const selectedKeys = ref([])
-const openKeys = ref([])
+const mobileOpen = ref(false)
+const selectedKey = ref('')
+const openKey = ref('')
 const proceso = ref(null)
 const procesos = ref([])
+const procesosLoading = ref(false)
 
 const notifOpen = ref(false)
 const notificaciones = ref([])
@@ -244,112 +289,94 @@ const idsMostrados = new Set()
 let fcmListener = null
 const showNotifBanner = ref(false)
 
-const checkNotifPermission = () => {
-  if (!('Notification' in window)) return
-  const dismissed = sessionStorage.getItem('notif_banner_dismissed')
-  if (Notification.permission === 'default' && !dismissed) {
-    showNotifBanner.value = true
-  }
+/* ── Tema ───────────────────────────────────────────────────────────────
+   app.blade.php fija data-theme antes de pintar para evitar el parpadeo;
+   aqui solo leemos lo que ya hay y lo cambiamos cuando el revisor decide. */
+const isDark = ref(false)
+
+const readTheme = () => {
+  isDark.value = document.documentElement.getAttribute('data-theme') === 'dark'
 }
 
-const activarNotificaciones = async () => {
+const setTheme = (mode) => {
+  isDark.value = mode === 'dark'
+  document.documentElement.setAttribute('data-theme', mode)
   try {
-    const fcm = useNotificaciones()
-    await fcm.activar()
-    showNotifBanner.value = false
-    message.success('Notificaciones activadas correctamente')
+    localStorage.setItem('rev-theme', mode)
   } catch {
-    message.error('No se pudieron activar las notificaciones')
+    /* Un navegador sin almacenamiento no debe romper el cambio de tema. */
   }
 }
 
-const dismissNotifBanner = () => {
-  showNotifBanner.value = false
-  sessionStorage.setItem('notif_banner_dismissed', '1')
+const applyViewport = () => {
+  const w = window.innerWidth
+  isMobile.value = w < 1024
+  if (w < 1280 && w >= 1024) collapsed.value = true
+  if (!isMobile.value) mobileOpen.value = false
 }
 
+/* ───────────────────────────────── identidad ──────────────────────────── */
 const user = computed(() => page.props.auth?.user || {})
-const userName = computed(() => user.value.name || 'Usuario')
 const userFullName = computed(() => [user.value.name, user.value.paterno].filter(Boolean).join(' ') || 'Usuario revisor')
-const userDni = computed(() => user.value.dni || '---')
+const userDni = computed(() => user.value.dni || '—')
 const userAvatar = computed(() => user.value.avatar || '')
-const userInitials = computed(() => {
-  const names = userFullName.value.trim().split(/\s+/).slice(0, 2)
-  return names.map((name) => name.charAt(0)).join('').toUpperCase() || 'R'
-})
-const pageTitle = computed(() => props.pagina || props.title || activeMenuLabel.value || 'Revision')
 
-const menuItems = [
-  {
-    key: 'dashboard',
-    icon: DashboardOutlined,
-    label: 'Dashboard',
-    route: '/revisor',
-    permission: 'revisor.access',
-  },
-  {
-    key: 'mi_actividad',
-    icon: AppstoreFilled,
-    label: 'Mi Actividad',
-    route: '/revisor/mi-actividad',
-    permission: 'revisor-actividad.read',
-  },
-  {
-    key: 'gestion_acceso',
-    icon: CameraOutlined,
-    label: 'Gestion de acceso',
-    children: [
-      { key: 'fotos', label: 'Fotos', route: '/revisor/foto-inscripcion', permission: 'revisor-inscripcion.read' },
-      { key: 'revision', label: 'Revision', route: '/revisor/impresion', permission: 'revisor-inscripcion.read' },
-      { key: 'fotos_huellas', label: 'Fotos y huellas', route: '/revisor/fotos-admision', permission: 'revisor-biometrico.read' },
-    ],
-  },
-  {
-    key: 'control_biometrico',
-    icon: AuditOutlined,
-    label: 'Control Biometrico',
-    children: [
-      { key: 'fotos_bio', label: 'Fotos biometrico', route: '/revisor/foto-biometrico', permission: 'revisor-biometrico.read' },
-      { key: 'revision_bio', label: 'Revision biometrico', route: '/revisor/imprimir', permission: 'revisor-biometrico.read' },
-    ],
-  },
-  {
-    key: 'certificados',
-    icon: SafetyCertificateOutlined,
-    label: 'Certificados',
-    route: '/revisor/validacion',
-    permission: 'revisor-validacion.read',
-  },
-  {
-    key: 'solicitudes_revision',
-    icon: FileDoneOutlined,
-    label: 'Solicitudes',
-    route: '/revisor/solicitudes-revision',
-    permission: 'revisor-solicitudes.read',
-  },
-]
+/* ───────────────────────────────── navegación ─────────────────────────
+   Agrupada por tarea, no por tabla de base de datos.                     */
+const navGroups = computed(() => {
+  const groups = [
+    {
+      label: 'Revisión',
+      items: [
+        { key: 'solicitudes_revision', icon: 'inbox', label: 'Solicitudes', route: '/revisor/solicitudes-revision', permission: 'revisor-solicitudes.read', badge: noLeidas.value || null },
+        { key: 'certificados', icon: 'shield-check', label: 'Certificados', route: '/revisor/validacion', permission: 'revisor-validacion.read' },
+      ],
+    },
+    {
+      label: 'Operación',
+      items: [
+        {
+          key: 'gestion_acceso', icon: 'files', label: 'Gestión de acceso',
+          children: [
+            { key: 'fotos', label: 'Fotos', route: '/revisor/foto-inscripcion', permission: 'revisor-inscripcion.read' },
+            { key: 'revision', label: 'Ficha de inscripción', route: '/revisor/impresion', permission: 'revisor-inscripcion.read' },
+            { key: 'fotos_huellas', label: 'Fotos y huellas', route: '/revisor/fotos-admision', permission: 'revisor-biometrico.read' },
+          ],
+        },
+        {
+          key: 'control_biometrico', icon: 'fingerprint', label: 'Control biométrico',
+          children: [
+            { key: 'fotos_bio', label: 'Captura biométrica', route: '/revisor/foto-biometrico', permission: 'revisor-biometrico.read' },
+            { key: 'revision_bio', label: 'Revisión biométrica', route: '/revisor/imprimir', permission: 'revisor-biometrico.read' },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Análisis',
+      items: [
+        { key: 'dashboard', icon: 'dashboard', label: 'Panel general', route: '/revisor', permission: 'revisor.access' },
+        { key: 'mi_actividad', icon: 'activity', label: 'Mi actividad', route: '/revisor/mi-actividad', permission: 'revisor-actividad.read' },
+      ],
+    },
+  ]
 
-const permissions = computed(() => page.props.auth?.permissions || [])
+  const perms = page.props.auth?.permissions || []
+  const can = (p) => perms.includes(p)
 
-const hasPermission = (perm) => permissions.value.includes(perm)
-
-const filteredMenuItems = computed(() => {
-  return menuItems
-    .map((item) => {
-      if (!item.children) {
-        return hasPermission(item.permission) ? item : null
-      }
-      const visibleChildren = item.children.filter((child) => hasPermission(child.permission))
-      return visibleChildren.length > 0 ? { ...item, children: visibleChildren } : null
-    })
-    .filter(Boolean)
+  return groups.map((g) => ({
+    ...g,
+    items: g.items
+      .map((item) => {
+        if (!item.children) return can(item.permission) ? item : null
+        const visible = item.children.filter((c) => can(c.permission))
+        return visible.length ? { ...item, children: visible } : null
+      })
+      .filter(Boolean),
+  }))
 })
 
-const flatMenu = computed(() => filteredMenuItems.value.flatMap((item) => item.children || item))
-const activeMenuLabel = computed(() => {
-  const cleanUrl = page.url.split('?')[0]
-  return flatMenu.value.find((item) => item.route === cleanUrl)?.label
-})
+const flatItems = computed(() => navGroups.value.flatMap((g) => g.items.flatMap((i) => i.children || [i])))
 
 const routeToKeyMap = {
   '/revisor': 'dashboard',
@@ -364,41 +391,67 @@ const routeToKeyMap = {
   '/revisor/validacion': 'certificados',
   '/revisor/revisor-validacion': 'certificados',
   '/revisor/solicitudes-revision': 'solicitudes_revision',
+  '/revisor/postulantes': 'solicitudes_revision',
 }
-
 const childToParentMap = {
-  fotos: 'gestion_acceso',
-  revision: 'gestion_acceso',
-  fotos_huellas: 'gestion_acceso',
-  fotos_bio: 'control_biometrico',
-  revision_bio: 'control_biometrico',
+  fotos: 'gestion_acceso', revision: 'gestion_acceso', fotos_huellas: 'gestion_acceso',
+  fotos_bio: 'control_biometrico', revision_bio: 'control_biometrico',
 }
 
 const setMenuState = (url) => {
-  const cleanUrl = url.split('?')[0]
-  const currentKey = routeToKeyMap[cleanUrl]
-  selectedKeys.value = currentKey ? [currentKey] : []
-  openKeys.value = currentKey && childToParentMap[currentKey] ? [childToParentMap[currentKey]] : []
+  const clean = (url || '').split('?')[0]
+  const key = routeToKeyMap[clean] || (clean.startsWith('/revisor/postulante') ? 'solicitudes_revision' : '')
+  selectedKey.value = key || ''
+  if (key && childToParentMap[key]) openKey.value = childToParentMap[key]
+}
+
+const isBranchActive = (item) => (item.children || []).some((c) => c.key === selectedKey.value)
+const toggleBranch = (key) => {
+  if (collapsed.value) { collapsed.value = false; openKey.value = key; return }
+  openKey.value = openKey.value === key ? '' : key
+}
+
+const activeLabel = computed(() => flatItems.value.find((i) => i.key === selectedKey.value)?.label)
+const pageTitle = computed(() => props.pagina || props.title || activeLabel.value || 'Mesa de revisión')
+
+/* ───────────────────────────────── notificaciones ─────────────────────── */
+const checkNotifPermission = () => {
+  if (!('Notification' in window)) return
+  const dismissed = sessionStorage.getItem('notif_banner_dismissed')
+  if (Notification.permission === 'default' && !dismissed) showNotifBanner.value = true
+}
+
+const activarNotificaciones = async () => {
+  try {
+    const fcm = useNotificaciones()
+    await fcm.activar()
+    showNotifBanner.value = false
+    message.success('Notificaciones activadas')
+  } catch {
+    message.error('No se pudieron activar las notificaciones')
+  }
+}
+
+const dismissNotifBanner = () => {
+  showNotifBanner.value = false
+  sessionStorage.setItem('notif_banner_dismissed', '1')
 }
 
 const mostrarNotificacionNativa = (n) => {
   if (!('Notification' in window) || Notification.permission !== 'granted') return false
-
   try {
-    const notif = new Notification('Nueva solicitud de revision', {
-      body: n.mensaje || 'Tienes una nueva solicitud de revision de documentos',
+    const notif = new Notification('Nueva solicitud de revisión', {
+      body: n.mensaje || 'Tienes una nueva solicitud de revisión de documentos',
       icon: '/favicon.ico',
       tag: n.id,
       data: { url: n.url },
       requireInteraction: true,
     })
-
     notif.onclick = () => {
       window.focus()
       if (n.url) window.location.href = n.url
       notif.close()
     }
-
     return true
   } catch {
     return false
@@ -424,18 +477,16 @@ const cargarNotificaciones = async (mostrarPopup = false) => {
         idsMostrados.add(n.id)
         if (!mostrarNotificacionNativa(n)) {
           notification.info({
-            message: 'Nueva solicitud de revision',
-            description: n.mensaje || 'Tienes una nueva solicitud de revision de documentos',
+            message: 'Nueva solicitud de revisión',
+            description: n.mensaje || 'Tienes una nueva solicitud de revisión de documentos',
             placement: 'bottomRight',
             duration: 6,
-            onClick: () => {
-              if (n.url) window.location.href = n.url
-            },
+            onClick: () => { if (n.url) window.location.href = n.url },
           })
         }
       })
   } catch {
-    /* El polling no debe interrumpir el trabajo del revisor. */
+    /* El sondeo nunca debe interrumpir el trabajo del revisor. */
   }
 }
 
@@ -443,9 +494,7 @@ const marcarTodasLeidas = async () => {
   try {
     await axios.post('/revisor/notificaciones/leer-todas')
     noLeidas.value = 0
-    notificaciones.value.forEach((n) => {
-      n.leida = true
-    })
+    notificaciones.value.forEach((n) => { n.leida = true })
   } catch {
     message.error('No se pudieron actualizar las notificaciones')
   }
@@ -457,20 +506,17 @@ const clickNotificacion = async (notif) => {
       await axios.post(`/revisor/notificaciones/${notif.id}/leer`)
       notif.leida = true
       noLeidas.value = Math.max(0, noLeidas.value - 1)
-    } catch {
-      /* Mantiene la navegacion aunque falle el marcado. */
-    }
+    } catch { /* la navegación no depende del marcado */ }
   }
-
   if (notif.url) {
     notifOpen.value = false
     window.location.href = notif.url
   }
 }
 
+/* ───────────────────────────────── proceso activo ─────────────────────── */
 const cambiarProceso = async (value) => {
   if (!value) return
-
   try {
     const res = await axios.post('/revisor/cambiar_proceso', { id_proceso: value })
     if (res.data.estado === true) {
@@ -478,15 +524,15 @@ const cambiarProceso = async (value) => {
       window.location.reload()
       return
     }
-
     message.error('No se pudo actualizar el proceso')
   } catch (error) {
     console.error(error)
-    message.error('Error al cambiar proceso')
+    message.error('Error al cambiar de proceso')
   }
 }
 
 const getProcesos = async () => {
+  procesosLoading.value = true
   try {
     const res = await axios.get('/api/get-select-procesos')
     if (res.data.estado) {
@@ -495,10 +541,13 @@ const getProcesos = async () => {
     }
   } catch (error) {
     console.error(error)
-    message.error('Error al cargar procesos')
+    message.error('Error al cargar los procesos')
+  } finally {
+    procesosLoading.value = false
   }
 }
 
+/* ───────────────────────────────── sesión ─────────────────────────────── */
 const handleLogout = async () => {
   try {
     const fcm = useNotificaciones()
@@ -508,35 +557,32 @@ const handleLogout = async () => {
   }
   sessionStorage.removeItem('fcm_user_id')
   router.post('/logout', {}, {
-    onSuccess: () => {
-      window.location.href = '/login'
-    },
-    onError: () => {
-      message.error('Error al cerrar sesion')
-    },
+    onSuccess: () => { window.location.href = '/login' },
+    onError: () => { message.error('Error al cerrar sesión') },
   })
 }
 
+/* ───────────────────────────────── ciclo de vida ──────────────────────── */
 watch(() => page.url, setMenuState, { immediate: true })
-watch(collapsed, (value) => {
-  if (!value) setMenuState(page.url)
-})
-watch(isMobile, (value) => {
-  if (value) collapsed.value = true
-})
 
 onMounted(async () => {
+  document.body.classList.add('rev-theme')
+  readTheme()
+  applyViewport()
+  window.addEventListener('resize', applyViewport)
+
   await getProcesos()
   cargarNotificaciones(false)
   checkNotifPermission()
 
-  // Escuchar notificaciones push de Firebase para recargar solo cuando llega una
   const fcm = useNotificaciones()
   fcmListener = () => cargarNotificaciones(true)
   fcm.fcmEventTarget.addEventListener('fcm-message', fcmListener)
 })
 
 onUnmounted(() => {
+  document.body.classList.remove('rev-theme')
+  window.removeEventListener('resize', applyViewport)
   if (fcmListener) {
     const fcm = useNotificaciones()
     fcm.fcmEventTarget.removeEventListener('fcm-message', fcmListener)
@@ -545,801 +591,324 @@ onUnmounted(() => {
 </script>
 
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --reviewer-ink: #111827;
-  --reviewer-muted: #64748b;
-  --reviewer-soft: #f6f8fb;
-  --reviewer-line: #e5e7eb;
-  --reviewer-accent: #3b82f6;
-  --reviewer-accent-strong: #2563eb;
-  --reviewer-blue: #2563eb;
-  --sider-navy: #0f172a;
-  --sider-panel: #111827;
-  --sider-line: rgba(255, 255, 255, 0.07);
-  --sider-text: #cbd5e1;
-  --sider-muted: #94a3b8;
-  --sider-accent: #3b82f6;
-}
-
-.reviewer-layout {
-  min-height: 100vh;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f4f6f9 !important;
-}
-
-.reviewer-sider {
-  background:
-    linear-gradient(180deg, rgba(59, 130, 246, 0.08), transparent 40%),
-    linear-gradient(180deg, #0f172a 0%, #111827 50%, #0b1220 100%) !important;
-  background-color: #0f172a !important;
-  position: relative;
-}
-
-/* Grid pattern overlay */
-.reviewer-sider::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.010) 1px, transparent 1px),
-    linear-gradient(45deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 6px 6px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Subtle top glow */
-.reviewer-sider::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-  background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.06), transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.reviewer-sider .ant-layout-sider-children,
-.reviewer-sider .sider-shell {
-  position: relative;
-  z-index: 1;
-}
-
-.sider-shell {
-  position: relative;
+/* ══════════════════════════════════ ESTRUCTURA ═════════════════════════ */
+.rev-shell {
   display: flex;
-  flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background: var(--rev-bg);
+  font-family: var(--rev-font);
+  color: var(--rev-ink);
 }
 
-.brand-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 78px;
-  padding: 18px 18px 14px;
-  border-bottom: 1px solid var(--sider-line);
+/* ══════════════════════════════════ PANEL LATERAL ══════════════════════ */
+.rev-nav {
+  position: fixed; inset: 0 auto 0 0;
+  z-index: 60;
+  display: flex; flex-direction: column;
+  width: var(--rev-nav-w);
+  background: var(--rev-nav-bg);
+  border-right: 1px solid rgba(255,255,255,.06);
+  transition: width var(--rev-t-base) var(--rev-ease), transform var(--rev-t-base) var(--rev-ease);
+}
+.rev-shell.is-collapsed .rev-nav { width: var(--rev-nav-w-collapsed); }
+
+/* Marca ------------------------------------------------------------------ */
+.rev-nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  height: var(--rev-topbar-h);
+  flex: none;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--rev-nav-line);
+}
+.rev-nav-mark {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; flex: none;
+  border-radius: var(--rev-r-md);
+  background: rgba(255,255,255,.07);
+  border: 1px solid var(--rev-nav-line-2);
+}
+.rev-nav-mark img { width: 19px; height: 19px; object-fit: contain; }
+.rev-nav-wordmark { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.rev-nav-wordmark small {
+  font-size: var(--rev-fs-2xs); font-weight: 650;
+  letter-spacing: var(--rev-track-caps); text-transform: uppercase;
+  color: var(--rev-nav-accent);
+}
+.rev-nav-wordmark strong {
+  font-size: var(--rev-fs-md); font-weight: 620; color: #fff;
+  letter-spacing: -.012em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
-  border-radius: 8px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+/* Lista ------------------------------------------------------------------ */
+.rev-nav-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--rev-s-6) var(--rev-s-5) var(--rev-s-7); }
+.rev-nav-scroll::-webkit-scrollbar { width: 6px; }
+.rev-nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 999px; }
+
+.rev-nav-group + .rev-nav-group { margin-top: var(--rev-s-6); }
+.rev-nav-group-label {
+  padding: 0 8px var(--rev-s-3);
+  font-size: var(--rev-fs-2xs); font-weight: 680;
+  letter-spacing: var(--rev-track-caps); text-transform: uppercase;
+  color: var(--rev-nav-muted);
+}
+.rev-shell.is-collapsed .rev-nav-group + .rev-nav-group { margin-top: var(--rev-s-5); position: relative; padding-top: var(--rev-s-5); }
+.rev-shell.is-collapsed .rev-nav-group + .rev-nav-group::before {
+  content: ""; position: absolute; top: 0; left: 8px; right: 8px; height: 1px; background: var(--rev-nav-line);
 }
 
-.brand-logo {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-
-.brand-copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  color: #fff;
-  line-height: 1.1;
-}
-
-.brand-kicker {
-  margin-bottom: 3px;
-  color: #93c5fd;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-
-.brand-copy strong {
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 0;
-}
-
-.sider-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 16px 12px 88px;
-}
-
-.sider-scroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sider-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.13);
-  border-radius: 999px;
-}
-
-.profile-card {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 14px;
-  border: 1px solid var(--sider-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.055);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.profile-card.compact {
-  justify-content: center;
-  padding: 12px 8px;
-}
-
-.profile-avatar,
-.user-avatar {
-  color: #0f172a;
-  font-weight: 800;
-  background: linear-gradient(145deg, #bfdbfe, #93c5fd);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-}
-
-.profile-copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.profile-label,
-.profile-meta {
-  color: var(--sider-muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.profile-copy strong {
-  margin: 2px 0;
-  color: var(--sider-text);
-  font-size: 14px;
-  font-weight: 800;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.process-card {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--sider-line);
-}
-
-.process-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  color: #93c5fd;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.process-select {
-  width: 100%;
-}
-
-.process-select .ant-select-selector {
-  min-height: 38px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 8px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: var(--sider-text) !important;
-}
-
-.process-select .ant-select-selection-item,
-.process-select .ant-select-selection-placeholder,
-.process-select .ant-select-arrow {
-  color: var(--sider-text) !important;
-}
-
-.menu-section {
-  padding-top: 18px;
-}
-
-.menu-section.compact {
-  padding-top: 12px;
-}
-
-.menu-label {
-  padding: 0 10px 8px;
-  color: var(--sider-muted);
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-
-.reviewer-menu {
-  background: transparent !important;
-  border: 0 !important;
-}
-
-.reviewer-menu .ant-menu-item,
-.reviewer-menu .ant-menu-submenu-title {
-  width: auto !important;
-  height: 42px !important;
-  margin: 3px 0 !important;
-  border-radius: 8px !important;
-  color: var(--sider-muted) !important;
-  line-height: 42px !important;
-}
-
-.reviewer-menu .ant-menu-item::after {
-  display: none !important;
-}
-
-.reviewer-menu .menu-link {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.reviewer-menu .menu-icon {
-  color: currentColor;
-  font-size: 17px;
-}
-
-.reviewer-menu .menu-text {
-  color: inherit;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.reviewer-menu .ant-menu-item:hover,
-.reviewer-menu .ant-menu-submenu-title:hover {
-  color: #fff !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-}
-
-.reviewer-menu .ant-menu-item-selected {
-  color: #fff !important;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.22), rgba(59, 130, 246, 0.10)) !important;
-  box-shadow: inset 3px 0 0 #3b82f6;
-}
-
-.reviewer-menu .ant-menu-sub {
-  background: rgba(5, 8, 20, 0.35) !important;
-  border-radius: 8px;
-  margin: 2px 0 6px !important;
-}
-
-.reviewer-menu .ant-menu-sub .ant-menu-item {
-  padding-left: 42px !important;
-}
-
-.child-link {
-  gap: 10px;
-}
-
-.child-dot {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.6);
-}
-
-.reviewer-menu .ant-menu-item-selected .child-dot {
-  background: #3b82f6;
-}
-
-.reviewer-menu .ant-menu-submenu-arrow {
-  color: currentColor !important;
-}
-
-.collapse-action {
-  position: absolute;
-  right: 12px;
-  bottom: 14px;
-  left: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 42px;
-  border: 1px solid var(--sider-line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--sider-text);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.collapse-action:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-.workspace {
-  min-width: 0;
-  background: #f4f6f9 !important;
-}
-
-.ant-layout-header.topbar,
-.topbar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  flex-shrink: 0 !important;
-  width: 100% !important;
-  height: 65px !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-  padding: 0 12px !important;
-  box-sizing: border-box !important;
-  background: #ffffff !important;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.95) !important;
-  box-shadow: none !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 50 !important;
-}
-
-.topbar-left,
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.topbar-left {
-  flex: 1 1 auto;
-}
-
-.topbar-right {
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-
-.title-stack {
-  min-width: 0;
-}
-
-.title-stack .eyebrow {
-  display: block;
-  margin-bottom: 2px;
-  color: var(--reviewer-muted);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.title-stack h1 {
-  margin: 0;
-  color: var(--reviewer-ink);
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1.1;
-}
-
-.icon-button,
-.user-menu {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--reviewer-line);
-  border-radius: 8px;
-  background: #fff;
-  color: #334155;
-  cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
-}
-
-.icon-button {
+.rev-nav-item {
   position: relative;
-  width: 42px;
-  height: 42px;
-  font-size: 18px;
-}
-
-.icon-button:hover,
-.user-menu:hover {
-  border-color: rgba(59, 130, 246, 0.35);
-  color: #3b82f6;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-}
-
-.bell-button.active {
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.32);
-  background: #eff6ff;
-}
-
-.bell-badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  display: grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border: 2px solid #fff;
-  border-radius: 999px;
-  background: #dc2626;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.user-menu {
-  gap: 9px;
-  height: 42px;
-  padding: 0 10px 0 5px;
-  font-weight: 800;
-}
-
-.user-menu span:not(.ant-avatar-string) {
-  max-width: 120px;
-  overflow: hidden;
-  color: var(--reviewer-ink);
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.account-menu .ant-menu-item {
-  color: #dc2626 !important;
-  font-weight: 700;
-}
-
-.ant-layout-content.main-content,
-.main-content {
-  height: calc(100vh - 72px) !important;
-  overflow-y: auto !important;
-  background: #f4f6f9 !important;
-}
-
-.content-inner {
+  display: flex; align-items: center; gap: 10px;
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 18px 14px 28px;
+  min-height: 36px; padding: 0 10px;
+  margin-bottom: 2px;
+  border: 0; background: transparent;
+  border-radius: var(--rev-r-md);
+  color: var(--rev-nav-text);
+  font-family: var(--rev-font); font-size: var(--rev-fs-md); font-weight: 520;
+  text-align: left; text-decoration: none; cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease);
 }
-
-.notif-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding: .75rem 1rem;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
-  border: 1px solid #93c5fd;
+.rev-shell.is-collapsed .rev-nav-item { justify-content: center; padding: 0; }
+.rev-nav-item:hover { background: rgba(255,255,255,.055); color: var(--rev-nav-text-hi); }
+.rev-nav-item:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--rev-nav-accent); }
+.rev-nav-item.is-active {
+  background: rgba(108,155,255,.13);
+  color: #fff; font-weight: 600;
 }
-
-.notif-banner-text {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  color: #1e40af;
-  font-size: .8125rem;
-  font-weight: 600;
+.rev-nav-item.is-active::before {
+  content: ""; position: absolute; left: -12px; top: 9px; bottom: 9px;
+  width: 2px; border-radius: 0 2px 2px 0; background: var(--rev-nav-accent);
 }
-
-.notif-banner-actions {
-  display: flex;
-  gap: .5rem;
-  flex-shrink: 0;
+.rev-shell.is-collapsed .rev-nav-item.is-active::before { left: -12px; }
+.rev-nav-item.is-active-branch { color: var(--rev-nav-text-hi); }
+.rev-nav-icon { flex: none; opacity: .82; }
+.rev-nav-item.is-active .rev-nav-icon { opacity: 1; color: var(--rev-nav-accent); }
+.rev-nav-text { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rev-nav-badge {
+  flex: none; font-size: var(--rev-fs-2xs); font-weight: 700;
+  background: var(--rev-danger); color: #fff;
+  border-radius: var(--rev-r-pill); padding: 0 5px; line-height: 15px; min-width: 17px; text-align: center;
 }
+.rev-nav-caret { flex: none; opacity: .5; transition: transform var(--rev-t-base) var(--rev-ease); }
+.rev-nav-item.is-open .rev-nav-caret { transform: rotate(180deg); opacity: .8; }
 
-.notif-banner-btn {
-  border: none;
-  border-radius: 6px;
-  padding: .375rem .875rem;
-  font-size: .75rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all .2s;
+.rev-nav-children { padding: 2px 0 4px 18px; position: relative; }
+.rev-nav-children::before {
+  content: ""; position: absolute; left: 18px; top: 2px; bottom: 4px; width: 1px; background: var(--rev-nav-line-2);
 }
-
-.notif-banner-btn.primary {
-  background: #3b82f6;
-  color: #fff;
-}
-
-.notif-banner-btn.primary:hover {
-  background: #2563eb;
-}
-
-.notif-banner-btn.ghost {
-  background: transparent;
-  color: #64748b;
-}
-
-.notif-banner-btn.ghost:hover {
-  background: rgba(0, 0, 0, .05);
-}
-
-.notif-popover .ant-popover-inner {
-  padding: 0 !important;
-  overflow: hidden;
-  border-radius: 8px !important;
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18) !important;
-}
-
-.notif-dropdown {
-  width: 370px;
-  padding: 16px;
-}
-
-.notif-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--reviewer-line);
-}
-
-.notif-head > div {
-  display: flex;
-  flex-direction: column;
-}
-
-.notif-kicker {
-  color: var(--reviewer-muted);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.notif-head strong {
-  color: var(--reviewer-ink);
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.notif-count {
-  display: grid;
-  place-items: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: #3b82f6;
-  font-weight: 800;
-}
-
-.mark-read {
-  width: 100%;
-  margin: 12px 0 8px;
-  padding: 9px 10px;
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: #3b82f6;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.notif-list {
-  display: grid;
-  gap: 8px;
-  max-height: 330px;
-  overflow-y: auto;
-  padding-right: 2px;
-}
-
-.notif-item {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  padding: 11px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: #fff;
-  text-align: left;
-  cursor: pointer;
-}
-
-.notif-item:hover,
-.notif-item.unread {
-  border-color: #bfdbfe;
-  background: #f8fbff;
-}
-
-.notif-icon {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  flex: 0 0 32px;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: var(--reviewer-blue);
-}
-
-.notif-body {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.notif-body strong {
-  color: #1f2937;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.notif-body small {
-  margin-top: 4px;
-  color: var(--reviewer-muted);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.notif-empty {
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  padding: 30px 10px;
-  color: var(--reviewer-muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.notif-empty .anticon {
-  font-size: 25px;
-  color: #cbd5e1;
-}
-
-.notif-link {
-  display: flex;
-  justify-content: center;
-  margin-top: 12px;
-  padding: 10px;
-  border-radius: 8px;
-  background: #111827;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
+.rev-nav-child {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 30px; padding: 0 9px 0 12px;
+  border-radius: var(--rev-r-md);
+  color: var(--rev-nav-muted); font-size: var(--rev-fs-md); font-weight: 500;
   text-decoration: none;
+  transition: background var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease);
+}
+.rev-nav-child:hover { background: rgba(255,255,255,.05); color: var(--rev-nav-text-hi); }
+.rev-nav-child.is-active { color: #fff; font-weight: 600; background: rgba(108,155,255,.1); }
+.rev-nav-child-tick { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .5; flex: none; }
+.rev-nav-child.is-active .rev-nav-child-tick { opacity: 1; background: var(--rev-nav-accent); }
+
+/* Pie --------------------------------------------------------------------- */
+.rev-nav-foot { flex: none; padding: 10px; border-top: 1px solid var(--rev-nav-line); display: flex; flex-direction: column; gap: 6px; }
+.rev-nav-user {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 7px 8px; border: 0; border-radius: var(--rev-r-md);
+  background: rgba(255,255,255,.045); color: var(--rev-nav-text);
+  cursor: pointer; text-align: left;
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.rev-nav-user:hover { background: rgba(255,255,255,.09); }
+.rev-nav-user.is-compact { justify-content: center; padding: 7px 0; }
+.rev-nav-user-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.rev-nav-user-copy strong { font-size: var(--rev-fs-sm); font-weight: 620; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rev-nav-user-copy small { font-size: var(--rev-fs-2xs); color: var(--rev-nav-muted); font-variant-numeric: tabular-nums; }
+.rev-nav-user-caret { opacity: .5; flex: none; }
+
+.rev-nav-collapse {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  height: 29px; border: 0; border-radius: var(--rev-r-md);
+  background: transparent; color: var(--rev-nav-muted);
+  font-family: var(--rev-font); font-size: var(--rev-fs-sm); font-weight: 560;
+  cursor: pointer; transition: background var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease);
+}
+.rev-nav-collapse:hover { background: rgba(255,255,255,.06); color: var(--rev-nav-text-hi); }
+
+.rev-nav-scrim { position: fixed; inset: 0; z-index: 55; background: rgba(12,19,34,.5); animation: rev-fade-in var(--rev-t-base) var(--rev-ease); }
+
+/* ══════════════════════════════════ ÁREA DE TRABAJO ════════════════════ */
+.rev-work {
+  flex: 1 1 auto; min-width: 0;
+  height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+  margin-left: var(--rev-nav-w);
+  transition: margin-left var(--rev-t-base) var(--rev-ease);
+}
+.rev-shell.is-collapsed .rev-work { margin-left: var(--rev-nav-w-collapsed); }
+
+/* Barra superior ---------------------------------------------------------- */
+.rev-topbar {
+  position: sticky; top: 0; z-index: var(--rev-z-topbar);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--rev-s-5);
+  height: var(--rev-topbar-h); flex: none;
+  padding: 0 var(--rev-gutter);
+  background: var(--rev-surface);
+  border-bottom: 1px solid var(--rev-line);
+}
+.rev-topbar-left { display: flex; align-items: center; gap: var(--rev-s-5); min-width: 0; }
+.rev-topbar-title {
+  margin: 0;
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-lg); font-weight: 500;
+  letter-spacing: -.01em; color: var(--rev-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rev-topbar-right { display: flex; align-items: center; gap: var(--rev-s-5); flex: none; }
+
+.rev-icon-btn {
+  position: relative;
+  display: grid; place-items: center;
+  width: 32px; height: 32px;
+  border: 1px solid transparent; border-radius: var(--rev-r-md);
+  background: transparent; color: var(--rev-ink-3);
+  cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease), border-color var(--rev-t-fast) var(--rev-ease);
+}
+.rev-icon-btn:hover { background: var(--rev-n-100); color: var(--rev-ink); }
+.rev-icon-btn:focus-visible { outline: none; box-shadow: var(--rev-ring); }
+.rev-icon-btn.has-alert { color: var(--rev-primary-600); }
+.rev-icon-btn.is-menu { display: none; }
+.rev-icon-btn-dot {
+  position: absolute; top: -2px; right: -2px;
+  min-width: 15px; height: 15px; padding: 0 4px;
+  display: grid; place-items: center;
+  border-radius: var(--rev-r-pill);
+  background: var(--rev-danger); color: #fff;
+  font-size: 9px; font-weight: 700; line-height: 1;
+  border: 1.5px solid #fff;
 }
 
-.notif-link:hover {
-  color: #fff;
-  background: #3b82f6;
+/* Interruptor de tema ----------------------------------------------------- */
+.rev-theme-switch {
+  display: flex; align-items: center; gap: 2px;
+  height: 32px; padding: 3px;
+  border: 1px solid var(--rev-line); border-radius: var(--rev-r-md);
+  box-sizing: border-box; flex: none;
 }
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+.rev-theme-btn {
+  display: grid; place-items: center;
+  width: 28px; height: 24px;
+  border: 0; border-radius: var(--rev-r-xs);
+  background: transparent; color: var(--rev-ink-3);
+  cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease), color var(--rev-t-fast) var(--rev-ease);
 }
+.rev-theme-btn:hover { color: var(--rev-ink-2); }
+.rev-theme-btn:focus-visible { outline: none; box-shadow: var(--rev-ring); }
+.rev-theme-btn.is-on { background: var(--rev-surface-2); color: var(--rev-ink); }
 
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(3px);
+/* Selector de contexto (proceso activo) ---------------------------------- */
+.rev-context {
+  display: flex; align-items: center; gap: 2px;
+  height: 30px; padding: 0 3px 0 10px;
+  border: 1px solid var(--rev-line-strong); border-radius: var(--rev-r-md);
+  background: var(--rev-surface);
+  transition: border-color var(--rev-t-fast) var(--rev-ease);
+  max-width: 320px;
 }
-
-@media (max-width: 900px) {
-  .ant-layout-header.topbar {
-    padding: 0 10px !important;
-  }
-
-  .title-stack h1 {
-    font-size: 18px;
-  }
-
-  .user-menu span:not(.ant-avatar-string) {
-    max-width: 90px;
-  }
-
-  .content-inner {
-    padding: 14px 10px 24px;
-  }
+.rev-context:hover { border-color: var(--rev-n-300); }
+.rev-context-label {
+  font-size: var(--rev-fs-2xs); font-weight: 680;
+  letter-spacing: var(--rev-track-caps); text-transform: uppercase;
+  color: var(--rev-ink-4); flex: none;
+  padding-right: 8px; border-right: 1px solid var(--rev-line);
 }
+.rev-context-select { min-width: 150px; max-width: 220px; }
+.rev-context-select .ant-select-selector { height: 28px !important; padding: 0 6px !important; background: transparent !important; }
+.rev-context-select .ant-select-selection-item {
+  line-height: 28px !important;
+  font-size: var(--rev-fs-md) !important; font-weight: 600 !important; color: var(--rev-ink) !important;
+}
+.rev-context.is-empty .rev-context-select .ant-select-selection-placeholder { line-height: 28px !important; }
 
+/* Lienzo ------------------------------------------------------------------ */
+.rev-canvas { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.rev-canvas-inner {
+  padding: var(--rev-s-8) var(--rev-gutter) var(--rev-s-11);
+  min-height: 100%;
+  display: flex; flex-direction: column;
+}
+.rev-canvas-banner { margin-bottom: var(--rev-s-6); }
+
+/* ══════════════════════════════════ NOTIFICACIONES ═════════════════════ */
+.rev-notif-overlay .ant-popover-inner-content { padding: 0 !important; }
+.rev-notif-overlay .ant-popover-inner { padding: 0 !important; overflow: hidden; }
+.rev-notif { width: 366px; max-width: calc(100vw - 32px); }
+.rev-notif-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--rev-s-5);
+  padding: 12px var(--rev-s-6); border-bottom: 1px solid var(--rev-line);
+}
+.rev-notif-head > div { display: flex; flex-direction: column; gap: 1px; }
+.rev-notif-list { max-height: 344px; overflow-y: auto; padding: 5px; }
+.rev-notif-item {
+  position: relative;
+  display: flex; align-items: flex-start; gap: 10px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: var(--rev-r-md);
+  background: transparent; text-align: left; cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.rev-notif-item:hover { background: var(--rev-n-50); }
+.rev-notif-mark {
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px;
+  border-radius: var(--rev-r-md); background: var(--rev-n-100); color: var(--rev-ink-3);
+}
+.rev-notif-item.is-unread .rev-notif-mark { background: var(--rev-primary-50); color: var(--rev-primary-600); }
+.rev-notif-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.rev-notif-msg { font-size: var(--rev-fs-md); font-weight: 550; color: var(--rev-ink-2); line-height: 1.4; }
+.rev-notif-item.is-unread .rev-notif-msg { font-weight: 620; color: var(--rev-ink); }
+.rev-notif-copy small { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); }
+.rev-notif-dot { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--rev-primary-600); margin-top: 8px; }
+.rev-notif-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--rev-s-4);
+  padding: 9px var(--rev-s-5); border-top: 1px solid var(--rev-line); background: var(--rev-surface-2);
+}
+.rev-link-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 0; background: transparent; cursor: pointer;
+  font-family: var(--rev-font); font-size: var(--rev-fs-sm); font-weight: 600;
+  color: var(--rev-ink-3); text-decoration: none; padding: 3px 5px; border-radius: var(--rev-r-sm);
+  transition: color var(--rev-t-fast) var(--rev-ease), background var(--rev-t-fast) var(--rev-ease);
+}
+.rev-link-btn:hover { color: var(--rev-ink); background: var(--rev-n-100); }
+.rev-link-btn.is-strong { color: var(--rev-primary-700); }
+.rev-link-btn.is-strong:hover { background: var(--rev-primary-50); }
+
+/* Menú de cuenta ---------------------------------------------------------- */
+.rev-account-menu { min-width: 216px; }
+.rev-account-menu .ant-menu-item-disabled { cursor: default !important; padding: 8px 12px !important; height: auto !important; }
+.rev-account-head { display: flex; flex-direction: column; gap: 1px; line-height: 1.35; }
+.rev-account-head strong { font-size: var(--rev-fs-md); font-weight: 640; color: var(--rev-ink); }
+.rev-account-head small { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); }
+.rev-account-action { display: inline-flex; align-items: center; gap: 7px; font-weight: 580; }
+
+/* ══════════════════════════════════ RESPONSIVO ═════════════════════════ */
+@media (max-width: 1023px) {
+  .rev-nav { transform: translateX(-100%); box-shadow: var(--rev-sh-xl); }
+  .rev-shell.is-mobile-open .rev-nav { transform: none; width: var(--rev-nav-w); }
+  .rev-work, .rev-shell.is-collapsed .rev-work { margin-left: 0; }
+  .rev-icon-btn.is-menu { display: grid; }
+  .rev-topbar { padding: 0 var(--rev-gutter); }
+  .rev-shell { --rev-gutter: 20px; }
+  .rev-canvas-inner { padding: var(--rev-s-6) var(--rev-gutter) var(--rev-s-9); }
+  .rev-context-label { display: none; }
+  .rev-context { padding-left: 4px; }
+}
 @media (max-width: 640px) {
-  .ant-layout-header.topbar {
-    height: auto !important;
-    min-height: 64px;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 10px 8px !important;
-  }
-
-  .topbar-left,
-  .topbar-right {
-    width: 100%;
-  }
-
-  .topbar-right {
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .main-content {
-    height: calc(100vh - 124px);
-  }
-
-  .content-inner {
-    padding: 12px 8px 20px;
-  }
-
-  .title-stack h1 {
-    font-size: 16px;
-  }
-
-  .notif-dropdown {
-    width: min(340px, calc(100vw - 32px));
-  }
-}
-
-@media (max-width: 480px) {
-  .ant-layout-header.topbar {
-    gap: 6px;
-    padding: 8px 6px !important;
-  }
-
-  .icon-button {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-  }
-
-  .user-menu {
-    height: 38px;
-  }
-
-  .title-stack .eyebrow {
-    font-size: 9px;
-  }
-
-  .title-stack h1 {
-    font-size: 15px;
-  }
-
-  .main-content {
-    height: calc(100vh - 116px);
-  }
+  .rev-topbar-title { font-size: var(--rev-fs-lg); }
+  .rev-context-select { min-width: 110px; }
+  .rev-shell { --rev-gutter: 16px; }
+  .rev-canvas-inner { padding: var(--rev-s-5) var(--rev-gutter) var(--rev-s-8); }
 }
 </style>

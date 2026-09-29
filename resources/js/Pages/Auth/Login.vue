@@ -63,6 +63,24 @@
             Continuar con Google
           </button>
 
+          <button type="button" @click="iniciarDnie()" class="btn-dnie" :disabled="processing || ['iniciando', 'esperandoConector', 'enCurso', 'completado'].includes(dnieEstado)">
+            <svg viewBox="0 0 24 24" class="g-icon" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2.5" y="5" width="19" height="14" rx="2"/>
+              <circle cx="8.5" cy="11" r="2"/>
+              <path d="M5.5 16.5c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 9.5h4.5M14 12.5h4.5M14 15.5h3"/>
+            </svg>
+            <span v-if="dnieEstado === 'completado'">Verificando…</span>
+            <span v-else-if="dnieEstado === 'iniciando' || dnieEstado === 'esperandoConector' || dnieEstado === 'enCurso'">Esperando el conector…</span>
+            <span v-else>Continuar con DNIe</span>
+          </button>
+
+          <p v-if="dnieMensaje" class="dnie-msg" :class="{ 'dnie-error': dnieEstado === 'error' }">{{ dnieMensaje }}</p>
+          <p v-if="dnieRequiereInstalacion" class="dnie-install">
+            <a :href="dnieUrlDescarga" target="_blank" rel="noopener">Descargar el conector de DNIe</a>
+            <span> e inténtelo de nuevo.</span>
+          </p>
+          <button v-if="dnieEstado === 'esperandoConector' || dnieEstado === 'enCurso'" type="button" class="dnie-cancel" @click="cancelarDnie()">Cancelar</button>
+
           <div class="divider"><span>o inicie sesión con correo</span></div>
 
           <form @submit.prevent="submit" class="login-form">
@@ -117,6 +135,7 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { useDniAuth } from '@/composables/useDniAuth';
 import { Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -139,6 +158,19 @@ const loginWithGoogle = () => {
   processing.value = true;
   window.location.href = route('google.redirect');
 };
+
+const {
+  estado: dnieEstado,
+  mensaje: dnieMensaje,
+  requiereInstalacion: dnieRequiereInstalacion,
+  urlDescarga: dnieUrlDescarga,
+  iniciar: iniciarDnie,
+  cancelar: cancelarDnie,
+} = useDniAuth({
+  authUrl: import.meta.env.VITE_DNIAUTH_URL,
+  clientId: import.meta.env.VITE_DNIAUTH_CLIENT_ID,
+  rutaCallback: '/auth/dnie/callback',
+});
 </script>
 
 <style scoped>
@@ -238,6 +270,23 @@ const loginWithGoogle = () => {
 .btn-google:active:not(:disabled) { transform: scale(.98); }
 .btn-google:disabled { opacity: .5; cursor: not-allowed; }
 .g-icon { width: 20px; height: 20px; }
+
+/* DNIe */
+.btn-dnie {
+  width: 100%; height: 46px; margin-top: .625rem;
+  border: 1px solid #e2e8f0; border-radius: 12px;
+  background: #fff; display: flex; align-items: center; justify-content: center; gap: .75rem;
+  font-size: .875rem; font-weight: 500; color: #334155;
+  cursor: pointer; transition: all .2s ease;
+}
+.btn-dnie:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,.05); transform: translateY(-1px); }
+.btn-dnie:active:not(:disabled) { transform: scale(.98); }
+.btn-dnie:disabled { opacity: .5; cursor: not-allowed; }
+.dnie-msg { margin: .75rem 0 0; font-size: .8125rem; color: #1e40af; text-align: center; }
+.dnie-error { color: #dc2626; }
+.dnie-install { margin: .5rem 0 0; font-size: .8125rem; color: #64748b; text-align: center; }
+.dnie-install a { color: #2563eb; font-weight: 600; }
+.dnie-cancel { background: none; border: none; padding: 0; margin: .5rem auto 0; display: block; font-size: .8125rem; color: #64748b; text-decoration: underline; cursor: pointer; }
 
 /* Divider */
 .divider { display: flex; align-items: center; margin: 1.5rem 0; }
@@ -370,6 +419,13 @@ const loginWithGoogle = () => {
   .status-alert { background: rgba(37,99,235,.12); border-left-color: #3b82f6; color: #93c5fd; }
   .btn-google { background: #1e293b; border-color: #334155; color: #e2e8f0; }
   .btn-google:hover:not(:disabled) { background: #334155; border-color: #475569; }
+  .btn-dnie { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+  .btn-dnie:hover:not(:disabled) { background: #334155; border-color: #475569; }
+  .dnie-msg { color: #93c5fd; }
+  .dnie-error { color: #f87171; }
+  .dnie-install { color: #94a3b8; }
+  .dnie-install a { color: #60a5fa; }
+  .dnie-cancel { color: #94a3b8; }
   .divider::before, .divider::after { background: #334155; }
   .divider span { color: #64748b; }
   .field-label { color: #cbd5e1; }

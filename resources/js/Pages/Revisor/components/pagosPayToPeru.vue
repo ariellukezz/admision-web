@@ -61,6 +61,7 @@ const notificacion = (type, titulo, mensaje) => { notification[type]({ message: 
 
 
 <style scoped>
-.rojo{ color: #525252; background: white;}
-.verde { background: #e3e3e3;}
+/* Estado del comprobante por color de fila: verificado vs. pendiente. */
+.rojo  { color: var(--rev-ink-2); background: var(--rev-surface); }
+.verde { color: var(--rev-success-ink); background: var(--rev-success-bg); }
 </style>

@@ -82,7 +82,7 @@
             :key="index"
             class="ultimo-item"
           >
-            <a-avatar :size="24" style="background-color: #1890ff">
+            <a-avatar :size="24" style="background-color: var(--rev-primary-600); font-size: 11px; font-weight: 600;">
               {{ persona.nombre?.charAt(0) || '?' }}
             </a-avatar>
             <span class="nombre">{{ persona.nombre }} {{ persona.apellido }}</span>

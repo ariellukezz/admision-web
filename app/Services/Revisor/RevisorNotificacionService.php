@@ -63,13 +63,30 @@ class RevisorNotificacionService
         Auth::user()->unreadNotifications->markAsRead();
     }
 
-    public function solicitudesRevision(string $busqueda = '')
+    public function solicitudesRevision(string $busqueda = '', string $filtro = 'pendientes', ?string $desde = null, ?string $hasta = null, ?int $modalidadId = null)
     {
         $idProceso = Auth::user()->id_proceso;
 
         $query = RevisionSolicitud::with('postulante:id,nro_doc,primer_apellido,segundo_apellido,nombres')
-            ->whereNull('finalizada_at')
             ->orderBy('solicitada_at', 'desc');
+
+        if ($filtro === 'atendidas') {
+            $query->whereNotNull('finalizada_at');
+        } elseif ($filtro === 'todas') {
+            // sin filtro de estado
+        } else {
+            $query->whereNull('finalizada_at');
+        }
+
+        if ($desde) {
+            $query->whereDate('solicitada_at', '>=', $desde);
+        }
+        if ($hasta) {
+            $query->whereDate('solicitada_at', '<=', $hasta);
+        }
+        if ($modalidadId) {
+            $query->where('id_modalidad', $modalidadId);
+        }
 
         if ($busqueda) {
             $query->whereHas('postulante', function ($q) use ($busqueda) {
@@ -80,24 +97,31 @@ class RevisorNotificacionService
             });
         }
 
-        $tiposEnRequisitos = DB::table('requisito_tipo_documento')
-            ->pluck('id_tipo_documento')
-            ->unique();
-
-        return $query->paginate(20)->through(function ($s) use ($idProceso, $tiposEnRequisitos) {
+        return $query->paginate(20)->through(function ($s) use ($idProceso) {
             $p = $s->postulante;
 
-            $documentosSubidos = Documento::where('id_postulante', $p->id)
+            // Tipos válidos solo para la modalidad de esta solicitud,
+            // no globales. Así cada fila muestra sus propios documentos.
+            $reqIds = DB::table('requisito_modalidad')
+                ->where('id_modalidad', $s->id_modalidad)
+                ->pluck('id_requisito_documento');
+
+            $tiposSolicitud = DB::table('requisito_tipo_documento')
+                ->whereIn('id_requisito_documento', $reqIds)
+                ->pluck('id_tipo_documento')
+                ->unique();
+
+            $documentosSubidos = $tiposSolicitud->isEmpty() ? 0 : Documento::where('id_postulante', $p->id)
                 ->where('estado', 1)
                 ->where('is_deleted', false)
-                ->whereIn('id_tipo_documento', $tiposEnRequisitos)
+                ->whereIn('id_tipo_documento', $tiposSolicitud)
                 ->count();
 
-            $documentosVerificados = Documento::where('id_postulante', $p->id)
+            $documentosVerificados = $tiposSolicitud->isEmpty() ? 0 : Documento::where('id_postulante', $p->id)
                 ->where('estado', 1)
                 ->where('is_deleted', false)
-                ->whereIn('id_tipo_documento', $tiposEnRequisitos)
-                ->where('verificado', 1)
+                ->whereIn('id_tipo_documento', $tiposSolicitud)
+                ->where('valido', 1)
                 ->count();
 
             $modalidad = DB::table('modalidad')

@@ -1,216 +1,179 @@
+<!--
+  ============================================================================
+  Mi actividad — el parte personal del revisor.
+  ----------------------------------------------------------------------------
+  Se lee de dentro hacia fuera: primero lo que YO he hecho, después lo que
+  tengo por delante, luego mi traza en el tiempo y, sólo al final, la
+  comparación con el equipo. El ranking va abajo a propósito: informa, no debe
+  presidir la pantalla de trabajo de nadie.
+  ============================================================================
+-->
 <template>
-<Head title="Mi Actividad" />
-<AuthenticatedLayout pagina="Mi Actividad">
+  <Head title="Mi actividad" />
+  <AuthenticatedLayout pagina="Mi actividad">
+    <div class="act">
 
-<div class="dashboard-container">
+      <RevPageHeader
+        title="Mi actividad"
+        description="Resumen de tu trabajo de verificación en el proceso activo."
+      >
+        <template #actions>
+          <RevButton variant="secondary" icon="refresh" :loading="loading" @click="fetchAll">Actualizar</RevButton>
+        </template>
+      </RevPageHeader>
 
-  <!-- KPI CARDS PERSONALES -->
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #dbeafe;">
-        <FileProtectOutlined style="color: #3b82f6;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Documentos verificados</span>
-        <span class="kpi-value">{{ resumen.docs_verificados }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.docs_verificados_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #dcfce7;">
-        <DollarOutlined style="color: #22c55e;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Comprobantes verificados</span>
-        <span class="kpi-value">{{ resumen.comp_verificados }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.comp_verificados_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #fef3c7;">
-        <SafetyOutlined style="color: #f59e0b;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Controles biométricos</span>
-        <span class="kpi-value">{{ resumen.biometricos }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.biometricos_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
-
-    <div class="kpi-card">
-      <div class="kpi-icon" style="background: #f3e8ff;">
-        <SolutionOutlined style="color: #a855f7;" />
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-label">Inscripciones procesadas</span>
-        <span class="kpi-value">{{ resumen.inscripciones }}</span>
-        <span class="kpi-sub">
-          <ArrowUpOutlined style="color: #22c55e; font-size: 11px;" />
-          <span style="color: #22c55e; font-weight: 600;">{{ resumen.inscripciones_hoy }}</span>
-          <span style="color: #94a3b8;">hoy</span>
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- PENDIENTES GLOBALES -->
-  <div class="pendientes-row" v-if="resumen.total_docs_pendientes > 0 || resumen.total_comp_pendientes > 0">
-    <div class="pendiente-card">
-      <div class="pendiente-info">
-        <span class="pendiente-label">Docs. pendientes (global)</span>
-        <span class="pendiente-value">{{ resumen.total_docs_pendientes }}</span>
-      </div>
-      <a-progress :percent="docsPercent" :show-info="false" stroke-color="#3b82f6" size="small" />
-    </div>
-    <div class="pendiente-card">
-      <div class="pendiente-info">
-        <span class="pendiente-label">Comprob. pendientes (global)</span>
-        <span class="pendiente-value">{{ resumen.total_comp_pendientes }}</span>
-      </div>
-      <a-progress :percent="compsPercent" :show-info="false" stroke-color="#22c55e" size="small" />
-    </div>
-  </div>
-
-  <!-- EMPTY STATE -->
-  <div class="empty-card" v-if="resumen.docs_verificados === 0 && resumen.comp_verificados === 0 && resumen.biometricos === 0 && resumen.inscripciones === 0">
-    <div class="empty-icon"><InboxOutlined style="font-size: 48px; color: #cbd5e1;" /></div>
-    <h3>Sin actividad registrada</h3>
-    <p>Tus estadísticas aparecerán cuando comiences a verificar documentos, comprobantes o realizar controles biométricos.</p>
-  </div>
-
-  <!-- ACCIONES RECIENTES + DISTRIBUCIÓN -->
-  <div class="charts-row" v-if="acciones.length > 0 || distribucion.some(d => d.cant > 0)">
-    <div class="chart-card chart-card-lg">
-      <div class="chart-header">
-        <h3>Acciones recientes</h3>
-      </div>
-      <div class="acciones-body">
-        <div v-for="(acc, idx) in acciones" :key="idx" class="accion-item">
-          <div class="accion-tipo">
-            <a-tag :color="tipoColor(acc.tipo)" style="margin: 0;">{{ acc.tipo }}</a-tag>
-          </div>
-          <div class="accion-datos">
-            <span class="accion-nombre">{{ acc.nombres }} {{ acc.paterno }} {{ acc.materno }}</span>
-            <span class="accion-detalle">{{ acc.detalle }}</span>
-          </div>
-          <div class="accion-fecha">
-            {{ formatFecha(acc.fecha) }}
-          </div>
+      <!-- ── Lo que he verificado ───────────────────────────────────────── -->
+      <section class="act-section">
+        <div class="rev-divider-labeled">Verificado por mí</div>
+        <div class="act-grid-4">
+          <RevStat label="Documentos" :value="resumen.docs_verificados" :delta="resumen.docs_verificados_hoy" hint="hoy" icon="file-check" :loading="loading" />
+          <RevStat label="Comprobantes" :value="resumen.comp_verificados" :delta="resumen.comp_verificados_hoy" hint="hoy" icon="credit-card" :loading="loading" />
+          <RevStat label="Controles biométricos" :value="resumen.biometricos" :delta="resumen.biometricos_hoy" hint="hoy" icon="fingerprint" :loading="loading" />
+          <RevStat label="Inscripciones procesadas" :value="resumen.inscripciones" :delta="resumen.inscripciones_hoy" hint="hoy" icon="user" :loading="loading" />
         </div>
-        <div v-if="acciones.length === 0" class="chart-empty">Sin acciones recientes</div>
-      </div>
-    </div>
+      </section>
 
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Distribución de mi actividad</h3></div>
-      <div class="chart-body">
-        <Doughnut v-if="distribucion.some(d => d.cant > 0)" :data="distribucionData" :options="doughnutOptions" />
-        <div v-else class="chart-empty">Sin datos de actividad</div>
-      </div>
-    </div>
-  </div>
+      <!-- ── Sin actividad ──────────────────────────────────────────────── -->
+      <RevPanel v-if="sinActividad && !loading" flush>
+        <RevEmptyState
+          icon="activity"
+          title="Aún sin actividad registrada"
+          description="Tus estadísticas aparecerán en cuanto empieces a verificar documentos, comprobantes o a realizar controles biométricos."
+        >
+          <template #actions>
+            <RevButton variant="primary" icon="inbox" href="/revisor/solicitudes-revision">Ir a solicitudes</RevButton>
+          </template>
+        </RevEmptyState>
+      </RevPanel>
 
-  <!-- TIMELINE + RANKING -->
-  <div class="charts-row" v-if="timeline.length > 0 || ranking.length > 0">
-    <div class="chart-card chart-card-lg">
-      <div class="chart-header"><h3>Mi actividad últimos 30 días</h3></div>
-      <div class="chart-body">
-        <Line v-if="timeline.length > 0" :data="timelineData" :options="timelineOptions" />
-        <div v-else class="chart-empty">Sin actividad en los últimos 30 días</div>
-      </div>
-    </div>
+      <template v-else>
+        <!-- ── Cola de trabajo ──────────────────────────────────────────── -->
+        <section class="act-section">
+          <div class="rev-divider-labeled">Cola de trabajo</div>
+          <div class="act-grid-2">
+            <RevPanel title="Documentos por verificar" :count="pendientes.docs_pendientes?.length || 0" flush>
+              <template #actions>
+                <span class="rev-meta">{{ resumen.total_docs_pendientes }} en total</span>
+              </template>
+              <ul v-if="pendientes.docs_pendientes?.length" class="act-queue">
+                <li v-for="(doc, i) in pendientes.docs_pendientes" :key="'d' + i">
+                  <span class="act-queue-mark"><RevIcon name="file" size="sm" /></span>
+                  <div class="act-queue-copy">
+                    <span class="act-queue-name">{{ doc.nombres }} {{ doc.paterno }}</span>
+                    <span class="act-queue-detail">{{ doc.tipo_doc }} · {{ doc.programa }}</span>
+                  </div>
+                  <span class="act-queue-dni rev-mono">{{ doc.dni }}</span>
+                </li>
+              </ul>
+              <RevEmptyState v-else compact variant="success" title="Nada pendiente" description="No hay documentos esperando tu verificación." />
+            </RevPanel>
 
-    <div class="chart-card chart-card-md">
-      <div class="chart-header"><h3>Ranking de revisores</h3></div>
-      <div class="ranking-body">
-        <div v-for="(rev, idx) in ranking" :key="rev.id" class="ranking-item" :class="{ 'ranking-yo': rev.es_yo }">
-          <div class="ranking-pos">
-            <span v-if="idx < 3" class="ranking-medal" :style="{ color: ['#f59e0b', '#94a3b8', '#cd7f32'][idx] }">{{ idx + 1 }}</span>
-            <span v-else class="ranking-num">{{ idx + 1 }}</span>
+            <RevPanel title="Comprobantes por verificar" :count="pendientes.comps_pendientes?.length || 0" flush>
+              <template #actions>
+                <span class="rev-meta">{{ resumen.total_comp_pendientes }} en total</span>
+              </template>
+              <ul v-if="pendientes.comps_pendientes?.length" class="act-queue">
+                <li v-for="(comp, i) in pendientes.comps_pendientes" :key="'c' + i">
+                  <span class="act-queue-mark"><RevIcon name="credit-card" size="sm" /></span>
+                  <div class="act-queue-copy">
+                    <span class="act-queue-name">{{ comp.nombres }} {{ comp.paterno }}</span>
+                    <span class="act-queue-detail">Op. {{ comp.nro_operacion }} · S/ {{ comp.monto }}</span>
+                  </div>
+                  <span class="act-queue-dni rev-mono">{{ comp.dni }}</span>
+                </li>
+              </ul>
+              <RevEmptyState v-else compact variant="success" title="Nada pendiente" description="No hay comprobantes esperando tu verificación." />
+            </RevPanel>
           </div>
-          <div class="ranking-info">
-            <span class="ranking-nombre">{{ rev.nombre }}</span>
-            <span class="ranking-detalle">{{ rev.docs }} docs · {{ rev.comps }} comp · {{ rev.bios }} bio · {{ rev.inscs }} insc</span>
+        </section>
+
+        <!-- ── Traza ───────────────────────────────────────────────────── -->
+        <section class="act-section">
+          <div class="rev-divider-labeled">Traza y últimas acciones</div>
+
+          <div class="act-grid-2-1">
+            <RevPanel title="Mi actividad" description="Últimos 30 días">
+              <div class="act-chart" style="height: 250px">
+                <Line v-if="timeline.length" :data="timelineData" :options="lineOptions" />
+                <RevEmptyState v-else compact icon="chart" title="Sin actividad" description="No hay registros en los últimos 30 días." />
+              </div>
+            </RevPanel>
+
+            <RevPanel title="Reparto de mi trabajo" description="Por tipo de verificación">
+              <div v-if="distribucionRows.length" class="act-split">
+                <div v-for="(d, i) in distribucionRows" :key="d.tipo" class="act-split-row">
+                  <span class="act-split-label">
+                    <i class="act-split-dot" :style="{ background: serie(i) }" />{{ d.tipo }}
+                  </span>
+                  <RevMeter :value="d.cant" :max="distribucionMax" tone="accent" size="sm" class="act-split-meter" />
+                  <span class="act-split-num rev-num">{{ d.cant }}</span>
+                  <span class="act-split-pct rev-num">{{ pct(d.cant) }}%</span>
+                </div>
+              </div>
+              <RevEmptyState v-else compact icon="chart" title="Sin datos de actividad" />
+            </RevPanel>
           </div>
-          <div class="ranking-total">
-            <span class="ranking-total-num">{{ rev.total }}</span>
-          </div>
-        </div>
-        <div v-if="ranking.length === 0" class="chart-empty">Sin datos de ranking</div>
-      </div>
+
+          <RevPanel title="Acciones recientes" flush class="act-recent">
+            <RevTimeline v-if="accionesTimeline.length" :items="accionesTimeline" class="act-timeline" />
+            <RevEmptyState v-else compact title="Sin acciones recientes" description="Tus últimas verificaciones aparecerán aquí." />
+          </RevPanel>
+        </section>
+
+        <!-- ── Equipo ──────────────────────────────────────────────────── -->
+        <section v-if="ranking.length" class="act-section">
+          <div class="rev-divider-labeled">Equipo de revisión</div>
+          <RevPanel title="Ranking de revisores" description="Total de verificaciones en el proceso activo" flush>
+            <ul class="act-rank">
+              <li v-for="(rev, i) in ranking" :key="rev.id" :class="{ 'is-me': rev.es_yo }">
+                <span class="act-rank-pos rev-num" :class="{ 'is-top': i < 3 }">{{ i + 1 }}</span>
+                <div class="act-rank-copy">
+                  <span class="act-rank-name">
+                    {{ rev.nombre }}
+                    <RevBadge v-if="rev.es_yo" tone="accent" size="sm">Tú</RevBadge>
+                  </span>
+                  <span class="act-rank-detail">
+                    <span class="rev-num">{{ rev.docs }}</span> docs ·
+                    <span class="rev-num">{{ rev.comps }}</span> comp ·
+                    <span class="rev-num">{{ rev.bios }}</span> bio ·
+                    <span class="rev-num">{{ rev.inscs }}</span> insc
+                  </span>
+                </div>
+                <RevMeter :value="rev.total" :max="rankingMax" :tone="rev.es_yo ? 'accent' : 'neutral'" size="sm" class="act-rank-meter" />
+                <span class="act-rank-total rev-num">{{ rev.total }}</span>
+              </li>
+            </ul>
+          </RevPanel>
+        </section>
+      </template>
     </div>
-  </div>
-
-  <!-- PENDIENTES POR VERIFICAR -->
-  <div class="charts-row" v-if="pendientes.docs_pendientes?.length > 0 || pendientes.comps_pendientes?.length > 0">
-    <div class="chart-card chart-card-md">
-      <div class="chart-header">
-        <h3>📄 Documentos por verificar</h3>
-      </div>
-      <div class="pendientes-body">
-        <div v-for="(doc, idx) in pendientes.docs_pendientes" :key="'d'+idx" class="pendiente-item">
-          <div class="pendiente-datos">
-            <span class="pendiente-nombre">{{ doc.nombres }} {{ doc.paterno }}</span>
-            <span class="pendiente-detalle">{{ doc.tipo_doc }} · {{ doc.programa }}</span>
-          </div>
-          <span class="pendiente-dni">{{ doc.dni }}</span>
-        </div>
-        <div v-if="pendientes.docs_pendientes?.length === 0" class="chart-empty">Sin documentos pendientes</div>
-      </div>
-    </div>
-
-    <div class="chart-card chart-card-md">
-      <div class="chart-header">
-        <h3>💰 Comprobantes por verificar</h3>
-      </div>
-      <div class="pendientes-body">
-        <div v-for="(comp, idx) in pendientes.comps_pendientes" :key="'c'+idx" class="pendiente-item">
-          <div class="pendiente-datos">
-            <span class="pendiente-nombre">{{ comp.nombres }} {{ comp.paterno }}</span>
-            <span class="pendiente-detalle">Op. {{ comp.nro_operacion }} · S/ {{ comp.monto }}</span>
-          </div>
-          <span class="pendiente-dni">{{ comp.dni }}</span>
-        </div>
-        <div v-if="pendientes.comps_pendientes?.length === 0" class="chart-empty">Sin comprobantes pendientes</div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-</AuthenticatedLayout>
+  </AuthenticatedLayout>
 </template>
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/LayoutDocente.vue'
 import { Head } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
-import {
-  FileProtectOutlined, DollarOutlined, SafetyOutlined, SolutionOutlined,
-  ArrowUpOutlined, InboxOutlined
-} from '@ant-design/icons-vue'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale, Title, LinearScale, PointElement, LineElement, Filler } from 'chart.js'
-import { Doughnut, Line } from 'vue-chartjs'
 import axios from 'axios'
+import {
+  Chart as ChartJS, ArcElement, Tooltip, Legend, BarElement, CategoryScale,
+  Title, LinearScale, PointElement, LineElement, Filler,
+} from 'chart.js'
+import { Line } from 'vue-chartjs'
+import RevPageHeader from '@/Components/Revisor/RevPageHeader.vue'
+import RevPanel from '@/Components/Revisor/RevPanel.vue'
+import RevStat from '@/Components/Revisor/RevStat.vue'
+import RevMeter from '@/Components/Revisor/RevMeter.vue'
+import RevBadge from '@/Components/Revisor/RevBadge.vue'
+import RevButton from '@/Components/Revisor/RevButton.vue'
+import RevIcon from '@/Components/Revisor/RevIcon.vue'
+import RevTimeline from '@/Components/Revisor/RevTimeline.vue'
+import RevEmptyState from '@/Components/Revisor/RevEmptyState.vue'
+import { REV_SERIES, revLine, revLineOptions } from '@/Components/Revisor/charts.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ArcElement, Tooltip, Legend, PointElement, LineElement, Filler)
 
-const COLORS = { blue: '#3b82f6', green: '#22c55e', amber: '#f59e0b', purple: '#a855f7', red: '#ef4444' }
-
+const loading = ref(true)
 const resumen = ref({
   docs_verificados: 0, docs_verificados_hoy: 0,
   comp_verificados: 0, comp_verificados_hoy: 0,
@@ -224,77 +187,80 @@ const distribucion = ref([])
 const ranking = ref([])
 const pendientes = ref({ docs_pendientes: [], comps_pendientes: [] })
 
-const docsPercent = computed(() => {
-  const total = resumen.value.docs_verificados + resumen.value.total_docs_pendientes
-  return total > 0 ? Math.round((resumen.value.docs_verificados / total) * 100) : 0
-})
+const sinActividad = computed(() =>
+  resumen.value.docs_verificados === 0 && resumen.value.comp_verificados === 0 &&
+  resumen.value.biometricos === 0 && resumen.value.inscripciones === 0
+)
 
-const compsPercent = computed(() => {
-  const total = resumen.value.comp_verificados + resumen.value.total_comp_pendientes
-  return total > 0 ? Math.round((resumen.value.comp_verificados / total) * 100) : 0
-})
+/* ── Reparto del trabajo: barras en lugar de anillo ──────────────────────
+   Cuatro categorías en un anillo obligan a comparar arcos; en barras
+   alineadas a un mismo origen la comparación es inmediata y honesta. */
+const distribucionRows = computed(() => (distribucion.value || []).filter((d) => d.cant > 0))
+const distribucionTotal = computed(() => distribucionRows.value.reduce((s, d) => s + Number(d.cant || 0), 0))
+const distribucionMax = computed(() => Math.max(...distribucionRows.value.map((d) => Number(d.cant || 0)), 1))
+const pct = (v) => (distribucionTotal.value > 0 ? Math.round((Number(v) / distribucionTotal.value) * 100) : 0)
+const serie = (i) => REV_SERIES[i % REV_SERIES.length]
 
-const tipoColor = (tipo) => {
-  const map = { 'Documento': 'blue', 'Comprobante': 'green', 'Biométrico': 'orange', 'Inscripción': 'purple' }
-  return map[tipo] || 'default'
+const rankingMax = computed(() => Math.max(...ranking.value.map((r) => Number(r.total || 0)), 1))
+
+/* ── Línea temporal de tres series ─────────────────────────────────────── */
+const timelineData = computed(() => ({
+  labels: timeline.value.map((d) => (d.fecha || '').substring(5)),
+  datasets: [
+    revLine(timeline.value.map((d) => d.docs), REV_SERIES[0], 'Documentos'),
+    revLine(timeline.value.map((d) => d.comps), REV_SERIES[1], 'Comprobantes'),
+    revLine(timeline.value.map((d) => d.bios), REV_SERIES[2], 'Biométrico'),
+  ],
+}))
+const lineOptions = {
+  ...revLineOptions(),
+  plugins: {
+    ...revLineOptions().plugins,
+    legend: {
+      position: 'bottom', align: 'start',
+      labels: {
+        boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: 'circle',
+        padding: 14, color: '#6B7787', font: { family: '"Inter", sans-serif', size: 11, weight: '500' },
+      },
+    },
+  },
+}
+
+/* ── Acciones recientes como línea de tiempo con tono semántico ────────── */
+const tonoPorTipo = {
+  'Documento': 'info',
+  'Comprobante': 'success',
+  'Biométrico': 'warning',
+  'Inscripción': 'neutral',
+}
+const iconoPorTipo = {
+  'Documento': 'file-check',
+  'Comprobante': 'credit-card',
+  'Biométrico': 'fingerprint',
+  'Inscripción': 'user',
 }
 
 const formatFecha = (fecha) => {
   if (!fecha) return ''
   const d = new Date(fecha)
-  const hoy = new Date()
-  const diff = hoy - d
+  const diff = new Date() - d
   if (diff < 3600000) return `Hace ${Math.max(1, Math.floor(diff / 60000))} min`
   if (diff < 86400000) return `Hace ${Math.floor(diff / 3600000)} h`
   return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })
 }
 
-const distribucionData = computed(() => ({
-  labels: distribucion.value.map(d => d.tipo),
-  datasets: [{
-    data: distribucion.value.map(d => d.cant),
-    backgroundColor: [COLORS.blue, COLORS.green, COLORS.amber, COLORS.purple],
-    borderWidth: 0,
-  }]
-}))
+const accionesTimeline = computed(() => (acciones.value || []).map((a, i) => ({
+  id: i,
+  tone: tonoPorTipo[a.tipo] || 'neutral',
+  icon: iconoPorTipo[a.tipo] || 'check',
+  title: [a.nombres, a.paterno, a.materno].filter(Boolean).join(' '),
+  detail: `${a.tipo} — ${a.detalle}`,
+  time: formatFecha(a.fecha),
+})))
 
-const timelineData = computed(() => ({
-  labels: timeline.value.map(d => d.fecha?.substring(5) || ''),
-  datasets: [
-    {
-      label: 'Documentos',
-      data: timeline.value.map(d => d.docs),
-      borderColor: COLORS.blue,
-      backgroundColor: 'rgba(59,130,246,0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-    },
-    {
-      label: 'Comprobantes',
-      data: timeline.value.map(d => d.comps),
-      borderColor: COLORS.green,
-      backgroundColor: 'rgba(34,197,94,0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-    },
-    {
-      label: 'Biométrico',
-      data: timeline.value.map(d => d.bios),
-      borderColor: COLORS.amber,
-      backgroundColor: 'rgba(245,158,11,0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 2,
-    },
-  ]
-}))
-
-const doughnutOptions = { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } } }
-const timelineOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 } } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
-
+/* ── Carga ──────────────────────────────────────────────────────────────── */
 const fetchAll = async () => {
+  loading.value = true
   try {
     const [r1, r2, r3, r4, r5, r6] = await Promise.all([
       axios.get('/revisor/mi-actividad/resumen').catch(() => null),
@@ -310,75 +276,93 @@ const fetchAll = async () => {
     if (r4?.data?.success) distribucion.value = r4.data.datos
     if (r5?.data?.success) ranking.value = r5.data.datos
     if (r6?.data?.success) pendientes.value = r6.data.datos
-  } catch (e) { console.error('Error cargando mi actividad:', e) }
+  } catch (e) {
+    console.error('Error cargando mi actividad:', e)
+  } finally {
+    loading.value = false
+  }
 }
 
-onMounted(() => { fetchAll() })
+onMounted(fetchAll)
 </script>
 
 <style scoped>
-.dashboard-container { padding: 16px; }
+.act { display: flex; flex-direction: column; gap: var(--rev-s-8); }
+.act-section { display: flex; flex-direction: column; gap: var(--rev-s-5); }
+.act-grid-4   { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--rev-s-5); }
+.act-grid-2   { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--rev-s-5); }
+.act-grid-2-1 { display: grid; grid-template-columns: 1.62fr 1fr; gap: var(--rev-s-5); }
+.act-chart { position: relative; width: 100%; }
 
-.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
-.kpi-card { background: white; border-radius: 14px; padding: 18px 20px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s; }
-.kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
-.kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-.kpi-info { display: flex; flex-direction: column; width: 100%; }
-.kpi-label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-.kpi-value { font-size: 26px; font-weight: 700; color: #1e293b; line-height: 1.2; }
-.kpi-sub { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+/* Cola de trabajo --------------------------------------------------------- */
+.act-queue { list-style: none; margin: 0; padding: 0; max-height: 262px; overflow-y: auto; }
+.act-queue li {
+  display: flex; align-items: center; gap: var(--rev-s-5);
+  padding: 8px var(--rev-s-6);
+  border-bottom: 1px solid var(--rev-line-soft);
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.act-queue li:hover { background: var(--rev-n-25); }
+.act-queue li:last-child { border-bottom: 0; }
+.act-queue-mark {
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px;
+  border-radius: var(--rev-r-md); background: var(--rev-n-100); color: var(--rev-ink-3);
+}
+.act-queue-copy { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; line-height: 1.3; }
+.act-queue-name {
+  font-size: var(--rev-fs-md); font-weight: 600; color: var(--rev-ink);
+  text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.act-queue-detail { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.act-queue-dni { font-size: var(--rev-fs-sm); color: var(--rev-ink-3); flex: none; }
 
-.pendientes-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.pendiente-card { background: white; border-radius: 14px; padding: 16px 20px; border: 1px solid #f1f5f9; }
-.pendiente-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.pendiente-label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-.pendiente-value { font-size: 22px; font-weight: 700; color: #1e293b; }
+/* Reparto ----------------------------------------------------------------- */
+.act-split { display: flex; flex-direction: column; gap: var(--rev-s-5); }
+.act-split-row { display: grid; grid-template-columns: 1fr 74px 34px 34px; align-items: center; gap: var(--rev-s-4); }
+.act-split-label { display: inline-flex; align-items: center; gap: 7px; font-size: var(--rev-fs-md); color: var(--rev-ink-2); min-width: 0; }
+.act-split-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.act-split-num { font-size: var(--rev-fs-md); font-weight: 680; color: var(--rev-ink); text-align: right; }
+.act-split-pct { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); text-align: right; }
 
-.empty-card { background: white; border-radius: 14px; padding: 40px 20px; border: 1px solid #f1f5f9; text-align: center; margin-bottom: 14px; }
-.empty-card h3 { color: #64748b; font-size: 16px; font-weight: 600; margin: 14px 0 6px; }
-.empty-card p { color: #94a3b8; font-size: 13px; }
+/* Acciones recientes ------------------------------------------------------ */
+.act-recent :deep(.rev-panel-body) { padding: var(--rev-s-6); }
+.act-timeline { max-height: 300px; overflow-y: auto; padding-right: 4px; }
 
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.chart-card { background: white; border-radius: 14px; border: 1px solid #f1f5f9; overflow: hidden; }
-.chart-header { padding: 14px 18px 0; }
-.chart-header h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin: 0; }
-.chart-body { padding: 10px 14px 14px; height: 270px; }
-.chart-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 13px; }
+/* Ranking ----------------------------------------------------------------- */
+.act-rank { list-style: none; margin: 0; padding: 0; }
+.act-rank li {
+  display: grid; grid-template-columns: 30px 1fr 110px 48px;
+  align-items: center; gap: var(--rev-s-5);
+  padding: 9px var(--rev-s-6);
+  border-bottom: 1px solid var(--rev-line-soft);
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.act-rank li:last-child { border-bottom: 0; }
+.act-rank li:hover { background: var(--rev-n-25); }
+.act-rank li.is-me { background: var(--rev-primary-50); box-shadow: inset 2px 0 0 var(--rev-primary-600); }
+.act-rank-pos {
+  display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: var(--rev-r-md);
+  font-size: var(--rev-fs-sm); font-weight: 680;
+  background: var(--rev-n-100); color: var(--rev-ink-3);
+}
+.act-rank-pos.is-top { background: var(--rev-primary-600); color: #fff; }
+.act-rank-copy { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+.act-rank-name {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--rev-fs-md); font-weight: 600; color: var(--rev-ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.act-rank-detail { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); }
+.act-rank-total { font-size: var(--rev-fs-lg); font-weight: 680; color: var(--rev-ink); text-align: right; }
 
-/* Acciones recientes */
-.acciones-body { padding: 8px 14px 14px; max-height: 320px; overflow-y: auto; }
-.accion-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
-.accion-item:last-child { border-bottom: none; }
-.accion-datos { flex: 1; display: flex; flex-direction: column; }
-.accion-nombre { font-size: 13px; font-weight: 600; color: #1e293b; }
-.accion-detalle { font-size: 11px; color: #94a3b8; }
-.accion-fecha { font-size: 11px; color: #94a3b8; white-space: nowrap; }
-
-/* Ranking */
-.ranking-body { padding: 8px 14px 14px; max-height: 320px; overflow-y: auto; }
-.ranking-item { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 8px; transition: background 0.2s; }
-.ranking-item:hover { background: #f8fafc; }
-.ranking-yo { background: #eff6ff; border: 1px solid #bfdbfe; }
-.ranking-pos { width: 28px; text-align: center; }
-.ranking-medal { font-size: 18px; font-weight: 800; }
-.ranking-num { font-size: 13px; font-weight: 600; color: #94a3b8; }
-.ranking-info { flex: 1; display: flex; flex-direction: column; }
-.ranking-nombre { font-size: 13px; font-weight: 600; color: #1e293b; }
-.ranking-detalle { font-size: 11px; color: #94a3b8; }
-.ranking-total { min-width: 40px; text-align: right; }
-.ranking-total-num { font-size: 18px; font-weight: 700; color: #1e293b; }
-
-/* Pendientes por verificar */
-.pendientes-body { padding: 8px 14px 14px; max-height: 280px; overflow-y: auto; }
-.pendiente-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f8fafc; }
-.pendiente-item:last-child { border-bottom: none; }
-.pendiente-datos { display: flex; flex-direction: column; }
-.pendiente-nombre { font-size: 13px; font-weight: 600; color: #1e293b; }
-.pendiente-detalle { font-size: 11px; color: #94a3b8; }
-.pendiente-dni { font-size: 12px; color: #64748b; font-weight: 500; font-family: monospace; }
-
-@media (max-width: 1024px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .charts-row, .pendientes-row { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .kpi-row { grid-template-columns: 1fr; } }
-
-:deep(.ant-progress-bg) { border-radius: 8px !important; }
+@media (max-width: 1280px) {
+  .act-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .act-grid-2-1 { grid-template-columns: 1fr; }
+}
+@media (max-width: 820px) {
+  .act-grid-4, .act-grid-2 { grid-template-columns: 1fr; }
+  .act-rank li { grid-template-columns: 26px 1fr 44px; }
+  .act-rank-meter { display: none; }
+}
 </style>

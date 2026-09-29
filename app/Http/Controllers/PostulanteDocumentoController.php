@@ -45,6 +45,18 @@ class PostulanteDocumentoController extends Controller
             ->first();
         $idProgramaPostulante = $inscripcion?->id_programa;
 
+        // Modalidades de preinscripción = misma fuente que preinscripción pública:
+        // SELECT DISTINCT id_modalidad FROM vacantes WHERE id_proceso = ?
+        // (ver ProgramaProcesoController::getSelectModalidadesProceso).
+        // Se usa UNION con las modalidades de requisitos para no romper
+        // revisiones existentes mientras se configura la data.
+        $modalidadesVacantes = $idProceso
+            ? DB::table('vacantes')
+                ->where('id_proceso', $idProceso)
+                ->distinct()
+                ->pluck('id_modalidad')
+            : collect();
+
         $requisitos = RequisitoDocumento::with([
             'modalidades:id,nombre,codigo',
             'programas:id,nombre,nombre_corto',
@@ -70,8 +82,11 @@ class PostulanteDocumentoController extends Controller
             ->get()
             ->groupBy('id_tipo_documento');
 
-        // Calcular modalidadIds antes de usarlos
-        $modalidadIds = $requisitos->pluck('modalidades')->flatten()->pluck('id')->unique()->values();
+        // UNION: vacantes (preinscripción) + requisitos (compatibilidad).
+        // Así Documentos muestra las mismas modalidades que preinscripción
+        // y no se rompen las revisiones ya solicitadas con otra modalidad.
+        $modalidadesRequisitos = $requisitos->pluck('modalidades')->flatten()->pluck('id')->unique();
+        $modalidadIds = $modalidadesVacantes->merge($modalidadesRequisitos)->unique()->values();
 
         // Modalidades con revisión pendiente (para bloquear edición per-modalidad)
         $modalidadesConRevisionPendiente = RevisionSolicitud::where('id_postulante', $postulante->id)
@@ -528,6 +543,22 @@ class PostulanteDocumentoController extends Controller
 
         if (!$idModalidad) {
             return response()->json(['success' => false, 'mensaje' => 'Debes seleccionar una modalidad'], 400);
+        }
+
+        // Compatibilidad: aceptar modalidad de vacantes (preinscripción) o de requisitos.
+        // El bloqueo estricto rompía revisiones existentes (ej. proceso 35 tiene
+        // vacantes 7,8 pero requisitos solo en 1,4).
+        $enVacantes = DB::table('vacantes')
+            ->where('id_proceso', $idProceso)
+            ->where('id_modalidad', $idModalidad)
+            ->exists();
+
+        $enRequisitos = DB::table('requisito_modalidad')
+            ->where('id_modalidad', $idModalidad)
+            ->exists();
+
+        if (!$enVacantes && !$enRequisitos) {
+            return response()->json(['success' => false, 'mensaje' => 'La modalidad seleccionada no está habilitada para el proceso activo'], 400);
         }
 
         // Validar cooldown de 24 horas POR MODALIDAD

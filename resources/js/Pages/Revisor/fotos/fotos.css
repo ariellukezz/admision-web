@@ -1,92 +1,122 @@
+/* ============================================================================
+   Registro biométrico — captura de foto y huellas.
+   Pantalla de mostrador, con un operador y una persona delante: la identidad
+   del estudiante y el estado de la captura mandan; los controles son grandes
+   sólo donde se accionan con prisa.
+   ========================================================================== */
+
 .compact-card {
-  padding: 16px;
-  border-radius: 14px;
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.04);
+  padding: 0;
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-xs);
+  overflow: hidden;
 }
 
+/* Cabecera ------------------------------------------------------------------ */
 .compact-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  gap: var(--rev-s-6);
+  flex-wrap: wrap;
+  padding: 11px var(--rev-s-6);
+  margin: 0;
+  border-bottom: 1px solid var(--rev-line);
 }
 
-.header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.header-left { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 
 .header-left h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-lg);
+  font-weight: 650;
+  letter-spacing: var(--rev-track-tight);
+  color: var(--rev-ink);
+  line-height: 1.25;
 }
 
-.text-muted {
-  font-size: 12px;
-  color: #8c8c8c;
-}
+.text-muted { font-size: var(--rev-fs-sm); color: var(--rev-ink-3); }
 
-.header-right {
+.header-right { display: flex; align-items: center; gap: var(--rev-s-4); flex: none; }
+
+/* El cuerpo de la pantalla respira sólo lo necesario. */
+.compact-card > .ant-divider { display: none; }
+.compact-card > .ant-row { padding: var(--rev-s-6); margin: 0 !important; }
+
+/* Pie de acción -------------------------------------------------------------- */
+.compact-footer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: var(--rev-s-4);
+  margin: 0;
+  padding: 11px var(--rev-s-6);
+  text-align: right;
+  background: var(--rev-surface-2);
+  border-top: 1px solid var(--rev-line);
 }
 
-.compact-footer {
-  margin-top: 16px;
-  text-align: center;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
+/* Últimos atendidos ---------------------------------------------------------- */
 .ultimos-atendidos {
-  margin-top: 16px;
-  padding: 12px;
-  background: #fafafa;
-  border-radius: 6px;
+  margin: 0;
+  padding: var(--rev-s-5) var(--rev-s-6);
+  background: var(--rev-surface);
+  border-top: 1px solid var(--rev-line);
 }
 
 .ultimos-atendidos h4 {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--rev-s-4);
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-2xs);
+  font-weight: 680;
+  letter-spacing: var(--rev-track-caps);
+  text-transform: uppercase;
+  color: var(--rev-ink-4);
 }
 
-.ultimos-lista {
-  max-height: 120px;
-  overflow-y: auto;
-}
+.ultimos-lista { max-height: 152px; overflow-y: auto; margin: 0 calc(-1 * var(--rev-s-4)); }
 
 .ultimo-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  font-size: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  gap: var(--rev-s-5);
+  padding: 6px var(--rev-s-4);
+  font-size: var(--rev-fs-md);
+  border-bottom: 1px solid var(--rev-line-soft);
+  border-radius: var(--rev-r-sm);
+  transition: background 110ms cubic-bezier(.2, 0, 0, 1);
 }
 
-.ultimo-item:last-child {
-  border-bottom: none;
-}
+.ultimo-item:hover { background: var(--rev-n-25); }
+.ultimo-item:last-child { border-bottom: none; }
 
 .ultimo-item .nombre {
-  flex: 1;
-  font-weight: 500;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--rev-ink);
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ultimo-item .dni {
-  color: #8c8c8c;
-  font-size: 11px;
+  font-family: var(--rev-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--rev-fs-sm);
+  color: var(--rev-ink-4);
+  flex: none;
 }
 
-.mb-0 {
-  margin-bottom: 0;
-}
+.mb-0 { margin-bottom: 0; }
+.mb-2 { margin-bottom: var(--rev-s-4); }
 
-.mb-2 {
-  margin-bottom: 8px;
+@media (max-width: 720px) {
+  .compact-header { align-items: stretch; }
+  .header-right { width: 100%; }
+  .header-right > * { flex: 1 1 auto; }
 }

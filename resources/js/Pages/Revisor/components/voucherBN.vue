@@ -193,19 +193,63 @@ const notificacion = (type, titulo, mensaje) => { notification[type]({ message: 
 </script>
 
 <style scoped>
+/* Comprobantes de pago — tabla densa dentro de un modal de selección.
+   El botón de cada fila alterna entre «Seleccionar» y «Quitar»: el color
+   comunica la consecuencia, no la marca. */
 .vch-wrap { width: 100%; }
-.vch-header { display: flex; justify-content: flex-end; margin-bottom: 12px; }
-.vch-btn-add { background: #3b82f6 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 8px; }
-.vch-btn-add:hover { background: #2563eb !important; }
+.vch-header { display: flex; justify-content: flex-end; margin-bottom: var(--rev-s-5); }
 
-.vch-modal-section { margin-bottom: 1.25rem; }
-.vch-modal-title { font-size: .875rem; font-weight: 700; color: #1e293b; margin: 0 0 .625rem; padding-bottom: .5rem; border-bottom: 1px solid #f1f5f9; }
+.vch-btn-add {
+  background: var(--rev-primary-600) !important;
+  border: 1px solid var(--rev-primary-600) !important;
+  color: #fff !important;
+  font-weight: 580;
+  border-radius: var(--rev-r-md) !important;
+}
+.vch-btn-add:hover { background: var(--rev-primary-700) !important; border-color: var(--rev-primary-700) !important; }
 
-.vch-btn-select { background: #eff6ff !important; border: 1px solid #3b82f6 !important; color: #3b82f6 !important; font-weight: 600; border-radius: 6px; font-size: .75rem; }
-.vch-btn-select:hover { background: #dbeafe !important; }
-.vch-btn-selected { background: #ef4444 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 6px; font-size: .75rem; }
-.vch-btn-selected:hover { background: #dc2626 !important; }
+.vch-modal-section { margin-bottom: var(--rev-s-7); }
+.vch-modal-title {
+  margin: 0 0 var(--rev-s-4);
+  padding-bottom: var(--rev-s-4);
+  border-bottom: 1px solid var(--rev-line);
+  font-size: var(--rev-fs-2xs);
+  font-weight: 680;
+  letter-spacing: var(--rev-track-caps);
+  text-transform: uppercase;
+  color: var(--rev-ink-4);
+}
 
-.vch-btn-primary { background: #3b82f6 !important; border: none !important; color: #fff !important; font-weight: 600; border-radius: 8px; }
-.vch-btn-primary:hover { background: #2563eb !important; }
+.vch-btn-select {
+  background: var(--rev-surface) !important;
+  border: 1px solid var(--rev-line-strong) !important;
+  color: var(--rev-ink-2) !important;
+  font-weight: 580;
+  border-radius: var(--rev-r-sm) !important;
+  font-size: var(--rev-fs-sm) !important;
+}
+.vch-btn-select:hover {
+  background: var(--rev-primary-50) !important;
+  border-color: var(--rev-primary-300) !important;
+  color: var(--rev-primary-700) !important;
+}
+
+.vch-btn-selected {
+  background: var(--rev-surface) !important;
+  border: 1px solid var(--rev-danger-border) !important;
+  color: var(--rev-danger-ink) !important;
+  font-weight: 580;
+  border-radius: var(--rev-r-sm) !important;
+  font-size: var(--rev-fs-sm) !important;
+}
+.vch-btn-selected:hover { background: var(--rev-danger-bg) !important; border-color: var(--rev-danger) !important; }
+
+.vch-btn-primary {
+  background: var(--rev-primary-600) !important;
+  border: 1px solid var(--rev-primary-600) !important;
+  color: #fff !important;
+  font-weight: 580;
+  border-radius: var(--rev-r-md) !important;
+}
+.vch-btn-primary:hover { background: var(--rev-primary-700) !important; border-color: var(--rev-primary-700) !important; }
 </style>

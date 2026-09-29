@@ -45,12 +45,30 @@ class RevisorNotificationController extends Controller
 
     public function solicitudesRevision(Request $request)
     {
-        $busqueda = $request->input('busqueda', '');
-        $solicitudes = $this->service->solicitudesRevision($busqueda);
+        $busqueda = (string) ($request->input('busqueda') ?? '');
+        $filtro = (string) ($request->input('filtro') ?? 'pendientes');
+        if (!in_array($filtro, ['pendientes', 'atendidas', 'todas'])) {
+            $filtro = 'pendientes';
+        }
+        $desde = $request->input('desde') ?: null;
+        $hasta = $request->input('hasta') ?: null;
+        $modalidadId = $request->input('modalidad_id') ? (int) $request->input('modalidad_id') : null;
+        $solicitudes = $this->service->solicitudesRevision($busqueda, $filtro, $desde, $hasta, $modalidadId);
+
+        $modalidades = \Illuminate\Support\Facades\DB::table('modalidad')
+            ->select('id as value', 'nombre as label')
+            ->where('estado', 1)
+            ->orderBy('nombre')
+            ->get();
 
         return Inertia('Revisor/SolicitudesRevision', [
             'solicitudes' => $solicitudes,
             'busqueda'    => $busqueda,
+            'filtro'      => $filtro,
+            'desde'       => $desde,
+            'hasta'       => $hasta,
+            'modalidad_id' => $modalidadId,
+            'modalidades' => $modalidades,
         ]);
     }
 }

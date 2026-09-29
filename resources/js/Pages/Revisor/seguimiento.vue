@@ -1,345 +1,281 @@
+<!--
+  ============================================================================
+  Seguimiento del postulante — consulta por DNI.
+  ----------------------------------------------------------------------------
+  Pantalla de mostrador: se usa de pie, a menudo proyectada, y su único trabajo
+  es responder «¿en qué paso estoy y tengo algo pendiente?». Por eso el estado
+  manda sobre la decoración: la observación, si existe, aparece antes que la
+  línea de pasos, porque es lo único que exige acción.
+  ============================================================================
+-->
 <template>
-    <Head title="Mi pasos"/>
-    <Layout>
-    <div class="flex " style="height: calc(100vh - 180px); margin: auto; background: none; align-items: center;" >
+  <Head title="Seguimiento del postulante" />
+  <Layout>
+    <div class="seg rev-scope">
 
-    <div style="width: 100%;">
-        <div style="width: 100%;"  >
-            <div class="flex align-center justify-center">           
-              <a-card style="border-radius: 10px;">
-                    <div class="mt-2">
-                      <label for="dni">DNI:</label>
-                      <a-input 
-                      ref="myInput" @keyup.enter="handleEnter"  
-                      type="text" id="dni" placeholder="Ingrese dni" 
-                      v-model:value="dni" :maxlength="dniMaxLength" 
-                      inputmode="numeric" required/>
-                    </div>
-                <div class="flex justify-center mt-3">
-                </div>
-              </a-card>
-            </div>    
+      <!-- Consulta -------------------------------------------------------- -->
+      <div class="seg-query">
+        <label class="seg-query-label" for="seg-dni">Documento de identidad</label>
+        <div class="seg-query-field" :class="{ 'is-focused': focused, 'is-busy': loading }">
+          <RevIcon name="search" size="md" class="seg-query-icon" />
+          <input
+            id="seg-dni"
+            ref="myInput"
+            v-model="dni"
+            type="text"
+            inputmode="numeric"
+            :maxlength="dniMaxLength"
+            placeholder="Ingrese los 8 dígitos del DNI"
+            autocomplete="off"
+            @keyup.enter="handleEnter"
+            @focus="focused = true"
+            @blur="focused = false"
+          />
+          <RevIcon v-if="loading" name="loader" size="sm" spin class="seg-query-busy" />
+          <button v-else-if="dni" type="button" class="seg-query-clear" aria-label="Limpiar" @click="handleEnter">
+            <RevIcon name="close" size="xs" />
+          </button>
         </div>
-            <div  style="width: 100%;">
-                <div v-if="observacion !== ''" class="flex justify-center observacion"> 
-                <div style="text-align: center;">
-                    <h1 style="font-weight: bold; font-size:1.2rem;">!IMPORTANTE!</h1>
-                    <span>Sr(a). {{datos.nombres}} {{ observacion }} </span>
-                </div> 
-                </div>      
-                <div  class="tracking">
-                    <div class="timeline">
-                        <div
-                        v-for="(step, index) in steps"
-                        :key="index"
-                        class="timeline-item"
-                        :class="{
-                            'active': index === currentStep,
-                            'completed': index < currentStep,
-                            'disabled': index > currentStep
-                        }"
-                        @click="jumpStep(index)"
-                        >
-                        <div class="step-circle">
-                            <div class="step-description" style="height: 200px; width: 170px; font-weight: bold;">
-                                {{ step.description }}
-                            </div>
-                            <div v-if="observacion !== '' && currentStep === index" 
-                            class="step-number" 
-                            :class="{'jump': index === currentStep && jumping }"
-                            style="background: red;"
-                            @click="modal = true"
-                                >
-                            <span v-if="index <= currentStep">
-                                <CheckOutlined/>
-                            </span>
-                            <span v-else>{{ index + 1 }}</span>
-                            </div>
-                            
-                            <div v-else
-                            class="step-number"
-                            :class="{
-                                'jump': index === currentStep && jumping
-                            }"
-                            >
-                            
-                            <span v-if="index <= currentStep">
-                                <CheckOutlined/>
-                
-                            </span>
-                            <span v-else>{{ index + 1 }}</span>
-                            </div>
-                            <div v-if="observacion !== '' && index === currentStep " class="step-description">
-                                <div>!Observado!</div>  
-                            </div>
-                            <div v-else class="step-description" style="margin-top: 5px;">
-                                <div>!Completado!</div>
-                            </div>
-                            
-                        </div>
-                        </div>
-                    </div>
-        
-                </div>
-        
-                <!-- <div class="flex justify-center mt-3">
-                <a-button type="primary" @click="postulante = null" @keyup.enter.native="postulante = null" style="  border-radius: 4px; width: 200px;">Nueva Consulta</a-button>
-                </div> -->
-        
-            </div>
+        <p class="seg-query-hint">La consulta se lanza automáticamente al completar los 8 dígitos.</p>
+      </div>
 
+      <!-- Estado vacío ----------------------------------------------------- -->
+      <RevEmptyState
+        v-if="currentStep < 0 && !loading"
+        icon="user"
+        title="Esperando una consulta"
+        description="Introduce el DNI del postulante para ver en qué punto del proceso de admisión se encuentra."
+      />
+
+      <template v-else-if="currentStep >= 0">
+        <!-- Identidad ----------------------------------------------------- -->
+        <div class="seg-person">
+          <RevAvatar :name="datos.nombres || 'Postulante'" size="lg" tone="accent" />
+          <div class="seg-person-copy">
+            <span class="rev-eyebrow">Postulante</span>
+            <h2 class="seg-person-name">{{ datos.nombres || '—' }}</h2>
+          </div>
+          <RevBadge :tone="observacion ? 'warning' : 'success'" dot :pulse="!!observacion">
+            {{ observacion ? 'Con observación' : 'Sin observaciones' }}
+          </RevBadge>
+        </div>
+
+        <!-- Observación: lo único que exige acción va primero -------------- -->
+        <RevBanner
+          v-if="observacion"
+          tone="warning"
+          title="Hay una observación pendiente"
+        >{{ observacion }}</RevBanner>
+
+        <!-- Línea de pasos ------------------------------------------------- -->
+        <div class="seg-steps" role="list">
+          <div
+            v-for="(step, index) in steps"
+            :key="index"
+            class="seg-step"
+            :class="{
+              'is-done': index < currentStep,
+              'is-current': index === currentStep,
+              'is-todo': index > currentStep,
+              'is-flagged': observacion && index === currentStep,
+            }"
+            role="listitem"
+          >
+            <span class="seg-step-line" aria-hidden="true" />
+            <span class="seg-step-mark">
+              <RevIcon v-if="observacion && index === currentStep" name="alert" size="sm" />
+              <RevIcon v-else-if="index <= currentStep" name="check" size="sm" />
+              <span v-else class="rev-num">{{ index + 1 }}</span>
+            </span>
+            <span class="seg-step-name">{{ step.description }}</span>
+            <span class="seg-step-state">
+              {{ index < currentStep ? 'Completado'
+                 : index === currentStep ? (observacion ? 'Observado' : 'En curso')
+                 : 'Pendiente' }}
+            </span>
+          </div>
+        </div>
+      </template>
     </div>
-    </div>
-
-
-    </Layout>
+  </Layout>
 </template>
-    
+
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import Layout from '@/Layouts/LayoutPasos.vue'    
-import { ref, reactive, onMounted, watch } from 'vue';
-import { CheckOutlined, CloseOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { Head } from '@inertiajs/vue3'
+import Layout from '@/Layouts/LayoutPasos.vue'
+import { ref, reactive, onMounted, watch } from 'vue'
+import RevIcon from '@/Components/Revisor/RevIcon.vue'
+import RevBadge from '@/Components/Revisor/RevBadge.vue'
+import RevBanner from '@/Components/Revisor/RevBanner.vue'
+import RevAvatar from '@/Components/Revisor/RevAvatar.vue'
+import RevEmptyState from '@/Components/Revisor/RevEmptyState.vue'
 
 const steps = reactive([
-    { description: 'Preinscripción' },
-    { description: 'Examen Vocacional' },
-    { description: 'Inscripción' },
-    { description: 'Examen' },
-    { description: 'Resultados' },
-]);
+  { description: 'Preinscripción' },
+  { description: 'Examen vocacional' },
+  { description: 'Inscripción' },
+  { description: 'Examen' },
+  { description: 'Resultados' },
+])
 
-const myInput = ref(null);
-onMounted(() => {
-  myInput.value.focus();
-});
+const myInput = ref(null)
+const focused = ref(false)
+const loading = ref(false)
+const currentStep = ref(-1)
+const observacion = ref('')
+const dni = ref('')
+const dniMaxLength = 12
 
-function handleEnter() {
-    postulante.value = null;
-    myInput.value.focus();
-    dni.value = ''
-    currentStep.value = -1;
-}
-
-
-const postulante = ref(null)
-
-const modal = ref(true);
-
-const currentStep = ref(-1);
-const observacion = ref("");
-const jumping = ref(false);
-
-onMounted(() => {
-    setInterval(() => {
-        jumping.value = true;
-        setTimeout(() => {
-        jumping.value = false;
-        }, 500);
-    }, 2500);
-});
-
-const dni = ref('');
-const ubigeo = ref('');
-const dniMaxLength = 12;
-const dniPattern = /^\d{8}(\d{4})?$/;
-const ubigeoMaxLength = 6;
-const ubigeoPattern = /^\d{6}$/;
-
-
-const test = ref(null)
-
-const items = ref(null);
 const datos = ref({
-    dni_postulante: "",
-    id_proceso: "",
-    avance: "",
-    id_usuario: 1
+  dni_postulante: '',
+  id_proceso: '',
+  avance: '',
+  nombres: '',
+  id_usuario: 1,
 })
 
-watch(dni, (newValue, oldValue ) => {
-    if( dni.value.length === 8 ) {
-        getDatos();
-    }
-});
+function handleEnter() {
+  myInput.value?.focus()
+  dni.value = ''
+  currentStep.value = -1
+  observacion.value = ''
+}
 
 const getDatos = async () => {
-    let res = await axios.post("/get-avance-postulante2",{ dni: dni.value });
-    datos.value = res.data.datos;   
-    currentStep.value = res.data.datos.avance - 1;
-    observacion.value = res.data.datos.observacion;
-    postulante.value = 's'
+  loading.value = true
+  try {
+    const res = await axios.post('/get-avance-postulante2', { dni: dni.value })
+    datos.value = res.data.datos
+    currentStep.value = res.data.datos.avance - 1
+    observacion.value = res.data.datos.observacion || ''
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
 }
-    
+
+watch(dni, () => {
+  if (dni.value.length === 8) getDatos()
+})
+
+onMounted(() => { myInput.value?.focus() })
 </script>
-      
-<style scope>
-    .tracking {
-    position: relative;
-    display: flex;
-    background: #2587e432;
-    justify-content: center;
-    border-radius: 20px;
-    margin: 20px;
-    align-items: center;
-    height: 300px;
-    width:calc(100% - 40px);
-    scale: 0.8;
-    height: calc(260px);
-    }
-    
-    .timeline {    
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 80%;
-    margin: 0 auto;
-    }
-    
-    .timeline-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-    }
-    
-    .step-circle {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #fff;
-    background: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease;
-    }
-    
-    .step-number {
-    color: #fff;
-    opacity: 1;
-    transition: transform 0.3s ease;
-    background-color: #2eb339;
-    width: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    }
-    .observacion{}
-    
-    .step-number.jump {
-    animation: jumpAnimation 0.5s ease-in-out;
-    animation-iteration-count: 1;
-    }
-    
-    @keyframes jumpAnimation {
-    0% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-    100% {
-        transform: translateY(0);
-    }
-    }
-    
-    .step-number span.check-icon {
-    display: none;
-    }
-    
-    .step.completed .step-number {
-    opacity: 1;
-    }
-    
-    .step.completed span.check-icon {
-    display: block;
-    }
-    
-    .step-description {
-    text-align: center;
-    margin-top: 10px;
-    background: white;
-    background: none;
-    font-size: 16px;
-    color: #666;
-    }
-    
-    .timeline-item.disabled {
-    pointer-events: 100px;
-    opacity: 0.5;
-    }
-    
-    .timeline-item.disabled .step-circle {
-    background-color: white;
-    }
-    
-    .timeline-item.disabled .step-number {
-    background-color: #ccc;
-    }
-    
-    @media (max-width: 768px) {
-    .tracking {
-        height: 100%;
-        height: calc(100vh - 200px);
-        scale: .9;
-    }
-    .timeline {
-        flex-direction: column;
-        align-items: center;
-    }
-    .observacion{
-        margin-top: 50px;
-        padding-top: 120px;
-    }
-    .timeline-item {
-        margin-bottom: 70px;
-    }
+
+<style scoped>
+.seg {
+  display: flex; flex-direction: column; gap: var(--rev-s-7);
+  width: 100%; max-width: 760px; margin: 0 auto;
+  padding: var(--rev-s-9) var(--rev-s-6);
 }
 
-.header {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    background-color: #001529;
+/* Consulta ---------------------------------------------------------------- */
+.seg-query { display: flex; flex-direction: column; gap: 6px; }
+.seg-query-label { font-size: var(--rev-fs-sm); font-weight: 600; color: var(--rev-ink-2); }
+.seg-query-field {
+  display: flex; align-items: center; gap: 10px;
+  height: 46px; padding: 0 12px;
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line-strong);
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-xs);
+  transition: border-color var(--rev-t-fast) var(--rev-ease), box-shadow var(--rev-t-fast) var(--rev-ease);
+}
+.seg-query-field.is-focused { border-color: var(--rev-primary-500); box-shadow: var(--rev-ring); }
+.seg-query-icon { color: var(--rev-ink-4); flex: none; }
+.seg-query-busy { color: var(--rev-primary-600); flex: none; }
+.seg-query-field input {
+  flex: 1 1 auto; min-width: 0;
+  border: 0; outline: 0; background: transparent;
+  font-family: var(--rev-font); font-size: var(--rev-fs-xl); font-weight: 600;
+  letter-spacing: .06em; color: var(--rev-ink);
+  font-variant-numeric: tabular-nums;
+}
+.seg-query-field input::placeholder { font-size: var(--rev-fs-md); font-weight: 500; letter-spacing: 0; color: var(--rev-ink-4); }
+.seg-query-clear {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px;
+  border: 0; border-radius: var(--rev-r-sm);
+  background: var(--rev-n-100); color: var(--rev-ink-3); cursor: pointer;
+  transition: background var(--rev-t-fast) var(--rev-ease);
+}
+.seg-query-clear:hover { background: var(--rev-n-200); color: var(--rev-ink); }
+.seg-query-hint { margin: 0; font-size: var(--rev-fs-sm); color: var(--rev-ink-4); }
+
+/* Identidad --------------------------------------------------------------- */
+.seg-person {
+  display: flex; align-items: center; gap: var(--rev-s-5);
+  padding: var(--rev-s-5) var(--rev-s-6);
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-xs);
+  animation: rev-rise var(--rev-t-slow) var(--rev-ease-out) both;
+}
+.seg-person-copy { flex: 1 1 auto; min-width: 0; }
+.seg-person-name {
+  margin: 1px 0 0; font-size: var(--rev-fs-2xl); font-weight: 660;
+  letter-spacing: -.02em; color: var(--rev-ink); line-height: 1.2;
+  text-transform: capitalize;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.logo {
-    margin-right: 32px;
+/* Pasos ------------------------------------------------------------------- */
+.seg-steps {
+  display: flex; flex-direction: column;
+  padding: var(--rev-s-6) var(--rev-s-7);
+  background: var(--rev-surface);
+  border: 1px solid var(--rev-line);
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-xs);
+}
+.seg-step {
+  position: relative;
+  display: grid; grid-template-columns: 28px 1fr auto;
+  align-items: center; gap: var(--rev-s-5);
+  padding: 11px 0;
+}
+.seg-step-line {
+  position: absolute; left: 13px; top: 30px; bottom: -11px;
+  width: 2px; background: var(--rev-line);
+}
+.seg-step:last-child .seg-step-line { display: none; }
+.seg-step.is-done .seg-step-line { background: var(--rev-success); }
+
+.seg-step-mark {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  font-size: var(--rev-fs-sm); font-weight: 680;
+  border: 1px solid var(--rev-line); background: var(--rev-n-50); color: var(--rev-ink-4);
+  z-index: 1;
+  transition: background var(--rev-t-base) var(--rev-ease), color var(--rev-t-base) var(--rev-ease), border-color var(--rev-t-base) var(--rev-ease);
+}
+.seg-step.is-done .seg-step-mark { background: var(--rev-success); border-color: var(--rev-success); color: #fff; }
+.seg-step.is-current .seg-step-mark {
+  background: var(--rev-primary-600); border-color: var(--rev-primary-600); color: #fff;
+  box-shadow: 0 0 0 4px var(--rev-primary-100);
+}
+.seg-step.is-flagged .seg-step-mark {
+  background: var(--rev-warning); border-color: var(--rev-warning); color: #fff;
+  box-shadow: 0 0 0 4px var(--rev-warning-bg);
 }
 
-.logo img {
-    height: 80px;
-    width: auto;
-}
+.seg-step-name { font-size: var(--rev-fs-lg); font-weight: 560; color: var(--rev-ink-3); }
+.seg-step.is-done .seg-step-name,
+.seg-step.is-current .seg-step-name { color: var(--rev-ink); font-weight: 620; }
+.seg-step.is-todo .seg-step-name { color: var(--rev-ink-4); }
 
-.subtitle {
-    color: #fff;
+.seg-step-state {
+  font-size: var(--rev-fs-sm); font-weight: 620;
+  letter-spacing: .01em; color: var(--rev-ink-4);
 }
+.seg-step.is-done .seg-step-state { color: var(--rev-success); }
+.seg-step.is-current .seg-step-state { color: var(--rev-primary-700); }
+.seg-step.is-flagged .seg-step-state { color: var(--rev-warning-ink); }
 
-.title {
-    color: white;
-    font-size: 22px;
-    margin-bottom: 8px;
+@media (max-width: 600px) {
+  .seg { padding: var(--rev-s-7) var(--rev-s-5); }
+  .seg-person { flex-wrap: wrap; }
+  .seg-step { grid-template-columns: 28px 1fr; }
+  .seg-step-state { grid-column: 2; font-size: var(--rev-fs-xs); }
 }
-
-.description {
-    font-size: 16px;
-}
-
-@media (max-width: 768px) {
-    .header {
-    flex-direction: column;
-    align-items: center;
-    height: 70px;
-    }
-    .title {font-size: 1.4rem; margin-top: 0px; color:white;}
-    .subtitle {opacity:0.6;}
-}
-
 </style>

@@ -1,0 +1,807 @@
+/* ============================================================================
+   MESA DE REVISIÓN — DESIGN SYSTEM  ·  v1.0
+   Capa de tokens y primitivas visuales para el Rol 2 (Revisor).
+   ----------------------------------------------------------------------------
+   Reglas de la casa:
+   · Un solo acento. El color comunica significado, nunca decora.
+   · Densidad alta, respiración por ritmo tipográfico — no por aire vacío.
+   · Sombras como profundidad mínima, no como efecto.
+   · Radios contenidos (4–10px). Nada parece una burbuja.
+   · Todo estado (hover/active/focus/disabled/loading/empty/error) es explícito.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. TOKENS */
+/* Dos modos elegidos, no uno invertido. Los neutros son cálidos en ambos, de
+   modo que la aplicación no cambia de temperatura al cambiar de tema.        */
+
+:root {
+
+  /* — Acento: azul institucional profundo ——————————————————— */
+  --rev-primary-50:  #EDF2FE;
+  --rev-primary-100: #DBE4FD;
+  --rev-primary-200: #BACAFB;
+  --rev-primary-300: #90A9F5;
+  --rev-primary-400: #6285EC;
+  --rev-primary-500: #3B61DE;
+  --rev-primary-600: #1F3D8F;   /* acción por defecto */
+  --rev-primary-700: #17306F;   /* hover */
+  --rev-primary-800: #122658;   /* active */
+  --rev-primary-900: #0F1E45;
+  --rev-primary-950: #0A142E;
+
+  /* Roles del acento: en oscuro no basta con aclarar el mismo hex. */
+  --rev-accent-solid: var(--rev-primary-600);  /* fondo de la acción principal */
+  --rev-accent-ink:   #FFFFFF;                 /* tinta sobre ese fondo */
+  --rev-accent-soft:  var(--rev-primary-600);  /* texto, iconos, indicadores */
+  --rev-accent-bar:   #6F8FE0;                 /* marca de elemento activo en el rail */
+
+  /* — Neutros cálidos (piedra) ——————————————————————————— */
+  --rev-n-0:   #FFFFFF;
+  --rev-n-25:  #FCFCFB;
+  --rev-n-50:  #FAF9F7;
+  --rev-n-100: #F4F2EF;
+  --rev-n-150: #EFEDE9;
+  --rev-n-200: #E7E4DF;
+  --rev-n-300: #D8D4CE;
+  --rev-n-400: #B0ABA3;
+  --rev-n-500: #8A857D;
+  --rev-n-600: #6E6A63;
+  --rev-n-700: #45423D;
+  --rev-n-800: #2E2C28;
+  --rev-n-900: #191816;
+  --rev-n-950: #0F0E0D;
+
+  /* — Chrome: rail y visor de documentos ————————————————— */
+  --rev-nav-bg:      #1B1A18;
+  --rev-nav-bg-alt:  #2A2825;
+  --rev-nav-line:    transparent;
+  --rev-nav-line-2:  rgba(255, 255, 255, 0.10);
+  --rev-nav-text:    #B8B3AB;
+  --rev-nav-text-hi: #FFFFFF;
+  --rev-nav-muted:   #8A857D;
+  --rev-nav-accent:  #6F8FE0;
+  --rev-nav-mark:    #FAF9F7;
+  --rev-nav-mark-ink:#1B1A18;
+
+  --rev-viewer-bg:    #2A2825;
+  --rev-viewer-line:  #3A3733;
+  --rev-viewer-text:  #FFFFFF;
+  --rev-viewer-muted: #C4C0B9;
+  --rev-sheet-shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+
+  /* — Semánticos: apagados a propósito. El color informa, no grita. ——— */
+  --rev-success:        #2A6449;
+  --rev-success-bg:     #EAF2ED;
+  --rev-success-border: #C3DACC;
+  --rev-success-ink:    #1F5039;
+
+  --rev-warning:        #8C5411;
+  --rev-warning-bg:     #FAF2E6;
+  --rev-warning-border: #E8D5B4;
+  --rev-warning-ink:    #6F4209;
+
+  --rev-danger:         #A32E23;
+  --rev-danger-bg:      #FBEDEB;
+  --rev-danger-border:  #E8C7C2;
+  --rev-danger-ink:     #83241B;
+
+  --rev-info:           var(--rev-primary-600);
+  --rev-info-bg:        var(--rev-primary-50);
+  --rev-info-border:    #C9D6F6;
+  --rev-info-ink:       var(--rev-primary-700);
+
+  --rev-pending:        #6E6A63;
+  --rev-pending-bg:     #F4F2EF;
+  --rev-pending-border: #E7E4DF;
+  --rev-pending-ink:    #45423D;
+
+  /* — Roles de superficie ————————————————————————————————— */
+  --rev-bg:          #FAF9F7;   /* papel */
+  --rev-surface:     #FFFFFF;   /* panel */
+  --rev-surface-2:   #F4F2EF;   /* hundido: cabeceras de tabla, índices */
+  --rev-surface-3:   #EFEDE9;
+  --rev-line:        #E7E4DF;
+  --rev-line-soft:   #F1EFEC;
+  --rev-line-strong: #D8D4CE;
+
+  /* — Tinta ————————————————————————————————————————————— */
+  --rev-ink:        #191816;
+  --rev-ink-2:      #45423D;
+  --rev-ink-3:      #6E6A63;
+  --rev-ink-4:      #8A857D;
+  --rev-ink-invert: #FFFFFF;
+
+  /* — Tipografía ————————————————————————————————————————— */
+  --rev-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --rev-font:    "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --rev-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --rev-fs-2xs: 10px;
+  --rev-fs-xs:  11px;
+  --rev-fs-sm:  12px;
+  --rev-fs-md:  13px;
+  --rev-fs-lg:  14px;
+  --rev-fs-xl:  16px;
+  --rev-fs-2xl: 19px;
+  --rev-fs-3xl: 23px;
+  --rev-fs-4xl: 28px;
+  --rev-fs-display:   28px;
+  --rev-fs-display-lg: 36px;
+
+  --rev-lh-tight: 1.2;
+  --rev-lh-snug:  1.35;
+  --rev-lh-base:  1.55;
+
+  --rev-track-caps:  .1em;
+  --rev-track-tight: -.015em;
+
+  /* — Espaciado (base 4), holgado ————————————————————————— */
+  --rev-s-1: 2px;   --rev-s-2: 4px;   --rev-s-3: 6px;   --rev-s-4: 8px;
+  --rev-s-5: 12px;  --rev-s-6: 16px;  --rev-s-7: 20px;  --rev-s-8: 24px;
+  --rev-s-9: 32px;  --rev-s-10: 40px; --rev-s-11: 48px;
+
+  /* — Radios contenidos ——————————————————————————————————— */
+  --rev-r-xs: 3px;
+  --rev-r-sm: 4px;
+  --rev-r-md: 4px;
+  --rev-r-lg: 6px;
+  --rev-r-xl: 8px;
+  --rev-r-pill: 999px;
+
+  /* — Elevación mínima ——————————————————————————————————— */
+  --rev-sh-xs: 0 1px 2px rgba(25, 24, 22, .04);
+  --rev-sh-sm: 0 1px 2px rgba(25, 24, 22, .06);
+  --rev-sh-md: 0 4px 12px -2px rgba(25, 24, 22, .08);
+  --rev-sh-lg: 0 12px 28px -8px rgba(25, 24, 22, .14);
+  --rev-sh-xl: 0 24px 56px -16px rgba(25, 24, 22, .22);
+  --rev-ring:  0 0 0 3px rgba(31, 61, 143, .16);
+  --rev-ring-danger: 0 0 0 3px rgba(163, 46, 35, .16);
+
+  /* — Movimiento ————————————————————————————————————————— */
+  --rev-ease: cubic-bezier(.2, 0, 0, 1);
+  --rev-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --rev-t-fast: 110ms;
+  --rev-t-base: 160ms;
+  --rev-t-slow: 240ms;
+
+  /* — Estructura ————————————————————————————————————————— */
+  --rev-nav-w: 232px;
+  --rev-nav-w-collapsed: 64px;
+  --rev-topbar-h: 60px;
+  --rev-gutter: 32px;
+  --rev-z-sticky: 40;
+  --rev-z-topbar: 50;
+
+  /* — Serie de datos (claro) ——————————————————————————————— */
+  --rev-series-1: #2C63C9;
+  --rev-series-2: #E06B2E;
+  --rev-series-3: #00958C;
+  --rev-series-4: #D6453F;
+  --rev-series-5: #D79A00;
+  --rev-series-6: #6A4FC0;
+  --rev-series-7: #DB6C9C;
+}
+
+/* ══════════════════════════════════ MODO OSCURO ═══════════════════════════
+   Pasos elegidos y medidos contra la superficie oscura, no una inversión.  */
+:root[data-theme="dark"] {
+
+  --rev-primary-50:  #131A2C;
+  --rev-primary-100: #17223C;
+  --rev-primary-200: #1E2E52;
+  --rev-primary-300: #27406F;
+  --rev-primary-400: #3A62C8;
+  --rev-primary-500: #5A7FD8;
+  --rev-primary-600: #8AA8EE;
+  --rev-primary-700: #A8BFF4;
+  --rev-primary-800: #C6D6F8;
+  --rev-primary-900: #DDE7FB;
+  --rev-primary-950: #EFF4FE;
+
+  --rev-accent-solid: #3A62C8;
+  --rev-accent-ink:   #FFFFFF;
+  --rev-accent-soft:  #8AA8EE;
+  --rev-accent-bar:   #8AA8EE;
+
+  --rev-n-0:   #1A1918;
+  --rev-n-25:  #1E1D1C;
+  --rev-n-50:  #151413;
+  --rev-n-100: #232120;
+  --rev-n-150: #2C2A28;
+  --rev-n-200: #2C2A28;
+  --rev-n-300: #3A3835;
+  --rev-n-400: #4A4743;
+  --rev-n-500: #8A857D;
+  --rev-n-600: #96918A;
+  --rev-n-700: #C4C0B9;
+  --rev-n-800: #DEDAD4;
+  --rev-n-900: #F2F0EC;
+  --rev-n-950: #FFFFFF;
+
+  --rev-nav-bg:      #0B0A0A;
+  --rev-nav-bg-alt:  #232120;
+  --rev-nav-line:    #232120;
+  --rev-nav-line-2:  rgba(255, 255, 255, 0.10);
+  --rev-nav-text:    #A8A39B;
+  --rev-nav-text-hi: #F2F0EC;
+  --rev-nav-muted:   #8A857D;
+  --rev-nav-accent:  #8AA8EE;
+  --rev-nav-mark:    #F2F0EC;
+  --rev-nav-mark-ink:#0B0A0A;
+
+  --rev-viewer-bg:    #0B0A0A;
+  --rev-viewer-line:  #232120;
+  --rev-viewer-text:  #F2F0EC;
+  --rev-viewer-muted: #C4C0B9;
+  --rev-sheet-shadow: 0 20px 48px rgba(0, 0, 0, .62);
+
+  --rev-success:        #5FA97F;
+  --rev-success-bg:     #17241D;
+  --rev-success-border: #2C4437;
+  --rev-success-ink:    #8FC7A6;
+
+  --rev-warning:        #D69A4A;
+  --rev-warning-bg:     #261C10;
+  --rev-warning-border: #46351E;
+  --rev-warning-ink:    #E6B87A;
+
+  --rev-danger:         #E08078;
+  --rev-danger-bg:      #271614;
+  --rev-danger-border:  #472925;
+  --rev-danger-ink:     #EDA59F;
+
+  --rev-info:           #8AA8EE;
+  --rev-info-bg:        #151C2E;
+  --rev-info-border:    #27334F;
+  --rev-info-ink:       #A8BFF4;
+
+  --rev-pending:        #96918A;
+  --rev-pending-bg:     #232120;
+  --rev-pending-border: #2C2A28;
+  --rev-pending-ink:    #C4C0B9;
+
+  --rev-bg:          #121110;
+  --rev-surface:     #1A1918;
+  --rev-surface-2:   #151413;
+  --rev-surface-3:   #232120;
+  --rev-line:        #2C2A28;
+  --rev-line-soft:   #232120;
+  --rev-line-strong: #3A3835;
+
+  --rev-ink:        #F2F0EC;
+  --rev-ink-2:      #C4C0B9;
+  --rev-ink-3:      #96918A;
+  --rev-ink-4:      #8A857D;
+  --rev-ink-invert: #121110;
+
+  --rev-sh-xs: 0 1px 2px rgba(0, 0, 0, .3);
+  --rev-sh-sm: 0 1px 3px rgba(0, 0, 0, .4);
+  --rev-sh-md: 0 4px 12px -2px rgba(0, 0, 0, .5);
+  --rev-sh-lg: 0 12px 28px -8px rgba(0, 0, 0, .6);
+  --rev-sh-xl: 0 24px 56px -16px rgba(0, 0, 0, .7);
+  --rev-ring:  0 0 0 3px rgba(138, 168, 238, .22);
+  --rev-ring-danger: 0 0 0 3px rgba(224, 128, 120, .22);
+
+  --rev-series-1: #6F94E2;
+  --rev-series-2: #E89058;
+  --rev-series-3: #45B4AA;
+  --rev-series-4: #E5776F;
+  --rev-series-5: #D9A94A;
+  --rev-series-6: #9D89DE;
+  --rev-series-7: #E294B8;
+}
+
+/* El esquema nativo (scrollbars, date pickers) se acota al Revisor: fijarlo
+   en :root tenia dos modos, pero tambien tenia los otros cinco roles.      */
+body.rev-theme { color-scheme: light; }
+:root[data-theme="dark"] body.rev-theme { color-scheme: dark; }
+
+/* ------------------------------------------------- 2. RESET DE ÁMBITO REVISOR */
+.rev-scope,
+body.rev-theme {
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-md);
+  line-height: var(--rev-lh-base);
+  color: var(--rev-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv05" 1, "cv11" 1, "ss01" 1;
+}
+
+.rev-scope *,
+.rev-scope *::before,
+.rev-scope *::after { box-sizing: border-box; }
+
+/* Cifras siempre alineadas: en tablas, KPIs y badges */
+.rev-num,
+.rev-scope .rev-num,
+body.rev-theme .rev-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+.rev-mono { font-family: var(--rev-mono); font-variant-numeric: tabular-nums; }
+
+/* Foco visible y consistente en todo el módulo */
+.rev-scope :focus-visible,
+body.rev-theme .ant-modal :focus-visible,
+body.rev-theme .ant-drawer :focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--rev-ring);
+  border-radius: var(--rev-r-sm);
+}
+
+/* Barras de desplazamiento discretas */
+.rev-scope ::-webkit-scrollbar { width: 9px; height: 9px; }
+.rev-scope ::-webkit-scrollbar-track { background: transparent; }
+.rev-scope ::-webkit-scrollbar-thumb {
+  background: var(--rev-n-200);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--rev-r-pill);
+}
+.rev-scope ::-webkit-scrollbar-thumb:hover { background: var(--rev-n-300); background-clip: content-box; }
+
+/* --------------------------------------------------- 3. RITMO TIPOGRÁFICO */
+.rev-eyebrow {
+  font-size: var(--rev-fs-2xs);
+  font-weight: 650;
+  letter-spacing: var(--rev-track-caps);
+  text-transform: uppercase;
+  color: var(--rev-ink-4);
+}
+.rev-label {
+  font-size: var(--rev-fs-xs);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--rev-ink-3);
+}
+.rev-title-lg { font-size: var(--rev-fs-2xl); font-weight: 680; letter-spacing: var(--rev-track-tight); line-height: var(--rev-lh-tight); color: var(--rev-ink); margin: 0; }
+.rev-title    { font-size: var(--rev-fs-xl);  font-weight: 650; letter-spacing: var(--rev-track-tight); line-height: var(--rev-lh-tight); color: var(--rev-ink); margin: 0; }
+.rev-title-sm { font-size: var(--rev-fs-lg);  font-weight: 640; line-height: var(--rev-lh-snug); color: var(--rev-ink); margin: 0; }
+.rev-body     { font-size: var(--rev-fs-md); color: var(--rev-ink-2); }
+.rev-meta     { font-size: var(--rev-fs-sm); color: var(--rev-ink-3); }
+.rev-hint     { font-size: var(--rev-fs-sm); color: var(--rev-ink-4); }
+
+/* ---------------------------------------------------------- 4. SEPARADORES */
+.rev-divider { height: 1px; background: var(--rev-line); border: 0; margin: var(--rev-s-6) 0; }
+.rev-divider-v { width: 1px; align-self: stretch; background: var(--rev-line); }
+.rev-divider-labeled {
+  display: flex; align-items: center; gap: var(--rev-s-5);
+  font-size: var(--rev-fs-2xs); font-weight: 650; letter-spacing: var(--rev-track-caps);
+  text-transform: uppercase; color: var(--rev-ink-4);
+}
+.rev-divider-labeled::after { content: ""; flex: 1; height: 1px; background: var(--rev-line); }
+
+/* -------------------------------------------- 5. SOBREESCRITURA DE ANT DESIGN
+   Ant Design teletransporta modales, dropdowns y selects al <body>.
+   Por eso el ámbito es `body.rev-theme`, aplicado por el layout del revisor. */
+
+body.rev-theme {
+  --ant-primary-color: var(--rev-primary-600);
+}
+
+/* Botones ------------------------------------------------------------------ */
+body.rev-theme .ant-btn {
+  font-family: var(--rev-font);
+  font-size: var(--rev-fs-md);
+  font-weight: 560;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--rev-r-md);
+  border-color: var(--rev-line-strong);
+  color: var(--rev-ink-2);
+  box-shadow: none;
+  transition: background var(--rev-t-fast) var(--rev-ease),
+              border-color var(--rev-t-fast) var(--rev-ease),
+              color var(--rev-t-fast) var(--rev-ease);
+}
+body.rev-theme .ant-btn:not(:disabled):hover {
+  color: var(--rev-primary-700);
+  border-color: var(--rev-primary-300);
+  background: var(--rev-primary-50);
+}
+body.rev-theme .ant-btn:not(:disabled):active { transform: translateY(.5px); }
+body.rev-theme .ant-btn:focus-visible { box-shadow: var(--rev-ring); }
+body.rev-theme .ant-btn-primary {
+  background: var(--rev-primary-600);
+  border-color: var(--rev-primary-600);
+  color: #fff;
+}
+body.rev-theme .ant-btn-primary:not(:disabled):hover {
+  background: var(--rev-primary-700);
+  border-color: var(--rev-primary-700);
+  color: #fff;
+}
+body.rev-theme .ant-btn-primary:not(:disabled):active { background: var(--rev-primary-800); border-color: var(--rev-primary-800); }
+body.rev-theme .ant-btn-dangerous.ant-btn-primary { background: var(--rev-danger); border-color: var(--rev-danger); }
+body.rev-theme .ant-btn:disabled,
+body.rev-theme .ant-btn-primary:disabled {
+  background: var(--rev-n-100);
+  border-color: var(--rev-line);
+  color: var(--rev-ink-4);
+  cursor: not-allowed;
+}
+body.rev-theme .ant-btn-sm { height: 26px; padding: 0 9px; font-size: var(--rev-fs-sm); border-radius: var(--rev-r-sm); }
+body.rev-theme .ant-btn-lg { height: 38px; padding: 0 16px; font-size: var(--rev-fs-lg); }
+body.rev-theme .ant-btn-link { color: var(--rev-primary-600); border: 0; padding: 0 4px; height: auto; }
+body.rev-theme .ant-btn-link:not(:disabled):hover { background: transparent; color: var(--rev-primary-700); text-decoration: underline; text-underline-offset: 2px; }
+
+/* Campos de entrada -------------------------------------------------------- */
+body.rev-theme .ant-input,
+body.rev-theme .ant-input-affix-wrapper,
+body.rev-theme .ant-input-number,
+body.rev-theme .ant-picker,
+body.rev-theme .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  font-size: var(--rev-fs-md);
+  border-radius: var(--rev-r-md);
+  border-color: var(--rev-line-strong);
+  color: var(--rev-ink);
+  background: var(--rev-surface);
+  box-shadow: none;
+  transition: border-color var(--rev-t-fast) var(--rev-ease), box-shadow var(--rev-t-fast) var(--rev-ease);
+}
+body.rev-theme .ant-input:hover,
+body.rev-theme .ant-input-affix-wrapper:hover,
+body.rev-theme .ant-picker:hover,
+body.rev-theme .ant-select:not(.ant-select-disabled):hover .ant-select-selector { border-color: var(--rev-n-300); }
+body.rev-theme .ant-input:focus,
+body.rev-theme .ant-input-focused,
+body.rev-theme .ant-input-affix-wrapper-focused,
+body.rev-theme .ant-picker-focused,
+body.rev-theme .ant-select-focused:not(.ant-select-disabled) .ant-select-selector {
+  border-color: var(--rev-primary-500) !important;
+  box-shadow: var(--rev-ring) !important;
+}
+body.rev-theme .ant-input[disabled],
+body.rev-theme .ant-select-disabled .ant-select-selector,
+body.rev-theme .ant-picker-disabled {
+  background: var(--rev-n-50) !important;
+  color: var(--rev-ink-4) !important;
+  border-color: var(--rev-line) !important;
+}
+body.rev-theme .ant-input::placeholder,
+body.rev-theme .ant-select-selection-placeholder { color: var(--rev-ink-4); }
+body.rev-theme .ant-select-single:not(.ant-select-customize-input) .ant-select-selector { height: 32px; }
+body.rev-theme .ant-select-single .ant-select-selector .ant-select-selection-item,
+body.rev-theme .ant-select-single .ant-select-selector .ant-select-selection-placeholder { line-height: 30px; }
+body.rev-theme .ant-input-status-error,
+body.rev-theme .ant-input-affix-wrapper-status-error { border-color: var(--rev-danger) !important; }
+body.rev-theme .ant-input-status-error:focus { box-shadow: var(--rev-ring-danger) !important; }
+
+/* Desplegables y menús ------------------------------------------------------ */
+body.rev-theme .ant-select-dropdown,
+body.rev-theme .ant-dropdown-menu,
+body.rev-theme .ant-picker-dropdown .ant-picker-panel-container {
+  border-radius: var(--rev-r-lg);
+  border: 1px solid var(--rev-line);
+  box-shadow: var(--rev-sh-lg);
+  padding: 4px;
+}
+body.rev-theme .ant-select-item,
+body.rev-theme .ant-dropdown-menu-item {
+  font-size: var(--rev-fs-md);
+  border-radius: var(--rev-r-sm);
+  min-height: 30px;
+  color: var(--rev-ink-2);
+}
+body.rev-theme .ant-select-item-option-active:not(.ant-select-item-option-disabled) { background: var(--rev-n-50); }
+body.rev-theme .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: var(--rev-primary-50);
+  color: var(--rev-primary-700);
+  font-weight: 600;
+}
+
+/* Tablas ------------------------------------------------------------------- */
+body.rev-theme .ant-table { font-size: var(--rev-fs-md); color: var(--rev-ink-2); }
+body.rev-theme .ant-table-thead > tr > th {
+  background: var(--rev-surface-2);
+  color: var(--rev-ink-3);
+  font-size: var(--rev-fs-2xs);
+  font-weight: 650;
+  letter-spacing: var(--rev-track-caps);
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--rev-line);
+  padding: 9px 12px;
+}
+body.rev-theme .ant-table-thead > tr > th::before { display: none !important; }
+body.rev-theme .ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--rev-line-soft);
+  padding: 9px 12px;
+}
+body.rev-theme .ant-table-tbody > tr:hover > td { background: var(--rev-n-25) !important; }
+body.rev-theme .ant-table-tbody > tr:last-child > td { border-bottom: 0; }
+
+/* Etiquetas / badges nativos ------------------------------------------------ */
+body.rev-theme .ant-tag {
+  font-size: var(--rev-fs-xs);
+  font-weight: 600;
+  line-height: 18px;
+  border-radius: var(--rev-r-sm);
+  padding: 0 7px;
+  margin-inline-end: 4px;
+}
+
+/* Pestañas ------------------------------------------------------------------ */
+body.rev-theme .ant-tabs-top > .ant-tabs-nav { margin-bottom: var(--rev-s-6); }
+body.rev-theme .ant-tabs-top > .ant-tabs-nav::before { border-bottom-color: var(--rev-line); }
+body.rev-theme .ant-tabs-tab {
+  font-size: var(--rev-fs-md);
+  font-weight: 560;
+  color: var(--rev-ink-3);
+  padding: 8px 2px;
+}
+body.rev-theme .ant-tabs-tab + .ant-tabs-tab { margin-left: 22px; }
+body.rev-theme .ant-tabs-tab:hover { color: var(--rev-ink); }
+body.rev-theme .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn { color: var(--rev-primary-700); font-weight: 640; }
+body.rev-theme .ant-tabs-ink-bar { background: var(--rev-primary-600); height: 2px; }
+body.rev-theme .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {
+  background: var(--rev-surface-2);
+  border-color: var(--rev-line);
+  border-radius: var(--rev-r-md) var(--rev-r-md) 0 0;
+  padding: 7px 14px;
+}
+body.rev-theme .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active { background: var(--rev-surface); border-bottom-color: var(--rev-surface); }
+
+/* Modales y drawers --------------------------------------------------------- */
+body.rev-theme .ant-modal-content {
+  border-radius: var(--rev-r-xl);
+  box-shadow: var(--rev-sh-xl);
+  padding: 0;
+  overflow: hidden;
+}
+body.rev-theme .ant-modal-header {
+  padding: 14px 18px;
+  margin: 0;
+  border-bottom: 1px solid var(--rev-line);
+  background: var(--rev-surface);
+}
+body.rev-theme .ant-modal-title { font-size: var(--rev-fs-lg); font-weight: 650; color: var(--rev-ink); letter-spacing: var(--rev-track-tight); }
+body.rev-theme .ant-modal-body { padding: 18px; }
+body.rev-theme .ant-modal-footer { padding: 12px 18px; margin: 0; border-top: 1px solid var(--rev-line); background: var(--rev-surface-2); }
+body.rev-theme .ant-modal-close { top: 12px; inset-inline-end: 12px; border-radius: var(--rev-r-md); }
+body.rev-theme .ant-modal-mask { background: rgba(15,19,24,.45); backdrop-filter: blur(1.5px); }
+body.rev-theme .ant-drawer-header { border-bottom: 1px solid var(--rev-line); padding: 14px 18px; }
+body.rev-theme .ant-drawer-title { font-size: var(--rev-fs-lg); font-weight: 650; }
+body.rev-theme .ant-drawer-body { padding: 18px; }
+
+/* Tooltips, popovers, mensajes --------------------------------------------- */
+body.rev-theme .ant-tooltip-inner {
+  background: var(--rev-n-900);
+  font-size: var(--rev-fs-sm);
+  font-weight: 500;
+  border-radius: var(--rev-r-md);
+  padding: 5px 9px;
+  min-height: 0;
+  box-shadow: var(--rev-sh-md);
+}
+body.rev-theme .ant-tooltip-arrow::before { background: var(--rev-n-900); }
+body.rev-theme .ant-popover-inner { border-radius: var(--rev-r-lg); box-shadow: var(--rev-sh-lg); border: 1px solid var(--rev-line); }
+body.rev-theme .ant-message-notice-content,
+body.rev-theme .ant-notification-notice {
+  border-radius: var(--rev-r-lg);
+  box-shadow: var(--rev-sh-lg);
+  border: 1px solid var(--rev-line);
+  font-size: var(--rev-fs-md);
+}
+
+/* Paginación ---------------------------------------------------------------- */
+body.rev-theme .ant-pagination { font-size: var(--rev-fs-md); }
+body.rev-theme .ant-pagination-item,
+body.rev-theme .ant-pagination-prev .ant-pagination-item-link,
+body.rev-theme .ant-pagination-next .ant-pagination-item-link {
+  border-radius: var(--rev-r-md);
+  border-color: var(--rev-line);
+  min-width: 30px; height: 30px; line-height: 28px;
+}
+body.rev-theme .ant-pagination-item a { color: var(--rev-ink-2); font-weight: 560; }
+body.rev-theme .ant-pagination-item:hover { border-color: var(--rev-primary-300); background: var(--rev-primary-50); }
+body.rev-theme .ant-pagination-item-active {
+  border-color: var(--rev-primary-600);
+  background: var(--rev-primary-600);
+}
+body.rev-theme .ant-pagination-item-active a { color: #fff; }
+
+/* Progreso, spin, segmented -------------------------------------------------- */
+body.rev-theme .ant-progress-bg { background: var(--rev-primary-600); border-radius: var(--rev-r-pill); }
+body.rev-theme .ant-progress-inner { background: var(--rev-n-150); border-radius: var(--rev-r-pill); }
+body.rev-theme .ant-spin-dot-item { background: var(--rev-primary-600); }
+body.rev-theme .ant-segmented {
+  background: var(--rev-n-100);
+  border-radius: var(--rev-r-md);
+  padding: 2px;
+  font-size: var(--rev-fs-md);
+}
+body.rev-theme .ant-segmented-item { border-radius: var(--rev-r-sm); color: var(--rev-ink-3); transition: color var(--rev-t-fast) var(--rev-ease); }
+body.rev-theme .ant-segmented-item-label { padding: 0 12px; line-height: 26px; min-height: 26px; font-weight: 560; }
+body.rev-theme .ant-segmented-item-selected { color: var(--rev-ink); box-shadow: var(--rev-sh-sm); }
+body.rev-theme .ant-segmented-thumb { border-radius: var(--rev-r-sm); box-shadow: var(--rev-sh-sm); }
+
+/* Casillas y radios ---------------------------------------------------------- */
+body.rev-theme .ant-checkbox-inner { border-radius: var(--rev-r-xs); border-color: var(--rev-n-300); }
+body.rev-theme .ant-checkbox-checked .ant-checkbox-inner { background: var(--rev-primary-600); border-color: var(--rev-primary-600); }
+body.rev-theme .ant-checkbox-wrapper { font-size: var(--rev-fs-md); color: var(--rev-ink-2); }
+body.rev-theme .ant-radio-checked .ant-radio-inner { border-color: var(--rev-primary-600); }
+body.rev-theme .ant-radio-inner::after { background: var(--rev-primary-600); }
+body.rev-theme .ant-switch-checked { background: var(--rev-primary-600); }
+
+/* Tarjeta nativa: la neutralizamos para que no compita con RevPanel --------- */
+body.rev-theme .ant-card {
+  border-radius: var(--rev-r-lg);
+  border: 1px solid var(--rev-line);
+  box-shadow: var(--rev-sh-xs);
+}
+body.rev-theme .ant-card-body { padding: var(--rev-s-6); }
+
+/* ------------------------------------------------ 6. ANIMACIONES CONTENIDAS */
+@keyframes rev-fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rev-rise    { from { opacity: 0; transform: translateY(4px) } to { opacity: 1; transform: none } }
+@keyframes rev-spin    { to { transform: rotate(360deg) } }
+@keyframes rev-shimmer { from { background-position: 100% 0 } to { background-position: -100% 0 } }
+@keyframes rev-pulse-soft { 0%,100% { opacity: 1 } 50% { opacity: .45 } }
+@keyframes rev-count-in { from { opacity: 0; transform: translateY(-3px) } to { opacity: 1; transform: none } }
+
+.rev-enter { animation: rev-rise var(--rev-t-slow) var(--rev-ease-out) both; }
+
+/* Transiciones nombradas de Vue, compartidas por todo el módulo */
+.rev-fade-enter-active, .rev-fade-leave-active { transition: opacity var(--rev-t-base) var(--rev-ease); }
+.rev-fade-enter-from, .rev-fade-leave-to { opacity: 0; }
+
+.rev-rise-enter-active { transition: opacity var(--rev-t-base) var(--rev-ease-out), transform var(--rev-t-base) var(--rev-ease-out); }
+.rev-rise-leave-active { transition: opacity var(--rev-t-fast) var(--rev-ease), transform var(--rev-t-fast) var(--rev-ease); }
+.rev-rise-enter-from, .rev-rise-leave-to { opacity: 0; transform: translateY(4px); }
+
+.rev-expand-enter-active, .rev-expand-leave-active {
+  transition: grid-template-rows var(--rev-t-base) var(--rev-ease), opacity var(--rev-t-base) var(--rev-ease);
+  display: grid; grid-template-rows: 1fr; overflow: hidden;
+}
+.rev-expand-enter-from, .rev-expand-leave-to { grid-template-rows: 0fr; opacity: 0; }
+.rev-expand-enter-active > *, .rev-expand-leave-active > * { min-height: 0; overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rev-scope *, body.rev-theme * {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ------------------------------------------------------- 7. ESQUELETO CARGA */
+.rev-skel {
+  background: linear-gradient(90deg, var(--rev-n-100) 25%, var(--rev-n-150) 37%, var(--rev-n-100) 63%);
+  background-size: 300% 100%;
+  animation: rev-shimmer 1.35s linear infinite;
+  border-radius: var(--rev-r-sm);
+}
+
+/* ------------------------------------------------------------ 8. UTILIDADES */
+.rev-stack   { display: flex; flex-direction: column; }
+.rev-row     { display: flex; align-items: center; }
+.rev-gap-2 { gap: var(--rev-s-2) } .rev-gap-3 { gap: var(--rev-s-3) }
+.rev-gap-4 { gap: var(--rev-s-4) } .rev-gap-5 { gap: var(--rev-s-5) }
+.rev-gap-6 { gap: var(--rev-s-6) } .rev-gap-8 { gap: var(--rev-s-8) }
+.rev-grow    { flex: 1 1 auto; min-width: 0 }
+.rev-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rev-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ═════════════ 9. SUPERFICIES DE ANT DESIGN QUE FALTABAN POR TOKENIZAR ═════
+   Ant Design deja blancos en duro en varios contenedores. Sin esto, el modo
+   oscuro se rompe justo donde más se nota: desplegables, modales y tablas.  */
+
+body.rev-theme .ant-table,
+body.rev-theme .ant-table-container,
+body.rev-theme .ant-table-content,
+body.rev-theme .ant-table-tbody > tr > td,
+body.rev-theme .ant-card,
+body.rev-theme .ant-card-body,
+body.rev-theme .ant-modal-content,
+body.rev-theme .ant-modal-header,
+body.rev-theme .ant-modal-body,
+body.rev-theme .ant-drawer-content,
+body.rev-theme .ant-drawer-header,
+body.rev-theme .ant-drawer-body,
+body.rev-theme .ant-popover-inner,
+body.rev-theme .ant-select-dropdown,
+body.rev-theme .ant-dropdown-menu,
+body.rev-theme .ant-picker-panel-container,
+body.rev-theme .ant-picker-panel,
+body.rev-theme .ant-notification-notice,
+body.rev-theme .ant-message-notice-content,
+body.rev-theme .ant-empty-description,
+body.rev-theme .ant-list,
+body.rev-theme .ant-collapse-content {
+  background-color: var(--rev-surface);
+  color: var(--rev-ink-2);
+}
+
+body.rev-theme .ant-table-thead > tr > th,
+body.rev-theme .ant-modal-footer,
+body.rev-theme .ant-drawer-footer,
+body.rev-theme .ant-collapse-header {
+  background-color: var(--rev-surface-2);
+  color: var(--rev-ink-3);
+}
+
+body.rev-theme .ant-modal-title,
+body.rev-theme .ant-drawer-title,
+body.rev-theme .ant-popover-title,
+body.rev-theme .ant-notification-notice-message,
+body.rev-theme .ant-dropdown-menu-title-content,
+body.rev-theme .ant-select-selection-item,
+body.rev-theme .ant-picker-input > input,
+body.rev-theme .ant-picker-header,
+body.rev-theme .ant-picker-content th,
+body.rev-theme .ant-picker-cell-in-view .ant-picker-cell-inner {
+  color: var(--rev-ink);
+}
+
+body.rev-theme .ant-notification-notice-description,
+body.rev-theme .ant-picker-cell:not(.ant-picker-cell-in-view) .ant-picker-cell-inner,
+body.rev-theme .ant-empty-description {
+  color: var(--rev-ink-3);
+}
+
+body.rev-theme .ant-modal-close-x,
+body.rev-theme .ant-drawer-close,
+body.rev-theme .ant-notification-notice-close,
+body.rev-theme .ant-picker-header button,
+body.rev-theme .ant-select-arrow,
+body.rev-theme .ant-picker-suffix,
+body.rev-theme .ant-input-clear-icon,
+body.rev-theme .ant-select-clear {
+  color: var(--rev-ink-3);
+  background: transparent;
+}
+
+body.rev-theme .ant-picker-cell-selected .ant-picker-cell-inner,
+body.rev-theme .ant-picker-today-btn {
+  background: var(--rev-accent-solid) !important;
+  color: var(--rev-accent-ink) !important;
+}
+body.rev-theme .ant-picker-today-btn { background: transparent !important; color: var(--rev-accent-soft) !important; }
+
+body.rev-theme .ant-divider { border-color: var(--rev-line); }
+body.rev-theme .ant-modal-mask,
+body.rev-theme .ant-drawer-mask { background: rgba(10, 9, 8, .55); }
+
+/* Lienzo del documento: el PDF siempre se muestra sobre fondo neutro oscuro,
+   en los dos modos, para que la hoja blanca tenga el peso visual. */
+.rev-viewer-surface {
+  background: var(--rev-viewer-bg);
+}
+.rev-sheet-shadow { box-shadow: var(--rev-sheet-shadow); }
+
+/* ═════════════ 10. TIPOGRAFÍA EDITORIAL ═══════════════════════════════════ */
+.rev-display {
+  font-family: var(--rev-display);
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 1.08;
+  color: var(--rev-ink);
+}
+
+/* ═════════════ 11. ESTADO EN PUNTO Y PALABRA ══════════════════════════════
+   Sustituye a la píldora pastel. El punto lleva el color; el texto, la tinta
+   normal. Es lo que separa una herramienta de un panel de plantilla.        */
+.rev-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--rev-fs-sm);
+  font-weight: 500;
+  color: var(--rev-ink-2);
+  white-space: nowrap;
+}
+.rev-state::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--rev-ink-4);
+  flex: none;
+}
+.rev-state.is-ok::before      { background: var(--rev-success); }
+.rev-state.is-warn::before    { background: var(--rev-warning); }
+.rev-state.is-danger::before  { background: var(--rev-danger); }
+.rev-state.is-accent::before  { background: var(--rev-accent-soft); }
+.rev-state.is-live::before    { background: var(--rev-accent-soft); animation: rev-pulse-soft 1.9s var(--rev-ease) infinite; }
