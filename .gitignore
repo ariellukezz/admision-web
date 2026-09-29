@@ -28,3 +28,8 @@ _temp_documentos_service
 storage/app/temp/
 storage/app/backup_*.sql
 storage/app/calificar/
+.backup-*/
+*.bak
+*.v1
+.codely/
+storage/app/documentos/
