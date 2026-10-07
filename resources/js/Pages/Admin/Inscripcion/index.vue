@@ -3,24 +3,6 @@
 <AuthenticatedLayout>
 <div class="insc-container">
 
-<!-- Header -->
-<div class="insc-header">
-  <div class="insc-header-content">
-    <div class="insc-header-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="8.5" cy="7" r="4"/>
-        <line x1="20" y1="8" x2="20" y2="14"/>
-        <line x1="23" y1="11" x2="17" y2="11"/>
-      </svg>
-    </div>
-    <div>
-      <h1 class="insc-title">Inscripciones</h1>
-      <p class="insc-subtitle">Gestión de inscripciones del proceso de admisión</p>
-    </div>
-  </div>
-</div>
-
 <!-- Botones + Buscador -->
 <div class="insc-toolbar">
   <div class="insc-toolbar-left">
@@ -496,7 +478,65 @@ const descargarExcel = async () => {
 :deep(.insc-row-even) {
   background-color: rgba(0, 0, 0, 0.02) !important;
 }
+</style>
 
+<style>
+.theme-dark .insc-filters,
+.theme-dark .insc-table-card,
+.theme-hybrid .insc-filters,
+.theme-hybrid .insc-table-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border);
+}
+.theme-dark .insc-label,
+.theme-hybrid .insc-label {
+  color: var(--card-muted);
+}
+.theme-dark .insc-row-even > td,
+.theme-hybrid .insc-row-even > td {
+  background-color: var(--row-even) !important;
+}
+.theme-dark .ant-table,
+.theme-hybrid .ant-table {
+  background: transparent !important;
+  color: var(--card-text) !important;
+}
+.theme-dark .ant-table-thead > tr > th,
+.theme-hybrid .ant-table-thead > tr > th {
+  background: var(--table-header-bg) !important;
+  color: var(--card-text) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+}
+.theme-dark .ant-table-tbody > tr > td,
+.theme-hybrid .ant-table-tbody > tr > td {
+  color: var(--card-text) !important;
+  border-bottom: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+}
+.theme-dark .ant-table-tbody > tr:hover > td,
+.theme-hybrid .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg) !important;
+}
+.theme-dark .ant-pagination .ant-pagination-item,
+.theme-hybrid .ant-pagination .ant-pagination-item {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+}
+.theme-dark .ant-pagination .ant-pagination-item a,
+.theme-hybrid .ant-pagination .ant-pagination-item a {
+  color: var(--card-text) !important;
+}
+.theme-dark .ant-select-selector,
+.theme-dark .ant-input,
+.theme-hybrid .ant-select-selector,
+.theme-hybrid .ant-input {
+  background: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  color: var(--card-text) !important;
+}
+</style>
+
+<style scoped>
 /* Responsive */
 @media (max-width: 768px) {
   .insc-toolbar {

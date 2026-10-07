@@ -133,7 +133,8 @@ class UsuarioController extends Controller
             'users.id_rol',
             'users.id_proceso',
             'procesos.nombre AS proceso',
-            'users.estado'
+            'users.estado',
+            'users.two_factor_enabled'
         )
         ->join('roles','roles.id','users.id_rol')
         ->join('procesos','procesos.id','users.id_proceso')
@@ -148,6 +149,19 @@ class UsuarioController extends Controller
         ->get();
 
         return response()->json(['usuarios' => $res], 200);
+    }
+
+    public function toggleTwoFactor($id)
+    {
+        $user = User::findOrFail($id);
+        $user->two_factor_enabled = !$user->two_factor_enabled;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $user->two_factor_enabled ? '2FA activado' : '2FA desactivado',
+            'two_factor_enabled' => $user->two_factor_enabled,
+        ]);
     }
 
     public function saveUsuario(Request $request)

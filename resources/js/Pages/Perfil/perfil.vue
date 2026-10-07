@@ -66,6 +66,9 @@
             <a-button block @click="showPasswordModal" class="action-btn">
               <LockOutlined /> Cambiar Contraseña
             </a-button>
+            <a-button block @click="toggle2FA" class="action-btn" :loading="toggling2FA">
+              <SafetyCertificateOutlined /> {{ userData.two_factor_enabled ? 'Desactivar 2FA' : 'Activar 2FA' }}
+            </a-button>
           </div>
         </a-card>
 
@@ -442,6 +445,24 @@ const showEditModal = () => {
   editForm.celular = userData.celular
   editModalVisible.value = true
 }
+const toggling2FA = ref(false)
+const toggle2FA = async () => {
+  toggling2FA.value = true
+  try {
+    const { data } = await axios.post('/perfil/toggle-2fa')
+    if (data.success) {
+      userData.two_factor_enabled = data.data.two_factor_enabled
+      message.success(data.message)
+    } else {
+      message.error(data.message || 'Error')
+    }
+  } catch (error) {
+    message.error('Error al actualizar 2FA')
+  } finally {
+    toggling2FA.value = false
+  }
+}
+
 const showPasswordModal = () => {
   passwordForm.currentPassword = ''
   passwordForm.newPassword = ''

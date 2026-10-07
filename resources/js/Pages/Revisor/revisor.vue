@@ -310,13 +310,13 @@ const fetchAll = async () => {
       axios.get('/revisor/dashboard/timeline-inscripciones').catch(() => null),
       axios.get('/revisor/dashboard/modalidad-distribucion').catch(() => null),
     ])
-    if (r1?.data?.success) resumen.value = r1.data.datos
-    if (r2?.data?.success) biometrico.value = r2.data.datos
-    if (r3?.data?.success) areas.value = r3.data.datos
-    if (r4?.data?.success) generoArea.value = r4.data.datos
-    if (r5?.data?.success) programas.value = r5.data.datos
-    if (r6?.data?.success) timeline.value = r6.data.datos
-    if (r7?.data?.success) modalidades.value = r7.data.datos
+    if (r1?.data?.success) resumen.value = r1.data.datos ?? r1.data.data
+    if (r2?.data?.success) biometrico.value = r2.data.datos ?? r2.data.data
+    if (r3?.data?.success) areas.value = r3.data.datos ?? r3.data.data ?? []
+    if (r4?.data?.success) generoArea.value = r4.data.datos ?? r4.data.data ?? []
+    if (r5?.data?.success) programas.value = r5.data.datos ?? r5.data.data ?? []
+    if (r6?.data?.success) timeline.value = r6.data.datos ?? r6.data.data ?? []
+    if (r7?.data?.success) modalidades.value = r7.data.datos ?? r7.data.data ?? []
   } catch (e) {
     console.error('Error cargando el panel:', e)
   } finally {

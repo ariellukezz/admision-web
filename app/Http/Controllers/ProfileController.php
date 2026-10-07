@@ -85,6 +85,7 @@ class ProfileController extends Controller
                 'procesos.id as id_proceso',
                 'procesos.nombre as proceso',
                 'users.estado',
+                'users.two_factor_enabled',
             ])
             ->leftJoin('roles', 'roles.id', '=', 'users.id_rol')
             ->leftJoin('procesos', 'procesos.id', '=', 'users.id_proceso')
@@ -159,6 +160,22 @@ class ProfileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Contraseña actualizada correctamente'
+        ]);
+    }
+
+    public function toggleTwoFactor(Request $request)
+    {
+        $user = User::find(Auth::id());
+
+        $user->two_factor_enabled = !$user->two_factor_enabled;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $user->two_factor_enabled
+                ? 'Verificación en dos pasos activada'
+                : 'Verificación en dos pasos desactivada',
+            'data' => ['two_factor_enabled' => $user->two_factor_enabled],
         ]);
     }
 

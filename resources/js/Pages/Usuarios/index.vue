@@ -66,6 +66,12 @@
             </a-tag>
           </template>
 
+          <template v-if="column.dataIndex === '2fa'">
+            <a-tag :color="record.two_factor_enabled ? 'green' : 'default'">
+              {{ record.two_factor_enabled ? 'Activo' : 'Inactivo' }}
+            </a-tag>
+          </template>
+
           <template v-if="column.dataIndex === 'acciones'">
             <div style="display: flex; gap: 2px;">
               <a-button @click="modalCertificado = true" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: green; display: flex; align-items: center;">
@@ -73,6 +79,9 @@
               </a-button>
               <a-button @click="editarUsuario(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #1890ff; display: flex; align-items: center;">
                 <FormOutlined />
+              </a-button>
+              <a-button @click="toggle2FA(record)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #722ed1; display: flex; align-items: center;" title="Activar/Desactivar 2FA">
+                2FA
               </a-button>
               <a-button @click="eliminarUsuario(record.id)" size="small" style="background:white; height: 28px; border: 1px solid #d9d9d9; color: #ff4d4f; display: flex; align-items: center;">
                 <DeleteOutlined />
@@ -263,7 +272,8 @@ const columns = [
   { title: 'Rol', dataIndex: 'rol' },
   { title: 'Proceso', dataIndex: 'proceso' },
   { title: 'Estado', dataIndex: 'estado', width: 90, align: 'center' },
-  { title: 'Acciones', dataIndex: 'acciones', width: 100, align: 'center' }
+  { title: '2FA', dataIndex: '2fa', width: 80, align: 'center' },
+  { title: 'Acciones', dataIndex: 'acciones', width: 120, align: 'center' }
 ]
 
 watch(buscar, getUsuarios)
@@ -320,6 +330,14 @@ function eliminarUsuario(id) {
       getUsuarios()
     }
   })
+}
+
+async function toggle2FA(record) {
+  const { data } = await axios.post(`/admin/usuarios/${record.id}/toggle-2fa`)
+  if (data.success) {
+    message.success(data.message)
+    record.two_factor_enabled = data.two_factor_enabled
+  }
 }
 
 async function getUsuarios() {

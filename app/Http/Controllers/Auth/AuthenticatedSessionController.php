@@ -40,6 +40,23 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        if ($user->two_factor_enabled) {
+            Auth::logout();
+            $request->session()->put('two_factor:user_id', $user->id);
+
+            try {
+                $twoFactor = app(\App\Services\TwoFactorService::class);
+                $code = $twoFactor->generateCode($user);
+                $twoFactor->sendCode($user, $code);
+            } catch (\Exception $e) {
+                return redirect('/login')->withErrors([
+                    'email' => 'No se pudo enviar el código de verificación: ' . $e->getMessage(),
+                ]);
+            }
+
+            return redirect('/2fa/challenge');
+        }
+
         $request->session()->regenerate();
 
         if ($user->id_rol == 7) { return redirect('/calificacion'); }

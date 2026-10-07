@@ -120,6 +120,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/get-datos-perfil', [ProfileController::class, 'getDatosUsuario']);
     Route::post('/actualizar-datos-perfil', [ProfileController::class, 'actualizarDatosUsuario']);
     Route::post('/cambiar-contrasena-perfil', [ProfileController::class, 'cambiarContrasenaPerfil']);
+    Route::post('/perfil/toggle-2fa', [ProfileController::class, 'toggleTwoFactor']);
     Route::post('/actualizar-estado-firma-perfil', [ProfileController::class, 'actualizarEstadoFirma']);
     Route::post('/subir-foto-perfil', [ProfileController::class, 'subirFotoPerfil']);
     Route::post('/crear-certificado-digital', [ProfileController::class, 'crearCertificadoDigital']);
@@ -170,6 +171,7 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
     Route::post('/get-usuarios', [UsuarioController::class, 'getUsuarios']);
     Route::get('/get-roles-u', [UsuarioController::class, 'getRoles']);
     Route::post('/save-user',[UsuarioController::class, 'saveUsuario']);
+    Route::post('/usuarios/{id}/toggle-2fa', [UsuarioController::class, 'toggleTwoFactor']);
 
     Route::get('/get-permisos', [UsuarioController::class, 'getPermisos']);
 

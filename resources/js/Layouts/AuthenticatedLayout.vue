@@ -1,5 +1,5 @@
 <template>
-  <a-layout class="min-h-screen" :class="'theme-' + themeMode">
+  <a-layout class="min-h-screen" :class="'theme-' + themeMode" style="height: 100vh; overflow: hidden;">
     <!-- Sidebar -->
     <a-layout-sider
       v-model:collapsed="collapsed"
@@ -488,6 +488,8 @@ watch(proceso, (newVal, oldVal) => {
   transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 20;
+  height: 100vh;
+  overflow: hidden;
 }
 .theme-dark .custom-sider,
 .theme-hybrid .custom-sider {
@@ -496,6 +498,9 @@ watch(proceso, (newVal, oldVal) => {
 }
 .custom-sider .ant-layout-sider-children {
   background: var(--sider-bg) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 /* BRAND */
@@ -538,7 +543,8 @@ watch(proceso, (newVal, oldVal) => {
 
 /* USER CARD */
 .sider-scroll {
-  height: calc(100vh - 72px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -776,6 +782,9 @@ watch(proceso, (newVal, oldVal) => {
 /* ====== CONTENT ====== */
 .main-content {
   background: var(--content-bg) !important;
+  overflow-y: auto;
+  min-height: 0;
+  height: calc(100vh - 60px);
 }
 .content-container {
   padding: 0 14px 14px 14px;
