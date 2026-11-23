@@ -83,6 +83,7 @@ use App\Http\Controllers\ConfiguracionCitacionController;
 use App\Http\Controllers\AdminDocumentoController;
 use App\Http\Controllers\CarrerasPreviasController;
 use App\Http\Controllers\ResumenBiometricoController;
+use App\Http\Controllers\Admin\ResumenIngresantesController;
 use App\Http\Controllers\ResumenInscripcionesController;
 use App\Http\Controllers\DescargarArchivosController;
 use App\Http\Controllers\SyncController;
@@ -481,6 +482,8 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::get('/resumenes-biometrico', fn () => Inertia::render('Admin/Resumenes/biometrico'))->name('admin-resumenes-biometrico');
     Route::post('/resumen-biometrico', [ResumenBiometricoController::class, 'resumenBiometrico']);
+    Route::get('/resumenes-ingresantes', [ResumenIngresantesController::class, 'index'])->name('admin-resumenes-ingresantes');
+    Route::post('/resumen-ingresantes', [ResumenIngresantesController::class, 'resumen']);
 
     // REPORTE SUNEDU
     Route::get('/reporte-sunedu', fn () => Inertia::render('Admin/Resumenes/reporteSunedu'))->name('admin-reporte-sunedu');

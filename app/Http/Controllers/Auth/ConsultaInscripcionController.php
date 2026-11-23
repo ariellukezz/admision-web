@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\ConsultarInscripcionesRequest;
+use App\Http\Requests\Auth\ConsultaPorProcesoRequest;
 use App\Services\Auth\InscripcionLookupService;
 use Illuminate\Http\JsonResponse;
 
 class ConsultaInscripcionController extends Controller
 {
     public function __invoke(
-        ConsultarInscripcionesRequest $request,
+        ConsultaPorProcesoRequest $request,
         InscripcionLookupService $inscripcionLookup
     ): JsonResponse {
         $datos = $request->validated();
