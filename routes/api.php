@@ -20,11 +20,14 @@ use App\Http\Controllers\ReniecController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\App\AuthController;
 use App\Http\Controllers\App\RegistroController;
+use App\Http\Controllers\Auth\ConsultaInscripcionController;
 
 // Health Check (sin auth)
 Route::get('/health', HealthCheckController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/v1/inscripciones/consulta-inscritos', ConsultaInscripcionController::class)
+        ->name('api.v1.inscripciones.consulta-inscritos');
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);
     Route::get('/get-postulante-pago/{dni}/{proceso}', [ApixController::class, 'getPostulantePago']);
     Route::get('/v1/get-postulante-inscrito/{dni}', [ApixController::class, 'getPostulanteProcesos']);
