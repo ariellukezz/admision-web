@@ -13,10 +13,12 @@ class ConsultaInscripcionController extends Controller
         ConsultarInscripcionesRequest $request,
         InscripcionLookupService $inscripcionLookup
     ): JsonResponse {
+        $datos = $request->validated();
+
         return response()->json([
             'data' => $inscripcionLookup->buscarInscritos(
-                (int) $request->user()->id_proceso,
-                $request->validated('nro_docs')
+                (int) $datos['id_proceso'],
+                $datos['nro_docs']
             ),
         ]);
     }
