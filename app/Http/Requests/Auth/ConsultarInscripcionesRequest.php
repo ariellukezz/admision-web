@@ -8,7 +8,7 @@ class ConsultarInscripcionesRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return (int) ($this->user()?->id_proceso ?? 0) > 0;
     }
 
     /**
