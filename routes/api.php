@@ -21,6 +21,7 @@ use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\App\AuthController;
 use App\Http\Controllers\App\RegistroController;
 use App\Http\Controllers\Auth\ConsultaInscripcionController;
+use App\Http\Controllers\Auth\ConsultaInscripcionPorDniController;
 use App\Http\Controllers\Auth\ConsultaIngresantesController;
 
 // Health Check (sin auth)
@@ -29,6 +30,8 @@ Route::get('/health', HealthCheckController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/v1/inscripciones/consulta-inscritos', ConsultaInscripcionController::class)
         ->name('api.v1.inscripciones.consulta-inscritos');
+    Route::post('/v1/inscripciones/consulta-dni', ConsultaInscripcionPorDniController::class)
+        ->name('api.v1.inscripciones.consulta-dni');
     Route::post('/v1/ingresantes/consulta', ConsultaIngresantesController::class)
         ->name('api.v1.ingresantes.consulta');
     Route::get('/get-ingresante/{dni}/{anio}/{ciclo}', [ApixController::class, 'getIngresante']);

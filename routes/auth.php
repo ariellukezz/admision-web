@@ -19,6 +19,10 @@ Route::middleware('guest')->group(function () {
     Route::get('auth/dnid/callback', [DnidSsoController::class, 'callback'])
         ->name('dnid.callback');
 
+    Route::post('auth/dnid/status', [DnidSsoController::class, 'status'])
+        ->middleware('throttle:120,1')
+        ->name('dnid.status');
+
     Route::get('register', [RegisteredUserController::class, 'create'])
                 ->name('register');
 
