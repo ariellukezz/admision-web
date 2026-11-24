@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\DnidSsoController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -12,6 +13,12 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
+    Route::get('auth/dnid', [DnidSsoController::class, 'redirect'])
+        ->name('dnid.redirect');
+
+    Route::get('auth/dnid/callback', [DnidSsoController::class, 'callback'])
+        ->name('dnid.callback');
+
     Route::get('register', [RegisteredUserController::class, 'create'])
                 ->name('register');
 

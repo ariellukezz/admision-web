@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCQh0hM9glpqQcYMxmygzpz6bv_D0ZBLbg",
@@ -11,6 +11,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+const messagingPromise = isSupported().then((supported) => (
+    supported ? getMessaging(app) : null
+));
 
-export { messaging };
+export { messagingPromise };

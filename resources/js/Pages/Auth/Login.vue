@@ -63,6 +63,15 @@
             Continuar con Google
           </button>
 
+          <button type="button" @click="loginWithDnid" class="btn-dnid" :disabled="processing">
+            <svg viewBox="0 0 24 24" class="g-icon" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="2"/>
+              <circle cx="8.5" cy="11" r="2"/>
+              <path d="M5.5 16.5c.6-1.6 1.7-2.4 3-2.4s2.4.8 3 2.4M14 9.5h4.5M14 12.5h4.5M14 15.5h3"/>
+            </svg>
+            Continuar con DNId
+          </button>
+
           <button type="button" @click="iniciarDnie()" class="btn-dnie" :disabled="processing || ['iniciando', 'esperandoConector', 'enCurso', 'completado'].includes(dnieEstado)">
             <svg viewBox="0 0 24 24" class="g-icon" fill="none" stroke="currentColor" stroke-width="1.8">
               <rect x="2.5" y="5" width="19" height="14" rx="2"/>
@@ -157,6 +166,11 @@ const submit = () => {
 const loginWithGoogle = () => {
   processing.value = true;
   window.location.href = route('google.redirect');
+};
+
+const loginWithDnid = () => {
+  processing.value = true;
+  window.location.href = route('dnid.redirect');
 };
 
 const {
@@ -287,6 +301,18 @@ const {
 .dnie-install { margin: .5rem 0 0; font-size: .8125rem; color: #64748b; text-align: center; }
 .dnie-install a { color: #2563eb; font-weight: 600; }
 .dnie-cancel { background: none; border: none; padding: 0; margin: .5rem auto 0; display: block; font-size: .8125rem; color: #64748b; text-decoration: underline; cursor: pointer; }
+
+/* DNId */
+.btn-dnid {
+  width: 100%; height: 46px; margin-top: .625rem;
+  border: 1px solid #e2e8f0; border-radius: 12px;
+  background: #fff; display: flex; align-items: center; justify-content: center; gap: .75rem;
+  font-size: .875rem; font-weight: 500; color: #334155;
+  cursor: pointer; transition: all .2s ease;
+}
+.btn-dnid:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,.05); transform: translateY(-1px); }
+.btn-dnid:active:not(:disabled) { transform: scale(.98); }
+.btn-dnid:disabled { opacity: .5; cursor: not-allowed; }
 
 /* Divider */
 .divider { display: flex; align-items: center; margin: 1.5rem 0; }
@@ -419,6 +445,8 @@ const {
   .status-alert { background: rgba(37,99,235,.12); border-left-color: #3b82f6; color: #93c5fd; }
   .btn-google { background: #1e293b; border-color: #334155; color: #e2e8f0; }
   .btn-google:hover:not(:disabled) { background: #334155; border-color: #475569; }
+  .btn-dnid { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+  .btn-dnid:hover:not(:disabled) { background: #334155; border-color: #475569; }
   .btn-dnie { background: #1e293b; border-color: #334155; color: #e2e8f0; }
   .btn-dnie:hover:not(:disabled) { background: #334155; border-color: #475569; }
   .dnie-msg { color: #93c5fd; }

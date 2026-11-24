@@ -1,54 +1,73 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { message } from 'ant-design-vue';
-import { messaging } from '@/firebase';
+import { messagingPromise } from '@/firebase';
 import { getToken, deleteToken, onMessage } from 'firebase/messaging';
 
 const VAPID_KEY = "BKYJGo1CC3swVWZ49PnULvtwbgG1s45UKoRKtfy43fe9LcmYO2ni4hltrI7YkLRIIn-N17NvAIAw8oX-3FA7fDk";
 
 // Event emitter simple para notificar al layout cuando llega un mensaje en foreground
 const fcmEventTarget = new EventTarget();
+let messagingInstancePromise = null;
 
 export function useNotificaciones() {
     const token = ref(null);
     const activado = ref(false);
+    let messaging = null;
+    let listenerRegistered = false;
 
-    // Registrar listener de foreground INMEDIATAMENTE
-    onMessage(messaging, async (payload) => {
-        // Notificar al layout que llego un mensaje para que recargue notificaciones
-        fcmEventTarget.dispatchEvent(new Event('fcm-message'));
-
-        const title = payload.data?.title || payload.notification?.title || 'Nueva notificación';
-        const body = payload.data?.body || payload.notification?.body || '';
-        const url = payload.data?.url || '';
-
-        // Usar Service Worker para mostrar la notificación
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            registration.showNotification(title, {
-                body,
-                icon: '/favicon.ico',
-                requireInteraction: true,
-                tag: payload.data?.tipo || 'default',
-                data: { ...payload.data, url },
-            });
-        } catch (e) {
-            const notification = new Notification(title, {
-                body,
-                icon: '/favicon.ico',
-                requireInteraction: true,
-                tag: payload.data?.tipo || 'default',
-                data: payload.data || {},
-            });
-            notification.onclick = function () {
-                window.focus();
-                if (url) window.location.href = url;
-                notification.close();
-            };
+    async function getMessagingInstance() {
+        if (!messagingInstancePromise) {
+            messagingInstancePromise = messagingPromise;
         }
-    });
+
+        messaging = await messagingInstancePromise;
+
+        if (messaging && !listenerRegistered) {
+            onMessage(messaging, async (payload) => {
+                fcmEventTarget.dispatchEvent(new Event('fcm-message'));
+
+                const title = payload.data?.title || payload.notification?.title || 'Nueva notificación';
+                const body = payload.data?.body || payload.notification?.body || '';
+                const url = payload.data?.url || '';
+
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    registration.showNotification(title, {
+                        body,
+                        icon: '/favicon.ico',
+                        requireInteraction: true,
+                        tag: payload.data?.tipo || 'default',
+                        data: { ...payload.data, url },
+                    });
+                } catch (e) {
+                    const notification = new Notification(title, {
+                        body,
+                        icon: '/favicon.ico',
+                        requireInteraction: true,
+                        tag: payload.data?.tipo || 'default',
+                        data: payload.data || {},
+                    });
+                    notification.onclick = function () {
+                        window.focus();
+                        if (url) window.location.href = url;
+                        notification.close();
+                    };
+                }
+            });
+            listenerRegistered = true;
+        }
+
+        return messaging;
+    }
 
     const activar = async () => {
+        const messaging = await getMessagingInstance();
+        if (!messaging) {
+            message.warning('Las notificaciones no están disponibles en este navegador');
+            return;
+        }
+
         console.log('[FCM] activar() llamado');
         const permiso = await Notification.requestPermission();
         console.log('[FCM] Permiso:', permiso);
@@ -91,6 +110,9 @@ export function useNotificaciones() {
     };
 
     const init = async () => {
+        const messaging = await getMessagingInstance();
+        if (!messaging) return;
+
         console.log('[FCM] init() llamado');
 
         if ('serviceWorker' in navigator) {
@@ -161,7 +183,8 @@ export function useNotificaciones() {
             }
 
             try {
-                await deleteToken(messaging);
+                const messaging = await getMessagingInstance();
+                if (messaging) await deleteToken(messaging);
             } catch (e) {
                 console.warn('[FCM] Error eliminando token de Firebase:', e);
             }
