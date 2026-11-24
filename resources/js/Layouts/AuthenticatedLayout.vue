@@ -304,6 +304,7 @@ const menuItems = [
       { key: 'apoderados', icon: SettingFilled, label: 'Apoderados', route: 'admin-apoderado-index' },
       { key: 'postulantes', icon: SettingFilled, label: 'Postulantes', route: 'admin-postulante-index' },
       { key: 'consultaReniec', icon: SettingFilled, label: 'Consulta Reniec', route: 'admin-consulta-reniec' },
+      { key: 'verificarDnid', icon: SafetyCertificateOutlined, label: 'Verificar DNI digital', route: 'admin-verificar-dni' },
       { key: 'documentos', icon: SettingFilled, label: 'Documentos', route: 'admin-documento-index' },
       { key: 'colegios', icon: SettingFilled, label: 'Colegios', route: 'admin-colegios' },
       { key: 'carrerasprevias', icon: SettingFilled, label: 'Estudios anteriores', route: 'admin-carreras-previas' },

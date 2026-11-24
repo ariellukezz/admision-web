@@ -96,13 +96,19 @@
               <span class="provider-text">
                 <span v-if="dnieEstado === 'completado'">Verificando…</span>
                 <span v-else-if="dnieEstado === 'iniciando' || dnieEstado === 'esperandoConector' || dnieEstado === 'enCurso'">Esperando el conector…</span>
-                <span v-else>Continuar con DNIe 3.0</span>
+                <span v-else>Continuar con DNIe</span>
               </span>
-              <span class="provider-version" aria-hidden="true">3.0</span>
+              <span class="provider-version" aria-hidden="true">v 1.0 o 2.0</span>
               <svg class="provider-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path d="m7.5 5 5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
+          </div>
+
+          <div class="standalone-verification">
+            <Link :href="route('dnid.verificacion.publico')" class="link-verificar-dni">
+              Verificar mi DNI digital sin iniciar sesión
+            </Link>
           </div>
 
           <p v-if="dnieMensaje" class="dnie-msg" :class="{ 'dnie-error': dnieEstado === 'error' }">{{ dnieMensaje }}</p>
@@ -331,6 +337,10 @@ const {
 .provider-dnie { color: #b45309; background: #fef3c7; }
 .provider-dnie + .provider-text + .provider-version { color: #92400e; background: #fef3c7; border: 1px solid #fde68a; }
 
+.standalone-verification { margin-top: .85rem; text-align: center; }
+.link-verificar-dni { color: #2563eb; font-size: .78rem; font-weight: 600; text-decoration: none; }
+.link-verificar-dni:hover { color: #1d4ed8; text-decoration: underline; }
+
 .dnie-msg { margin: .75rem 0 0; font-size: .8125rem; color: #1e40af; text-align: center; }
 .dnie-error { color: #dc2626; }
 .dnie-install { margin: .5rem 0 0; font-size: .8125rem; color: #64748b; text-align: center; }
@@ -477,6 +487,8 @@ const {
   .btn-dnie:hover:not(:disabled) { background: rgba(245, 158, 11, 0.17); border-color: #b45309; }
   .provider-dnie { color: #fcd34d; background: rgba(245, 158, 11, 0.17); }
   .provider-dnie + .provider-text + .provider-version { color: #fde68a; background: rgba(245, 158, 11, 0.17); border-color: #78530b; }
+  .link-verificar-dni { color: #93c5fd; }
+  .link-verificar-dni:hover { color: #bfdbfe; }
   .dnie-msg { color: #93c5fd; }
   .dnie-error { color: #f87171; }
   .dnie-install { color: #94a3b8; }

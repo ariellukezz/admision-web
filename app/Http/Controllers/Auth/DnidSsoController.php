@@ -23,7 +23,7 @@ class DnidSsoController extends Controller
 
     private const STATE_COOKIE = 'dnid_login_state';
 
-    public function redirect(Request $request): Response
+    public function redirect(Request $request): Response|RedirectResponse
     {
         $state = Str::random(48);
         $verifier = Str::random(64);
@@ -109,7 +109,7 @@ class DnidSsoController extends Controller
             return $this->loginError('No se pudo obtener el código QR de DNId.');
         }
 
-        $data = $requestResponse->json();
+        $data = $this->responseJson($requestResponse);
         $qrPngDataUrl = is_array($data) ? ($data['qr_png_data_url'] ?? null) : null;
         $deepLink = is_array($data) ? ($data['deep_link'] ?? null) : null;
         $expiresAt = is_array($data) ? ($data['expires_at_epoch_ms'] ?? null) : null;
@@ -173,7 +173,7 @@ class DnidSsoController extends Controller
             return $this->statusFailure('No se pudo consultar el estado de DNId.', 502);
         }
 
-        $data = $response->json();
+        $data = $this->responseJson($response);
         $status = is_array($data) ? ($data['status'] ?? null) : null;
 
         if ($response->failed()) {
@@ -287,13 +287,13 @@ class DnidSsoController extends Controller
         if ($response->failed()) {
             Log::warning('DNId authorization code was rejected', [
                 'status' => $response->status(),
-                'body' => $response->json() ?? $response->body(),
+                'body' => $this->responseJson($response) ?? $response->body(),
             ]);
 
             return $this->loginError('No se pudo validar el acceso DNId. Inténtelo nuevamente.');
         }
 
-        $data = $response->json();
+        $data = $this->responseJson($response);
         if (
             ! is_array($data)
             || ($data['verified'] ?? false) !== true
@@ -348,6 +348,11 @@ class DnidSsoController extends Controller
         Log::info('Ingreso con DNId', ['user_id' => $usuario->id]);
 
         return redirect()->to($this->redirectFor($usuario));
+    }
+
+    private function responseJson(ClientResponse $response): mixed
+    {
+        return json_decode($response->body(), true);
     }
 
     private function providerGet(string $path, array $query = [], ?string $providerCookie = null): ClientResponse

@@ -66,6 +66,7 @@ use App\Http\Controllers\DniAuthController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\PeriodoMatriculaController;
 use App\Http\Controllers\DniController;
+use App\Http\Controllers\DnidVerificacionController;
 use App\Http\Controllers\DocumentoSegundaController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\ReglamentoController;
@@ -110,6 +111,13 @@ Route::get('/dashboard', function () {
     return redirect()->route('admin-dashboard');
 })->middleware(['auth', 'verified','revisor','admin'])->name('dashboard');
 
+Route::get('/verificar-dni', [DnidVerificacionController::class, 'publico'])
+    ->middleware('throttle:12,1')
+    ->name('dnid.verificacion.publico');
+Route::post('/verificar-dni/estado', [DnidVerificacionController::class, 'estadoPublico'])
+    ->middleware('throttle:120,1')
+    ->name('dnid.verificacion.estado.publico');
+
 Route::get('/preinscripcion/verification-setting', [SettingController::class, 'getPreinscripcionEmailVerification']);
 
 Route::middleware('auth')->group(function () {
@@ -145,6 +153,12 @@ Route::prefix('admin')->middleware('auth','admin')->group(function () {
 
     Route::get('/', fn () => Inertia::render('Admin/Dashboard/Index'));
     Route::get('dashboard', fn () => Inertia::render('Admin/Dashboard/Index'))->name('admin-dashboard');
+    Route::get('verificar-dni', [DnidVerificacionController::class, 'admin'])
+        ->middleware('throttle:12,1')
+        ->name('admin-verificar-dni');
+    Route::post('verificar-dni/estado', [DnidVerificacionController::class, 'estadoAdmin'])
+        ->middleware('throttle:120,1')
+        ->name('admin-verificar-dni-estado');
     Route::get('get-preinscritos', [DashboardController::class, 'preinscritos']);
     Route::get('get-inscritos', [DashboardController::class, 'inscritos']);
     Route::get('get-mejores-inscriptores', [DashboardController::class, 'mInscriptores']);
