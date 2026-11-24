@@ -110,9 +110,9 @@ class DnidSsoController extends Controller
         }
 
         $data = $requestResponse->json();
-        $qrPngDataUrl = $data['qr_png_data_url'] ?? null;
-        $deepLink = $data['deep_link'] ?? null;
-        $expiresAt = $data['expires_at_epoch_ms'] ?? null;
+        $qrPngDataUrl = is_array($data) ? ($data['qr_png_data_url'] ?? null) : null;
+        $deepLink = is_array($data) ? ($data['deep_link'] ?? null) : null;
+        $expiresAt = is_array($data) ? ($data['expires_at_epoch_ms'] ?? null) : null;
 
         if (
             ! is_array($data)
